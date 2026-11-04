@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="통합 대시보드">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="../icon-192.png">
+<link rel="apple-touch-icon" href="../icon-192.png">
+<title>통합 대시보드 · 에비뉴엘 시설팀</title>
+<style>
+  html,body{margin:0;height:100%;background:#F4F6F8;font-family:'Noto Sans KR',system-ui,-apple-system,sans-serif;color:#18202B}
+  iframe{position:fixed;inset:0;width:100%;height:100%;height:100dvh;border:0;background:#F4F6F8}
+  .msg{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;font-size:15px;line-height:1.6}
+  .spin{width:28px;height:28px;border:3px solid #1F5FA8;border-right-color:transparent;border-radius:50%;animation:s .8s linear infinite}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 18px;border-radius:8px;background:#1F5FA8;color:#fff;text-decoration:none;font-weight:700}
+  .slow{display:none}
+  small{color:#5B6573}
+</style>
+<script src="../apps.js"></script>
+</head>
+<body>
+<div class="msg" id="msg"><div class="spin" aria-hidden="true"></div><span>통합 대시보드 여는 중…</span>
+  <div class="slow" id="slow"><small>오래 걸리면 아래를 눌러 주세요.</small><br><br><a class="btn" id="direct" href="#" target="_blank" rel="noopener">새 창에서 열기</a></div>
+</div>
+<script>
+(function () {
+  var KEY = 'hub';
+  var app = (window.FM_APPS || {})[KEY] || {};
+  var msg = document.getElementById('msg');
+  if (!/^https:\/\/script\.google\.com\/(macros|a\/macros\/[\w.-]+)\/s\/[\w-]+\/exec$/.test(app.exec || '')) {
+    msg.innerHTML = '<b>아직 앱 주소가 등록되지 않았습니다.</b><small>apps.js 파일의 ' + KEY + ' 항목에 웹앱 /exec 주소를 넣어 주세요.</small>';
+    return;
+  }
+  // 받은 주소 뒤의 값(?fe=…, ?t=… 등)을 그대로 앱에 넘김
+  var src = app.exec + (location.search || '');
+  document.getElementById('direct').href = src;
+  var f = document.createElement('iframe');
+  f.src = src;
+  f.title = app.name || '';
+  f.setAttribute('allow', 'camera; clipboard-read; clipboard-write; fullscreen');
+  f.setAttribute('allowfullscreen', '');
+  f.addEventListener('load', function () { msg.style.display = 'none'; });
+  document.body.appendChild(f);
+  setTimeout(function () { document.getElementById('slow').style.display = 'block'; }, 12000);
+})();
+</script>
+</body>
+</html>

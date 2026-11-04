@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>에비뉴엘 시설팀 앱</title>
+<link rel="icon" href="icon-192.png">
+<style>
+  body{margin:0;background:#F4F6F8;font-family:'Noto Sans KR',system-ui,-apple-system,sans-serif;color:#18202B}
+  .w{max-width:520px;margin:0 auto;padding:32px 16px;display:flex;flex-direction:column;gap:12px}
+  a.app{display:flex;align-items:center;gap:12px;min-height:64px;padding:0 16px;background:#fff;border:1px solid #DCE1E7;border-radius:12px;color:#18202B;text-decoration:none;font-size:17px;font-weight:700}
+  small{color:#5B6573;line-height:1.6}
+</style>
+<script src="apps.js"></script>
+</head>
+<body>
+<div class="w">
+  <small>잠실점 에비뉴엘 · 시설팀</small>
+  <h1 style="margin:0 0 8px;font-size:22px">시설팀 앱</h1>
+  <div id="list"></div>
+  <small>휴대폰에서는 원하는 앱을 연 뒤 브라우저 메뉴의 「홈 화면에 추가」를 누르면 앱처럼 쓸 수 있습니다.</small>
+</div>
+<script>
+  var html = '';
+  Object.keys(window.FM_APPS || {}).forEach(function (k) {
+    var a = window.FM_APPS[k];
+    html += '<a class="app" href="' + k + '/">' + a.name + (a.exec ? '' : ' <small>(준비 중)</small>') + '</a>';
+  });
+  document.getElementById('list').innerHTML = html;
+  document.getElementById('list').style.cssText = 'display:flex;flex-direction:column;gap:10px';
+</script>
+</body>
+</html>
