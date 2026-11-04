@@ -30,6 +30,8 @@
 <script>
 (function () {
   var KEY = 'ws';
+  // 소화기 QR(?fe=…)은 구글 웹앱 대신 GitHub의 점검 화면을 바로 엶 — 실시간 카메라가 되도록 (결정 42)
+  if (/[?&]fe=/.test(location.search)) { location.replace('check.html' + location.search); return; }
   var app = (window.FM_APPS || {})[KEY] || {};
   var msg = document.getElementById('msg');
   if (!/^https:\/\/script\.google\.com\/(macros|a\/macros\/[\w.-]+)\/s\/[\w-]+\/exec$/.test(app.exec || '')) {
