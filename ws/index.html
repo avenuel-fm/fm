@@ -38,6 +38,16 @@
     msg.innerHTML = '<b>아직 앱 주소가 등록되지 않았습니다.</b><small>apps.js 파일의 ' + KEY + ' 항목에 웹앱 /exec 주소를 넣어 주세요.</small>';
     return;
   }
+  // 기기 표 보관 (결정 50): 앱(구글 칸)이 보낸 표를 이 페이지 저장소에도 둠. googleusercontent에서 온 요청에만 답함
+  var TK = 'fm_' + KEY + '_token';
+  function alive(t) { var p = String(t || '').split('.'); return p.length === 3 && Number(p[1]) > Date.now(); }
+  function get() { try { var t = localStorage.getItem(TK) || ''; if (t && !alive(t)) { localStorage.removeItem(TK); t = ''; } return t; } catch (e) { return ''; } }
+  window.addEventListener('message', function (e) {
+    if (!/^https:\/\/[a-z0-9-]+-script\.googleusercontent\.com$/.test(e.origin)) return;
+    var d = e.data || {};
+    if (d.fm === KEY + '-token-get') { try { e.source.postMessage({ fm: KEY + '-token', token: get() }, e.origin); } catch (x) {} }
+    else if (d.fm === KEY + '-token-set') { try { if (d.token && alive(d.token)) localStorage.setItem(TK, d.token); else localStorage.removeItem(TK); } catch (x) {} }
+  });
   // 받은 주소 뒤의 값(?fe=…, ?t=… 등)을 그대로 앱에 넘김
   var src = app.exec + (location.search || '');
   document.getElementById('direct').href = src;

@@ -122,6 +122,8 @@ const API = window.FM_CHECK || {
 };
 const S = { init: null, photo: '', bad: false, sending: false, done: false };
 const GUIDE = '<svg viewBox="0 0 230 230" fill="none" aria-hidden="true"><circle cx="115" cy="115" r="105" stroke="#fff" stroke-width="4"/><circle cx="115" cy="115" r="90" stroke="#fff" stroke-width="1.5" stroke-dasharray="6 6" opacity=".8"/><path d="M52 150 A70 70 0 1 1 178 150" stroke="#fff" stroke-width="3" opacity=".9"/><g stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".9"><path d="M60 145l9-5"/><path d="M55 108h10"/><path d="M70 72l8 7"/><path d="M115 50v10"/><path d="M160 72l-8 7"/><path d="M175 108h-10"/><path d="M170 145l-9-5"/></g><path d="M115 115l38-30" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="4 5"/><circle cx="115" cy="115" r="7" fill="#fff"/></svg>';
+/* 사진 칸 압력계 그림 (결정 52) — 카메라 안내 원과 같은 모양, 파란 선 */
+const GAUGE_ICON = '<svg width="104" height="104" viewBox="0 0 230 230" fill="none" aria-hidden="true"><circle cx="115" cy="115" r="105" fill="#fff" stroke="currentColor" stroke-width="6"/><path d="M52 150 A70 70 0 1 1 178 150" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><g stroke="currentColor" stroke-width="6" stroke-linecap="round"><path d="M60 145l9-5"/><path d="M55 108h10"/><path d="M70 72l8 7"/><path d="M115 50v10"/><path d="M160 72l-8 7"/><path d="M175 108h-10"/><path d="M170 145l-9-5"/></g><path d="M115 115l38-30" stroke="#C0261A" stroke-width="7" stroke-linecap="round"/><circle cx="115" cy="115" r="11" fill="currentColor"/><text x="115" y="178" text-anchor="middle" font-size="26" font-weight="700" fill="currentColor" font-family="sans-serif">MPa</text></svg>';
 function $(id) { return document.getElementById(id); }
 function h(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
@@ -159,7 +161,7 @@ function renderForm() {
 function renderShot() {
   $('shotBox').innerHTML = S.photo
     ? '<div class="shot-done"><img src="' + S.photo + '" alt="찍은 압력계 사진">' + GUIDE + '<button class="btn sm" onclick="openCamera()">다시 찍기</button></div>'
-    : '<button class="shot" onclick="openCamera()"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>사진 찍기<span style="font-size:12px;font-weight:400;color:var(--blue-d)">압력계 정면이 보이게</span></button>';
+    : '<button class="shot" onclick="openCamera()" aria-label="압력계 사진 찍기">' + GAUGE_ICON + '<span style="font-size:17px">사진 찍기</span><span style="font-size:12px;font-weight:400;color:var(--blue-d)">압력계 정면이 보이게</span></button>';
 }
 function setBad(b) {
   if (S.bad === b) return;
