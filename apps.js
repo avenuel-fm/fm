@@ -5,6 +5,6 @@
  */
 window.FM_APPS = {
   hub: { name: '통합 대시보드', exec: '' },
-  ws:  { name: '업무지원',     exec: '' },
+  ws:  { name: '업무지원',     exec: 'https://script.google.com/macros/s/AKfycbxzD0-R4Cg5_eeECMfgLok3lCSOZuac5cwVSVLvVuQTp_d3rfm_HWH1ju-EmyVC5qut6Q/exec' },
   dw:  { name: '도면협의',     exec: 'https://script.google.com/macros/s/AKfycbyc0v4cT_zoVSjy7RGydb8rfys9mUyi6jHfAQeTvDXpmH1ycLglOoHmF6mRu2B8x-Ty/exec' }
 };
