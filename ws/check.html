@@ -21,6 +21,7 @@ html,body{margin:0;background:var(--ground);color:var(--ink);font-family:'Noto S
 button,input,select,textarea{font:inherit;color:inherit}
 a{color:var(--blue)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;border-radius:8px;border:1px solid var(--line);background:var(--card);font-size:15px;font-weight:500;color:var(--ink);cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+@media (prefers-reduced-motion:no-preference){.btn{transition:scale .15s ease-out}.btn:not(:disabled):active{scale:.96}}
 .btn:disabled{opacity:.5;cursor:default}
 .btn.pri{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:700}
 .btn.warn{border-color:#E8B4AE;color:var(--red)}
@@ -35,7 +36,7 @@ a{color:var(--blue)}
 .c-miss{background:var(--red-bg);color:var(--red)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 16px;border-radius:12px;font-size:14px;z-index:100;max-width:calc(100% - 32px);box-shadow:0 6px 18px rgba(24,32,43,.25)}
 .dialog-back{position:fixed;inset:0;background:rgba(24,32,43,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center}
-.dialog{width:100%;max-width:520px;background:#fff;border-radius:16px 16px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto}
+.dialog{width:100%;max-width:520px;background:#fff;border-radius:16px 16px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto;overscroll-behavior:contain}
 @media (min-width:700px){.dialog-back{align-items:center}.dialog{border-radius:16px}}
 .spin{width:18px;height:18px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .8s linear infinite;display:inline-block}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -345,6 +346,7 @@ function done(r) {
     '<div style="width:72px;height:72px;border-radius:36px;background:' + (bad ? 'var(--orange-bg)' : 'var(--green-bg)') + ';display:flex;align-items:center;justify-content:center"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="' + (bad ? '#B4410F' : '#1F7A4D') + '" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg></div>' +
     '<b style="font-size:20px">보냈습니다. 감사합니다.</b>' +
     '<span style="font-size:15px;color:var(--sub);line-height:1.6">' + h(S.init.monthLabel) + ' 점검이 ' + (bad ? '<b style="color:var(--orange)">이상 있음</b>으로' : '<b style="color:var(--green)">점검완료</b>로') + ' 기록되었습니다.' + (r.late ? '<br>(기한 후 입력)' : '') + '</span>' +
+    (r.checkId ? '<span style="font-size:12px;color:var(--muted);background:var(--line3);border-radius:8px;padding:6px 10px">저장 번호 ' + h(r.checkId) + (r.at ? ' · ' + h(r.at) : '') + '</span>' : '') +
     '<span style="font-size:13px;color:var(--muted)">이 창은 닫으셔도 됩니다.</span></div>';
 }
 function alertBox(msg) {
