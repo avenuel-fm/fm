@@ -256,16 +256,23 @@
   }
   /* 공조기·에어커튼 가동시간은 구글(온습도 앱 읽기)에 남음 → 업무지원 구글 웹앱 ?api=logac 로 받음. 같은 날은 10분 기억 */
   const AC = {};
-  async function withAc(r) {
+  // 기다리지 않음: 기억한 값이 없으면 r.acLater(약속)만 붙여 돌려줌 → 화면이 일지를 먼저 그리고 도착하면 그 칸만 채움
+  function withAc(r) {
     if (!r || !r.day) return r;
     const c = AC[r.day];
-    if (c && Date.now() - c.at < 600e3) { r.ac = c.ac; return r; }
-    try {
-      const j = await (await fetch(C.WS_GAS_URL + '?api=logac&day=' + r.day)).json();
-      if (!j.ok) throw new Error(j.error || '');
-      r.ac = j.ac;
-      if (!j.ac.err) AC[r.day] = { at: Date.now(), ac: j.ac };
-    } catch (e) { r.ac = { err: '온습도 앱 기록을 불러오지 못했습니다' }; }
+    if (c && c.ac && Date.now() - c.at < 600e3) { r.ac = c.ac; return r; }
+    if (!c || !c.p || Date.now() - c.at >= 600e3) {
+      const day = r.day, p = (async () => {
+        try {
+          const j = await (await fetch(C.WS_GAS_URL + '?api=logac&day=' + day)).json();
+          if (!j.ok) throw new Error(j.error || '');
+          if (!j.ac.err) AC[day] = { at: Date.now(), ac: j.ac }; else delete AC[day];
+          return j.ac;
+        } catch (e) { delete AC[day]; return { err: '온습도 앱 기록을 불러오지 못했습니다' }; }
+      })();
+      AC[day] = { at: Date.now(), p };   // 같은 날을 받는 중이면 다시 부르지 않음
+    }
+    r.acLater = AC[r.day].p;
     return r;
   }
 
