@@ -1,0 +1,95 @@
+<!-- 자동 생성: tools/build_fm.py (Code.gs ehViewPage_ 의 Supabase 판). 직접 고치지 마세요. -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>전열기기 신고필증 · 에비뉴엘 시설팀</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+/* 공통 틀 v0.1 — 도면협의 Styles.html 기준 이름 (통합 설계정의서 12장) */
+:root{
+  --ground:#F4F6F8; --card:#FFFFFF; --line2:#DCE1E7; --line3:#EDF0F3; --line:#CBD2DB;
+  --ink:#18202B; --sub:#3F4855; --muted:#5B6573;
+  --blue:#1F5FA8; --blue-d:#174A84; --blue-bg:#E8F0FA;
+  --green:#1F7A4D; --green-bg:#EAF5EF; --orange:#B4410F; --orange-bg:#FDF0E8; --red:#C0261A; --red-bg:#FBE9E7;
+}
+*{box-sizing:border-box}
+/* WS-25 화면 다듬기: 단어 중간 줄바꿈 막기, 제목·강조 600 (인쇄·라벨·PDF 양식은 700 그대로) */
+body{word-break:keep-all;overflow-wrap:anywhere}
+h1,h2,h3,b,strong{font-weight:600}
+.tbp b,.tbp strong,.tbp h1,.cspdf b,.cspdf strong,.label b,.ehlt b{font-weight:700}
+.tbp,.cspdf,.label,.ehlt,.ehg{word-break:normal;overflow-wrap:normal}
+.ui-ico{display:inline-block;flex:none;vertical-align:-3px}
+html,body{margin:0;background:var(--ground);color:var(--ink);font-family:'Noto Sans KR',system-ui,-apple-system,sans-serif;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--blue)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;border-radius:8px;border:1px solid var(--line);background:var(--card);font-size:15px;font-weight:500;color:var(--ink);cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+@media (prefers-reduced-motion:no-preference){.btn{transition:scale .15s ease-out}.btn:not(:disabled):active{scale:.96}}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:500}
+.btn.warn{border-color:#E8B4AE;color:var(--red)}
+.btn.sm{min-height:36px;padding:0 12px;font-size:13px}
+.btn.big{min-height:52px;font-size:16px}
+.inp{width:100%;min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-size:16px;background:#fff}
+.card{background:var(--card);border:1px solid var(--line2);border-radius:12px}
+.chip{display:inline-flex;align-items:center;gap:4px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.c-ok{background:var(--green-bg);color:var(--green)}
+.c-bad{background:var(--orange-bg);color:var(--orange)}
+.c-wait{background:var(--line3);color:var(--muted)}
+.c-miss{background:var(--red-bg);color:var(--red)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 16px;border-radius:12px;font-size:14px;z-index:100;max-width:calc(100% - 32px);box-shadow:0 6px 18px rgba(24,32,43,.25)}
+.dialog-back{position:fixed;inset:0;background:rgba(24,32,43,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.dialog{width:100%;max-width:520px;background:#fff;border-radius:16px 16px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto;overscroll-behavior:contain}
+@media (min-width:700px){.dialog-back{align-items:center}.dialog{border-radius:16px}}
+.spin{width:18px;height:18px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .8s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+.hide{display:none!important}
+</style>
+<style>
+/* 어두운 화면 (결정 98): 화면만 색을 뒤집고 사진·서명·QR은 되돌림. 인쇄·저장 이미지는 그대로 흰 바탕 */
+@media screen{
+html[data-theme=dark]{filter:invert(1) hue-rotate(180deg) contrast(.78)}   /* 검정 대신 진한 회색 (사용자 11-11) */
+html[data-theme=dark] :is(img,video,canvas,.keep-color):not(.keep-color *){filter:invert(1) hue-rotate(180deg)}
+html[data-theme=dark] :is(.dialog-back,.overlay,.pinpop,.gprev.modal){background:rgba(255,255,255,.5)}
+}
+</style>
+<script>
+/* 기기에 고른 값 → 없으면 휴대폰 설정. 화면 그리기 전에 정해서 번쩍임 없음 */
+(function () { var t = null; try { t = localStorage.getItem('fm_theme'); } catch (e) {} if (!t && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark'; if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); })();
+function themeDark() { return document.documentElement.getAttribute('data-theme') === 'dark'; }
+function toggleTheme() { var t = themeDark() ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', t); try { localStorage.setItem('fm_theme', t); } catch (e) {} document.querySelectorAll('.theme-btn').forEach(function (b) { b.textContent = themeLabel(); }); }
+function themeLabel() { return themeDark() ? '밝게' : '어둡게'; }
+</script>
+
+<style>.w{max-width:520px;margin:0 auto;padding:20px 16px}.eht{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line2);border-radius:12px;overflow:hidden;font-size:16px}
+.eht th{width:96px;text-align:left;background:var(--blue-bg);color:var(--blue-d);padding:12px;font-size:14px;border-top:1px solid var(--line3)}.eht td{padding:12px;border-top:1px solid var(--line3);font-weight:700}
+.banner{background:var(--red-bg);color:var(--red);border-radius:12px;padding:16px;line-height:1.6}h1{font-size:20px;margin:0 0 4px}.s{color:var(--muted);font-size:13px;margin-bottom:14px}</style>
+</head>
+<body>
+<div class="w"><h1>전열기기 신고필증</h1><div class="s">롯데백화점 에비뉴엘 월드타워점 · 시설팀</div><div id="b">불러오는 중…</div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+(function () {
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var row = function (k, x) { return '<tr><th>' + k + '</th><td>' + esc(x) + '</td></tr>'; };
+  var bad = function (e, no) { return '<div class="banner">' + esc(e) + (no ? '<br><small>' + esc(no) + '</small>' : '') + '</div>'; };
+  var out = document.getElementById('b');
+  var m = location.search.match(/[?&]eh=([^&#]*)/), qr = m ? decodeURIComponent(m[1]) : '';
+  var C = window.WS_CONFIG || {};
+  var sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+  sb.rpc('ws_eh_view', { p_qr: qr }).then(function (r) {
+    if (r.error) throw new Error(r.error.message);
+    var v = r.data, i = v.item || {};
+    out.innerHTML = v.ok
+      ? '<table class="eht">' + row('관리번호', i.no) + row('사용장소', i.floor + ' · ' + i.store) + row('기기명', i.name) + row('용량', i.w ? Number(i.w).toLocaleString() + ' W' : '') +
+        row('제조사', i.maker) + row('책임자', i.m1 + (i.m2 ? ' / ' + i.m2 : '')) + row('승인일자', String(i.date).replace(/-/g, '.')) + row('승인', '시설소장') + '</table>'
+      : bad(v.error, v.no);
+  }).catch(function (e) { out.innerHTML = bad('필증 정보를 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.'); });
+})();
+</script>
+</body>
+</html>

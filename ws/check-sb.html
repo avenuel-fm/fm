@@ -1,0 +1,398 @@
+<!-- 자동 생성: tools/build_fm.py (src/Check.html, Supabase 판). 직접 고치지 마세요. -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>소화기 점검 · 에비뉴엘 시설팀</title>
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+/* 공통 틀 v0.1 — 도면협의 Styles.html 기준 이름 (통합 설계정의서 12장) */
+:root{
+  --ground:#F4F6F8; --card:#FFFFFF; --line2:#DCE1E7; --line3:#EDF0F3; --line:#CBD2DB;
+  --ink:#18202B; --sub:#3F4855; --muted:#5B6573;
+  --blue:#1F5FA8; --blue-d:#174A84; --blue-bg:#E8F0FA;
+  --green:#1F7A4D; --green-bg:#EAF5EF; --orange:#B4410F; --orange-bg:#FDF0E8; --red:#C0261A; --red-bg:#FBE9E7;
+}
+*{box-sizing:border-box}
+/* WS-25 화면 다듬기: 단어 중간 줄바꿈 막기, 제목·강조 600 (인쇄·라벨·PDF 양식은 700 그대로) */
+body{word-break:keep-all;overflow-wrap:anywhere}
+h1,h2,h3,b,strong{font-weight:600}
+.tbp b,.tbp strong,.tbp h1,.cspdf b,.cspdf strong,.label b,.ehlt b{font-weight:700}
+.tbp,.cspdf,.label,.ehlt,.ehg{word-break:normal;overflow-wrap:normal}
+.ui-ico{display:inline-block;flex:none;vertical-align:-3px}
+html,body{margin:0;background:var(--ground);color:var(--ink);font-family:'Noto Sans KR',system-ui,-apple-system,sans-serif;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--blue)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;border-radius:8px;border:1px solid var(--line);background:var(--card);font-size:15px;font-weight:500;color:var(--ink);cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+@media (prefers-reduced-motion:no-preference){.btn{transition:scale .15s ease-out}.btn:not(:disabled):active{scale:.96}}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:500}
+.btn.warn{border-color:#E8B4AE;color:var(--red)}
+.btn.sm{min-height:36px;padding:0 12px;font-size:13px}
+.btn.big{min-height:52px;font-size:16px}
+.inp{width:100%;min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-size:16px;background:#fff}
+.card{background:var(--card);border:1px solid var(--line2);border-radius:12px}
+.chip{display:inline-flex;align-items:center;gap:4px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.c-ok{background:var(--green-bg);color:var(--green)}
+.c-bad{background:var(--orange-bg);color:var(--orange)}
+.c-wait{background:var(--line3);color:var(--muted)}
+.c-miss{background:var(--red-bg);color:var(--red)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 16px;border-radius:12px;font-size:14px;z-index:100;max-width:calc(100% - 32px);box-shadow:0 6px 18px rgba(24,32,43,.25)}
+.dialog-back{position:fixed;inset:0;background:rgba(24,32,43,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.dialog{width:100%;max-width:520px;background:#fff;border-radius:16px 16px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto;overscroll-behavior:contain}
+@media (min-width:700px){.dialog-back{align-items:center}.dialog{border-radius:16px}}
+.spin{width:18px;height:18px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .8s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+.hide{display:none!important}
+</style>
+<style>
+/* 어두운 화면 (결정 98): 화면만 색을 뒤집고 사진·서명·QR은 되돌림. 인쇄·저장 이미지는 그대로 흰 바탕 */
+@media screen{
+html[data-theme=dark]{filter:invert(1) hue-rotate(180deg) contrast(.78)}   /* 검정 대신 진한 회색 (사용자 11-11) */
+html[data-theme=dark] :is(img,video,canvas,.keep-color):not(.keep-color *){filter:invert(1) hue-rotate(180deg)}
+html[data-theme=dark] :is(.dialog-back,.overlay,.pinpop,.gprev.modal){background:rgba(255,255,255,.5)}
+}
+</style>
+<script>
+/* 기기에 고른 값 → 없으면 휴대폰 설정. 화면 그리기 전에 정해서 번쩍임 없음 */
+(function () { var t = null; try { t = localStorage.getItem('fm_theme'); } catch (e) {} if (!t && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark'; if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); })();
+function themeDark() { return document.documentElement.getAttribute('data-theme') === 'dark'; }
+function toggleTheme() { var t = themeDark() ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', t); try { localStorage.setItem('fm_theme', t); } catch (e) {} document.querySelectorAll('.theme-btn').forEach(function (b) { b.textContent = themeLabel(); }); }
+function themeLabel() { return themeDark() ? '밝게' : '어둡게'; }
+</script>
+
+<style>
+body{min-height:100vh;word-break:keep-all;overflow-wrap:anywhere}
+b,strong,h1,h2,h3{font-weight:600}
+.page{max-width:520px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--ground)}
+.hd{background:#fff;border-bottom:1px solid var(--line2);padding:18px 16px 14px;display:flex;flex-direction:column;gap:4px}
+.hd small{font-size:12px;color:var(--muted)}
+.hd h1{margin:0;font-size:20px}
+.main{flex:1;padding:14px 16px;display:flex;flex-direction:column;gap:16px}
+.lbl{font-size:14px;font-weight:600}
+.shot{width:100%;aspect-ratio:4/3;border-radius:10px;border:2px dashed var(--blue);background:var(--blue-bg);color:var(--blue);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:15px;font-weight:500;cursor:pointer;padding:0}
+.shot-done{position:relative;width:100%;aspect-ratio:4/3;border-radius:10px;background:var(--line3);overflow:hidden}
+.shot-done img{width:100%;height:100%;object-fit:contain;display:block}
+.shot-done .btn{position:absolute;right:8px;bottom:8px}
+.shot-done svg{position:absolute;left:50%;top:50%;width:62%;height:auto;transform:translate(-50%,-50%);opacity:.35;pointer-events:none}
+.seg{display:flex;gap:8px}
+.seg button{flex:1;min-height:48px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:15px;color:var(--sub);cursor:pointer}
+.seg button.on{border-color:var(--blue);background:var(--blue-bg);color:var(--blue-d);font-weight:500}
+.seg button.on.bad{border-color:var(--orange);background:var(--orange-bg);color:var(--orange)}
+.pad{position:relative;width:100%;height:120px;border-radius:10px;border:2px dashed #B8C0CB;background:#fff;touch-action:none;overflow:hidden}
+.pad.inked{border-style:solid;border-color:var(--line)}
+.pad canvas{position:absolute;left:0;top:0;width:100%;height:100%}
+.pad .clr{position:absolute;right:6px;top:6px;z-index:2;min-height:32px;padding:0 10px;border-radius:6px;border:1px solid var(--line);background:#fff;font-size:13px;color:var(--sub);cursor:pointer}
+.foot{background:#fff;border-top:1px solid var(--line2);padding:10px 16px calc(20px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;position:sticky;bottom:0}
+.miss{font-size:14px;font-weight:500;color:var(--red);text-align:center;min-height:20px}
+.send{width:100%;min-height:56px;border-radius:10px;border:none;background:var(--blue);color:#fff;font-size:18px;font-weight:500;cursor:pointer}
+.send:disabled{background:var(--line2);color:var(--muted);cursor:default}
+.cam{position:fixed;inset:0;z-index:60;background:#0E131A;color:#fff;display:flex;flex-direction:column}
+.cam-top{display:flex;align-items:center;padding:12px;gap:8px}
+.cam-top button{width:44px;height:44px;border:none;background:none;color:#fff;font-size:22px;cursor:pointer}
+.cam-msg{margin:0 auto;background:rgba(14,19,26,.75);border-radius:999px;padding:10px 18px;font-size:16px;font-weight:500}
+.view{position:relative;width:100%;aspect-ratio:4/3;background:#2B333E;overflow:hidden}
+.view video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.view svg{position:absolute;left:50%;top:50%;width:62%;height:auto;transform:translate(-50%,-50%);pointer-events:none}
+.shutter{width:76px;height:76px;border-radius:38px;border:4px solid #fff;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.shutter span{width:60px;height:60px;border-radius:30px;background:#fff}
+.torch{width:44px;height:44px;border-radius:22px;border:1px solid rgba(255,255,255,.4);background:none;color:#fff;font-size:20px;cursor:pointer}
+.torch.on{background:#FFD54A;border-color:#FFD54A;color:#18202B}
+.view img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.view.check svg{opacity:.45}
+.cam-btns{display:flex;gap:10px;padding:20px 16px calc(32px + env(safe-area-inset-bottom))}
+.cam-btns button{flex:1;min-height:56px;border-radius:12px;font-size:17px;font-weight:500;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="page" id="page">
+  <div class="main" style="align-items:center;justify-content:center"><span class="spin" style="color:var(--blue);width:32px;height:32px"></span></div>
+</div>
+<input id="file" type="file" accept="image/*" capture="environment" class="hide">
+<div id="layer"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+/* QR 점검 입력 — Supabase (supabase/05_fire.sql ws_check_init · ws_check_submit, 비로그인도 됨). 파일은 버킷 fire/{QR}/ 아래 */
+(function () {
+  var m = location.search.match(/[?&]fe=([^&#]*)/);
+  var qr = m ? decodeURIComponent(m[1]) : '';
+  window.FM_QR = /^([a-f0-9]{32}|[2-9a-km-np-z]{12})$/.test(qr) ? qr : '';
+  var C = window.WS_CONFIG || {}, BUCKET = C.SUPABASE_BUCKET_NAME || 'ws-files';
+  var sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+  function rpc(fn, a) { return sb.rpc(fn, a).then(function (r) { if (r.error) throw new Error(r.error.message); return r.data; }); }
+  function blob(d) {
+    var x = /^data:([^;,]+)[^,]*;base64,(.*)$/.exec(String(d || '')); if (!x) return null;
+    var b = atob(x[2]), a = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) a[i] = b.charCodeAt(i);
+    return new Blob([a], { type: x[1] });
+  }
+  function rid() { return (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2)).replace(/-/g, ''); }
+  // 사진은 화면이 이미 설정 크기(사진긴변px·사진품질)로 줄여 옴 → 그대로 올림
+  function up(q, d, ext) {
+    var b = blob(d); if (!b) return Promise.resolve(null);
+    var path = 'fire/' + q + '/' + new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 7) + '/' + rid() + '.' + ext;
+    return sb.storage.from(BUCKET).upload(path, b, { contentType: b.type, upsert: false }).then(function (r) {
+      if (r.error) throw new Error('사진을 올리지 못했습니다: ' + r.error.message);
+      return { path: path, url: sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl };
+    });
+  }
+  window.FM_CHECK = {
+    init: function (q) { return rpc('ws_check_init', { p_qr: q }); },
+    submit: function (q, d) {
+      // 이미 있는데 덮어쓰기를 안 골랐으면 사진을 올리기 전에 알림 (버킷에 쓸모없는 파일이 남지 않게)
+      var first = d.overwrite ? Promise.resolve(null) : rpc('ws_check_init', { p_qr: q });
+      return first.then(function (i) {
+        if (i && i.ok && i.exists) return { ok: false, exists: true, error: '이번 달 입력이 이미 있습니다.' };
+        return Promise.all([up(q, d.photo, 'jpg'), up(q, d.signA, 'png'), up(q, d.signB, 'png')]).then(function (f) {
+          var files = {}; ['photo', 'memo', 'name'].forEach(function (k, n) { if (f[n]) files[k] = f[n]; });
+          return rpc('ws_check_submit', { p_qr: q, p_d: { state: d.state, overwrite: !!d.overwrite }, p_files: files });
+        });
+      });
+    }
+  };
+})();
+</script>
+<script>
+/* 서버 통로 — 구글 웹앱 안: google.script.run / GitHub check.html: fetch (window.FM_CHECK, 빌드 때 넣음) */
+const QR = (typeof window.FM_QR === 'string') ? window.FM_QR : '';
+const API = window.FM_CHECK || {
+  init: qr => new Promise((ok, no) => google.script.run.withSuccessHandler(ok).withFailureHandler(no).checkInit(qr)),
+  submit: (qr, d) => new Promise((ok, no) => google.script.run.withSuccessHandler(ok).withFailureHandler(no).checkSubmit(qr, d))
+};
+const S = { init: null, photo: '', bad: false, sending: false, done: false };
+const GUIDE = '<svg viewBox="0 0 230 230" fill="none" aria-hidden="true"><circle cx="115" cy="115" r="105" stroke="#fff" stroke-width="4"/><circle cx="115" cy="115" r="90" stroke="#fff" stroke-width="1.5" stroke-dasharray="6 6" opacity=".8"/><path d="M52 150 A70 70 0 1 1 178 150" stroke="#fff" stroke-width="3" opacity=".9"/><g stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".9"><path d="M60 145l9-5"/><path d="M55 108h10"/><path d="M70 72l8 7"/><path d="M115 50v10"/><path d="M160 72l-8 7"/><path d="M175 108h-10"/><path d="M170 145l-9-5"/></g><path d="M115 115l38-30" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="4 5"/><circle cx="115" cy="115" r="7" fill="#fff"/></svg>';
+/* 사진 칸 압력계 그림 (결정 52) — 카메라 안내 원과 같은 모양, 파란 선 */
+const GAUGE_ICON = '<svg width="104" height="104" viewBox="0 0 230 230" fill="none" aria-hidden="true"><circle cx="115" cy="115" r="105" fill="#fff" stroke="currentColor" stroke-width="6"/><path d="M52 150 A70 70 0 1 1 178 150" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><g stroke="currentColor" stroke-width="6" stroke-linecap="round"><path d="M60 145l9-5"/><path d="M55 108h10"/><path d="M70 72l8 7"/><path d="M115 50v10"/><path d="M160 72l-8 7"/><path d="M175 108h-10"/><path d="M170 145l-9-5"/></g><path d="M115 115l38-30" stroke="#C0261A" stroke-width="7" stroke-linecap="round"/><circle cx="115" cy="115" r="11" fill="currentColor"/><text x="115" y="178" text-anchor="middle" font-size="26" font-weight="700" fill="currentColor" font-family="sans-serif">MPa</text></svg>';
+function $(id) { return document.getElementById(id); }
+function h(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ── 시작 ── */
+if (!QR) showError('QR 주소가 올바르지 않습니다.');
+else API.init(QR).then(r => { if (!r.ok) showError(r.error); else { S.init = r; renderForm(); } })
+  .catch(e => showError('연결 오류: ' + (e.message || e) + '\n신호를 확인하고 다시 열어 주세요.'));
+
+function showError(msg) {
+  $('page').innerHTML = '<div class="hd"><small>잠실점 에비뉴엘 · 소화기 점검</small><h1>열 수 없습니다</h1></div><div class="main"><div class="card" style="padding:16px;font-size:15px;line-height:1.6">' + h(msg) + '</div></div>';
+}
+
+/* ── 입력 화면 ── */
+function renderForm() {
+  const r = S.init, m = Number(r.ym.slice(5, 7));
+  $('page').innerHTML =
+    '<div class="hd"><small>잠실점 에비뉴엘 · 소화기 월 점검</small><h1>' + h(r.fe.name) + '</h1>' +
+    '<span style="font-size:13px;color:var(--sub)">' + h(r.fe.floor) + ' · ' + h(r.monthLabel) + ' · 입력 기간 <b>' + m + '월 ' + r.window.start + '일 ~ ' + r.window.end + '일</b></span></div>' +
+    '<div class="main">' +
+    (r.late ? '<div class="banner" style="background:var(--orange-bg);color:var(--orange);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.5">입력 기간이 지났지만 지금 입력할 수 있습니다. 「기한 후 입력」으로 표시됩니다.</div>' : '') +
+    (r.exists ? '<div style="background:var(--line3);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--sub)">이번 달 입력이 이미 있습니다. 다시 보내면 새 내용으로 바뀝니다.</div>' : '') +
+    '<section style="display:flex;flex-direction:column;gap:6px"><span class="lbl">1. 압력계 사진</span><div id="shotBox"></div></section>' +
+    '<section style="display:flex;flex-direction:column;gap:6px"><span class="lbl">2. 상태</span><div class="seg"><button id="sOk" class="on" aria-pressed="true" onclick="setBad(false)">이상 없음</button><button id="sBad" aria-pressed="false" onclick="setBad(true)">이상 있음</button></div></section>' +
+    '<section style="display:flex;flex-direction:column;gap:8px"><span class="lbl">3. 손가락으로 따라 쓰기</span>' +
+    '<div class="pad" id="padA"><canvas class="g"></canvas><canvas class="i" aria-label="외관 압력 이상무 손글씨 칸"></canvas><button class="clr hide" onclick="PADS.A.clear()">지우기</button></div>' +
+    '<div class="pad" id="padB"><canvas class="g"></canvas><canvas class="i" aria-label="이름 손글씨 칸"></canvas><button class="clr hide" onclick="PADS.B.clear()">지우기</button></div>' +
+    '<small style="color:var(--muted)">회색 글자 위에 손가락으로 크게 따라 써 주세요.</small></section>' +
+    '</div>' +
+    '<div class="foot"><div class="miss" id="miss" role="alert"></div><button class="send" id="send" onclick="submit()" disabled>전송하기</button></div>';
+  renderShot();
+  PADS.A = makePad($('padA'), () => S.bad ? '이상 내용' : '외관·압력 이상무');
+  PADS.B = makePad($('padB'), () => '이름');
+  update();
+}
+function renderShot() {
+  $('shotBox').innerHTML = S.photo
+    ? '<div class="shot-done"><img src="' + S.photo + '" alt="찍은 압력계 사진">' + GUIDE + '<button class="btn sm" onclick="openCamera()">다시 찍기</button></div>'
+    : '<button class="shot" onclick="openCamera()" aria-label="압력계 사진 찍기">' + GAUGE_ICON + '<span style="font-size:17px">사진 찍기</span><span style="font-size:12px;font-weight:400;color:var(--blue-d)">압력계 정면이 보이게</span></button>';
+}
+function setBad(b) {
+  if (S.bad === b) return;
+  S.bad = b;
+  $('sOk').className = b ? '' : 'on'; $('sOk').setAttribute('aria-pressed', String(!b));
+  $('sBad').className = b ? 'on bad' : ''; $('sBad').setAttribute('aria-pressed', String(b));
+  PADS.A.clear();
+}
+function update() {
+  if (!S.init || S.done) return;
+  const miss = [];
+  if (!S.photo) miss.push('압력계 사진');
+  if (!PADS.A.has()) miss.push(S.bad ? '이상 내용 칸' : '외관·압력 이상무 칸');
+  if (!PADS.B.has()) miss.push('이름 칸');
+  $('miss').textContent = miss.length ? miss.join(', ') + '이(가) 비어 있습니다' : '';
+  $('send').disabled = miss.length > 0 || S.sending;
+}
+
+/* ── 손글씨 칸 ── */
+const PADS = {};
+function makePad(box, ghostText) {
+  const g = box.querySelector('canvas.g'), ink = box.querySelector('canvas.i'), clr = box.querySelector('.clr');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let len = 0, drawing = false, last = null;
+  function size() {
+    const w = box.clientWidth, hgt = box.clientHeight;
+    [g, ink].forEach(c => { c.width = Math.round(w * dpr); c.height = Math.round(hgt * dpr); });
+    ghost();
+  }
+  function ghost() {
+    const c = g.getContext('2d');
+    c.clearRect(0, 0, g.width, g.height);
+    const text = ghostText();
+    let fs = 46 * dpr;
+    c.font = '800 ' + fs + 'px "Noto Sans KR", sans-serif';
+    while (c.measureText(text).width > g.width * 0.9 && fs > 16) { fs -= 2; c.font = '800 ' + fs + 'px "Noto Sans KR", sans-serif'; }
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillStyle = '#C5CCD6';   // 연회색 굵은 글자 (결정 46)
+    c.fillText(text, g.width / 2, g.height / 2);
+  }
+  function pos(e) { const r = ink.getBoundingClientRect(); return { x: (e.clientX - r.left) * dpr, y: (e.clientY - r.top) * dpr }; }
+  ink.addEventListener('pointerdown', e => { e.preventDefault(); ink.setPointerCapture(e.pointerId); drawing = true; last = pos(e); dot(last); });
+  ink.addEventListener('pointermove', e => {
+    if (!drawing) return;
+    const p = pos(e), c = ink.getContext('2d');
+    c.lineWidth = 3.2 * dpr; c.lineCap = 'round'; c.lineJoin = 'round'; c.strokeStyle = '#18202B';
+    c.beginPath(); c.moveTo(last.x, last.y); c.lineTo(p.x, p.y); c.stroke();
+    len += Math.hypot(p.x - last.x, p.y - last.y); last = p; mark();
+  });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(t => ink.addEventListener(t, () => { drawing = false; }));
+  function dot(p) { const c = ink.getContext('2d'); c.fillStyle = '#18202B'; c.beginPath(); c.arc(p.x, p.y, 1.6 * dpr, 0, Math.PI * 2); c.fill(); }
+  function mark() { box.classList.toggle('inked', len > 0); clr.classList.toggle('hide', len === 0); update(); }
+  window.addEventListener('resize', () => { if (len === 0) size(); });
+  size();
+  return {
+    has: () => len > 60 * dpr,
+    clear: () => { ink.getContext('2d').clearRect(0, 0, ink.width, ink.height); len = 0; ghost(); mark(); },
+    png: () => {
+      const W = 600, H = Math.round(600 * ink.height / ink.width);
+      const out = document.createElement('canvas'); out.width = W; out.height = H;
+      const c = out.getContext('2d'); c.fillStyle = '#fff'; c.fillRect(0, 0, W, H); c.drawImage(ink, 0, 0, W, H);
+      return out.toDataURL('image/png');
+    }
+  };
+}
+
+/* ── 압력계 촬영 ── */
+let stream = null, torchOn = false;
+async function openCamera() {
+  $('layer').innerHTML = '<div class="cam keep-color" role="dialog" aria-modal="true" aria-label="압력계 촬영">' +
+    '<div class="cam-top"><button onclick="closeCamera()" aria-label="닫기">✕</button><b style="flex:1;text-align:center">' + h(S.init.fe.name) + ' · 압력계</b><button class="torch hide" id="torch" onclick="toggleTorch()" aria-label="손전등 켜기" aria-pressed="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle"><path d="M8 2h8v4l-2 4v12h-4V10L8 6z"/><path d="M8 6h8M12 14v2"/></svg></button><span id="torchGap" style="width:44px"></span></div>' +
+    '<div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px">' +
+    '<div class="cam-msg" id="camMsg">동그라미에 압력계를 맞춰 주세요</div>' +
+    '<div class="view" id="view"><video id="vid" playsinline muted autoplay></video>' + GUIDE + '</div>' +
+    '<div id="camNote" style="text-align:center;font-size:13px;color:#CBD2DB;line-height:1.6;padding:0 24px">바늘과 숫자가 보이도록 정면에서 찍어 주세요.</div></div>' +
+    '<div id="camFoot" style="display:flex;align-items:center;justify-content:center;padding:20px 24px calc(32px + env(safe-area-inset-bottom))"><button class="shutter" id="shutter" onclick="snap()" aria-label="찍기"><span></span></button></div></div>';
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return useFileFallback();
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false });
+    $('vid').srcObject = stream;
+    setupTorch();
+  } catch (e) {
+    useFileFallback();
+  }
+}
+/* 손전등: 카메라가 지원할 때만 버튼을 보임 (주로 안드로이드 크롬) */
+function setupTorch() {
+  const track = stream && stream.getVideoTracks()[0];
+  let caps = {};
+  try { caps = (track && track.getCapabilities) ? track.getCapabilities() : {}; } catch (e) { caps = {}; }
+  if (caps.torch) { $('torch').classList.remove('hide'); $('torchGap').classList.add('hide'); }
+}
+async function toggleTorch() {
+  const track = stream && stream.getVideoTracks()[0];
+  if (!track) return;
+  try {
+    await track.applyConstraints({ advanced: [{ torch: !torchOn }] });
+    torchOn = !torchOn;
+    const b = $('torch'); b.classList.toggle('on', torchOn); b.setAttribute('aria-pressed', String(torchOn)); b.setAttribute('aria-label', torchOn ? '손전등 끄기' : '손전등 켜기');
+  } catch (e) { $('torch').classList.add('hide'); $('torchGap').classList.remove('hide'); }
+}
+function useFileFallback() {
+  const v = $('vid'); if (v) v.remove();
+  $('camNote').innerHTML = '이 화면에서는 카메라를 바로 열 수 없어 휴대폰 카메라를 엽니다.<br>압력계를 화면 가운데 동그라미 크기로 맞춰 찍어 주세요.';
+  $('shutter').onclick = () => $('file').click();
+}
+function stopStream() {
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  torchOn = false;
+}
+function closeCamera() { stopStream(); $('layer').innerHTML = ''; }
+function snap() {
+  const v = $('vid');
+  if (!v || !v.videoWidth) return;
+  confirmShot(toJpeg(v, v.videoWidth, v.videoHeight));
+}
+/* 찍은 뒤 확인 화면: 같은 원을 흐리게 겹쳐 보여 주고 [다시 찍기] [이 사진 쓰기] */
+function confirmShot(jpeg) {
+  stopStream();
+  S.pending = jpeg;
+  if (!$('view')) { openCamera().then(() => { stopStream(); confirmShot(jpeg); }); return; }
+  const tb = $('torch'); if (tb) { tb.classList.add('hide'); $('torchGap').classList.remove('hide'); }
+  $('camMsg').textContent = '압력계가 동그라미 안에 들어왔나요?';
+  $('view').className = 'view check';
+  $('view').innerHTML = '<img src="' + jpeg + '" alt="찍은 압력계 사진">' + GUIDE;
+  $('camNote').textContent = '바늘과 숫자가 잘 보이면 「이 사진 쓰기」를 눌러 주세요.';
+  $('camFoot').outerHTML = '<div class="cam-btns" id="camFoot"><button style="background:none;border:1px solid rgba(255,255,255,.5);color:#fff" onclick="openCamera()">다시 찍기</button><button style="background:#fff;border:none;color:#18202B" onclick="useShot()">이 사진 쓰기</button></div>';
+}
+function useShot() {
+  S.photo = S.pending; S.pending = '';
+  closeCamera(); renderShot(); update();
+}
+$('file').addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  const img = new Image();
+  const url = URL.createObjectURL(f);
+  img.onload = () => { const j = toJpeg(img, img.naturalWidth, img.naturalHeight); URL.revokeObjectURL(url); confirmShot(j); };
+  img.onerror = () => { URL.revokeObjectURL(url); alertBox('사진을 읽지 못했습니다. 다시 찍어 주세요.'); };
+  img.src = url;
+});
+/** 가운데를 4:3으로 맞춰 640×480 JPEG(품질 0.6)으로 줄임 — 압력계가 읽히는 가장 작은 크기 */
+function toJpeg(src, sw, sh) {
+  const W = (S.init.photo && S.init.photo.w) || 640, H = Math.round(W * 3 / 4), q = (S.init.photo && S.init.photo.q) || 0.6;
+  let cw = sw, ch = sw * 3 / 4;
+  if (ch > sh) { ch = sh; cw = sh * 4 / 3; }
+  const cx = (sw - cw) / 2, cy = (sh - ch) / 2;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d'); x.imageSmoothingQuality = 'high';
+  x.drawImage(src, cx, cy, cw, ch, 0, 0, W, H);
+  return c.toDataURL('image/jpeg', q);
+}
+
+/* ── 전송 ── */
+function submit(overwrite) {
+  update();
+  if ($('send').disabled) return;
+  if (S.init.exists && !overwrite) {
+    $('layer').innerHTML = '<div class="dialog-back"><div class="dialog" role="dialog" aria-modal="true"><h2 style="margin:0 0 8px;font-size:18px">이번 달 입력이 이미 있습니다</h2><p style="margin:0 0 14px;font-size:14px;color:var(--sub);line-height:1.6">새로 보낸 내용으로 바꿀까요?</p><div style="display:flex;gap:10px"><button class="btn big" style="flex:1" onclick="$(\'layer\').innerHTML=\'\'">취소</button><button class="btn big pri" style="flex:2" onclick="$(\'layer\').innerHTML=\'\';submit(true)">바꾸기</button></div></div></div>';
+    return;
+  }
+  S.sending = true; update();
+  $('send').innerHTML = '<span class="spin"></span>';
+  const data = { photo: S.photo, signA: PADS.A.png(), signB: PADS.B.png(), state: S.bad ? '이상있음' : '이상없음', overwrite: !!overwrite };
+  API.submit(QR, data).then(r => {
+    S.sending = false; $('send').textContent = '전송하기';
+    if (r.ok) return done(r);
+    if (r.exists) { S.init.exists = true; return submit(false); }
+    alertBox(r.error || '보내지 못했습니다.'); update();
+  }).catch(e => {
+    S.sending = false; $('send').textContent = '전송하기';
+    alertBox('보내지 못했습니다. 신호를 확인하고 다시 눌러 주세요. (' + (e.message || e) + ')'); update();
+  });
+}
+function done(r) {
+  S.done = true;
+  const bad = r.state === '이상있음';
+  $('page').innerHTML = '<div class="hd"><small>잠실점 에비뉴엘 · 소화기 월 점검</small><h1>' + h(S.init.fe.name) + '</h1></div>' +
+    '<div class="main" style="align-items:center;text-align:center;padding-top:48px;gap:14px">' +
+    '<div style="width:72px;height:72px;border-radius:36px;background:' + (bad ? 'var(--orange-bg)' : 'var(--green-bg)') + ';display:flex;align-items:center;justify-content:center"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="' + (bad ? '#B4410F' : '#1F7A4D') + '" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg></div>' +
+    '<b style="font-size:20px">보냈습니다. 감사합니다.</b>' +
+    '<span style="font-size:15px;color:var(--sub);line-height:1.6">' + h(S.init.monthLabel) + ' 점검이 ' + (bad ? '<b style="color:var(--orange)">이상 있음</b>으로' : '<b style="color:var(--green)">점검완료</b>로') + ' 기록되었습니다.' + (r.late ? '<br>(기한 후 입력)' : '') + '</span>' +
+    (r.checkId ? '<span style="font-size:12px;color:var(--muted);background:var(--line3);border-radius:8px;padding:6px 10px">저장 번호 ' + h(r.checkId) + (r.at ? ' · ' + h(r.at) : '') + '</span>' : '') +
+    '<span style="font-size:13px;color:var(--muted)">이 창은 닫으셔도 됩니다.</span></div>';
+}
+function alertBox(msg) {
+  $('layer').innerHTML = '<div class="dialog-back"><div class="dialog" role="alertdialog" aria-modal="true"><p style="margin:0 0 14px;font-size:15px;line-height:1.6">' + h(msg) + '</p><button class="btn big pri" style="width:100%" onclick="$(\'layer\').innerHTML=\'\'">확인</button></div></div>';
+}
+</script>
+</body>
+</html>
