@@ -1031,7 +1031,7 @@ function renderTbm() {
     '<button class="btn sm" onclick="loadTbm()">새로고침</button><button class="btn sm" onclick="S.tbm.showSigns=!S.tbm.showSigns;render()">' + (r.showSigns ? '목록 닫기' : '서명 목록') + '</button></div>' +
     (r.showSigns ? list : '') +
     (r.pdf && r.pdf.shared === false ? '<div class="banner b-red">이 PDF는 <b>공유가 안 되어</b> 구글 로그인을 안 한 휴대폰·PC에서는 열리지 않습니다. 시설팀 공용 계정의 드라이브에서 파일 공유를 「링크가 있는 모든 사용자」로 바꾸거나 관리자에게 알려 주세요.</div>' : '') +
-    (r.pdf ? '<div class="banner ' + (more ? 'b-warn' : 'b-info') + '">PDF 저장됨 ' + h(String(r.pdf.at).slice(11, 16)) + ' · 서명 ' + r.pdf.signs + '명' + (more ? ' — <b>PDF 뒤 서명 ' + more + '명 추가</b>. [PDF로 저장]을 다시 누르면 새로 만듭니다.' : '') + ' <a href="' + h(r.pdf.url) + '" target="_blank" rel="noopener">PDF 열기</a></div>' : '') +
+    (r.pdf ? '<div class="banner ' + (more ? 'b-warn' : 'b-info') + '">PDF 저장됨 ' + h(String(r.pdf.at).slice(11, 16)) + ' · 서명 ' + r.pdf.signs + '명' + (more ? ' — <b>PDF 뒤 서명 ' + more + '명 추가</b>. [PDF로 저장]을 다시 누르면 새로 만듭니다.' : '') + ' ' + pdfBtn(null, 'PDF 열기', r.pdf.url, tbmPv(r)) + '</div>' : '') +
     '<div class="sec">작업 표 — ' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일 명일 작업 예정에서 가져옴</div>' +
     (r.works.length ? r.works.map(tbmCard).join('') : '<div class="banner b-gray">이 날짜의 명일 작업 예정이 없습니다. 아래 [+ 작업 줄 추가]로 넣어 주세요.</div>') +
     '<button class="btn nwadd" onclick="tbmAdd()"' + (r.works.length >= 30 ? ' disabled' : '') + '>+ 작업 줄 추가</button>' +
@@ -1042,9 +1042,10 @@ function renderTbm() {
     '<div class="nwbar"><span id="tbState">' + tbmState() + '</span>' +
     '<button class="btn" onclick="tbmSaveBtn()"' + (r.busy || r.pdfBusy ? ' disabled' : '') + '>' + (r.busy ? '<span class="spin"></span>' : '저장') + '</button>' +
     // PDF를 만든 뒤 고친 것·새 서명이 없으면 [PDF 열기] (결정 72)
-    (r.pdf && !r.dirty && !r.pdfStale && !more ? pdfBtn('pri', 'PDF 열기', r.pdf.url, { name: r.day + '_TBM.pdf', sub: '서류작업 › TBM ›', meta: '서명 ' + r.pdf.signs + '명 · ' + String(r.pdf.at).slice(11, 16) + ' 만듦' }) :
+    (r.pdf && !r.dirty && !r.pdfStale && !more ? pdfBtn('pri', 'PDF 열기', r.pdf.url, tbmPv(r)) :
       '<button class="btn pri" onclick="tbmPdf()"' + (r.busy || r.pdfBusy ? ' disabled' : '') + '>' + (r.pdfBusy ? '<span class="spin"></span> PDF 만드는 중' : 'PDF로 저장') + '</button>') + '</div></div>';
 }
+function tbmPv(r) { return { name: r.day + '_TBM.pdf', sub: '서류작업 › TBM ›', meta: '서명 ' + r.pdf.signs + '명 · ' + String(r.pdf.at).slice(11, 16) + ' 만듦' }; }
 function tbmW(i) { return S.tbm.works[i]; }
 function tbmIn(i, k, el) { tbmW(i)[k] = el.value; tbmDirty(); }
 function tbmDept(i, d) { tbmW(i).dept = d; tbmDirty(); render(); }
@@ -2075,8 +2076,8 @@ function withBack(html) { return html.replace(/<div class="(nwbar|csbar-in)"( id
    Supabase 저장소 PDF는 바로 받고, 드라이브로 옮긴 PDF는 구글 웹앱 ?api=pdf 가 대신 받아 줌(「링크가 있는 사람 보기」 파일만). 구글 판은 예전처럼 새 창 */
 const PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
 const PV_Z = [1, 1.5, 2, 3];
-function pdfBtn(cls, label, url, o) {   // o = { name, sub, meta } — 돌아갈 화면은 지금 화면
-  return '<a class="btn ' + cls + '" href="' + h(url) + '" target="_blank" rel="noopener" data-pv="' + h(JSON.stringify(o)) + '" onclick="return pdfOpen(this)">' + label + '</a>';
+function pdfBtn(cls, label, url, o) {   // o = { name, sub, meta } — 돌아갈 화면은 지금 화면, cls = null 이면 글자 링크
+  return '<a' + (cls == null ? '' : ' class="btn ' + cls + '"') + ' href="' + h(url) + '" target="_blank" rel="noopener" data-pv="' + h(JSON.stringify(o)) + '" onclick="return pdfOpen(this)">' + label + '</a>';
 }
 function pdfOpen(a) {
   if (!window.WS_API) return true;   // 구글 판: 새 창
