@@ -11,7 +11,7 @@
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
 <script src="config.js"></script>
-<script>window.WS_VERSION = '0.9.14';</script>
+<script>window.WS_VERSION = '0.10.1';</script>
 <script src="ws-api.js"></script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -77,6 +77,14 @@ function themeLabel() { return themeDark() ? '밝게' : '어둡게'; }
 .top{background:#fff;border-bottom:1px solid var(--line2);position:sticky;top:0;z-index:20}
 .top-in{max-width:1100px;margin:0 auto;padding:10px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .backbar{position:sticky;bottom:0;z-index:14;background:var(--ground);border-top:1px solid var(--line2);padding:10px 16px calc(12px + env(safe-area-inset-bottom))}.backbar .btn{width:100%}
+/* 앱 안 PDF 보기 (계정 선택 창 없이, 시안 docs/시안/WS-PDF보기) */
+.pv-tool{display:flex;align-items:center;gap:8px;padding:8px max(16px,calc((100% - 1100px)/2 + 12px));background:var(--ground);border-bottom:1px solid var(--line2)}
+.pv-tool .fname{flex:1;min-width:0}.pv-tool .fname b{font-size:14px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pv-tool .fname small{font-size:12px;color:var(--muted)}
+.pv-zoom{display:flex;align-items:center;border:1px solid var(--line2);border-radius:8px;background:var(--card,#fff);overflow:hidden;flex:none}.pv-zoom button{width:40px;height:36px;border:0;background:none;font-size:18px;color:inherit;cursor:pointer}.pv-zoom button:disabled{opacity:.35;cursor:default}.pv-zoom span{min-width:56px;text-align:center;font-size:13px;font-variant-numeric:tabular-nums}
+.pv-pages{background:var(--line3);padding:12px 10px 20px;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:60vh;overflow-x:auto}.pv-pages.big{align-items:flex-start}
+.pv-page{display:block;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.18);flex:none}.pv-no{font-size:12px;color:var(--muted);margin-bottom:8px}
+.pv-bar{display:flex;gap:8px;padding-left:max(16px,calc((100% - 1100px)/2 + 12px))!important;padding-right:max(16px,calc((100% - 1100px)/2 + 12px))!important}.pv-bar .btn{width:auto!important;flex:1}
+.pv-state{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:48px 20px;color:var(--sub)}.pv-state b{color:var(--ink);font-size:17px}.pv-spin{width:30px;height:30px;border:3px solid var(--blue);border-right-color:transparent;border-radius:50%;animation:pvs .8s linear infinite}@keyframes pvs{to{transform:rotate(360deg)}}
 .btn.back-in{flex:none!important;min-width:0!important;margin-right:auto;padding:0 14px 0 8px;gap:2px}
 body:has(.csbar) #app{padding-bottom:calc(120px + env(safe-area-inset-bottom))}
 @media (max-width:599px){.nwbar{gap:6px}.nwbar .btn{min-width:0;padding:0 10px;font-size:15px}.nwbar .btn.green svg{display:none}.nwbar>span{flex:0 1 auto;min-width:0;font-size:12px}.btn.back-in{padding:0 10px 0 4px}}
@@ -505,7 +513,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.9.14' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.10.1' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -590,7 +598,7 @@ function go(view, push) {
 async function refreshFire() { try { const r = await call('bootstrap'); S.fire = r.fire; S.user = r.user; S.fireAt = Date.now(); if (S.view === 'fire') render(); } catch (e) {} }
 try { google.script.history.setChangeHandler(e => { const v = e.state && e.state.v; if (v && S.token) { S.view = v; render(); } }); } catch (e) {}
 const PARENT = { inspect: 'main', fire: 'inspect', eh: 'inspect', cs: 'inspect', csck: 'cs', qr: 'fire', status: 'fire', floor: 'status', docs: 'main', set: 'main', risk: 'set', tbm: 'docs', nw: 'docs', log: 'docs', att: 'docs', attup: 'att' };
-function back() { if (S.view === 'csck') return csLeave(); if (S.view === 'risk' && S.rk && S.rk.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; if (S.view === 'nw' && !nwLeaveOk()) return; if (S.view === 'log' && !lgLeaveOk()) return; if (S.view === 'tbm' && S.tbm && S.tbm.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; go(PARENT[S.view] || 'main'); }
+function back() { if (S.view === 'pdf') return go((S.pdf && S.pdf.from) || 'main'); if (S.view === 'csck') return csLeave(); if (S.view === 'risk' && S.rk && S.rk.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; if (S.view === 'nw' && !nwLeaveOk()) return; if (S.view === 'log' && !lgLeaveOk()) return; if (S.view === 'tbm' && S.tbm && S.tbm.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; go(PARENT[S.view] || 'main'); }
 
 function topbar(sub, title) {
   const u = S.user || {};
@@ -1034,7 +1042,7 @@ function renderTbm() {
     '<div class="nwbar"><span id="tbState">' + tbmState() + '</span>' +
     '<button class="btn" onclick="tbmSaveBtn()"' + (r.busy || r.pdfBusy ? ' disabled' : '') + '>' + (r.busy ? '<span class="spin"></span>' : '저장') + '</button>' +
     // PDF를 만든 뒤 고친 것·새 서명이 없으면 [PDF 열기] (결정 72)
-    (r.pdf && !r.dirty && !r.pdfStale && !more ? '<a class="btn pri" href="' + h(r.pdf.url) + '" target="_blank" rel="noopener">PDF 열기</a>' :
+    (r.pdf && !r.dirty && !r.pdfStale && !more ? pdfBtn('pri', 'PDF 열기', r.pdf.url, { name: r.day + '_TBM.pdf', sub: '서류작업 › TBM ›', meta: '서명 ' + r.pdf.signs + '명 · ' + String(r.pdf.at).slice(11, 16) + ' 만듦' }) :
       '<button class="btn pri" onclick="tbmPdf()"' + (r.busy || r.pdfBusy ? ' disabled' : '') + '>' + (r.pdfBusy ? '<span class="spin"></span> PDF 만드는 중' : 'PDF로 저장') + '</button>') + '</div></div>';
 }
 function tbmW(i) { return S.tbm.works[i]; }
@@ -1534,7 +1542,7 @@ function renderLog() {
     '<div id="lgSheet" style="zoom:' + lgZoom() + '">' + lgSheet(true) + '</div>' +
     '<div class="nwbar" id="lgBar"><span id="lgState">' + lgState() + '</span>' +
     '<button class="btn" onclick="lgPrint()">' + ICON.print + '인쇄 (B4)</button>' +
-    (g.pdf && !g.dirty ? '<a class="btn" href="' + h(g.pdf.url) + '" target="_blank" rel="noopener">' + ICON.file + 'PDF 열기</a>' : '') +
+    (g.pdf && !g.dirty ? pdfBtn('', ICON.file + 'PDF 열기', g.pdf.url, { name: g.day + '_종합업무일지.pdf', sub: '서류작업 › 종합업무일지 ›' }) : '') +
     '<button class="btn" id="lgPdf" onclick="lgPdf()"' + (g.busy ? ' disabled' : '') + '>' + ICON.file + (g.pdfBusy ? 'PDF 만드는 중…' : 'PDF로 저장') + '</button>' +
     '<button class="btn pri" id="lgSave" onclick="lgSave()"' + (g.busy ? ' disabled' : '') + '>' + (g.busy && !g.pdfBusy ? '<span class="spin"></span>' : ICON.ok + '저장') + '</button></div></div>';
 }
@@ -2063,6 +2071,108 @@ function ehSearch(el) { S.ehQ = el.value; const b = $('ehBody'); if (b) b.innerH
 /** 아래 저장 줄(.nwbar · 공사장 점검 .csbar-in) 맨 왼쪽에 「뒤로」를 넣음 — 없으면 그대로 돌려줌 (WS-25) */
 function withBack(html) { return html.replace(/<div class="(nwbar|csbar-in)"( id="\w+")?>/, m => m + '<button class="btn back-in" onclick="back()">' + ICON.back + '뒤로</button>'); }
 
+/* ── 앱 안 PDF 보기: [PDF 열기]가 휴대폰의 드라이브·PDF 앱으로 넘어가면 구글 계정을 물음 → 앱 안에서 pdf.js 로 그림 (Supabase 판만) ──
+   Supabase 저장소 PDF는 바로 받고, 드라이브로 옮긴 PDF는 구글 웹앱 ?api=pdf 가 대신 받아 줌(「링크가 있는 사람 보기」 파일만). 구글 판은 예전처럼 새 창 */
+const PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+const PV_Z = [1, 1.5, 2, 3];
+function pdfBtn(cls, label, url, o) {   // o = { name, sub, meta } — 돌아갈 화면은 지금 화면
+  return '<a class="btn ' + cls + '" href="' + h(url) + '" target="_blank" rel="noopener" data-pv="' + h(JSON.stringify(o)) + '" onclick="return pdfOpen(this)">' + label + '</a>';
+}
+function pdfOpen(a) {
+  if (!window.WS_API) return true;   // 구글 판: 새 창
+  const o = JSON.parse(a.dataset.pv || '{}');
+  S.pdf = { url: a.getAttribute('href'), name: o.name || 'PDF', sub: o.sub || '', meta: o.meta || '', from: S.view === 'pdf' && S.pdf ? S.pdf.from : S.view, z: 1, st: 'load', n: 0 };
+  S.pdfDoc = null;
+  go('pdf');
+  pdfLoad();
+  return false;
+}
+function pdfLib() {
+  if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  return new Promise((ok, no) => {
+    const sc = document.createElement('script'); sc.src = PDFJS + 'pdf.min.js';
+    sc.onload = () => { if (!window.pdfjsLib) return no(new Error('PDF 도구를 불러오지 못했습니다')); pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.js'; ok(window.pdfjsLib); };
+    sc.onerror = () => no(new Error('PDF 도구를 불러오지 못했습니다'));
+    document.head.appendChild(sc);
+  });
+}
+async function pdfBytes(url) {
+  const d = /^https:\/\/drive\.google\.com\/file\/d\/([\w-]+)/.exec(url);
+  if (d) {   // 드라이브로 옮긴 PDF: 브라우저가 직접 못 받음(CORS) → 구글 웹앱이 대신
+    const j = await (await fetch(WS_CONFIG.WS_GAS_URL + '?api=pdf&id=' + encodeURIComponent(d[1]))).json();
+    if (!j.ok) throw new Error(j.error || 'PDF를 받지 못했습니다');
+    const s = atob(j.b64), b = new Uint8Array(s.length);
+    for (let i = 0; i < s.length; i++) b[i] = s.charCodeAt(i);
+    return b;
+  }
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('PDF를 받지 못했습니다 (' + r.status + ')');
+  return new Uint8Array(await r.arrayBuffer());
+}
+async function pdfLoad() {
+  const me = S.pdf;
+  me.st = 'load'; me.err = ''; if (S.view === 'pdf') render();
+  try {
+    const [lib, bytes] = await Promise.all([pdfLib(), pdfBytes(me.url)]);
+    me.bytes = bytes;
+    const doc = await lib.getDocument({ data: bytes.slice() }).promise;   // pdf.js 가 넘긴 배열을 비우므로 복사본을 줌 (내려받기용 원본 보존)
+    if (S.pdf !== me) return;
+    S.pdfDoc = doc; me.n = doc.numPages; me.st = 'ok';
+  } catch (e) {
+    if (S.pdf !== me) return;
+    me.st = 'err'; me.err = String(e.message || e);
+  }
+  if (S.view === 'pdf') render();
+}
+function pvZoomLabel(z) { return z === 1 ? (window.innerWidth < 700 ? '쪽 맞춤' : '100%') : Math.round(z * 100) + '%'; }
+function renderPdf() {
+  const p = S.pdf;
+  const tool = '<div class="pv-tool"><span class="fname"><b>' + h(p.name) + '</b><small>' + h([p.n ? p.n + '쪽' : '', p.meta].filter(Boolean).join(' · ') || 'PDF') + '</small></span>' +
+    '<div class="pv-zoom" role="group" aria-label="크기"><button onclick="pvZoom(-1)" aria-label="작게"' + (p.z <= PV_Z[0] || p.st !== 'ok' ? ' disabled' : '') + '>−</button>' +
+    '<span id="pvZ">' + pvZoomLabel(p.z) + '</span><button onclick="pvZoom(1)" aria-label="크게"' + (p.z >= PV_Z[PV_Z.length - 1] || p.st !== 'ok' ? ' disabled' : '') + '>+</button></div></div>';
+  const body = p.st === 'err'
+    ? '<div class="pv-state" role="alert"><b>PDF를 불러오지 못했습니다</b><span>' + h(p.err && !/fetch|network/i.test(p.err) ? p.err : '인터넷 연결을 확인하고 다시 시도해 주세요.') + '</span>' +
+      '<button class="btn pri" onclick="pdfLoad()">다시 시도</button><a class="btn" href="' + h(p.url) + '" target="_blank" rel="noopener">새 창에서 열기</a>' +
+      '<small style="color:var(--muted)">새 창에서 열면 휴대폰이 구글 계정을 물을 수 있습니다.</small></div>'
+    : p.st === 'load' ? '<div class="pv-state"><div class="pv-spin" aria-hidden="true"></div><span>PDF 불러오는 중…</span></div>'
+    : '<div class="pv-pages' + (p.z > 1 ? ' big' : '') + '" id="pvPages">' + Array.from({ length: p.n }, (_, i) => '<canvas class="pv-page" id="pvC' + (i + 1) + '" aria-label="' + (i + 1) + '쪽"></canvas><div class="pv-no">' + (i + 1) + ' / ' + p.n + '</div>').join('') + '</div>';
+  return topbar(p.sub, 'PDF 보기') + tool + body +
+    '<div class="backbar pv-bar"><button class="btn back-in" onclick="back()">' + ICON.back + '뒤로</button>' +
+    '<button class="btn" onclick="pvDown()"' + (p.bytes ? '' : ' disabled') + '>' + ICON.file + '내려받기</button><button class="btn pri" onclick="pvShare()">공유</button></div>';
+}
+async function pvDraw() {
+  const p = S.pdf, doc = S.pdfDoc, box = $('pvPages');
+  if (!doc || !box) return;
+  const fit = Math.min(960, box.clientWidth - 20), dpr = Math.min(window.devicePixelRatio || 1, 3), z = p.z;
+  for (let i = 1; i <= p.n; i++) {
+    const pg = await doc.getPage(i);
+    if (S.pdf !== p || p.z !== z || S.view !== 'pdf') return;   // 그리는 중에 크기를 바꾸거나 나감
+    const cv = $('pvC' + i); if (!cv) return;
+    const w = fit * z, sc = w / pg.getViewport({ scale: 1 }).width;
+    const k = Math.min(dpr, 4096 / w);   // 캔버스가 너무 크면 휴대폰이 못 그림
+    const vp = pg.getViewport({ scale: sc * k });
+    cv.width = Math.floor(vp.width); cv.height = Math.floor(vp.height);
+    cv.style.width = Math.floor(w) + 'px'; cv.style.height = Math.floor(vp.height / k) + 'px';
+    await pg.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+  }
+}
+function pvZoom(d) {
+  const p = S.pdf, i = PV_Z.indexOf(p.z) + d;
+  if (i < 0 || i >= PV_Z.length) return;
+  p.z = PV_Z[i]; render();
+}
+function pvDown() {
+  const p = S.pdf; if (!p || !p.bytes) return;
+  const u = URL.createObjectURL(new Blob([p.bytes], { type: 'application/pdf' })), a = document.createElement('a');
+  a.href = u; a.download = p.name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(u), 60000);
+}
+async function pvShare() {
+  const p = S.pdf; if (!p) return;
+  if (navigator.share) { try { await navigator.share({ title: p.name, url: p.url }); } catch (e) {} return; }   // 취소해도 조용히
+  try { await navigator.clipboard.writeText(p.url); toast('PDF 링크를 복사했습니다. 받는 사람은 로그인 없이 볼 수 있습니다.'); } catch (e) { prompt('PDF 링크 (복사해서 보내세요)', p.url); }
+}
+
 function renderEh() {
   ehWas = ehWide();
   return topbar('점검 ›', '전열필증') + '<div class="wrap">' +
@@ -2331,7 +2441,7 @@ function csRowHtml(s, g, date, no) {
   return '<div class="csrow"><button class="csgo" onclick="csOpen(\'' + date + '\',\'' + h(s.id) + '\'' + round + ')">' + (no ? '<span class="csno">' + no + '</span>' : '') +
     '<span class="fname"><b>' + h(no ? s.name : csDay(date) + ' · ' + s.name) + '</b>' + (sub ? '<small>' + h(sub) + '</small>' : '') +
     '<span class="csrd">' + csRds(g && g.r[3]).map(n => csRdChip(g && g.r[n], n)).join('') + '</span></span></button>' +
-    (pdf ? '<a class="btn sm" href="' + h(pdf.url) + '" target="_blank" rel="noopener">PDF</a>' : '') +
+    (pdf ? pdfBtn('sm', 'PDF', pdf.url, { name: date + '_공사장점검-' + s.name + '.pdf', sub: '공사장 점검 ›' }) : '') +
     (no && s.live ? '<button class="btn sm ehmore" onclick="csSiteMenu(\'' + h(s.id) + '\')" aria-label="' + h(s.name) + ' 고치기·공사 끝">⋯</button>' : '') + '</div>';
 }
 function csSiteOpen(id) {
@@ -2424,7 +2534,7 @@ function renderCsCk() {
     k.items.map(csItemHtml).join('') +
     '<button class="btn big csadd" onclick="csExtraOpen()">＋ 이 현장에 점검 항목 추가</button></div>' +
     '<div class="csbar"><div class="csbar-in"><div><b>미흡 ' + c['미흡'] + ' · 양호 ' + c['양호'] + (c['해당없음'] ? ' · 해당없음 ' + c['해당없음'] : '') + '</b>' + (left ? ' · 안 고름 ' + left : '') + '<br><span id="csSt">' + csStateHtml() + '</span></div>' +
-    (dp && !dp.stale && !k.pdfBusy ? '<a class="btn big" href="' + h(dp.url) + '" target="_blank" rel="noopener">PDF 열기</a>' : '') +
+    (dp && !dp.stale && !k.pdfBusy ? pdfBtn('big', 'PDF 열기', dp.url, { name: k.date + '_공사장점검-' + k.site.name + '.pdf', sub: '공사장 점검 ›' }) : '') +
     '<button class="btn big pri" onclick="csPdf()"' + (k.pdfBusy ? ' disabled' : '') + '>' + (k.pdfBusy ? '<span class="spin"></span> PDF 만드는 중' : dp && !dp.stale ? 'PDF 다시' : '점검 끝 · PDF') + '</button></div></div>';
 }
 function csItemHtml(x, i) {
@@ -2555,6 +2665,7 @@ function render() {
   else if (S.view === 'device') html = renderDevice();
   else if (S.view === 'sign' && S.sign) html = renderSign();
   else if (!S.token || S.view === 'login') html = renderLogin();
+  else if (S.view === 'pdf' && S.pdf) html = renderPdf();
   else if (S.view === 'docs') html = renderDocs();
   else if (S.view === 'tbm') html = renderTbm();
   else if (S.view === 'nw') html = renderNw();
@@ -2579,6 +2690,7 @@ function render() {
   $('app').innerHTML = html;
   if (S.view === 'qr') drawQrs();
   if (S.view === 'sign') mountSign();
+  if (S.view === 'pdf') pvDraw();
 }
 
 (async function start() {
