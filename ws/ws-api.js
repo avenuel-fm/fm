@@ -118,11 +118,11 @@
     ehDelete: async (token, ids, floor) => fePage(await rpc('ws_eh_delete', { p_token: token, p_ids: ids || [], p_floor: floor || '' })),
     ehPrinted: async (token, ids, floor) => fePage(await rpc('ws_eh_printed', { p_token: token, p_ids: ids || [], p_floor: floor || '' })),
     /** 엑셀은 여기서 나눠 읽고(Code.gs ehParse_ 와 같음) 저장할 때 매장·기기 목록만 DB에 */
-    async ehImport(token, sheets, save) {
+    async ehImport(token, sheets, save, replace) {
       const P = ehParse(sheets || {});
       if (!P.items.length) return { ok: false, error: '전열기기를 찾지 못했습니다. 「2026년 전열기 관리대장」 엑셀이 맞는지 확인해 주세요.' };
       if (!save) return { ok: true, check: P.check };
-      const r = await rpc('ws_eh_import', { p_token: token, p_data: {
+      const r = await rpc('ws_eh_import', { p_token: token, p_data: { replace: !!replace,
         stores: P.stores.map(s => ({ floor: s.floor, no: s.no, name: s.name })),
         items: P.items.map(x => ({ floor: x.floor, store: x.store, no: x.no, name: x.name, w: x.w, maker: x.maker, m1: x.m1, m2: x.m2, date: x.date, gone: x.gone })) } });
       return r && r.ok ? fePage(Object.assign(r, { check: P.check })) : r;

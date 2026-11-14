@@ -11,7 +11,7 @@
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
 <script src="config.js"></script>
-<script>window.WS_VERSION = '0.10.3';</script>
+<script>window.WS_VERSION = '0.10.4';</script>
 <script src="ws-api.js"></script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -513,7 +513,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.10.3' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.10.4' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -2195,7 +2195,7 @@ function ehBody() {
       body += '<div class="list" style="margin-top:10px">' + (hits.length ? hits.slice(0, 50).map(n => '<button class="row" onclick="ehJump(\'' + n[0] + '\',\'' + n[2] + '\')"><span class="ehcnt">' + h(n[0]) + '</span><span class="fname"><b style="font-size:15px">' + h(n[1]) + '</b></span>' + ICON.chev + '</button>').join('') : '<div class="banner b-gray">「' + h(S.ehQ) + '」 매장이 없습니다.</div>') + '</div>';
     } else {
       body += '<div class="ehsum"><span><b>' + h(r.floor) + '</b> 매장 ' + fl.stores + '곳 · 기기 ' + fl.items + '대</span>' +
-        (r.empty && CAN_PRINT ? '<button class="btn sm" onclick="ehImportDlg()">엑셀 가져오기</button>' : '') +
+        (CAN_PRINT ? '<button class="btn sm" onclick="ehImportDlg(' + !r.empty + ')">' + (r.empty ? '엑셀 가져오기' : '엑셀 다시 가져오기') + '</button>' : '') +
         '<button class="btn sm" onclick="ehStoreDlg()">＋ 매장 추가</button></div>';
       if (!r.stores.length) body += '<div class="banner b-gray">' + (r.empty ? '아직 전열기기가 없습니다. ' + (CAN_PRINT ? '[엑셀 가져오기]로 관리대장을 옮기거나 ' : 'PC에서 관리대장 엑셀을 가져오거나 ') + '[＋ 매장 추가]로 시작하세요.' : '이 층에 매장이 없습니다.') + '</div>';
       else body += ehWide() ? ehPc(r) : r.stores.map(ehCard).join('');
@@ -2340,9 +2340,10 @@ function ehDoPrint(one) {
 }
 
 /* 엑셀 「전열기 관리대장」 가져오기 (처음 한 번, PC) */
-function ehImportDlg() {
-  S.ehX = null;
-  dialog('<h2 class="ehdh">엑셀 가져오기 (처음 한 번)</h2><p class="ehdp">「2026년 전열기 관리대장.xlsx」를 고르면 층 시트(B3F~6F·팝업)의 매장·기기를 읽습니다. 파일은 올리지 않고 읽은 내용만 저장합니다.</p>' +
+function ehImportDlg(re) {
+  S.ehX = null; S.ehRe = !!re;
+  dialog('<h2 class="ehdh">' + (re ? '엑셀 다시 가져오기' : '엑셀 가져오기 (처음 한 번)') + '</h2><p class="ehdp">「전열기 관리대장.xlsx」를 고르면 층 시트(B3F~6F·팝업)의 매장·기기를 읽습니다. 파일은 올리지 않고 읽은 내용만 저장합니다.</p>' +
+    (re ? '<div class="banner b-red" style="margin-bottom:10px">지금 들어 있는 매장·기기를 <b>모두 지우고</b> 새 엑셀 내용으로 바꿉니다. 앱에서 따로 추가·수정한 것도 엑셀에 없으면 사라집니다. 관리번호가 같은 기기는 QR이 그대로라 붙은 필증은 계속 씁니다.</div>' : '') +
     '<label class="btn" style="width:100%;min-height:64px;border-style:dashed;color:var(--blue);position:relative">' + ICON.clip + ' 엑셀 파일(.xlsx) 고르기<input type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onchange="ehXFile(this)" style="position:absolute;width:1px;height:1px;opacity:0"></label>' +
     '<div id="ehXo" style="margin-top:12px"></div>');
 }
@@ -2361,13 +2362,14 @@ async function ehXFile(el) {
     $('ehXo').innerHTML = '<table class="atst"><tr><th>층</th><th>매장</th><th>기기</th></tr>' + c.floors.filter(x => x[1]).map(x => '<tr><td>' + x[0] + '</td><td>' + x[1] + '</td><td>' + x[2] + '</td></tr>').join('') +
       '<tr class="sum"><td>합계</td><td>' + c.stores + '</td><td>' + c.items + '</td></tr></table>' +
       '<p class="ehdp" style="margin-top:10px">· 관리번호 그대로 ' + (c.items - c.renumbered) + '대 (지하 B1F- → B1- ' + c.bfix + '대)<br>· 번호 없음·겹침 → <b>새 번호 ' + c.renumbered + '대</b><br>· 「폐기·매장철수」 표시 <b>' + c.gone + '대</b>는 삭제 상태로 넣음<br>· 승인일자 빈칸 ' + c.noDate + '대</p>' +
-      '<div class="ehda"><button class="btn big" style="flex:1" onclick="closeDialog()">취소</button><button id="ehXb" class="btn big pri" style="flex:2" onclick="ehXSave()">가져오기</button></div>';
+      '<div class="ehda"><button class="btn big" style="flex:1" onclick="closeDialog()">취소</button><button id="ehXb" class="btn big ' + (S.ehRe ? 'warn' : 'pri') + '" style="flex:2" onclick="ehXSave()">' + (S.ehRe ? '모두 바꿔 넣기' : '가져오기') + '</button></div>';
   } catch (e) { $('ehXo').innerHTML = '<div class="banner b-red">' + h(e && e.message ? e.message : e) + '</div>'; }
 }
 async function ehXSave() {
   $('ehXb').disabled = true; $('ehXb').innerHTML = '<span class="spin"></span> 저장 중 (1~2분)';
-  try { const r = await call('ehImport', S.ehX, true); if (!r.ok) { toast(r.error); $('ehXb').disabled = false; $('ehXb').textContent = '가져오기'; return; } closeDialog(); S.ehX = null; toast('매장 ' + r.check.stores + '곳 · 기기 ' + r.check.items + '대 가져옴'); ehSet(r); }
-  catch (e) { $('ehXb').disabled = false; $('ehXb').textContent = '가져오기'; }
+  const back = () => { $('ehXb').disabled = false; $('ehXb').textContent = S.ehRe ? '모두 바꿔 넣기' : '가져오기'; };
+  try { const r = await call('ehImport', S.ehX, true, S.ehRe); if (!r.ok) { toast(r.error); back(); return; } closeDialog(); S.ehX = null; S.ehSel = {}; toast('매장 ' + r.check.stores + '곳 · 기기 ' + r.check.items + '대 가져옴' + (r.kept != null && S.ehRe ? ' (QR 그대로 ' + r.kept + '대)' : '')); ehSet(r); }
+  catch (e) { back(); }
 }
 
 /* ── 공사장 점검 (WS_공사장점검, 결정 100): 현장 목록 → 현장 점검(자동 저장) → 날짜별·현장별 PDF ── */
