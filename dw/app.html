@@ -12,7 +12,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
   <script src="../apps.js"></script>
   <script src="config.js"></script>
-  <script>window.DW_VERSION = '1.9.1';</script>
+  <script>window.DW_VERSION = '1.9.2';</script>
   <script src="dw-api.js"></script>
   <title>잠실점 에비뉴엘 도면협의</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -205,7 +205,7 @@ canvas.pen-on{cursor:crosshair}
 .tbl td.c-doc{white-space:nowrap}
 .tbl td.c-act .btn.sm{padding:0 8px}
 /* DW-2: 표 화면(PC·태블릿)에서 「최근 검토일」·「오픈 예정일」 제목·날짜·D-배지를 칸 가운데로 (카드 화면은 그대로) */
-@media (min-width:1101px){.tbl th.c-last,.tbl th.c-open,.tbl td.c-last,.tbl td.c-open{text-align:center;font-variant-numeric:tabular-nums}.tbl td.c-open .dday{margin:4px 0 0 4px}}
+@media (min-width:1101px){.tbl th.c-last,.tbl th.c-open,.tbl td.c-last,.tbl td.c-open{text-align:center;font-variant-numeric:tabular-nums}.tbl td.c-open .dday{margin:0 0 0 4px}}
 @media (min-width:1101px){.tbl td.c-doc{white-space:normal!important;overflow-wrap:anywhere;max-width:128px}.tbl td.c-act{font-size:0;min-width:306px}.tbl td.c-act .btn{margin-left:4px;white-space:nowrap}.tbl .stepsrow .cf,.tbl .st{white-space:nowrap}}
 .store-link{font-weight:500;text-decoration:none;color:var(--blue);background:none;border:0;padding:0;cursor:pointer;font-size:14px;text-align:left}
 .steps{display:inline-flex;align-items:center}
@@ -1279,7 +1279,7 @@ var GuideIndexer = (function () {
   }
   function ddayHtml(s) {
     var n = daysUntil(s.openDate); if (n == null) return '';
-    var out = '<br><span class="dday ' + (n < 0 ? 'past' : n <= 7 ? 'soon' : '') + '">' + (n < 0 ? '오픈 후 ' + (-n) + '일' : n === 0 ? 'D-DAY' : 'D-' + n) + '</span>';
+    var out = ' <span class="dday ' + (n < 0 ? 'past' : n <= 7 ? 'soon' : '') + '">' + (n < 0 ? '오픈 후 ' + (-n) + '일' : n === 0 ? 'D-DAY' : 'D-' + n) + '</span>';
     var ins = daysUntil(s.fireCheckDate);
     if (ins != null && ins >= 0 && ins <= 7) out += '<span class="dday insp">합동점검 ' + (ins === 0 ? '오늘' : 'D-' + ins) + '</span>';
     return out;
@@ -1352,7 +1352,7 @@ var GuideIndexer = (function () {
           '<span class="cfpair"><button type="button" class="cf' + (confirmed ? ' on' : '') + '" aria-pressed="' + confirmed + '" data-act="confirm" data-id="' + esc(s.id) + '"' + (confirmed && s.confirmedBy ? ' title="' + esc(s.confirmedBy + ' · ' + s.confirmedAt) + '"' : '') + '>' + (confirmed ? ICON.check : '') + '컨펌완료</button>' +
           '<span class="cf chief' + (s.chiefOk === 'Y' ? ' on' : '') + '" role="img" aria-label="시설 소장 확인 ' + (s.chiefOk === 'Y' ? '완료' : '전') + '">' + (s.chiefOk === 'Y' ? ICON.check : '') + '시설 소장 확인</span></span>' +
           '</div></td>' +
-          '<td class="c-last" data-label="최근 검토일">' + yymmdd(s.lastReviewDate) + '</td>' +
+          '<td class="c-last" data-label="최근 검토일" style="white-space:nowrap">' + yymmdd(s.lastReviewDate) + '</td>' +
           '<td class="c-open" data-label="오픈 예정일" style="white-space:nowrap">' + (s.openDate ? yymmdd(s.openDate) : '—') + ddayHtml(s) + '</td>' +
           '<td class="c-act" style="text-align:right;white-space:nowrap">' +
           '<button type="button" class="btn sm" data-act="open" data-id="' + esc(s.id) + '">열기</button> ' +
@@ -1973,10 +1973,35 @@ var GuideIndexer = (function () {
     var dl = $('#dl-company'); if (dl) dl.innerHTML = companyOptions();
   }
 
+  /* 담당 확인 · 서명란 연락처 (안전관리팀·영업팀만, 결정 139): 지난 검토서의 성명 → 연락처. 성명을 넣으면 연락처 자동 */
+  function contactOptions(who) {
+    return (S.contacts || []).filter(function (c) { return c.who === who; }).map(function (c) { return '<option value="' + esc(c.name) + '">' + esc(c.tel) + '</option>'; }).join('');
+  }
+  function contactLists() { ['safety', 'sales'].forEach(function (w) { var dl = $('#dl-' + w); if (dl) dl.innerHTML = contactOptions(w); }); }
+  function refreshContacts() {
+    api('apiContacts', S.auth).then(function (list) { S.contacts = list || []; contactLists(); }).catch(function () { /* 목록 없이 직접 입력 */ });
+  }
+  function mergeContacts(r) {
+    var list = S.contacts || (S.contacts = []);
+    ['safety', 'sales'].forEach(function (w) {
+      var name = String(r[w + 'Name'] || '').trim(), tel = String(r[w + 'Tel'] || '').trim(); if (!name || !tel) return;
+      list = list.filter(function (c) { return !(c.who === w && c.name === name); }); list.push({ who: w, name: name, tel: tel });
+    });
+    S.contacts = list; contactLists();
+  }
+  function fillContact(key, name) {
+    var w = key.replace(/Name$/, ''), mine = (S.contacts || []).filter(function (c) { return c.who === w; });
+    var c = mine.filter(function (x) { return x.name === String(name).trim(); })[0], tk = w + 'Tel', cur = String(S.review[tk] || '').trim();
+    // 비었거나 다른 사람의 저장된 번호일 때만 바꿈 (직접 고친 번호는 그대로)
+    if (!c || cur === c.tel || (cur && !mine.some(function (x) { return x.tel === cur; }))) return;
+    S.review[tk] = c.tel; var i = $('#f-' + tk); if (i) i.value = c.tel;
+    markDirty(); updateProgress(); updateChanges(); toast(c.name + ' 연락처를 불러왔습니다');
+  }
+
   function openEditor(storeId, round) {
     S.view = 'edit';
     closeGuide();
-    refreshCompanies();
+    refreshCompanies(); refreshContacts();
     if (!storeId) {
       S.store = null; S.reviews = []; S.round = 1; S.review = blankReview(); S.dirty = false;
       S.clientId = 'c-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -2027,6 +2052,7 @@ var GuideIndexer = (function () {
     var attrs = ' id="f-' + key + '" class="inp' + (off ? ' na-c' : '') + '" data-field="' + key + '" type="' + (off ? 'text' : type) + '" value="' + esc(off ? NA : S.review[key]) + '"' +
       (f.type === 'num' ? ' inputmode="decimal"' : '') + (f.type === 'tel' ? ' inputmode="numeric" maxlength="13"' : '') +
       (/Company$/.test(key) ? ' list="dl-company" autocomplete="off"' : '') +
+      (/^(safety|sales)Name$/.test(key) ? ' list="dl-' + key.replace(/Name$/, '') + '" autocomplete="off"' : '') +
       (/^(safety|sales|resp)Tel$/.test(key) ? ' autocomplete="off" name="x-' + key + '"' : '') +
       (opts.ph ? ' placeholder="' + esc(opts.ph) + '"' : '') + (opts.aria ? ' aria-label="' + esc(opts.aria) + '"' : '') +
       (opts.bare ? ' data-bare="1"' : '') + (off ? ' disabled' : dis());
@@ -2203,7 +2229,7 @@ var GuideIndexer = (function () {
       '<tr><td class="k">안전관리팀</td><td class="k muted" data-label="소속" style="font-weight:400">롯데쇼핑</td><td data-label="성명">' + fInput('safetyName', { bare: true, aria: '안전관리팀 성명' }) + '</td><td data-label="연락처">' + fInput('safetyTel', { bare: true, aria: '안전관리팀 연락처' }) + '</td><td class="sigc">' + sigCell('safetySig', '안전관리팀') + '<div class="sreqw" data-sreq="safety">' + sigReqHtml('safety') + '</div></td></tr>' +
       '<tr><td class="k">영업팀</td><td class="k muted" data-label="소속" style="font-weight:400">롯데쇼핑</td><td data-label="성명">' + fInput('salesName', { bare: true, aria: '영업팀 성명' }) + '</td><td data-label="연락처">' + fInput('salesTel', { bare: true, aria: '영업팀 연락처' }) + '</td><td class="sigc">' + sigCell('salesSig', '영업팀') + '<div class="sreqw" data-sreq="sales">' + sigReqHtml('sales') + '</div></td></tr>' +
       '<tr><td class="k">인테리어 공사 책임자</td><td data-label="소속">' + fInput('respOrg', { bare: true, aria: '공사 책임자 소속', ph: '시공업체' }) + '</td><td data-label="성명">' + fInput('respName', { bare: true, aria: '공사 책임자 성명' }) + '</td><td data-label="연락처">' + fInput('respTel', { bare: true, aria: '공사 책임자 연락처' }) + '</td><td class="sigc">' + sigCell('respSig', '인테리어 공사 책임자') + '<div class="sreqw" data-sreq="resp">' + sigReqHtml('resp') + '</div></td></tr>' +
-      '</tbody></table></div></section>' +
+      '</tbody></table><datalist id="dl-safety">' + contactOptions('safety') + '</datalist><datalist id="dl-sales">' + contactOptions('sales') + '</datalist></div></section>' +
 
       // 10. 소장 확인 (소장만, 차수마다, 잠긴 검토서도 가능)
       '<section id="s9" class="card sec"><div class="sh"><span class="dot" data-dot="s9">10</span><h2>시설 소장 확인</h2></div>' +
@@ -2399,7 +2425,7 @@ var GuideIndexer = (function () {
       S.store = b.store; S.reviews = b.reviews;
       var pall = pendingAll(), pk = pendingKey(payload);
       if (pall[pk]) { delete pall[pk]; pendingPut(pall); }
-      mergeCompanies(S.review);
+      mergeCompanies(S.review); mergeContacts(S.review);
       var saved = b.reviews.filter(function (x) { return Number(x.round) === S.round; })[0];
       if (saved) {
         S.review.status = saved.status; S.review.id = saved.id;
@@ -4844,6 +4870,7 @@ var GuideIndexer = (function () {
     if (e.target.id === 'ds') { S.dash.sort = e.target.value; renderDashBody(); return; }
     onField(e);
     if (e.target.dataset && /Company$/.test(e.target.dataset.field || '')) fillCompany(e.target.dataset.field, e.target.value);
+    if (e.target.dataset && /^(safety|sales)Name$/.test(e.target.dataset.field || '')) fillContact(e.target.dataset.field, e.target.value);
   });
 
   document.addEventListener('keydown', function (e) {

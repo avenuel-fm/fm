@@ -105,6 +105,7 @@
     async apiStart(a) { const r = await rpc('dw_start', { p_a: a }); fillBoot(r.boot); return r; },
     async apiBootstrap(a) { return fillBoot(await rpc('dw_bootstrap', { p_a: a })); },
     apiCompanies: a => rpc('dw_companies', { p_a: a }),
+    apiContacts: a => rpc('dw_contacts', { p_a: a }),
     apiListStores: a => rpc('dw_list_stores', { p_a: a }),
     apiGetStore: (a, sid) => rpc('dw_get_store', { p_a: a, p_store: sid }),
     apiSaveReview: (a, review, finalize) => rpc('dw_save_review', { p_a: a, p_review: review || {}, p_finalize: !!finalize }),
