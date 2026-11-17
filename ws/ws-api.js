@@ -93,6 +93,14 @@
       return withAc(await rpc('ws_log_save_pdf', { p_token: token, p_day: day, p_files: s.files, p_d: s.d, p_ver: ver || '' }));
     },
 
+    /* ── 공조기 환기온도 (supabase/12_ahu.sql, 결정 128). 저장은 고친 칸만 ── */
+    ahuGet: (token, day) => rpc('ws_ahu_get', { p_token: token, p_day: day || '' }),
+    ahuSave: (token, day, c) => rpc('ws_ahu_save', { p_token: token, p_day: day, p_c: c || {} }),
+    async ahuSavePdf(token, day, dataUri) {
+      const pdf = pdfBlob(dataUri); if (pdf.error) return pdf;
+      return rpc('ws_ahu_save_pdf', { p_token: token, p_day: day, p_file: await upload('ahu_pdf', pdf) });
+    },
+
     /* ── 3-3 출근현황 (supabase/04_attendance.sql). 엑셀 원본은 버킷 roster_xlsx/ 에 ── */
     attGet: (token, date) => rpc('ws_att_get', { p_token: token, p_date: date || '' }),
     async attPut(token, ym, rows, fileB64) {
