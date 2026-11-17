@@ -193,7 +193,8 @@
         const c = (r || []).map(x => String(x == null ? '' : x).trim());
         if (c.some(x => /^층\s*:/.test(x))) {
           const nx = (rows[i + 1] || []).map(x => String(x == null ? '' : x).trim()).filter(String);
-          const name = clean(String(nx[0] || '').replace(/^매장명\s*:\s*/, ''), 30);
+          // 2026-11 새 양식: 「매장명 :」 칸 옆 칸에 이름. 옛 양식: 한 칸에 「매장명 : 이름」 또는 이름만
+          const name = clean(String((/^매장명\s*:?$/.test(nx[0]) ? nx[1] : nx[0]) || '').replace(/^매장명\s*:\s*/, ''), 30);
           if (!name || name === '0') { cur = null; return; }
           const k = floor + '|' + name;
           if (key[k] === undefined) { key[k] = stores.length; stores.push({ floor, name, nos: {} }); }
