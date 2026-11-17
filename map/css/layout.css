@@ -678,3 +678,23 @@
                 margin: 10mm;
             }
         }
+
+/* 타점 메뉴 (결정 136) */
+.other-tab-arrow { color: #94a3b8; font-weight: 700; }
+.other-shade { position: fixed; inset: 0; background: rgba(15, 23, 42, .35); z-index: 2999; }
+.other-shade[hidden] { display: none; }
+.other-drawer { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; max-width: 85vw; background: #fff; z-index: 3000;
+    box-shadow: 8px 0 28px rgba(15, 23, 42, .22); padding: 18px 16px; display: flex; flex-direction: column; gap: 10px;
+    transform: translateX(-105%); transition: transform .22s ease; visibility: hidden; }
+.other-drawer.open { transform: none; visibility: visible; }
+.other-drawer h3 { margin: 0 0 6px; font-size: 17px; display: flex; justify-content: space-between; align-items: center; color: var(--text-main); }
+.other-close { border: 0; background: #f1f5f9; border-radius: 8px; width: 36px; height: 36px; font-size: 16px; cursor: pointer; }
+.other-card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; display: flex; gap: 12px; align-items: center; cursor: pointer;
+    background: #fff; text-align: left; font: inherit; color: var(--text-main); min-height: 64px; }
+.other-card:hover { border-color: var(--primary); }
+.other-card.active { border-color: var(--primary); background: #eff6ff; }
+.other-card b { font-size: 15px; display: block; }
+.other-card small { color: #64748b; }
+.other-card .ic { font-size: 26px; }
+.other-note { margin: 6px 0 0; color: #94a3b8; font-size: 12px; line-height: 1.5; }
+@media (prefers-reduced-motion: reduce) { .other-drawer { transition: none; } }

@@ -144,10 +144,6 @@ function switchCurrentBuilding(buildingId, keepFloorCode = null) {
         svgCache.clear();
     }
 
-    // 헤더 타이틀 반영
-    const mainTitleEl = document.querySelector('.main-title');
-    if (mainTitleEl) mainTitleEl.textContent = currentBuilding.title;
-
     // 층 결정
     if (keepFloorCode) {
         const matchIdx = FLOORS.findIndex(f => f.code === keepFloorCode);
@@ -160,6 +156,13 @@ function switchCurrentBuilding(buildingId, keepFloorCode = null) {
     document.querySelectorAll('.mainboard-building-tab').forEach(tab => {
         tab.classList.toggle('active', tab.getAttribute('data-building') === buildingId);
     });
+    // 타점 버튼: 백화점·캐슬플라자를 보는 중이면 「타점 · 백화점」 (결정 136)
+    const otherTab = document.getElementById('btn-other-bld');
+    if (otherTab) {
+        otherTab.classList.toggle('active', buildingId !== 'avenuel');
+        document.getElementById('other-tab-label').textContent = buildingId === 'avenuel' ? '타점' : '타점 · ' + currentBuilding.name;
+    }
+    document.querySelectorAll('.other-card').forEach(c => c.classList.toggle('active', c.getAttribute('data-building') === buildingId));
 
     // 도면 로드 및 층 버튼/패널 갱신
     if (typeof renderFloorList === 'function') renderFloorList();
@@ -170,3 +173,20 @@ function switchCurrentBuilding(buildingId, keepFloorCode = null) {
         loadFloorMap(currentFloorIdx, false);
     }
 }
+
+/* 타점 메뉴 (결정 136): 왼쪽에서 밀려 나와 백화점·캐슬플라자를 고름 */
+function openOtherDrawer() {
+    document.getElementById('other-shade').hidden = false;
+    const d = document.getElementById('other-drawer');
+    d.classList.add('open'); d.setAttribute('aria-hidden', 'false');
+}
+function closeOtherDrawer() {
+    document.getElementById('other-shade').hidden = true;
+    const d = document.getElementById('other-drawer');
+    d.classList.remove('open'); d.setAttribute('aria-hidden', 'true');
+}
+function pickOtherBuilding(id) {
+    closeOtherDrawer();
+    if (id !== currentBuildingId) switchCurrentBuilding(id);
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('other-drawer')?.classList.contains('open')) closeOtherDrawer(); });

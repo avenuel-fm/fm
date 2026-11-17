@@ -3,7 +3,7 @@
    localStorage 와 같은 모양(getItem·setItem·removeItem)이라 저장소 파일은 이름만 바꿔 씀.
    업무지원 앱(fm/ws/app.html) 안에서만 열림: 그 앱의 PIN 로그인 표로 parent.WS_MAP 을 부름.
    - 칸마다 판(ver)을 기억 → 그사이 다른 사람이 고쳤으면 서버가 막고, 알린 뒤 새로 불러옴 (결정 134)
-   - 보기 전용(readOnly): 직원(파트장 미만) 또는 지난 날짜를 보는 중 → 저장하지 않음 (결정 132·134)
+   - 보기 전용(readOnly): 소장·부소장·파트장이 아닌 사람 또는 지난 날짜를 보는 중 → 저장하지 않음 (결정 132·134)
    ========================================================================== */
 
 var mapStore = (function () {
@@ -46,7 +46,7 @@ var mapStore = (function () {
         getItem: k => (k in cache ? cache[k] : null),
         setItem: (k, v) => {
             v = String(v);
-            if (readOnly()) { if (cache[k] !== v && typeof showToast === 'function') showToast(viewAt ? '지난 기록은 고칠 수 없습니다.' : '지도는 파트장 이상만 고칠 수 있습니다.', 1800); return; }
+            if (readOnly()) { if (cache[k] !== v && typeof showToast === 'function') showToast(viewAt ? '지난 기록은 고칠 수 없습니다.' : '지도는 소장·부소장·파트장만 고칠 수 있습니다.', 1800); return; }
             if (cache[k] === v) return;
             cache[k] = live[k] = v; send(k, v);
         },

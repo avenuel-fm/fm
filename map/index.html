@@ -13,19 +13,14 @@
 <body>
     <header>
         <div class="header-title-block">
-            <span class="main-title">잠실점 쇼핑맵</span>
-            <!-- 메인보드 건물 선택 탭 (백화점, 캐슬플라자 현재 비활성화 - 필요시 disabled 및 뱃지 제거 후 활성화) -->
+            <!-- 건물 선택: 에비뉴엘 · 타점(백화점·캐슬플라자) -->
             <div class="building-switch-tabs" id="mainboard-tabs">
                 <button type="button" class="mainboard-building-tab active" data-building="avenuel" onclick="switchCurrentBuilding('avenuel')">
                     <span>🏛️ 에비뉴엘</span>
                 </button>
-                <button type="button" class="mainboard-building-tab" data-building="dept" disabled title="백화점 (준비 중)">
-                    <span>🏬 백화점</span>
-                    <span style="font-size:10px; background:#e2e8f0; color:#64748b; padding:1px 5px; border-radius:4px; font-weight:500;">준비중</span>
-                </button>
-                <button type="button" class="mainboard-building-tab" data-building="castle" disabled title="캐슬플라자 (준비 중)">
-                    <span>🏰 캐슬플라자</span>
-                    <span style="font-size:10px; background:#e2e8f0; color:#64748b; padding:1px 5px; border-radius:4px; font-weight:500;">준비중</span>
+                <!-- 타점(백화점·캐슬플라자)은 한 버튼으로 묶고 왼쪽에서 밀려 나오는 메뉴로 고름 (결정 136) -->
+                <button type="button" class="mainboard-building-tab other-tab" id="btn-other-bld" onclick="openOtherDrawer()" title="백화점 · 캐슬플라자 지도">
+                    <span>🏙️ <span id="other-tab-label">타점</span></span><span class="other-tab-arrow">›</span>
                 </button>
             </div>
             <div class="floor-pill-badge" id="current-floor-indicator">
@@ -650,6 +645,14 @@
     </div>
 
         <!-- 1. 층별 설정 및 메타데이터 -->
+    <!-- 타점 메뉴 (결정 136) -->
+    <div class="other-shade" id="other-shade" hidden onclick="closeOtherDrawer()"></div>
+    <aside class="other-drawer" id="other-drawer" aria-label="타점 지도" aria-hidden="true">
+        <h3>타점 지도<button type="button" class="other-close" onclick="closeOtherDrawer()" aria-label="닫기">✕</button></h3>
+        <button type="button" class="other-card" data-building="dept" onclick="pickOtherBuilding('dept')"><span class="ic">🏬</span><span><b>백화점</b><small>B4 ~ 12F · 16개 층</small></span></button>
+        <button type="button" class="other-card" data-building="castle" onclick="pickOtherBuilding('castle')"><span class="ic">🏰</span><span><b>캐슬플라자</b><small>B1 ~ 2F · 3개 층</small></span></button>
+        <p class="other-note">고르면 그 건물 지도가 열립니다. 매장·구역·심벌·연결선·기록 모두 에비뉴엘과 같게 씁니다.</p>
+    </aside>
     <script src="js/config/floors.js"></script>
     <script src="js/storage/mapStore.js"></script>
 
