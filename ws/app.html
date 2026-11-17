@@ -11,7 +11,7 @@
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
 <script src="config.js"></script>
-<script>window.WS_VERSION = '0.13.1';</script>
+<script>window.WS_VERSION = '0.14.0';</script>
 <script src="ws-api.js"></script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -61,7 +61,7 @@ a{color:var(--blue)}
 @media screen{
 html[data-theme=dark]{filter:invert(1) hue-rotate(180deg) contrast(.78)}   /* 검정 대신 진한 회색 (사용자 11-11) */
 html[data-theme=dark] :is(img,video,canvas,.keep-color):not(.keep-color *){filter:invert(1) hue-rotate(180deg)}
-html[data-theme=dark] :is(.dialog-back,.overlay,.pinpop,.gprev.modal){background:rgba(255,255,255,.5)}
+html[data-theme=dark] :is(.dialog-back,.overlay,.pinpop,.gprev.modal,.spsheet){background:rgba(255,255,255,.5)}
 }
 </style>
 <script>
@@ -74,6 +74,43 @@ function themeLabel() { return themeDark() ? '밝게' : '어둡게'; }
 
 <style>
 .wrap{max-width:1100px;margin:0 auto;padding:12px 16px 40px}
+/* 시방서 검색 (결정 140) — PC 3칸(왼쪽 고르기 · 가운데 결과 · 오른쪽 쪽 보기), 760px 아래는 결과만 + 쪽 보기 창 */
+.sp{max-width:1400px;margin:0 auto;padding:16px}
+.spq{position:relative;display:block}.spq svg{position:absolute;left:14px;top:16px;color:var(--muted)}
+.spq .inp{height:52px;padding-left:44px;border:2px solid var(--blue);font-size:17px}
+.spf{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.spf button{white-space:nowrap;flex:none;min-height:38px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:13px;color:var(--sub);cursor:pointer}
+.spf button span{color:var(--muted);margin-left:2px}.spf button.on{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:500}.spf button.on span{color:#C9D1DB}
+.spf .old{border-style:dashed;margin-left:auto}.spf .old.on{background:var(--blue-bg);border-color:var(--blue);color:var(--blue-d)}
+.spg{display:grid;grid-template-columns:240px minmax(0,1fr) minmax(0,1.1fr);gap:16px;margin-top:14px;align-items:start}
+.spside{display:flex;flex-direction:column;gap:12px}.spside .card{padding:14px}.spside h3{font-size:13px;margin:0 0 8px;color:var(--sub)}
+.spchips{display:flex;flex-wrap:wrap;gap:6px}.spchips button{min-height:34px;padding:0 10px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:13px;cursor:pointer}
+.spside ul{padding:0;margin:0}.spside li{list-style:none;margin:0 0 8px;font-size:13px;line-height:1.5}
+.srct{display:inline-block;font-size:11px;font-weight:500;border-radius:4px;padding:2px 6px;white-space:nowrap}
+.srct.s0{background:var(--blue-bg);color:var(--blue-d)}.srct.s1{background:var(--orange-bg);color:var(--orange)}.srct.s2{background:var(--green-bg);color:var(--green)}.srct.s3{background:#F1EAFB;color:#5B3A99}.srct.sold{background:var(--line3);color:var(--muted);margin-left:4px}
+.sphit{background:var(--card);border:1px solid var(--line2);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer}
+.sphit.on{border:2px solid var(--blue);padding:11px 13px;box-shadow:0 0 0 3px var(--blue-bg)}
+.sphd{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pgb{display:inline-flex;align-items:center;gap:4px;min-height:30px;padding:0 10px;border-radius:6px;background:var(--ink);color:#fff;font-size:13px;border:0;cursor:zoom-in}.pgb svg{width:13px;height:13px}
+.mk{background:#FFE58A;color:#18202B;font-weight:500;padding:0 2px;border-radius:2px}
+.spwhere{font-size:12px;color:var(--sub);margin-top:6px}.sptxt{font-size:14px;line-height:1.7;margin-top:4px}
+.spact{display:flex;gap:6px;margin-top:8px}.spact .btn{flex:1;min-width:0;white-space:normal;line-height:1.3;padding-top:4px;padding-bottom:4px}.spact .btn.pri{flex:1.4}
+.spnote{font-size:12px;color:var(--muted);line-height:1.6}
+.sppvw{position:sticky;top:12px}
+.sppv{background:var(--card);border:1px solid var(--line2);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;height:calc(100dvh - 300px);min-height:420px}
+.sppv-h{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line3);flex-wrap:wrap}
+.spttl{font-size:14px;flex:1 1 120px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sptools{display:flex;align-items:center;gap:4px;margin-left:auto}
+.sppv-b{flex:1;overflow:auto;overscroll-behavior:contain;background:var(--line3);padding:12px}
+.sppg{position:relative;margin:0 auto;box-shadow:0 2px 8px rgba(0,0,0,.15);background:#fff}.sppg img{display:block;width:100%;height:auto}
+.hl{position:absolute;background:rgba(255,214,0,.32);outline:2px solid #E8A200;border-radius:3px;pointer-events:none}
+.sppv-t{background:var(--card);border-radius:8px;padding:20px;max-width:620px;margin:0 auto;font-size:15px;line-height:1.8}
+.sppv-f{display:flex;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid var(--line3);flex-wrap:wrap}.sppv-f .btn{margin-left:auto}
+.spsheet{position:fixed;inset:0;z-index:60;background:rgba(24,32,43,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.spsheet .sppv{width:100%;max-width:1000px;height:min(94vh,1200px)}
+@media(max-width:1000px){.spg{grid-template-columns:200px minmax(0,1fr)}.sppvw{display:none}}
+@media(max-width:760px){.sp{padding:12px}.spg{grid-template-columns:minmax(0,1fr)}.spside,.pcon{display:none}.spf{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}.spf .old{margin-left:0}
+  .spsheet{align-items:flex-end;padding:0}.spsheet .sppv{height:90vh;border-radius:16px 16px 0 0}}
 .mapframe{display:block;width:100%;height:calc(100dvh - 150px);min-height:420px;border:0}
 .top{background:#fff;border-bottom:1px solid var(--line2);position:sticky;top:0;z-index:20}
 .top-in{max-width:1100px;margin:0 auto;padding:10px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -548,7 +585,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.13.1' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.14.0' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -605,6 +642,7 @@ const ICON = {
   docs: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>',
   inspect: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>',
   map: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>',
+  search: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
   soon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
   cam: '<svg class="ui-ico" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></svg>',
   folder: '<svg class="ui-ico" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
@@ -633,7 +671,7 @@ function go(view, push) {
 }
 async function refreshFire() { try { const r = await call('bootstrap'); S.fire = r.fire; S.user = r.user; S.fireAt = Date.now(); if (S.view === 'fire') render(); } catch (e) {} }
 try { google.script.history.setChangeHandler(e => { const v = e.state && e.state.v; if (v && S.token) { S.view = v; render(); } }); } catch (e) {}
-const PARENT = { inspect: 'main', fire: 'inspect', eh: 'inspect', cs: 'inspect', csck: 'cs', qr: 'fire', status: 'fire', floor: 'status', docs: 'main', set: 'main', risk: 'set', map: 'main', tbm: 'docs', nw: 'docs', log: 'docs', ahu: 'docs', att: 'docs', attup: 'att' };
+const PARENT = { inspect: 'main', fire: 'inspect', eh: 'inspect', cs: 'inspect', csck: 'cs', qr: 'fire', status: 'fire', floor: 'status', docs: 'main', set: 'main', risk: 'set', map: 'main', spec: 'main', tbm: 'docs', nw: 'docs', log: 'docs', ahu: 'docs', att: 'docs', attup: 'att' };
 function back() { if (S.view === 'pdf') return go((S.pdf && S.pdf.from) || 'main'); if (S.view === 'csck') return csLeave(); if (S.view === 'risk' && S.rk && S.rk.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; if (S.view === 'nw' && !nwLeaveOk()) return; if (S.view === 'log' && !lgLeaveOk()) return; if (S.view === 'ahu' && !ahuLeaveOk()) return; if (S.view === 'tbm' && S.tbm && S.tbm.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; go(PARENT[S.view] || 'main'); }
 
 function topbar(sub, title) {
@@ -800,7 +838,7 @@ function renderMain() {
     t('docs', '서류작업', 'TBM' + (S.docs ? ' · 오늘 서명 ' + S.docs.signs + '명' : ' · 명일 작업 예정'), ICON.docs) +
     soon('work') +
     t('inspect', '점검', c ? '소화기 ' + (c.ok + c.bad) + ' / ' + c.total + '대' : '소화기 점검', ICON.inspect) +
-    soon('plan') +
+    t('spec', '시방서 검색', '도면협의 지침 찾기', ICON.search) +
     soon('defect') +
     t('map', '지도', '에비뉴엘 도면', ICON.map) +
     '</div>' +
@@ -814,12 +852,153 @@ function renderMap() {
 }
 window.WS_MAP = { load: () => call('mapLoad'), save: (k, v, ver) => call('mapSave', k, v, ver), base: (k, v) => call('mapBase', k, v),
   days: () => call('mapDays'), at: at => call('mapAt', at), restore: day => call('mapRestore', day) };   // 기록·되돌리기 (결정 132)
+/* ── 시방서 검색 (결정 140, WS_시방서검색.md): 도면협의 지침 검색 자료를 읽기만. 검색 방식은 fm/dw/app.html searchGuide 와 같음 ── */
+const SP_KW = ['방화구획', '방화셔터', '감지기', '방염', '분전반', '스프링클러', '제연'];
+async function openSpec() {
+  S.sp = S.sp || { q: '', filter: 'all', old: false, sel: null, zoom: 1, big: false, imgs: {}, hits: [] };
+  go('spec');
+  try {
+    if (!S.sp.boot) { const [b, x] = await Promise.all([call('specBoot'), call('specIndex')]); S.sp.boot = b; S.sp.idx = x.entries || []; }
+  } catch (e) { S.sp.err = '시방서를 불러오지 못했습니다. 다시 열어 주세요.'; }
+  if (S.view === 'spec') { render(); const i = $('spQ'); if (i && !('ontouchstart' in window)) i.focus(); }
+}
+const spG = () => (S.sp.boot && S.sp.boot.guides) || [];
+const spGuide = id => spG().find(g => g.id === id) || { id, short: '지침', title: '지침', pages: 0 };
+const spNo = id => Math.max(0, spG().findIndex(g => g.id === id)) % 4;
+const spTag = id => { const g = spGuide(id); return '<span class="srct s' + spNo(id) + '">' + h(g.short) + '</span>' + (g.archived ? '<span class="srct sold">이전 판</span>' : ''); };
+const spRef = e => { const g = spGuide(e.d); return e.lp ? '(' + (e.s || g.short) + ' ' + e.lp + ', p.' + e.p + ')' : '(' + g.short + (e.s && e.s !== g.short ? ' ' + e.s : '') + ', p.' + e.p + ')'; };
+const spWhere = e => { const g = spGuide(e.d); return (e.lp ? (e.s || g.short) + ' ' + e.lp : (e.s && e.s !== g.short ? e.s : '')) + (e.h ? ' · ' + e.h : ''); };
+const spCmp = w => String(w).toLowerCase().replace(/\s+/g, '');
+function spTerms(q) {
+  const out = [q], seen = [spCmp(q)];
+  (S.sp.boot.synonyms || []).forEach(g => { if (g.some(w => spCmp(w) === seen[0])) g.forEach(w => { if (seen.indexOf(spCmp(w)) < 0) { seen.push(spCmp(w)); out.push(w); } }); });
+  return out;
+}
+/** 글 안에서 찾기 (띄어쓰기 무시까지) → [시작, 길이] */
+function spFind(t, term) {
+  const at = t.toLowerCase().indexOf(term.toLowerCase());
+  if (at >= 0) return [at, term.length];
+  const cq = spCmp(term), map = []; let s = '';
+  for (let i = 0; i < t.length; i++) if (!/\s/.test(t[i])) { s += t[i].toLowerCase(); map.push(i); }
+  const k = cq ? s.indexOf(cq) : -1;
+  return k < 0 ? null : [map[k], map[k + cq.length - 1] + 1 - map[k]];
+}
+function spSearch() {
+  const q = S.sp.q.trim(), counts = { all: 0 }, out = [], skip = {};
+  spG().forEach(g => { counts[g.id] = 0; if (g.archived && !S.sp.old) skip[g.id] = true; });
+  S.sp.terms = q ? spTerms(q) : [];
+  if (!q) return { hits: out, counts };
+  for (const e of S.sp.idx || []) {
+    if (skip[e.d]) continue;
+    const t = String(e.t || ''); let f = null;
+    for (const w of S.sp.terms) { f = spFind(t, w); if (f) break; }
+    if (!f) { const meta = spCmp((e.h || '') + ' ' + (e.l || '')); if (!S.sp.terms.some(w => meta.indexOf(spCmp(w)) >= 0)) continue; }
+    counts.all++; counts[e.d] = (counts[e.d] || 0) + 1;
+    if ((S.sp.filter === 'all' || S.sp.filter === e.d) && out.length < 80) out.push({ e, at: f ? f[0] : -1, len: f ? f[1] : 0 });
+  }
+  return { hits: out, counts };
+}
+function spSnip(x) {
+  const t = String(x.e.t || '');
+  if (x.at < 0) return h(t.length > 150 ? t.slice(0, 150) + '…' : t);
+  const s = Math.max(0, x.at - 60), en = Math.min(t.length, x.at + x.len + 90);
+  return (s > 0 ? '…' : '') + h(t.slice(s, x.at)) + '<span class="mk">' + h(t.slice(x.at, x.at + x.len)) + '</span>' + h(t.slice(x.at + x.len, en)) + (en < t.length ? '…' : '');
+}
+/** 노란 상자: 검색어가 걸친 글자 위치 상자 (fm/dw hlBoxes) */
+function spBoxes(x) {
+  const b = x.e.b || [];
+  if (!b.length || x.at < 0) return b;
+  const t = String(x.e.t), cAt = t.slice(0, x.at).replace(/\s+/g, '').length, cLen = Math.max(1, t.slice(x.at, x.at + x.len).replace(/\s+/g, '').length);
+  const out = b.filter((box, i) => box[4] < cAt + cLen && (i + 1 < b.length ? b[i + 1][4] : 1e9) > cAt);
+  return out.length ? out : [b[0]];
+}
+function renderSpec() {
+  const top = topbar('업무지원 ›', '시방서 검색');
+  if (S.sp.err) return top + '<div class="wrap"><div class="banner b-red">' + h(S.sp.err) + '</div></div>';
+  if (!S.sp.boot) return top + '<div class="wrap"><div class="banner b-gray">시방서를 불러오는 중…</div></div>';
+  const cur = spG().filter(g => !g.archived);
+  return top + '<div class="sp">' +
+    '<label class="spq">' + ICON.search + '<input id="spQ" class="inp" aria-label="검색어" placeholder="예: 방화구획, 감지기, 방염" autocomplete="off" value="' + h(S.sp.q) + '" oninput="spQ(this.value)" onkeydown="if(event.key===\'Escape\')spQ(this.value=\'\')"></label>' +
+    '<div class="spf" id="spF" role="tablist" aria-label="지침 고르기"></div>' +
+    '<div class="spg"><aside class="spside">' +
+    '<div class="card"><h3>자주 찾는 말</h3><div class="spchips">' + SP_KW.map(w => '<button type="button" onclick="spQ(\'' + w + '\',1)">' + w + '</button>').join('') + '</div></div>' +
+    '<div class="card"><h3>검색하는 지침 (' + cur.length + ')</h3>' + (cur.length ? '<ul>' + cur.map(g => '<li>' + spTag(g.id) + ' ' + h(g.title) + (g.pages ? ' · ' + g.pages + '쪽' : '') + '</li>').join('') + '</ul>' : '<div class="spnote">아직 없습니다.</div>') +
+    '<div class="spnote" style="margin-top:6px">지침 추가·개정은 도면협의 앱 <b>지침 관리</b>에서 합니다. 여기서는 읽기만 합니다.</div></div>' +
+    '<div class="spnote" id="spSyn"></div></aside>' +
+    '<section id="spRes" aria-live="polite"></section><div id="spPv" class="sppvw"></div></div></div>' +
+    '<div id="spBig"></div>';
+}
+function spQ(v, setBox) { S.sp.q = v; S.sp.sel = null; if (setBox) $('spQ').value = v; spDraw(); }
+function spDraw() {
+  const r = spSearch(), hits = S.sp.hits = r.hits, f = $('spF'), box = $('spRes');
+  if (!box) return;
+  const hasOld = spG().some(g => g.archived);
+  f.innerHTML = [{ id: 'all', short: '전체' }].concat(spG().filter(g => S.sp.old || !g.archived)).map(g => '<button type="button" role="tab" aria-selected="' + (S.sp.filter === g.id) + '" class="' + (S.sp.filter === g.id ? 'on' : '') + '" onclick="spFilter(\'' + h(g.id) + '\')">' + h(g.short) + (g.archived ? ' (이전 판)' : '') + ' <span>' + (r.counts[g.id] || 0) + '</span></button>').join('') +
+    (hasOld ? '<button type="button" class="old' + (S.sp.old ? ' on' : '') + '" aria-pressed="' + S.sp.old + '" onclick="spOld()">' + (S.sp.old ? '✓ ' : '') + '이전 판 포함</button>' : '');
+  $('spSyn').textContent = S.sp.terms.length > 1 ? '비슷한 말도 찾음: ' + S.sp.terms.slice(1).join(', ') : '';
+  if (S.sp.sel == null && hits.length) S.sp.sel = 0;
+  if (!spG().length) box.innerHTML = '<div class="banner b-gray">검색할 지침이 아직 없습니다. 도면협의 앱의 <b>지침 관리</b>에서 지침 PDF로 색인을 만들어 주세요.</div>';
+  else if (!S.sp.q.trim()) box.innerHTML = '<div class="spnote">검색어를 넣거나 자주 찾는 말을 누르세요.</div>';
+  else if (!hits.length) box.innerHTML = '<div class="banner b-gray">「' + h(S.sp.q) + '」에 해당하는 내용이 없습니다.</div>';
+  else box.innerHTML = '<div class="spnote" style="margin-bottom:8px">결과 <b style="color:var(--ink)">' + hits.length + (hits.length >= 80 ? '+' : '') + '건</b><span class="pcon"> · 결과를 누르면 오른쪽에 그 쪽이 보입니다</span></div>' +
+    hits.map((x, i) => '<div class="sphit' + (i === S.sp.sel ? ' on' : '') + '" onclick="spSel(' + i + ')"><div class="sphd"><button type="button" class="pgb" onclick="event.stopPropagation();spSel(' + i + ',1)" aria-label="' + x.e.p + '쪽 크게 보기">' + ICON.search + 'p.' + x.e.p + '</button>' + spTag(x.e.d) + '</div>' +
+      (spWhere(x.e) ? '<div class="spwhere">' + h(spWhere(x.e)) + '</div>' : '') + '<div class="sptxt">' + spSnip(x) + '</div>' +
+      '<div class="spact"><button type="button" class="btn sm" onclick="event.stopPropagation();spSel(' + i + ',1)">쪽 크게 보기</button><button type="button" class="btn sm pri" onclick="event.stopPropagation();spCopy(' + i + ')">참조 복사 ' + h(spRef(x.e)) + '</button></div></div>').join('');
+  spPv();
+}
+function spFilter(id) { S.sp.filter = id; S.sp.sel = null; spDraw(); }
+function spOld() { S.sp.old = !S.sp.old; if (!S.sp.old && spGuide(S.sp.filter).archived) S.sp.filter = 'all'; S.sp.sel = null; spDraw(); }
+function spSel(i, big) {
+  S.sp.sel = i; S.sp.big = !!big;
+  document.querySelectorAll('#spRes .sphit').forEach((el, k) => el.classList.toggle('on', k === i));
+  spPv();
+}
+function spZoom(d) { S.sp.zoom = Math.max(0.75, Math.min(2.5, S.sp.zoom + d)); spPv(); }
+function spBigClose() { S.sp.big = false; spPv(); }
+function spCopy(i) {
+  const x = S.sp.hits[i]; if (!x) return;
+  const ref = spRef(x.e);
+  (navigator.clipboard ? navigator.clipboard.writeText(ref) : Promise.reject()).then(() => toast('복사했습니다 ' + ref), () => toast('복사하지 못했습니다. 길게 눌러 직접 고르세요: ' + ref));
+}
+function spImg(d, p) {
+  const k = d + ':' + p;
+  if (!S.sp.imgs[k]) S.sp.imgs[k] = spGuide(d).images === false ? Promise.resolve({ img: '', pdf: '' }) : call('specPage', d, p).catch(() => { delete S.sp.imgs[k]; return { img: '', pdf: '' }; });
+  return S.sp.imgs[k];
+}
+/** 쪽 보기: PC는 오른쪽 칸(늘 떠 있음), 「쪽 크게 보기」·휴대폰은 화면 위 창 */
+function spPv() {
+  const side = $('spPv'), big = $('spBig'), x = S.sp.hits[S.sp.sel];
+  if (!side || !big) return;
+  side.innerHTML = x ? spPvHtml(x, false) : '';
+  big.innerHTML = x && S.sp.big ? '<div class="spsheet" onclick="if(event.target===this)spBigClose()" role="dialog" aria-modal="true" aria-label="쪽 크게 보기">' + spPvHtml(x, true) + '</div>' : '';
+  const sel = S.sp.sel;
+  if (!x) return;
+  spImg(x.e.d, x.e.p).then(r => {
+    if (S.sp.sel !== sel || S.sp.hits[sel] !== x) return;
+    document.querySelectorAll('.sppv').forEach(pv => {
+      const b = pv.querySelector('.sppv-b'), o = pv.querySelector('.spo');
+      if (o) { o.style.display = r.pdf ? '' : 'none'; o.onclick = () => window.open(r.pdf, '_blank'); }
+      if (!r.img) { b.innerHTML = '<div class="sppv-t"><div class="spnote" style="margin-bottom:10px">이 쪽의 그림이 없습니다. 도면협의 앱 <b>지침 관리</b>에서 이 지침을 다시 만들면 생깁니다.</div>' + spSnip(x) + '</div>'; return; }
+      b.innerHTML = '<div class="sppg" style="width:' + Math.round(S.sp.zoom * 100) + '%;max-width:' + Math.round((spGuide(x.e.d).landscape ? 900 : 620) * S.sp.zoom) + 'px"><img alt="' + h(spGuide(x.e.d).short + ' ' + x.e.p + '쪽') + '" src="' + h(r.img) + '">' +
+        spBoxes(x).map(z => '<span class="hl" style="left:' + ((z[0] - 0.004) * 100) + '%;top:' + ((z[1] - 0.004) * 100) + '%;width:' + ((z[2] - z[0] + 0.008) * 100) + '%;height:' + ((z[3] - z[1] + 0.008) * 100) + '%"></span>').join('') + '</div>';
+      const img = b.querySelector('img'), place = () => { const f = b.querySelector('.hl'); if (f) b.scrollTop = Math.max(0, f.offsetTop - b.clientHeight * 0.3); };
+      if (img.complete) place(); else img.onload = place;
+    });
+  });
+}
+function spPvHtml(x, big) {
+  return '<div class="sppv' + (big ? ' big' : '') + '"><div class="sppv-h">' + spTag(x.e.d) + '<b class="spttl">' + h(spWhere(x.e) || spGuide(x.e.d).title) + '</b><span class="spnote pcon">PDF ' + x.e.p + '쪽</span>' +
+    '<span class="sptools"><button type="button" class="btn sm" onclick="spZoom(-0.25)" aria-label="작게">−</button><span class="spnote">' + Math.round(S.sp.zoom * 100) + '%</span><button type="button" class="btn sm" onclick="spZoom(0.25)" aria-label="크게">+</button>' +
+    '<button type="button" class="btn sm spo" style="display:none">PDF 원본</button>' + (big ? '<button type="button" class="btn sm" onclick="spBigClose()" aria-label="닫기">' + ICON.x + '</button>' : '') + '</span></div>' +
+    '<div class="sppv-b"><div class="spnote" style="padding:40px;text-align:center">쪽 그림을 불러오는 중…</div></div>' +
+    '<div class="sppv-f"><span class="spnote">노란 표시 = 검색어가 있는 줄</span><button type="button" class="btn sm pri" onclick="spCopy(' + S.sp.sel + ')">참조 복사 ' + h(spRef(x.e)) + '</button></div></div>';
+}
 // PC 마우스 오른쪽 버튼 막기 (휴대폰 길게 누르기는 그대로)
 if (window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches) document.addEventListener('contextmenu', e => e.preventDefault());
-function tile(k) { if (k === 'inspect') go('inspect'); else if (k === 'docs') go('docs'); else if (k === 'map') { if (window.WS_API) go('map'); else toast('지도는 바로가기 앱(Supabase)에서만 열립니다'); } else toast('디자인 시안만 있는 메뉴입니다 (준비 중)'); }
+function tile(k) { if (k === 'inspect') go('inspect'); else if (k === 'docs') go('docs'); else if (k === 'spec') { if (window.WS_API) openSpec(); else toast('시방서 검색은 바로가기 앱(Supabase)에서만 열립니다'); } else if (k === 'map') { if (window.WS_API) go('map'); else toast('지도는 바로가기 앱(Supabase)에서만 열립니다'); } else toast('디자인 시안만 있는 메뉴입니다 (준비 중)'); }
 
 /* ── 환경설정 (소장만, 결정 102): 알림 시간, 직원 추가·편집·삭제·PIN ── */
-const ROLES = ['소장', '부소장', '파트장', '직원', '관리자'];
+const ROLES = ['소장', '부소장', '파트장', '직원', '관리자', '옵저버'];   // 옵저버: 파트 「관리」 고정 (결정 138)
 function isBoss() { return !!S.user && S.user.role === '소장'; }
 async function openSet() {
   S.set = null; go('set');
@@ -926,14 +1105,15 @@ function staffDlg(id) {
   const parts = Array.from(new Set(S.set.staff.map(s => s.part).concat(['전방파트', '기건파트'])));
   dialog('<h2 class="ehdh">' + (x ? '직원 편집' : '직원 추가') + '</h2>' +
     '<label class="ehf">이름<input id="sfN" class="inp" maxlength="20" value="' + h(x ? x.name : '') + '"></label>' +
-    '<label class="ehf">파트<input id="sfP" class="inp" maxlength="20" list="sfPL" value="' + h(x ? x.part : '전방파트') + '"><datalist id="sfPL">' + parts.map(p => '<option value="' + h(p) + '">').join('') + '</datalist></label>' +
-    '<label class="ehf">역할<select id="sfR" class="inp"' + (me ? ' disabled' : '') + '>' + ROLES.map(o => '<option' + ((x ? x.role : '직원') === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></label>' +
+    '<label class="ehf">파트<input id="sfP" class="inp" maxlength="20" list="sfPL" value="' + h(x ? x.part : '전방파트') + '"' + (x && x.role === '옵저버' ? ' disabled' : '') + '><datalist id="sfPL">' + parts.map(p => '<option value="' + h(p) + '">').join('') + '</datalist></label>' +
+    '<label class="ehf">역할<select id="sfR" class="inp" onchange="sfRole(this.value)"' + (me ? ' disabled' : '') + '>' + ROLES.map(o => '<option' + ((x ? x.role : '직원') === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></label>' +
     (me ? '<small style="color:var(--muted)">내 역할은 여기서 바꿀 수 없습니다.</small>' : '') +
     (x ? '' : '<label class="ehf">PIN 4자리<input id="sfX" class="inp" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="휴대폰 뒷 4자리"></label>') +
     '<div id="sfM" role="alert" class="ehmsg"></div>' +
     '<div class="ehda"><button class="btn big" style="flex:1" onclick="closeDialog()">취소</button><button id="sfB" class="btn big pri" style="flex:2" onclick="staffSaveGo(\'' + (id || '') + '\')">저장</button></div>');
   setTimeout(() => { const n = $('sfN'); if (n) n.focus(); }, 50);
 }
+function sfRole(v) { const p = $('sfP'); if (v === '옵저버') p.value = '관리'; p.disabled = v === '옵저버'; }   // 옵저버는 파트 「관리」 고정 (결정 138)
 async function staffSaveGo(id) {
   const d = { staff_id: id, name: $('sfN').value, part: $('sfP').value, role: $('sfR').value, pin: id ? '' : $('sfX').value };
   $('sfB').disabled = true;
@@ -2856,6 +3036,7 @@ function render() {
   else if (S.view === 'log') html = renderLog();
   else if (S.view === 'ahu') html = renderAhu();
   else if (S.view === 'map') html = renderMap();
+  else if (S.view === 'spec') html = S.sp ? renderSpec() : renderMain();
   else if (S.view === 'att') html = renderAtt();
   else if (S.view === 'attup') html = renderAttUp();
   else if (S.view === 'inspect') html = renderInspect();
@@ -2874,6 +3055,7 @@ function render() {
     html = h2 !== html ? h2 : html + '<div class="wrap backbar"><button class="btn big" onclick="back()">' + ICON.back + '뒤로</button></div>';
   }
   $('app').innerHTML = html;
+  if (S.view === 'spec' && S.sp && S.sp.boot) spDraw();
   if (S.view === 'qr') drawQrs();
   if (S.view === 'sign') mountSign();
   if (S.view === 'pdf') pvDraw();

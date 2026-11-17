@@ -56,7 +56,7 @@ body.map-ro #btn-edit-menu,body.map-ro #btn-undo,body.map-ro #btn-status-edit,bo
         document.body.classList.toggle('map-ro', ro);
         EDIT_BTNS.forEach(id => { const b = document.getElementById(id); if (!b) return;   // 보기 전용이면 편집 버튼 꺼 둠 (결정 136)
             b.disabled = ro;
-            if (ro) { if (!b.dataset.t) b.dataset.t = b.title || ''; b.title = mapStore.viewAt ? '지난 기록은 고칠 수 없습니다' : '지도는 소장·부소장·파트장만 고칠 수 있습니다'; }
+            if (ro) { if (!b.dataset.t) b.dataset.t = b.title || ''; b.title = mapStore.viewAt ? '지난 기록은 고칠 수 없습니다' : '지도는 소장·부소장·파트장·옵저버만 고칠 수 있습니다'; }
             else if (b.dataset.t !== undefined) { b.title = b.dataset.t; delete b.dataset.t; } });
         document.body.classList.toggle('hist-view', !!mapStore.viewAt);
         const btn = document.getElementById('btn-hist');
@@ -149,7 +149,7 @@ body.map-ro #btn-edit-menu,body.map-ro #btn-undo,body.map-ro #btn-status-edit,bo
         const w = document.createElement('div'); w.className = 'dropdown-wrapper hist-wrap';
         w.innerHTML = '<button class="btn" id="btn-hist" type="button" title="날짜별 도면 기록 보기"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>기록</span></button>';
         acts.insertBefore(w, acts.firstChild);
-        if (!mapStore.canEdit) { const c = document.createElement('span'); c.className = 'ro-chip'; c.textContent = '보기 전용'; c.title = '지도는 소장·부소장·파트장만 고칠 수 있습니다'; acts.insertBefore(c, w); }
+        if (!mapStore.canEdit) { const c = document.createElement('span'); c.className = 'ro-chip'; c.textContent = '보기 전용'; c.title = '지도는 소장·부소장·파트장·옵저버만 고칠 수 있습니다'; acts.insertBefore(c, w); }
         w.querySelector('#btn-hist').onclick = e => { e.stopPropagation(); openPop(); };
         document.addEventListener('click', e => { if (pop && !e.target.closest('.hist-wrap')) closePop(); });
         // 보기 전용일 때 고치는 단축키 막기 (Ctrl+Z · Delete · Backspace)

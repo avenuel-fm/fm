@@ -46,7 +46,7 @@ var mapStore = (function () {
         getItem: k => (k in cache ? cache[k] : null),
         setItem: (k, v) => {
             v = String(v);
-            if (readOnly()) { if (cache[k] !== v && typeof showToast === 'function') showToast(viewAt ? '지난 기록은 고칠 수 없습니다.' : '지도는 소장·부소장·파트장만 고칠 수 있습니다.', 1800); return; }
+            if (readOnly()) { if (cache[k] !== v && typeof showToast === 'function') showToast(viewAt ? '지난 기록은 고칠 수 없습니다.' : '지도는 소장·부소장·파트장·옵저버만 고칠 수 있습니다.', 1800); return; }
             if (cache[k] === v) return;
             cache[k] = live[k] = v; send(k, v);
         },
