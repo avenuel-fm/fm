@@ -72,6 +72,9 @@
     specBoot: (token) => rpc('ws_spec_boot', { p_token: token }),   // 시방서 검색 (결정 140, 14_spec.sql)
     specIndex: (token) => rpc('ws_spec_index', { p_token: token }),
     specPage: (token, d, p) => rpc('ws_spec_page', { p_token: token, p_guide: String(d || ''), p_page: Number(p) || 0 }),
+    specPubBoot: () => rpc('ws_spec_pub_boot', {}),   // 외부용 단독 페이지 spec.html — 로그인 없음 (결정 142)
+    specPubIndex: () => rpc('ws_spec_pub_index', {}),
+    specPubPage: (token, d, p) => rpc('ws_spec_pub_page', { p_guide: String(d || ''), p_page: Number(p) || 0 }),
     mapLoad: (token) => rpc('ws_map_load', { p_token: token }),
     mapSave: (token, k, v, ver) => rpc('ws_map_save', { p_token: token, p_k: k, p_v: v == null ? null : String(v), p_ver: ver || '' }),
     mapBase: (token, k, v) => rpc('ws_map_base', { p_token: token, p_k: k, p_v: v }),   // 업체 바탕 도면 보관 (결정 132)
