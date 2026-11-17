@@ -12,7 +12,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
   <script src="../apps.js"></script>
   <script src="config.js"></script>
-  <script>window.DW_VERSION = '1.9.0';</script>
+  <script>window.DW_VERSION = '1.9.1';</script>
   <script src="dw-api.js"></script>
   <title>잠실점 에비뉴엘 도면협의</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -150,9 +150,6 @@ a{color:var(--blue)}
 canvas.pen-on{cursor:crosshair}
 .sp-padwrap .sp-pad{margin-top:0}
 /* 서명 안내 영상(PC 전용, DW-4): 서명칸 위에 덮음 · 클릭은 아래 서명칸으로 통과 · 좌우 여백은 영상 바탕색 */
-.gv{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;background:#444545;border-radius:inherit;overflow:hidden;pointer-events:none}
-.sp-padwrap .gv{border-radius:12px}
-.gv video,.gv img{display:block;height:100%;width:auto;max-width:100%;object-fit:contain}
 .sp-pad{display:block;width:100%;height:200px;margin-top:10px;border:1.5px dashed #9AA4B2;border-radius:12px;background:#fff;touch-action:none;cursor:crosshair}
 .sp-btns{display:flex;gap:8px;margin-top:12px}.sp-btns .btn{flex:1;min-height:48px}.sp-btns .btn.pri{flex:2}
 .sp-err{color:#B4410F;margin-top:8px;min-height:18px}
@@ -1835,8 +1832,7 @@ var GuideIndexer = (function () {
         '<div class="small sp-err" id="spErr" role="alert"></div></div>' +
         '<div class="small muted sp-foot">서명은 휴대폰으로 진행 가능합니다 · 링크는 ' + esc(info.until) + '까지</div></div>';
       var c = $('#spPad'), ctx = c.getContext('2d');
-      var gd = guideAttach($('#spWrap'), info.guide);
-      var pen = sigPen(c, ctx, gd);
+      var pen = sigPen(c, ctx);
       function fit() {
         var r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
         var keep = pen.drawn ? c.toDataURL() : null;
@@ -1846,7 +1842,7 @@ var GuideIndexer = (function () {
         if (keep) { var im = new Image(); im.onload = function () { ctx.drawImage(im, 0, 0, r.width, r.height); }; im.src = keep; }
       }
       fit(); window.addEventListener('resize', fit);
-      $('#spClear').onclick = function () { ctx.clearRect(0, 0, c.width, c.height); pen.reset(); gd.show(); };
+      $('#spClear').onclick = function () { ctx.clearRect(0, 0, c.width, c.height); pen.reset(); };
       $('#spTel').addEventListener('input', function (e) {
         var d = e.target.value.replace(/\D/g, '').slice(0, 11);
         e.target.value = d.length < 4 ? d : d.length < 8 ? d.slice(0, 3) + '-' + d.slice(3) : d.slice(0, 3) + '-' + d.slice(3, 7) + '-' + d.slice(7);
@@ -2596,40 +2592,6 @@ var GuideIndexer = (function () {
     });
   }
 
-  /* ───────── 서명 안내 영상 (1.8.5, DW-4) ─────────
-   * PC(마우스 있고 가로 1024px 이상)에서만 서명칸 위에 반복 영상을 덮어 보여주고,
-   * 서명칸을 누르는 순간 영상이 사라지며 누른 자리부터 획이 시작됩니다. 「지우기/다시 쓰기」 때 다시 나옵니다.
-   * 영상 파일이 없거나 못 읽으면 영상 없이 서명칸만 (mp4 → 안 되면 gif → 안 되면 없음). */
-  function guideIsPc() {
-    try { return !!(window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine) and (min-width:1024px)').matches); } catch (x) { return false; }
-  }
-  function guideAttach(host, guide) {
-    var api = { show: function () {}, hide: function () {} };
-    if (!host || !guide || !guide.mp4 || !guideIsPc()) return api;
-    var gv = document.createElement('div'); gv.className = 'gv'; gv.setAttribute('aria-hidden', 'true');
-    var v = document.createElement('video');
-    v.muted = true; v.defaultMuted = true; v.loop = true; v.autoplay = true; v.playsInline = true; v.preload = 'auto';
-    v.setAttribute('muted', ''); v.setAttribute('loop', ''); v.setAttribute('autoplay', ''); v.setAttribute('playsinline', '');
-    var swapped = false;
-    function gone() { if (gv.parentNode) gv.parentNode.removeChild(gv); api.show = api.hide = function () {}; }
-    function toGif() {
-      if (swapped) { gone(); return; }
-      swapped = true;
-      if (!guide.gif) { gone(); return; }
-      var im = new Image(); im.alt = ''; im.onerror = gone;
-      im.src = guide.gif;
-      if (v.parentNode) v.parentNode.replaceChild(im, v);
-    }
-    v.addEventListener('error', toGif);
-    v.src = guide.mp4;
-    gv.appendChild(v);
-    host.appendChild(gv);
-    api.hide = function () { gv.style.display = 'none'; try { v.pause(); } catch (x) { /* noop */ } };
-    api.show = function () { gv.style.display = ''; try { v.currentTime = 0; var p = v.play(); if (p && p.catch) p.catch(function () { /* noop */ }); } catch (x) { /* noop */ } };
-    var p0 = v.play && v.play(); if (p0 && p0.catch) p0.catch(function () { /* 자동 재생이 막히면 첫 장면만 보임 */ });
-    return api;
-  }
-
   /* ───────── 서명 패드 ───────── */
   /** back: 서명창을 닫은 뒤 돌아갈 화면 (안전관리 동의서 팝업에서 열 때) */
   function openSig(key, who, back) {
@@ -2649,8 +2611,7 @@ var GuideIndexer = (function () {
       '<button type="button" class="btn pri" style="flex:2;min-height:54px;font-size:16px;font-weight:600" id="sigOk">서명 완료</button>' +
       '</div></section>';
     var c = $('#sigc'), ctx = c.getContext('2d');
-    var gd = guideAttach($('.sigpad', layer), S.boot && S.boot.guide);
-    var pen = sigPen(c, ctx, gd);
+    var pen = sigPen(c, ctx);
     var dpr = Math.max(1, window.devicePixelRatio || 1);
     function size() {
       var r = c.getBoundingClientRect();
@@ -2659,7 +2620,7 @@ var GuideIndexer = (function () {
       ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#18202B'; ctx.lineWidth = 3;
     }
     size();
-    $('#sigClear').onclick = function () { ctx.clearRect(0, 0, c.width, c.height); pen.reset(); gd.show(); };
+    $('#sigClear').onclick = function () { ctx.clearRect(0, 0, c.width, c.height); pen.reset(); };
     $('#sigCancel').onclick = closeModal;
     $('.overlay', layer).onclick = closeModal;
     if (has) $('#sigDel').onclick = function () {
@@ -2775,10 +2736,11 @@ var GuideIndexer = (function () {
   }
 
   /* 서명 입력 (DW-5): 누른 채 끌기(손가락·펜·마우스)는 그대로.
-   * PC 마우스·터치패드는 한 번 클릭(안내 영상 위 클릭 포함)하면 커서를 따라 그리고, 다시 클릭하면 펜을 듦.
-   * 서명칸 밖으로 나가도 펜을 듦. */
-  function sigPen(c, ctx, gd) {
-    var st = { drawn: false }, down = false, hover = false, last = null, start = null;
+   * PC 마우스·터치패드는 한 번 클릭하면 커서를 따라 그리고, 다시 클릭하면 펜을 듦. 서명칸 밖으로 나가도 펜을 듦.
+   * 손바닥 무시: 이 서명칸에 애플펜슬(펜)이 한 번 닿으면 그때부터 손가락·손바닥 터치는 무시하고 펜만 그림.
+   * 펜보다 먼저 닿은 손바닥 자국은 펜이 처음 닿을 때 지움. 서명칸(canvas) 이벤트만 거르므로 다른 화면은 그대로 */
+  function sigPen(c, ctx) {
+    var st = { drawn: false }, down = false, hover = false, last = null, start = null, pid = null, penOnly = false, touchDrew = false;
     function pt(e) { var r = c.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
     function line(p, ev) {
       if (!last) { last = p; return; }
@@ -2787,28 +2749,37 @@ var GuideIndexer = (function () {
       last = p; st.drawn = true;
     }
     c.addEventListener('pointerdown', function (e) {
-      e.preventDefault(); gd.hide();
+      e.preventDefault();
+      if (e.pointerType === 'pen' && !penOnly) {
+        penOnly = true;
+        if (touchDrew) { ctx.clearRect(0, 0, c.width, c.height); st.drawn = false; }   // 펜 전에 닿은 손바닥 자국
+        if (down) down = false;   // 그리던 손바닥 획을 끊음
+      }
+      if (e.pointerType === 'touch' && penOnly) return;   // 손바닥·손가락 무시
+      if (down) return;   // 다른 손가락이 이미 그리는 중
       if (hover) { hover = false; c.classList.remove('pen-on'); return; } // 따라 그리는 중 클릭 = 펜 들기
-      down = true; last = start = pt(e);
+      if (e.pointerType === 'touch') touchDrew = true;
+      down = true; pid = e.pointerId; last = start = pt(e);
       try { c.setPointerCapture(e.pointerId); } catch (x) { /* noop */ }
       ctx.beginPath(); ctx.arc(last.x, last.y, 1.5, 0, Math.PI * 2); ctx.fillStyle = '#18202B'; ctx.fill(); st.drawn = true;
     });
     c.addEventListener('pointermove', function (e) {
       if (!down && !hover) return;
+      if (down && e.pointerId !== pid) return;   // 그리는 손가락·펜이 아닌 터치 (손바닥)
       e.preventDefault();
       var evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [];
       if (!evs.length) evs = [e];
       evs.forEach(function (ev) { line(pt(ev), ev); });
     });
     c.addEventListener('pointerup', function (e) {
-      if (!down) return;
+      if (!down || e.pointerId !== pid) return;
       down = false;
       var p = pt(e);
       // 마우스로 제자리 클릭(5px 안) = 커서 따라 그리기 시작
       if (e.pointerType === 'mouse' && Math.abs(p.x - start.x) < 5 && Math.abs(p.y - start.y) < 5) { hover = true; last = p; c.classList.add('pen-on'); }
     });
-    ['pointercancel', 'pointerleave'].forEach(function (t) { c.addEventListener(t, function () { down = hover = false; c.classList.remove('pen-on'); }); });
-    st.reset = function () { st.drawn = down = hover = false; last = null; c.classList.remove('pen-on'); };
+    ['pointercancel', 'pointerleave'].forEach(function (t) { c.addEventListener(t, function (e) { if (down && e.pointerId !== pid) return; down = hover = false; c.classList.remove('pen-on'); }); });
+    st.reset = function () { st.drawn = down = hover = touchDrew = false; last = null; c.classList.remove('pen-on'); };   // 펜만 인식은 창을 닫을 때까지 유지
     return st;
   }
 

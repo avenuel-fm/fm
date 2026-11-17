@@ -89,7 +89,6 @@
     b.version = window.DW_VERSION || b.version;
     if (!b.publicUrl) b.publicUrl = HERE();   // QR(?store=)·서명 링크 기준 = 바로가기 페이지 (…/fm/dw/)
     b.appUrl = b.appUrl || HERE();
-    if (!b.guide || !b.guide.mp4) b.guide = { mp4: HERE() + 'sign_guide.mp4', gif: HERE() + 'sign_guide.gif' };
     b.sb = true;
     return b;
   }
@@ -139,11 +138,7 @@
     },
 
     /* 원격 서명 (링크의 표만으로, 로그인 없이도 됨) */
-    async apiSignInfo(token) {
-      const r = await rpc('dw_sign_info', { p_token: String(token || '') });
-      if (!r.guide || !r.guide.mp4) r.guide = { mp4: HERE() + 'sign_guide.mp4', gif: HERE() + 'sign_guide.gif' };
-      return r;
-    },
+    apiSignInfo: token => rpc('dw_sign_info', { p_token: String(token || '') }),
     apiSignSubmit: (token, data) => rpc('dw_sign_submit', { p_token: String(token || ''), p_data: data || {} }),
 
     /* 메일 — 구글 웹앱(Gmail)이 보내고 DB 에 기록 */
