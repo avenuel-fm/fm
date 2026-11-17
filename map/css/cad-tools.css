@@ -1,0 +1,701 @@
+/* ==========================================================================
+   cad-tools.css - 다각형 드로잉 배너, 외벽 보호, 바닥 그리드, 축척 캘리브레이션, 자유 그리기
+   ========================================================================== */
+        /* 다각형 그리기 안내 배너 */
+        .drawing-guide-banner {
+            position: absolute;
+            bottom: 0;
+            top: auto;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-medium);
+            border-bottom: none;
+            border-left: 4px solid var(--primary);
+            border-radius: 14px 14px 0 0;
+            box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.15);
+            padding: 10px 24px;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            white-space: nowrap;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            z-index: 50;
+            font-size: 13px;
+            color: var(--text-main);
+            user-select: none;
+            width: max-content;
+            max-width: 98vw;
+            box-sizing: border-box;
+        }
+        .guide-content {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .guide-content svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--primary);
+            fill: none;
+            stroke-width: 2;
+        }
+        .btn-guide-close {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-guide-close:hover {
+            background: #e2e8f0;
+            color: var(--text-main);
+        }
+
+        /* 구역(방화구역/제연구획/외벽) 드로잉 배너 */
+        .zone-guide-banner {
+            border-left-color: #dc2626 !important;
+            padding: 10px 24px;
+            gap: 16px;
+        }
+        .zone-banner-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: nowrap;
+            white-space: nowrap;
+        }
+        .zone-toggle-group {
+            display: inline-flex;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 2px;
+            gap: 2px;
+        }
+        .zone-toggle-btn {
+            background: transparent;
+            border: none;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .zone-toggle-btn:hover {
+            color: #0f172a;
+        }
+        .zone-toggle-btn.active {
+            background: #ffffff;
+            color: #dc2626;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .zone-toggle-btn:disabled {
+            opacity: 0.35 !important;
+            cursor: not-allowed !important;
+            pointer-events: none !important;
+            filter: grayscale(80%);
+        }
+        #btn-zone-cat-smoke.active {
+            color: #0284c7;
+        }
+        #btn-zone-cat-wall.active {
+            color: #334155;
+        }
+        .safety-zone-item.selected-zone polygon,
+        .safety-zone-item.selected-zone polyline {
+            stroke-width: 5px !important;
+            filter: drop-shadow(0 0 6px rgba(220, 38, 38, 0.85));
+        }
+        .zone-pts-badge {
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 3px 8px;
+            border-radius: 12px;
+        }
+        .btn-guide-finish {
+            background: #dc2626;
+            border: 1px solid #dc2626;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-guide-finish:hover {
+            background: #b91c1c;
+        }
+
+        /* 매장 삭제 후 바닥 흰색(#ffffff) 표시 - 경계선 완전 제거 */
+        .vacant-floor-polygon {
+            fill: #ffffff !important;
+            stroke: #ffffff !important;
+            stroke-width: 0 !important;
+            stroke-opacity: 0 !important;
+            pointer-events: none !important;
+            cursor: default !important;
+        }
+
+        /* 건물 외벽 스타일 */
+        .building-exterior-wall {
+            cursor: pointer;
+            user-select: none;
+        }
+        /* 일반 모드에서는 도면 배경 벽 클릭 방해 차단, 구역 드로잉 모드에서는 선택 가능하도록 설정 */
+        body:not(.zone-drawing-mode) .building-exterior-wall:not(.user-drawn-wall) {
+            pointer-events: none;
+        }
+        body.zone-drawing-mode .building-exterior-wall {
+            pointer-events: stroke !important;
+            cursor: pointer !important;
+        }
+
+        /* 사용자가 작성한 외벽 선분 스타일 */
+        .safety-zone-item[data-zone-category="wall"] {
+            cursor: pointer;
+        }
+        .safety-zone-item[data-zone-category="wall"] polyline {
+            pointer-events: stroke !important;
+        }
+        .safety-zone-item[data-zone-category="wall"].selected-zone polyline {
+            stroke: #0284c7 !important;
+            stroke-width: 6px !important;
+            filter: drop-shadow(0 0 6px rgba(2, 132, 199, 0.85)) !important;
+        }
+
+        /* 외벽 정점 조절 핸들 (Vertex Handles) */
+        .wall-vertex-handle {
+            cursor: move;
+            transition: transform 0.1s ease, r 0.1s ease;
+        }
+        .wall-vertex-handle:hover {
+            r: 7px;
+            fill: #38bdf8 !important;
+            stroke: #0369a1 !important;
+        }
+
+        polyline.building-exterior-wall,
+        path.building-exterior-wall-line {
+            stroke: #334155 !important;
+            stroke-width: 3.5px !important;
+            stroke-linecap: round !important;
+            stroke-linejoin: round !important;
+            fill: none !important;
+        }
+
+        /* 구역(방화구역/제연구획) SVG 스타일 */
+        .safety-zone-item {
+            cursor: pointer;
+            transition: opacity 0.15s ease;
+        }
+        .safety-zone-item:hover polyline {
+            stroke-width: 5px !important;
+            stroke: #b91c1c !important;
+        }
+        .safety-zone-item:hover polygon {
+            stroke-width: 3.5px !important;
+            stroke: #b91c1c !important;
+            fill: rgba(220, 38, 38, 0.22) !important;
+        }
+
+
+        /* 다각형 및 텍스트 상호작용: 사이드바와 통일된 쿨 블루 톤앤매너 */
+        .store-polygon, .store-group, svg text.editable-store-name {
+            cursor: pointer !important;
+        }
+        .store-polygon {
+            pointer-events: all;
+            stroke: #c8ddf7;
+            stroke-width: 1px;
+            transition: stroke 0.15s ease, stroke-width 0.15s ease, fill 0.15s ease;
+        }
+        /* 호버 시 부드러운 블루 하이라이트 */
+        .store-polygon:hover {
+            stroke: #2563eb !important;
+            stroke-width: 2.5px !important;
+            fill: #dbeafe !important;
+        }
+        /* 선택 시: 흔들림 없는 단정하고 명확한 블루 테두리 및 톤 부각 */
+        .store-polygon.selected {
+            stroke: #1d4ed8 !important;
+            stroke-width: 3.5px !important;
+            fill: #bfdbfe !important;
+        }
+
+        svg text.editable-store-name {
+            pointer-events: all;
+            user-select: none;
+            transition: fill 0.15s ease;
+        }
+        svg text.editable-store-name:hover {
+            fill: #1d4ed8 !important;
+            font-weight: 600 !important;
+        }
+        .store-group.selected text {
+            font-weight: 700 !important;
+            fill: #1d4ed8 !important;
+        }
+
+
+        /* 스페이스바 패닝 모드 */
+        #viewport.space-panning {
+            cursor: grab !important;
+        }
+        #viewport.space-panning.grabbing {
+            cursor: grabbing !important;
+        }
+
+        /* 자유 그리기 (손/펜 메모) 레이어 및 툴바 */
+        #freehand-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 45;
+            pointer-events: all;
+            touch-action: none;
+        }
+        #freehand-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+        .freehand-toolbar {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 10px 24px;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-medium);
+            border-bottom: none;
+            border-radius: 14px 14px 0 0;
+            box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.15);
+            z-index: 50;
+            user-select: none;
+            white-space: nowrap;
+            width: max-content;
+            max-width: 98vw;
+            box-sizing: border-box;
+        }
+        .freehand-tool-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+            padding-right: 12px;
+            border-right: 1px solid var(--border-light);
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .freehand-tool-badge svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--primary);
+            fill: none;
+            stroke-width: 2;
+        }
+        .freehand-colors {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .color-dot {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            outline: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .color-dot:hover {
+            transform: scale(1.15);
+        }
+        .color-dot.active {
+            outline: 2px solid var(--primary);
+            transform: scale(1.15);
+        }
+        .freehand-sizes {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0 8px;
+            border-left: 1px solid var(--border-light);
+            border-right: 1px solid var(--border-light);
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .size-pill {
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-light);
+            background: #ffffff;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.12s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .size-pill:hover {
+            background: #f1f5f9;
+            color: var(--text-main);
+        }
+        .size-pill.active {
+            background: #eff6ff;
+            border-color: var(--primary);
+            color: var(--primary);
+            font-weight: 700;
+        }
+        .freehand-btns {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .freehand-btns .btn {
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* 축척(Scale) 간결 모달 & 실측 다이얼로그 */
+        .scale-modal-box {
+            width: 440px;
+            max-width: 90vw;
+            background: #ffffff;
+            border: 1px solid var(--border-medium);
+            border-radius: 12px;
+            box-shadow: 0 20px 45px -8px rgba(15, 23, 42, 0.25);
+            overflow: hidden;
+        }
+        .scale-status-card {
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 14px 16px;
+        }
+        .scale-input-dialog {
+            width: 380px;
+            max-width: 90vw;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.22);
+            overflow: hidden;
+        }
+        .scale-measure-info-card {
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 12px 16px;
+        }
+        .scale-preset-chip {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-medium);
+            border-radius: 14px;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .scale-preset-chip:hover {
+            background: var(--primary-light);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        #scale-measure-guide-banner {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.94);
+            color: #ffffff;
+            padding: 10px 22px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 60;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.28);
+            backdrop-filter: blur(8px);
+            pointer-events: auto;
+        }
+
+        /* 그리기 툴바: 펜/거리/면적 서브툴 */
+        .freehand-tool-selector {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding-right: 12px;
+            border-right: 1px solid var(--border-subtle);
+        }
+        .freehand-tool-selector .tool-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+        }
+        .freehand-tool-selector .tool-btn svg {
+            width: 14px;
+            height: 14px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+        .freehand-tool-selector .tool-btn:hover:not(:disabled) {
+            background: var(--bg-hover);
+            color: var(--text-main);
+        }
+        .freehand-tool-selector .tool-btn.active {
+            background: var(--primary-light);
+            border-color: var(--primary-border);
+            color: var(--primary);
+        }
+        .freehand-tool-selector .tool-btn:disabled,
+        .freehand-tool-selector .tool-btn.disabled-tool {
+            opacity: 0.35;
+            cursor: not-allowed;
+            filter: grayscale(1);
+        }
+        /* 이미지 저장 버튼 아이콘 색상 글자와 일치 */
+        .freehand-btns .btn svg {
+            stroke: currentColor !important;
+        }
+
+
+        /* 축척(Scale) 모달 박스 */
+        .scale-modal-box {
+            width: 440px;
+            max-width: 90vw;
+            background: #ffffff;
+            border: 1px solid var(--border-medium);
+            border-radius: 12px;
+            box-shadow: 0 20px 45px -8px rgba(15, 23, 42, 0.25);
+            overflow: hidden;
+        }
+        .scale-info-alert {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 12px;
+            color: #1e40af;
+            line-height: 1.5;
+        }
+
+        /* 심벌(Symbol) 필터 드롭다운 및 모드 스타일 */
+        .symbol-filter-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            user-select: none;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+        .symbol-filter-item:hover {
+            background: var(--bg-hover);
+        }
+        .symbol-filter-item input[type="checkbox"] {
+            width: 15px;
+            height: 15px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+        .symbol-badge-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            flex-shrink: 0;
+        }
+
+        /* 심벌 드로잉 배너 & 칩 */
+        .symbol-guide-banner {
+            background: rgba(15, 23, 42, 0.92);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .symbol-type-chips {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .symbol-type-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1.5px solid transparent;
+            color: #f1f5f9;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .symbol-type-chip:hover {
+            background: rgba(255, 255, 255, 0.22);
+        }
+        .symbol-type-chip.active {
+            background: #ffffff;
+            color: #0f172a;
+            border-color: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+        }
+
+        /* 지도 위 심벌 노드 */
+        .cad-symbol-node {
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+        .cad-symbol-node:hover {
+            filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.45));
+        }
+
+        /* ==========================================================================
+           기능실(자) - 매장(모) 설비 배관/간선 라인 (Utility Feeder Lines)
+           ========================================================================== */
+        @keyframes utilFlowForward {
+            from { stroke-dashoffset: 24; }
+            to { stroke-dashoffset: 0; }
+        }
+
+        @keyframes utilFlowReverse {
+            from { stroke-dashoffset: 0; }
+            to { stroke-dashoffset: 24; }
+        }
+
+        /* 기본 라인 스타일 */
+        .util-feeder-line {
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            pointer-events: stroke;
+            cursor: pointer;
+            transition: stroke-width 0.15s ease, opacity 0.2s ease;
+        }
+
+        /* EPS (전기): 자 -> 모, 파란색 점선 3px */
+        .util-line-eps {
+            stroke: #2563eb !important;
+            stroke-width: 3px !important;
+            stroke-dasharray: 8 6;
+            animation: utilFlowForward 0.8s linear infinite;
+            filter: drop-shadow(0 0 2px rgba(37, 99, 235, 0.4));
+        }
+
+        /* PS / PD (급수): 자 -> 모, 하늘색 점선 3px */
+        .util-line-water {
+            stroke: #0284c7 !important;
+            stroke-width: 3px !important;
+            stroke-dasharray: 8 6;
+            animation: utilFlowForward 0.8s linear infinite;
+            filter: drop-shadow(0 0 2px rgba(2, 132, 199, 0.4));
+        }
+
+        /* PS / PD (배수): 모 -> 자, 검은색 점선 3px */
+        .util-line-drain {
+            stroke: #0f172a !important;
+            stroke-width: 3px !important;
+            stroke-dasharray: 8 6;
+            animation: utilFlowReverse 0.8s linear infinite;
+            filter: drop-shadow(0 0 2px rgba(15, 23, 42, 0.4));
+        }
+
+        /* 가스: 자 -> 모, 노란색 점선 3px */
+        .util-line-gas {
+            stroke: #eab308 !important;
+            stroke-width: 3px !important;
+            stroke-dasharray: 8 6;
+            animation: utilFlowForward 0.8s linear infinite;
+            filter: drop-shadow(0 0 2px rgba(234, 179, 8, 0.4));
+        }
+
+        /* AV (스프링클러): 빨간색 점선 3px (예비 확장) */
+        .util-line-sprinkler {
+            stroke: #dc2626 !important;
+            stroke-width: 3px !important;
+            stroke-dasharray: 8 6;
+            animation: utilFlowForward 0.8s linear infinite;
+            filter: drop-shadow(0 0 2px rgba(220, 38, 38, 0.4));
+        }
+
+        /* 공조실 (급기 SA): 청록색 점선 3px (예비 확장) */
+        .util-line-air-supply {
+            stroke: #0284c7 !important;
+            stroke-width: 3px !important;
+            stroke-dasharray: 8 6;
+            animation: utilFlowForward 0.8s linear infinite;
+        }
+
+        /* 공조실 (배기 RA): 주황색 점선 3px (예비 확장) */
+        .util-line-air-exhaust {
+            stroke: #ea580c !important;
+            stroke-width: 3px !important;
+            stroke-dasharray: 8 6;
+            animation: utilFlowReverse 0.8s linear infinite;
+        }
+
+        /* 비활성 상태 라인 */
+        .util-feeder-line.inactive {
+            opacity: 0.15;
+            animation: none !important;
+        }
+
+        /* 활성 하이라이트 상태 라인 */
+        .util-feeder-line.highlighted {
+            opacity: 1 !important;
+            z-index: 50;
+        }
