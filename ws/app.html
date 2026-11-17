@@ -11,7 +11,7 @@
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
 <script src="config.js"></script>
-<script>window.WS_VERSION = '0.12.0';</script>
+<script>window.WS_VERSION = '0.13.0';</script>
 <script src="ws-api.js"></script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -548,7 +548,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.12.0' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.13.0' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -812,7 +812,8 @@ function renderMain() {
 function renderMap() {
   return topbar('업무지원 ›', '지도') + '<iframe class="mapframe" src="../map/index.html" title="에비뉴엘 도면"></iframe>';
 }
-window.WS_MAP = { load: () => call('mapLoad'), save: (k, v) => call('mapSave', k, v) };
+window.WS_MAP = { load: () => call('mapLoad'), save: (k, v, ver) => call('mapSave', k, v, ver), base: (k, v) => call('mapBase', k, v),
+  days: () => call('mapDays'), at: at => call('mapAt', at), restore: day => call('mapRestore', day) };   // 기록·되돌리기 (결정 132)
 // PC 마우스 오른쪽 버튼 막기 (휴대폰 길게 누르기는 그대로)
 if (window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches) document.addEventListener('contextmenu', e => e.preventDefault());
 function tile(k) { if (k === 'inspect') go('inspect'); else if (k === 'docs') go('docs'); else if (k === 'map') { if (window.WS_API) go('map'); else toast('지도는 바로가기 앱(Supabase)에서만 열립니다'); } else toast('디자인 시안만 있는 메뉴입니다 (준비 중)'); }

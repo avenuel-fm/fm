@@ -118,10 +118,15 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                     } catch (e) {}
                 }
                 if (!svgText) {
-                    if (!floor.svgUrl) throw new Error('도면 주소가 없습니다');
-                    const res = await fetch(floor.svgUrl);
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                    const fetchedRaw = await res.text();
+                    const baseKey = getBaseSvgStorageKey(floor.code);
+                    let fetchedRaw = mapStore.viewAt ? mapStore.getItem(baseKey) : null;   // 지난 날짜: 그때 보관한 업체 도면 (결정 132)
+                    if (!fetchedRaw) {
+                        if (!floor.svgUrl) throw new Error('도면 주소가 없습니다');
+                        const res = await fetch(floor.svgUrl);
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                        fetchedRaw = await res.text();
+                        mapStore.keepBase(baseKey, fetchedRaw);   // 업체가 그림을 바꿨으면 보관
+                    }
                     svgText = applyBlueThemeToSvg(fetchedRaw);
                     svgCache.set(floor.code, svgText);
                 }

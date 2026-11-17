@@ -236,6 +236,7 @@ function renderFloorUtilityLines() {
 function selectUtilLineForDelete(line) {
     activeSelectedUtilLineId = line.id;
     renderFloorUtilityLines();
+    if (mapStore.readOnly()) return;   // 보기 전용: 선택(라벨 보기)만
 
     const specDesc = line.specText ? ` (${line.specText})` : '';
     const confirmMsg = `[설비 연결선 선택]\n기능실(자): ${line.sourceName || '기능실'}\n매장(모): ${line.targetName || '매장'}\n구분: ${line.subTypeLabel || ''}${specDesc}\n\n이 연결선을 삭제하시겠습니까?`;
@@ -247,14 +248,15 @@ function selectUtilLineForDelete(line) {
         renderFloorUtilityLines();
         showToast('🗑️ 설비 연결선이 삭제되었습니다.', 1500);
     } else {
-        activeSelectedUtilLineId = null;
-        renderFloorUtilityLines();
+        showToast('선택된 연결선: Delete 키로 지우기 · Esc 로 선택 풀기', 2000);   // 선택은 그대로 둠 (Delete 키 삭제, WS_지도 결정 134)
     }
 }
 
 // 키보드 Delete 키로 선택된 설비 선분 삭제 지원
 window.addEventListener('keydown', (e) => {
-    if (e.key === 'Delete' && activeSelectedUtilLineId) {
+    if (!activeSelectedUtilLineId || ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
+    if (e.key === 'Escape') { activeSelectedUtilLineId = null; renderFloorUtilityLines(); return; }
+    if (e.key === 'Delete' && !mapStore.readOnly()) {
         const floor = FLOORS[currentFloorIdx];
         deleteUtilityLine(floor.code, activeSelectedUtilLineId);
         activeSelectedUtilLineId = null;

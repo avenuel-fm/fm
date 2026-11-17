@@ -128,6 +128,12 @@ function getSavedSvgStorageKey(floorCode) {
     return `lotte_saved_svg_${floorCode}${bId}`;
 }
 
+// 업체 바탕 도면 보관 칸 (지도 기록, 결정 132) — Supabase map_hist 에만 있음
+function getBaseSvgStorageKey(floorCode) {
+    const bId = (typeof currentBuildingId !== 'undefined' && currentBuildingId !== 'avenuel') ? `_${currentBuildingId}` : '';
+    return `lotte_base_svg_${floorCode}${bId}`;
+}
+
 // 건물 전환 함수 (메인보드 대시보드 연동)
 function switchCurrentBuilding(buildingId, keepFloorCode = null) {
     if (!BUILDINGS[buildingId]) return;

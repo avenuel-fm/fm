@@ -1,37 +1,82 @@
 /* ==========================================================================
-   mapStore.js - 도면 자료를 Supabase에 두는 저장소 (업무지원 결정 130, docs/설계/WS_지도.md)
+   mapStore.js - 도면 자료를 Supabase에 두는 저장소 (업무지원 결정 130 · 132 · 134, docs/설계/WS_지도.md)
    localStorage 와 같은 모양(getItem·setItem·removeItem)이라 저장소 파일은 이름만 바꿔 씀.
    업무지원 앱(fm/ws/app.html) 안에서만 열림: 그 앱의 PIN 로그인 표로 parent.WS_MAP 을 부름.
+   - 칸마다 판(ver)을 기억 → 그사이 다른 사람이 고쳤으면 서버가 막고, 알린 뒤 새로 불러옴 (결정 134)
+   - 보기 전용(readOnly): 직원(파트장 미만) 또는 지난 날짜를 보는 중 → 저장하지 않음 (결정 132·134)
    ========================================================================== */
 
 var mapStore = (function () {
-    const cache = {};
-    const queue = {};   // 칸마다 저장을 차례로 (나중 값이 마지막에 도착하게)
-    let warned = false;
+    let cache = {}, live = {};
+    const vers = {}, bases = {};
+    const queue = {};   // 칸마다 저장을 차례로 (나중 값이 마지막에 도착하게, 판도 이어서)
+    let warned = false, canEdit = false, isBoss = false, viewAt = '';
     const api = (window.parent !== window && window.parent.WS_MAP) || null;
 
-    function send(k, v) {
-        queue[k] = (queue[k] || Promise.resolve()).then(() => api.save(k, v)).then(r => {
-            if (r && r.ok === false) throw new Error(r.error);
-        }).catch(e => {
-            if (warned) return;
-            warned = true;   // 한 번만 알림 (선 하나 그릴 때마다 뜨지 않게)
-            alert('도면을 저장하지 못했습니다. 인터넷을 확인하고 다시 해 주세요.\n' + (e && e.message ? e.message : e));
-            setTimeout(() => { warned = false; }, 10000);
-        });
+    function warnOnce(msg) {
+        if (warned) return;
+        warned = true;   // 한 번만 알림 (선 하나 그릴 때마다 뜨지 않게)
+        alert(msg);
+        setTimeout(() => { warned = false; }, 10000);
     }
+    function send(k, v) {
+        queue[k] = (queue[k] || Promise.resolve()).then(() => api.save(k, v, vers[k] || '')).then(r => {
+            if (r && r.conflict) { alert(r.error); location.reload(); return; }
+            if (!r || r.ok === false) throw new Error(r && r.error);
+            vers[k] = r.ver || '';
+        }).catch(e => warnOnce('도면을 저장하지 못했습니다. 인터넷을 확인하고 다시 해 주세요.\n' + (e && e.message ? e.message : e)));
+    }
+    function readOnly() { return !canEdit || !!viewAt; }
 
     const ready = api ? api.load().then(r => {
         if (!r || !r.ok) throw new Error((r && r.error) || '불러오지 못했습니다');
-        Object.assign(cache, r.kv || {});
+        live = Object.assign({}, r.kv || {}); cache = Object.assign({}, live);
+        Object.assign(vers, r.vers || {}); Object.assign(bases, r.bases || {});
+        canEdit = !!r.canEdit; isBoss = !!r.isBoss;
         Object.keys(BUILDINGS).forEach(b => BUILDINGS[b].floors.forEach(f => { f.svgUrl = (r.urls[b] || {})[f.code] || ''; }));
     }) : Promise.reject(new Error('업무지원 앱에서 [지도]를 눌러 열어 주세요.'));
+
+    async function sha256(text) {
+        const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+        return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join('');
+    }
 
     return {
         ready,
         getItem: k => (k in cache ? cache[k] : null),
-        setItem: (k, v) => { v = String(v); if (cache[k] === v) return; cache[k] = v; send(k, v); },
-        removeItem: k => { if (!(k in cache)) return; delete cache[k]; send(k, null); }
+        setItem: (k, v) => {
+            v = String(v);
+            if (readOnly()) { if (cache[k] !== v && typeof showToast === 'function') showToast(viewAt ? '지난 기록은 고칠 수 없습니다.' : '지도는 파트장 이상만 고칠 수 있습니다.', 1800); return; }
+            if (cache[k] === v) return;
+            cache[k] = live[k] = v; send(k, v);
+        },
+        removeItem: k => {
+            if (readOnly() || !(k in cache)) return;
+            delete cache[k]; delete live[k]; send(k, null);
+        },
+        get canEdit() { return canEdit; },
+        get isBoss() { return isBoss; },
+        get viewAt() { return viewAt; },
+        readOnly,
+        /** 업체 바탕 도면을 받으면 그림이 바뀌었을 때만 보관 (결정 132). 보기 중엔 안 함 */
+        async keepBase(k, raw) {
+            if (!api || viewAt || !raw || !(window.crypto && crypto.subtle)) return;
+            try {
+                const h = await sha256(raw);
+                if (bases[k] === h) return;
+                const r = await api.base(k, raw);
+                if (r && r.ok) bases[k] = r.sha;
+            } catch (e) { /* 보관 실패는 도면 보기에 지장 없음 — 다음에 층을 열 때 다시 */ }
+        },
+        /** 지난 날짜 모습 받기 (at = 'YYYY-MM-DD' 또는 시각). '' = 지금 모습으로 */
+        async view(at) {
+            if (!at) { viewAt = ''; cache = Object.assign({}, live); return; }
+            const r = await api.at(at);
+            if (!r || !r.ok) throw new Error((r && r.error) || '기록을 불러오지 못했습니다');
+            viewAt = at; cache = r.kv || {};
+        },
+        days: () => api.days(),
+        restore: day => api.restore(day)
     };
 })();
 

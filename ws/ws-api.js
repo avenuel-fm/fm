@@ -70,7 +70,11 @@
     /* ── 3-2 서류작업 (supabase/03_docs.sql). 사진·PDF는 버킷에 먼저 올리고 주소·경로만 DB 함수에 ── */
     /* ── 지도 (supabase/13_map.sql, 결정 130): 도면 앱 저장 칸 · 층 도면 주소 ── */
     mapLoad: (token) => rpc('ws_map_load', { p_token: token }),
-    mapSave: (token, k, v) => rpc('ws_map_save', { p_token: token, p_k: k, p_v: v == null ? null : String(v) }),
+    mapSave: (token, k, v, ver) => rpc('ws_map_save', { p_token: token, p_k: k, p_v: v == null ? null : String(v), p_ver: ver || '' }),
+    mapBase: (token, k, v) => rpc('ws_map_base', { p_token: token, p_k: k, p_v: v }),   // 업체 바탕 도면 보관 (결정 132)
+    mapDays: (token) => rpc('ws_map_days', { p_token: token }),
+    mapAt: (token, at) => rpc('ws_map_at', { p_token: token, p_at: at }),
+    mapRestore: (token, day) => rpc('ws_map_restore', { p_token: token, p_day: day }),
 
     nextWorkGet: (token, date) => rpc('ws_next_work_get', { p_token: token, p_date: date || '' }),
     nextWorkSave: (token, date, rows, ver) => rpc('ws_next_work_save', { p_token: token, p_date: date, p_rows: rows || [], p_ver: ver || '' }),
