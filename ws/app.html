@@ -10,9 +10,9 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.15.0"></script>
-<script>window.WS_VERSION = '0.15.0';</script>
-<script src="ws-api.js?v=0.15.0"></script>
+<script src="config.js?v=0.15.1"></script>
+<script>window.WS_VERSION = '0.15.1';</script>
+<script src="ws-api.js?v=0.15.1"></script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -483,7 +483,7 @@ button.attag{cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:i
 .hvs h1{margin:0;font-size:26px;font-weight:700}
 .hvsh{display:flex;align-items:flex-end;gap:16px}.hvsh .d{font-size:14px;color:#3F4855;margin-top:4px}
 .hvsh .wx{margin-left:auto;display:flex;gap:4px 10px;align-items:center;font-size:12.5px;color:#3F4855}.hvsh .wx b{color:#18202B}
-.hvsign{border-collapse:collapse;margin-left:16px}.hvsign th,.hvsign td{border:1px solid #18202B;width:74px;text-align:center;font-size:11.5px}.hvsign th{height:22px;font-weight:500;background:#EDF0F3}.hvsign td{height:44px}
+.hvsign{border-collapse:collapse;margin-left:16px}.hvsign th,.hvsign td{border:1px solid #18202B;width:74px;text-align:center;font-size:11.5px}.hvsign th{height:22px;font-weight:500;background:#EDF0F3}.hvsign td{height:44px;padding:1px}.hvsign img{display:block;margin:auto;max-width:72px;max-height:42px;object-fit:contain}
 .hvsmall{border-collapse:collapse;font-size:13.5px}.hvsmall th,.hvsmall td{border:1px solid #CBD2DB;height:24px;padding:0 8px;text-align:center;min-width:70px}.hvsmall th{background:#EDF0F3;font-weight:500;color:#3F4855}
 .hvnote{border:1px solid #CBD2DB;padding:10px 14px;font-size:13.5px;line-height:1.7;color:#3F4855;flex:1}.hvnote b{font-weight:600;color:#18202B}
 .hvgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
@@ -586,7 +586,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.15.0' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.15.1' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -1896,7 +1896,7 @@ function ahuSheet(edit) {
     Array(Math.max(0, 13 - b.length)).fill('<tr><td></td><td></td><td></td><td></td></tr>').join('') + '</tbody></table>').join('');
   return '<div class="hvs"><div class="hvsh"><div><h1>에비뉴엘 AHU · 환기온도 점검일지</h1><div class="d">' + ahuMd(g.day, true) + (ahuLong(g.day) ? ' &nbsp;<span class="hvchip">연장영업</span>' : '') + '</div></div>' +
     '<div class="wx">' + ahuWx().map(x => '<span>' + x[0] + ' <b>' + h(x[1]) + '</b></span>').join('') + '<span>점검자 <b>' + h(ahuWho()) + '</b></span></div>' +
-    '<table class="hvsign"><tr><th>파트장</th><th>소장</th></tr><tr><td></td><td></td></tr></table></div>' +
+    '<table class="hvsign"><tr><th>파트장</th><th>소장</th></tr><tr>' + ['part', 'boss'].map(k => { const x = (g.srv.signs || {})[k]; return '<td>' + (x && x.img ? '<img src="' + h(x.img) + '" alt="' + h(x.name) + ' 서명">' : '') + '</td>'; }).join('') + '</tr></table></div>' +
     '<div style="display:flex;gap:10px;align-items:stretch"><table class="hvsmall"><tr><th>점검시간</th><th>12:00</th><th>16:00</th></tr>' +
     AHU_OUT.map(o => '<tr><th>' + o[1] + '</th>' + ['12', '16'].map(t => '<td>' + val('data-k="' + o[0] + t + '" aria-label="' + o[1] + ' ' + t + ':00"', g.v[o[0] + t]) + '</td>').join('') + '</tr>').join('') + '</table>' +
     '<div class="hvnote"><b>특이사항</b> · 동절기 -7℃ 일 때 에너지센터 순환펌프 가동 확인 후 공조기 가동<br>공조기 정지시간: 평일 19:50 · 주말(금토일) 20:20</div></div>' +
@@ -1961,7 +1961,7 @@ async function ahuPdf() {
       try {
         uri = await html2pdf().set({
           margin: 0, filename: g.day + '_공조기환기온도.pdf', image: { type: 'jpeg', quality: 0.92 },
-          html2canvas: { scale: 2, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, x: 0, y: 0, windowWidth: 1376 },
+          html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, x: 0, y: 0, windowWidth: 1376 },   // 서명 그림이 Supabase 주소여도 PDF에 들어가게
           jsPDF: { unit: 'mm', format: [364, 257], orientation: 'landscape' }, pagebreak: { mode: ['legacy'] }
         }).from(box.firstChild).outputPdf('datauristring');
       } finally { window.scrollTo(0, keepY); }
