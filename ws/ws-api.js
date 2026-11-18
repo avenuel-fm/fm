@@ -62,7 +62,8 @@
       return rpc('ws_sign_today', { p_token: token, p_sign_url: f.url, p_sign_path: f.path });
     },
     async bootstrap(token) {
-      const r = await rpc('ws_bootstrap', { p_token: token });
+      const [r, m] = await Promise.all([rpc('ws_bootstrap', { p_token: token }), rpc('ws_menu', { p_token: token }).catch(() => null)]);   // 메인 메뉴 켜기·끄기 (결정 148)
+      r.menuOff = m && m.ok ? m.off : [];
       r.app = { id: 'WS', title: '업무지원', version: window.WS_VERSION || '' };
       return r;
     },
@@ -72,9 +73,6 @@
     specBoot: (token) => rpc('ws_spec_boot', { p_token: token }),   // 시방서 검색 (결정 140, 14_spec.sql)
     specIndex: (token) => rpc('ws_spec_index', { p_token: token }),
     specPage: (token, d, p) => rpc('ws_spec_page', { p_token: token, p_guide: String(d || ''), p_page: Number(p) || 0 }),
-    specPubBoot: () => rpc('ws_spec_pub_boot', {}),   // 외부용 단독 페이지 spec.html — 로그인 없음 (결정 142)
-    specPubIndex: () => rpc('ws_spec_pub_index', {}),
-    specPubPage: (token, d, p) => rpc('ws_spec_pub_page', { p_guide: String(d || ''), p_page: Number(p) || 0 }),
     mapLoad: (token) => rpc('ws_map_load', { p_token: token }),
     mapSave: (token, k, v, ver) => rpc('ws_map_save', { p_token: token, p_k: k, p_v: v == null ? null : String(v), p_ver: ver || '' }),
     mapBase: (token, k, v) => rpc('ws_map_base', { p_token: token, p_k: k, p_v: v }),   // 업체 바탕 도면 보관 (결정 132)
@@ -177,6 +175,7 @@
     /* ── 3-6 환경설정 (supabase/08_settings.sql, 소장만). 위험성 목록은 시트 대신 여기서 고침 ── */
     adminStaff: token => rpc('ws_admin_staff', { p_token: token }),
     adminSetToast: (token, sec) => rpc('ws_admin_set_toast', { p_token: token, p_sec: Number(sec) }),
+    adminSetMenu: (token, off) => rpc('ws_admin_set_menu', { p_token: token, p_off: off }),
     adminStaffSave: (token, d) => rpc('ws_admin_staff_save', { p_token: token, p_d: d || {} }),
     adminStaffPin: (token, id, pin) => rpc('ws_admin_staff_pin', { p_token: token, p_staff_id: String(id || ''), p_pin: String(pin || '') }),
     adminStaffRemove: (token, id) => rpc('ws_admin_staff_remove', { p_token: token, p_staff_id: String(id || '') }),

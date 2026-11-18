@@ -10,9 +10,9 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.15.1"></script>
-<script>window.WS_VERSION = '0.15.1';</script>
-<script src="ws-api.js?v=0.15.1"></script>
+<script src="config.js?v=0.17.0"></script>
+<script>window.WS_VERSION = '0.17.0';</script>
+<script src="ws-api.js?v=0.17.0"></script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -85,7 +85,9 @@ function themeLabel() { return themeDark() ? '밝게' : '어둡게'; }
 .spg{display:grid;grid-template-columns:240px minmax(0,1fr) minmax(0,1.1fr);gap:16px;margin-top:14px;align-items:start}
 .spside{display:flex;flex-direction:column;gap:12px}.spside .card{padding:14px}.spside h3{font-size:13px;margin:0 0 8px;color:var(--sub)}
 .spchips{display:flex;flex-wrap:wrap;gap:6px}.spchips button{min-height:34px;padding:0 10px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:13px;cursor:pointer}
-.spside ul{padding:0;margin:0}.spside li{list-style:none;margin:0 0 8px;font-size:13px;line-height:1.5}
+.spck{display:flex;align-items:flex-start;gap:8px;margin:0 0 8px;font-size:13px;line-height:1.5;cursor:pointer}.spck input{width:18px;height:18px;margin:1px 0 0;flex:none;accent-color:var(--blue)}
+.spck-t{flex:1;min-width:0}.spck-n{flex:none;font-weight:700;color:var(--ink)}.spck.old{border-top:1px dashed var(--line);padding-top:8px;color:var(--sub)}
+@media(min-width:761px){.spf{display:none}}
 .srct{display:inline-block;font-size:11px;font-weight:500;border-radius:4px;padding:2px 6px;white-space:nowrap}
 .srct.s0{background:var(--blue-bg);color:var(--blue-d)}.srct.s1{background:var(--orange-bg);color:var(--orange)}.srct.s2{background:var(--green-bg);color:var(--green)}.srct.s3{background:#F1EAFB;color:#5B3A99}.srct.sold{background:var(--line3);color:var(--muted);margin-left:4px}
 .sphit{background:var(--card);border:1px solid var(--line2);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer}
@@ -97,7 +99,7 @@ function themeLabel() { return themeDark() ? '밝게' : '어둡게'; }
 .spact{display:flex;gap:6px;margin-top:8px}.spact .btn{flex:1;min-width:0;white-space:normal;line-height:1.3;padding-top:4px;padding-bottom:4px}.spact .btn.pri{flex:1.4}
 .spnote{font-size:12px;color:var(--muted);line-height:1.6}
 .sppvw{position:sticky;top:12px}
-.sppub{font-size:13px;color:var(--muted);white-space:nowrap}
+.sppub{font-size:13px;color:var(--muted);white-space:nowrap}.ttl .spteam{font-size:15px;font-weight:700;color:var(--ink)}
 .sppv{background:var(--card);border:1px solid var(--line2);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;height:calc(100dvh - 300px);min-height:420px}
 .sppv-h{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line3);flex-wrap:wrap}
 .spttl{font-size:14px;flex:1 1 120px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -144,6 +146,8 @@ body:has(.csbar) #app{padding-bottom:calc(120px + env(safe-area-inset-bottom))}
 .tile.soon{background:transparent;border-style:dashed;cursor:default}
 .tile.soon .ico{background:var(--line3);color:var(--muted)}
 .tile.soon b{color:var(--sub)}
+.tile.off{opacity:.5;border-style:dashed;background:transparent;cursor:not-allowed}.tile.off .ico{background:var(--line3);color:var(--muted)}.tile.off small svg{vertical-align:-2px;margin-right:3px}
+.tile .offtag{color:var(--orange)}.seg.menuseg{width:150px;flex:none}.seg.menuseg button{flex:1}
 .ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center}
 .row{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border:1px solid var(--line2);border-radius:12px;cursor:pointer;width:100%;text-align:left}
 .list{display:flex;flex-direction:column;gap:10px}
@@ -586,7 +590,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.15.1' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.17.0' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -651,6 +655,7 @@ const ICON = {
   dl: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>',
   clip: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.5l-8.6 8.6a5.5 5.5 0 0 1-7.8-7.8l8.6-8.6a3.7 3.7 0 0 1 5.2 5.2l-8.6 8.6a1.8 1.8 0 0 1-2.6-2.6l8-8"/></svg>',
   file: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>',
+  lock: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
   x: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   plus: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
   ok: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>',
@@ -809,12 +814,12 @@ async function boot(fromStart) {
   }
   if (my !== bootSeq) return;
   const wasCached = S.cached && S.view === 'main';
-  S.user = r.user; S.fire = r.fire; S.docs = r.docs || null; S.cached = false; S.fireAt = Date.now();
+  S.user = r.user; S.fire = r.fire; S.docs = r.docs || null; S.menuOff = r.menuOff || []; S.cached = false; S.fireAt = Date.now();
   S.ver = r.app && r.app.version; store('ws_ver', S.ver || null);
   if (r.toastSec) store('ws_toast_sec', String(r.toastSec));
   if (wasCached && !r.needSign) toast('최신 내용으로 불러왔습니다');
   if (!r.needSign) setTimeout(prefetch, 0);   // 메인이 뜬 뒤 TBM·명일 작업을 뒤에서 미리 받음
-  if (!r.needSign) store('ws_main', JSON.stringify({ sid: r.user.staff_id, user: r.user, fire: r.fire, docs: r.docs }));   // 다음 접속 때 먼저 보여 줄 메인 화면
+  if (!r.needSign) store('ws_main', JSON.stringify({ sid: r.user.staff_id, user: r.user, fire: r.fire, docs: r.docs, menuOff: S.menuOff }));   // 다음 접속 때 먼저 보여 줄 메인 화면
   if (r.needSign) { S.sign = { mode: 'token', name: r.user.name, part: r.user.part, busy: false, msg: '' }; S.view = 'sign'; render(); return; }   // 표는 있는데 오늘 서명이 없음
   if (['login', 'loading', 'retry', 'sign'].indexOf(S.view) !== -1) go('main');
   else if (S.view === 'main') render();   // 먼저 보여 준 지난번 화면을 새 숫자로
@@ -831,7 +836,11 @@ function renderMain() {
   const u = S.user;
   const today = new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' });
   const c = S.fire ? S.fire.counts : null;
-  const t = (key, label, sub, ico) => '<button class="tile" onclick="tile(\'' + key + '\')"><span class="ico">' + ico + '</span><b>' + label + '</b><small>' + sub + '</small></button>';
+  const t = (key, label, sub, ico) => {   // 환경설정에서 끈 칸: 직원은 흐리게·안 열림, 소장·관리자·옵저버는 「직원에게 꺼짐」 표시 (결정 148)
+    const off = menuOff(key), lock = off && !menuCanOpen();
+    return '<button class="tile' + (lock ? ' off' : '') + '"' + (lock ? ' aria-disabled="true"' : '') + ' onclick="tile(\'' + key + '\')"><span class="ico">' + ico + '</span><b>' + label + '</b><small>' +
+      (lock ? ICON.lock + '지금은 사용 중지' : sub + (off ? ' · <b class="offtag">직원에게 꺼짐</b>' : '')) + '</small></button>';
+  };
   const soon = (key) => '<button class="tile soon" onclick="tile(\'' + key + '\')"><span class="ico">' + ICON.soon + '</span><b>작업중</b><small>준비 중</small></button>';
   return topbar('잠실점 에비뉴엘 · ' + today, '업무지원') + '<div class="wrap" style="display:flex;flex-direction:column;gap:14px">' +
     '<div class="banner b-gray">이 버전은 테스트판 입니다.' + (S.ver ? ' <b>v' + h(S.ver) + '</b>' : '') + '</div>' +
@@ -856,11 +865,12 @@ window.WS_MAP = { load: () => call('mapLoad'), save: (k, v, ver) => call('mapSav
 /* ── 시방서 검색 (결정 140, WS_시방서검색.md): 도면협의 지침 검색 자료를 읽기만. 검색 방식은 fm/dw/app.html searchGuide 와 같음 ── */
 const SP_KW = ['방화구획', '방화셔터', '감지기', '방염', '분전반', '스프링클러', '제연'];
 async function openSpec() {
-  S.sp = S.sp || { q: '', filter: 'all', old: false, sel: null, zoom: 1, big: false, imgs: {}, hits: [] };
+  S.sp = S.sp || { q: '', off: {}, old: false, sel: null, zoom: 1, big: false, imgs: {}, hits: [] };
   go('spec');
   try {
-    const pub = window.WS_PUB ? 'Pub' : '';   // 외부용은 로그인 없이 여는 함수 (결정 142)
-    if (!S.sp.boot) { const [b, x] = await Promise.all([call('spec' + pub + 'Boot'), call('spec' + pub + 'Index')]); S.sp.boot = b; S.sp.idx = x.entries || []; }
+    if (S.sp.boot) {}
+    else if (window.WS_PUB) { S.sp.boot = await call('specPubBoot'); S.sp.idx = []; }   // 외부용(spec.html): 색인은 내려주지 않고 서버에서 찾음 (결정 146)
+    else { const [b, x] = await Promise.all([call('specBoot'), call('specIndex')]); S.sp.boot = b; S.sp.idx = x.entries || []; }
   } catch (e) { S.sp.err = '시방서를 불러오지 못했습니다. 다시 열어 주세요.'; }
   if (S.view === 'spec') { render(); const i = $('spQ'); if (i && !('ontouchstart' in window)) i.focus(); }
 }
@@ -886,17 +896,18 @@ function spFind(t, term) {
   return k < 0 ? null : [map[k], map[k + cq.length - 1] + 1 - map[k]];
 }
 function spSearch() {
-  const q = S.sp.q.trim(), counts = { all: 0 }, out = [], skip = {};
+  const q = S.sp.q.trim(), counts = {}, out = [], skip = {};
   spG().forEach(g => { counts[g.id] = 0; if (g.archived && !S.sp.old) skip[g.id] = true; });
   S.sp.terms = q ? spTerms(q) : [];
   if (!q) return { hits: out, counts };
+  if (S.sp.cnt) Object.assign(counts, S.sp.cnt);   // 외부용: 지침별 건수는 서버가 셈
   for (const e of S.sp.idx || []) {
     if (skip[e.d]) continue;
     const t = String(e.t || ''); let f = null;
     for (const w of S.sp.terms) { f = spFind(t, w); if (f) break; }
     if (!f) { const meta = spCmp((e.h || '') + ' ' + (e.l || '')); if (!S.sp.terms.some(w => meta.indexOf(spCmp(w)) >= 0)) continue; }
-    counts.all++; counts[e.d] = (counts[e.d] || 0) + 1;
-    if ((S.sp.filter === 'all' || S.sp.filter === e.d) && out.length < 80) out.push({ e, at: f ? f[0] : -1, len: f ? f[1] : 0 });
+    if (!S.sp.cnt) counts[e.d] = (counts[e.d] || 0) + 1;
+    if (!S.sp.off[e.d] && out.length < 80) out.push({ e, at: f ? f[0] : -1, len: f ? f[1] : 0 });
   }
   return { hits: out, counts };
 }
@@ -915,7 +926,7 @@ function spBoxes(x) {
   return out.length ? out : [b[0]];
 }
 function renderSpec() {
-  const top = window.WS_PUB ? '<header class="top"><div class="top-in"><div class="ttl"><small>롯데백화점 잠실점 에비뉴엘 · 시설팀</small><b>시방서 검색</b></div><span class="sppub">공사 지침 · 읽기 전용</span></div></header>' : topbar('업무지원 ›', '시방서 검색');
+  const top = window.WS_PUB ? '<header class="top"><div class="top-in"><div class="ttl"><small class="spteam">잠실점 에비뉴엘 시설팀</small><b>시방서 검색</b></div><span class="sppub">공사 지침 · 읽기 전용</span></div></header>' : topbar('업무지원 ›', '시방서 검색');
   if (S.sp.err) return top + '<div class="wrap"><div class="banner b-red">' + h(S.sp.err) + '</div></div>';
   if (!S.sp.boot) return top + '<div class="wrap"><div class="banner b-gray">시방서를 불러오는 중…</div></div>';
   const cur = spG().filter(g => !g.archived);
@@ -924,22 +935,40 @@ function renderSpec() {
     '<div class="spf" id="spF" role="tablist" aria-label="지침 고르기"></div>' +
     '<div class="spg"><aside class="spside">' +
     '<div class="card"><h3>자주 찾는 말</h3><div class="spchips">' + SP_KW.map(w => '<button type="button" onclick="spQ(\'' + w + '\',1)">' + w + '</button>').join('') + '</div></div>' +
-    '<div class="card"><h3>검색하는 지침 (' + cur.length + ')</h3>' + (cur.length ? '<ul>' + cur.map(g => '<li>' + spTag(g.id) + ' ' + h(g.title) + (g.pages ? ' · ' + g.pages + '쪽' : '') + '</li>').join('') + '</ul>' : '<div class="spnote">아직 없습니다.</div>') +
+    '<div class="card"><h3>검색하는 지침 (' + cur.length + ')</h3>' + (cur.length ? '<div id="spGL"></div>' : '<div class="spnote">아직 없습니다.</div>') +
     '<div class="spnote" style="margin-top:6px">' + (window.WS_PUB ? '문의: 에비뉴엘 시설팀 (롯데백화점 지침 최신판)' : '지침 추가·개정은 도면협의 앱 <b>지침 관리</b>에서 합니다. 여기서는 읽기만 합니다.') + '</div></div>' +
     '<div class="spnote" id="spSyn"></div></aside>' +
     '<section id="spRes" aria-live="polite"></section><div id="spPv" class="sppvw"></div></div></div>' +
     '<div id="spBig"></div>';
 }
-function spQ(v, setBox) { S.sp.q = v; S.sp.sel = null; if (setBox) $('spQ').value = v; spDraw(); }
+function spQ(v, setBox) { S.sp.q = v; S.sp.sel = null; if (setBox) $('spQ').value = v; spGo(); }
+/** 외부용(spec.html)은 서버에서 찾아 받은 뒤 그림 — 전체 색인을 내려주지 않음, 고른 지침만 최대 80건 (결정 146) */
+let spT = 0, spN = 0;
+function spGo() {
+  if (!window.WS_PUB) return spDraw();
+  clearTimeout(spT);
+  const q = S.sp.q.trim(), n = ++spN;
+  if (!q) { S.sp.idx = []; S.sp.cnt = null; return spDraw(); }
+  spT = setTimeout(async () => {
+    let r = null; try { r = await call('specPubSearch', q, spG().filter(g => !S.sp.off[g.id]).map(g => g.id)); } catch (e) {}
+    if (n !== spN) return;   // 그사이 검색어가 바뀜
+    S.sp.idx = (r && r.entries) || []; S.sp.cnt = (r && r.counts) || {}; spDraw();
+  }, 250);
+}
 function spDraw() {
   const r = spSearch(), hits = S.sp.hits = r.hits, f = $('spF'), box = $('spRes');
   if (!box) return;
   const hasOld = spG().some(g => g.archived);
-  f.innerHTML = [{ id: 'all', short: '전체' }].concat(spG().filter(g => S.sp.old || !g.archived)).map(g => '<button type="button" role="tab" aria-selected="' + (S.sp.filter === g.id) + '" class="' + (S.sp.filter === g.id ? 'on' : '') + '" onclick="spFilter(\'' + h(g.id) + '\')">' + h(g.short) + (g.archived ? ' (이전 판)' : '') + ' <span>' + (r.counts[g.id] || 0) + '</span></button>').join('') +
+  const vis = spG().filter(g => S.sp.old || !g.archived), on = vis.filter(g => !S.sp.off[g.id]), gl = $('spGL');
+  // 휴대폰: 위 단추를 눌러 켜고 끔 / PC: 왼쪽 「검색하는 지침」 체크박스 (사용자 11-17)
+  f.innerHTML = vis.map(g => '<button type="button" aria-pressed="' + !S.sp.off[g.id] + '" class="' + (S.sp.off[g.id] ? '' : 'on') + '" onclick="spOn(\'' + h(g.id) + '\')">' + (S.sp.off[g.id] ? '' : '✓ ') + h(g.short) + (g.archived ? ' (이전 판)' : '') + ' <span>' + (r.counts[g.id] || 0) + '</span></button>').join('') +
     (hasOld ? '<button type="button" class="old' + (S.sp.old ? ' on' : '') + '" aria-pressed="' + S.sp.old + '" onclick="spOld()">' + (S.sp.old ? '✓ ' : '') + '이전 판 포함</button>' : '');
+  if (gl) gl.innerHTML = vis.map(g => '<label class="spck"><input type="checkbox" data-g="' + h(g.id) + '"' + (S.sp.off[g.id] ? '' : ' checked') + ' onchange="spOn(this.dataset.g)"><span class="spck-t">' + spTag(g.id) + ' ' + h(g.title) + (g.pages ? ' · ' + g.pages + '쪽' : '') + '</span><span class="spck-n">' + (S.sp.q.trim() ? r.counts[g.id] || 0 : '') + '</span></label>').join('') +
+    (hasOld ? '<label class="spck old"><input type="checkbox"' + (S.sp.old ? ' checked' : '') + ' onchange="spOld()"><span class="spck-t">이전 판도 검색</span></label>' : '');
   $('spSyn').textContent = S.sp.terms.length > 1 ? '비슷한 말도 찾음: ' + S.sp.terms.slice(1).join(', ') : '';
   if (S.sp.sel == null && hits.length) S.sp.sel = 0;
   if (!spG().length) box.innerHTML = '<div class="banner b-gray">검색할 지침이 아직 없습니다. 도면협의 앱의 <b>지침 관리</b>에서 지침 PDF로 색인을 만들어 주세요.</div>';
+  else if (!on.length) box.innerHTML = '<div class="banner b-gray">검색할 지침을 하나 이상 고르세요.</div>';
   else if (!S.sp.q.trim()) box.innerHTML = '<div class="spnote">검색어를 넣거나 자주 찾는 말을 누르세요.</div>';
   else if (!hits.length) box.innerHTML = '<div class="banner b-gray">「' + h(S.sp.q) + '」에 해당하는 내용이 없습니다.</div>';
   else box.innerHTML = '<div class="spnote" style="margin-bottom:8px">결과 <b style="color:var(--ink)">' + hits.length + (hits.length >= 80 ? '+' : '') + '건</b><span class="pcon"> · 결과를 누르면 오른쪽에 그 쪽이 보입니다</span></div>' +
@@ -948,8 +977,8 @@ function spDraw() {
       '<div class="spact"><button type="button" class="btn sm" onclick="event.stopPropagation();spSel(' + i + ',1)">쪽 크게 보기</button><button type="button" class="btn sm pri" onclick="event.stopPropagation();spCopy(' + i + ')">참조 복사 ' + h(spRef(x.e)) + '</button></div></div>').join('');
   spPv();
 }
-function spFilter(id) { S.sp.filter = id; S.sp.sel = null; spDraw(); }
-function spOld() { S.sp.old = !S.sp.old; if (!S.sp.old && spGuide(S.sp.filter).archived) S.sp.filter = 'all'; S.sp.sel = null; spDraw(); }
+function spOn(id) { S.sp.off[id] = !S.sp.off[id]; S.sp.sel = null; spGo(); }
+function spOld() { S.sp.old = !S.sp.old; S.sp.sel = null; spGo(); }
 function spSel(i, big) {
   S.sp.sel = i; S.sp.big = !!big;
   document.querySelectorAll('#spRes .sphit').forEach((el, k) => el.classList.toggle('on', k === i));
@@ -1001,7 +1030,16 @@ function spPvHtml(x, big) {
 }
 // PC 마우스 오른쪽 버튼 막기 (휴대폰 길게 누르기는 그대로)
 if (window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches) document.addEventListener('contextmenu', e => e.preventDefault());
-function tile(k) { if (k === 'inspect') go('inspect'); else if (k === 'docs') go('docs'); else if (k === 'spec') { if (window.WS_API) openSpec(); else toast('시방서 검색은 바로가기 앱(Supabase)에서만 열립니다'); } else if (k === 'map') { if (window.WS_API) go('map'); else toast('지도는 바로가기 앱(Supabase)에서만 열립니다'); } else toast('디자인 시안만 있는 메뉴입니다 (준비 중)'); }
+/* ── 메인 메뉴 켜기·끄기 (결정 148): 설정 표 「메인메뉴끄기」, 소장·관리자·옵저버는 꺼진 칸도 엶 ── */
+const MENU = [['docs', '서류작업', 'TBM · 명일 작업 · 종합업무일지 …'], ['inspect', '점검', '소화기 · 전열필증 · 공사장 점검'], ['spec', '시방서 검색', '도면협의 지침 찾기'], ['map', '지도', '에비뉴엘 도면']];
+const menuOff = k => (S.menuOff || []).indexOf(k) !== -1;
+const menuCanOpen = () => !!S.user && ['소장', '관리자', '옵저버'].indexOf(S.user.role) !== -1;
+async function setMenu(k, on) {
+  const r = await call('adminSetMenu', (S.menuOff || []).filter(x => x !== k).concat(on ? [] : [k]));
+  if (!r.ok) return toast(r.error);
+  S.menuOff = r.off; render(); toast(MENU.find(m => m[0] === k)[1] + (on ? ' 켬' : ' 끔 (직원에게 안 열림)'));
+}
+function tile(k) { if (menuOff(k) && !menuCanOpen()) return toast(((MENU.find(m => m[0] === k) || [])[1] || '이 메뉴') + '는 지금 사용 중지입니다'); if (k === 'inspect') go('inspect'); else if (k === 'docs') go('docs'); else if (k === 'spec') { if (window.WS_API) openSpec(); else toast('시방서 검색은 바로가기 앱(Supabase)에서만 열립니다'); } else if (k === 'map') { if (window.WS_API) go('map'); else toast('지도는 바로가기 앱(Supabase)에서만 열립니다'); } else toast('디자인 시안만 있는 메뉴입니다 (준비 중)'); }
 
 /* ── 환경설정 (소장만, 결정 102): 알림 시간, 직원 추가·편집·삭제·PIN ── */
 const ROLES = ['소장', '부소장', '파트장', '직원', '관리자', '옵저버'];   // 옵저버: 파트 「관리」 고정 (결정 138)
@@ -1022,6 +1060,10 @@ function renderSet() {
     '<h3 class="sth">알림 표시 시간</h3><div class="card" style="padding:14px 16px"><small style="color:var(--muted)">저장·동기화가 끝나면 아래에 뜨는 알림이 보이는 시간입니다. 알림이 여러 개면 0.5초 쉬고 다음 알림을 보여 줍니다.</small>' +
     '<div class="seg setseg" role="group" aria-label="알림 표시 시간" style="margin-top:10px">' + secs.map(v => '<button type="button" class="' + (Number(r.toastSec) === v ? 'on' : '') + '" aria-pressed="' + (Number(r.toastSec) === v) + '" onclick="setToastSec(' + v + ')">' + v + '초</button>').join('') + '</div></div>' +
     (window.WS_API ? '<h3 class="sth" style="margin-top:8px">TBM 위험성 목록</h3><div class="card strow"><span class="fname"><b>위험성 목록' + (r.riskN != null ? ' ' + r.riskN + '줄' : '') + '</b><small>TBM 작업 내용의 낱말로 위험요인·개선조치를 고르는 표</small></span><button class="btn sm pri" onclick="openRisk()">고치기</button></div>' : '') +
+    '<h3 class="sth" style="margin-top:8px">메인 메뉴</h3><div class="card">' + MENU.map(m => { const off = menuOff(m[0]);
+      return '<div class="strow"><span class="fname"><b>' + m[1] + '</b><small>' + m[2] + '</small></span><div class="seg setseg menuseg" role="group" aria-label="' + m[1] + ' 켜기·끄기">' +
+        '<button type="button" class="' + (off ? '' : 'on') + '" aria-pressed="' + !off + '" onclick="setMenu(\'' + m[0] + '\',1)">켜짐</button><button type="button" class="' + (off ? 'on' : '') + '" aria-pressed="' + off + '" onclick="setMenu(\'' + m[0] + '\',0)">꺼짐</button></div></div>'; }).join('') +
+    '</div><small style="color:var(--muted);line-height:1.6">꺼진 메뉴는 직원 화면에서 흐리게 보이고 눌러도 열리지 않습니다. <b>소장·관리자·옵저버</b>는 꺼진 메뉴도 열 수 있습니다.</small>' +
     '<div style="display:flex;align-items:center;margin-top:8px"><h3 class="sth" style="flex:1">직원 ' + r.staff.length + '명</h3><button class="btn sm pri" onclick="staffDlg()">+ 직원 추가</button></div>' +
     '<div class="card">' + r.staff.map(x => '<div class="strow"><span class="fname"><b>' + h(x.name) + '</b><small>' + h(x.part) + ' · ' + h(x.role) + ' · ' + h(x.staff_id) + '</small></span>' +
       '<button class="btn sm" onclick="staffDlg(\'' + x.staff_id + '\')">편집</button><button class="btn sm" onclick="staffPinDlg(\'' + x.staff_id + '\')">PIN 변경</button>' +
@@ -3032,7 +3074,6 @@ function render() {
   let html;
   if (S.view === 'loading') html = renderLoading();
   else if (S.view === 'retry') html = renderRetry();
-  else if (window.WS_PUB) html = S.sp ? renderSpec() : renderLoading();   // 외부용 단독 페이지는 시방서 검색만
   else if (S.view === 'device') html = renderDevice();
   else if (S.view === 'sign' && S.sign) html = renderSign();
   else if (!S.token || S.view === 'login') html = renderLogin();
@@ -3070,7 +3111,6 @@ function render() {
 
 (async function start() {
   render();   // 「불러오는 중」 — 저장된 표를 확인하는 동안 PIN 화면을 보이지 않음 (결정 48)
-  if (window.WS_PUB) return openSpec();   // 외부용 단독 페이지 (fm/ws/spec.html, 결정 142): 기기 등록·PIN 없음
   if (window.WS_API) {   // 바로가기 앱: 기기 등록(시설팀 공용 계정 Supabase 로그인)이 먼저 (Supabase 이관 3-1)
     try { S.device = await WS_API.device(); } catch (e) { S.device = null; }
     if (!S.device) { S.view = 'device'; render(); return; }
@@ -3083,7 +3123,7 @@ function render() {
   if (!S.token) { S.view = 'login'; render(); return; }
   // 이 기기에 기억한 지난번 메인 화면을 먼저 보여 주고, 서버 확인은 뒤에서 (로딩 개선, 결정 76). 표의 주인이 같을 때만
   let m = null; try { m = JSON.parse(store('ws_main') || 'null'); } catch (e) {}
-  if (m && m.user && m.sid === String(S.token).split('.')[0]) { S.user = m.user; S.fire = m.fire; S.docs = m.docs; S.cached = true; S.view = 'main'; render(); }
+  if (m && m.user && m.sid === String(S.token).split('.')[0]) { S.user = m.user; S.fire = m.fire; S.docs = m.docs; S.menuOff = m.menuOff || []; S.cached = true; S.view = 'main'; render(); }
   await boot(true);
 })();
 </script>
