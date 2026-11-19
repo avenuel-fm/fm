@@ -9,7 +9,7 @@
 <title>시방서 검색 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.19.1"></script>
+<script src="config.js?v=0.19.2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
@@ -163,6 +163,9 @@ function themeLabel() { return themeDark() ? '밝게' : '어둡게'; }
 @media(max-width:760px){.sp{padding:var(--sp-3)}.spg{grid-template-columns:minmax(0,1fr)}.spside,.pcon{display:none}.spf{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}.spf .old{margin-left:0}
   .spsheet{align-items:flex-end;padding:0}.spsheet .sppv{height:90vh;border-radius:var(--radius) var(--radius) 0 0}}
 .mapframe{display:block;width:100%;height:calc(100dvh - 150px);min-height:420px;border:0}
+.mapview{display:flex;flex-direction:column;height:100dvh}.mapview .mapframe{flex:1;height:auto;min-height:0}
+.mapback{position:fixed;left:var(--sp-3);bottom:calc(var(--sp-3) + env(safe-area-inset-bottom));z-index:15;gap:var(--sp-1)}
+body.mapfull .mapview .mapframe{position:fixed;inset:0;width:100%;height:100dvh;z-index:100}
 .top,.top .ttl,.top .ttl small,.top .ttl b{color:var(--white)}
 .top .btn.pri{background:var(--white);border-color:var(--white);color:var(--navy)}
 .top{background:var(--navy);border-bottom:1px solid var(--navy);position:sticky;top:0;z-index:20}

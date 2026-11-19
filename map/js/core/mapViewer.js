@@ -478,6 +478,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                     pathEl = existingGroup.querySelector('path');
                     textEl = existingGroup.querySelector('text');
                 }
+                layoutStoreLabel(textEl, cs.name, pathEl);
 
                 const spec = storedSpecs[cs.name] || cs;
                 const customItem = {
@@ -563,6 +564,115 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
         }
 
 
+        // 인포 레이어: 업체 도면의 안내 그림을 한 묶음으로 (결정 160). 부모에 위치 변환이 없어 옮겨도 자리 그대로
+        var INFO_NAMES = /엘리베이터|elevator|에스컬레이터|escalator|화장실|restroom|계단|stairs|tax ?refund|택스|텍스|안내|information|심장충격|aed|환전|currency exchange/i;
+        function collectInfoLayer(svgEl) {
+            let layer = svgEl.querySelector('#info-layer');
+            const icons = Array.from(svgEl.querySelectorAll('g[group-type="POI_GROUP"]'))
+                .filter(g => g.querySelector('image') && INFO_NAMES.test(g.getAttribute('name') || '') && !g.closest('#info-layer'));
+            if (!layer && !icons.length) return null;
+            if (!layer) {
+                layer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                layer.setAttribute('id', 'info-layer');
+            }
+            icons.forEach(g => layer.appendChild(g));
+            layer.style.pointerEvents = 'none';   // 그림을 눌러도 매장 그리기·선택을 막지 않음
+            layer.style.display = infoLayerOn() ? '' : 'none';
+            return layer;
+        }
+        function infoLayerOn() {
+            try { return localStorage.getItem('map_info_layer') !== 'off'; } catch (e) { return true; }
+        }
+        function onInfoLayerChange(on) {
+            try { localStorage.setItem('map_info_layer', on ? 'on' : 'off'); } catch (e) { /* 이 기기만 기억 */ }
+            const layer = mapContainer.querySelector('#info-layer');
+            if (layer) layer.style.display = on ? '' : 'none';
+        }
+
+        // 직접 그린 매장·기능실 이름: 글자 15, 도형보다 길면 다음 줄로 · 왼쪽 정렬 (결정 160)
+        var STORE_LABEL_SIZE = 15, STORE_LABEL_LINE = 18, STORE_LABEL_PAD = 4;
+        function layoutStoreLabel(textEl, name, pathEl) {
+            if (!textEl) return;
+            const ns = 'http://www.w3.org/2000/svg';
+            textEl.setAttribute('font-size', String(STORE_LABEL_SIZE));
+            textEl.textContent = '';
+            const one = document.createElementNS(ns, 'tspan');
+            one.textContent = name;
+            textEl.appendChild(one);
+            let box = null;
+            try { box = pathEl && pathEl.getBBox(); } catch (e) { /* 화면에 없으면 가운데 한 줄 */ }
+            if (!box || !box.width) return;
+            const cx = box.x + box.width / 2, cy = box.y + box.height / 2;
+            const room = box.width - STORE_LABEL_PAD * 2;
+            const width = t => { one.textContent = t; return one.getComputedTextLength(); };
+            if (width(name) <= room) {
+                textEl.setAttribute('text-anchor', 'middle');
+                textEl.setAttribute('x', cx.toFixed(2));
+                textEl.setAttribute('y', (cy + STORE_LABEL_SIZE / 3).toFixed(2));
+                one.removeAttribute('x'); one.removeAttribute('dy');
+                return;
+            }
+            // 띄어쓰기로 나누고, 한 낱말이 너무 길면 글자 단위로 나눔
+            const lines = [];
+            let cur = '';
+            const pieces = name.split(/(\s+)/).filter(x => x);
+            pieces.forEach(piece => {
+                const tryLine = cur + piece;
+                if (!cur || width(tryLine.trim()) <= room) { cur = tryLine; return; }
+                lines.push(cur.trim()); cur = piece.trim();
+            });
+            if (cur.trim()) lines.push(cur.trim());
+            const out = [];
+            lines.forEach(line => {
+                let part = '';
+                Array.from(line).forEach(ch => {
+                    if (part && width(part + ch) > room) { out.push(part); part = ch; } else part += ch;
+                });
+                if (part) out.push(part);
+            });
+            const x = (box.x + STORE_LABEL_PAD).toFixed(2);
+            textEl.setAttribute('text-anchor', 'start');
+            textEl.setAttribute('x', x);
+            textEl.setAttribute('y', (cy - (out.length - 1) * STORE_LABEL_LINE / 2 + STORE_LABEL_SIZE / 3).toFixed(2));
+            textEl.textContent = '';
+            out.forEach((line, i) => {
+                const t = document.createElementNS(ns, 'tspan');
+                t.setAttribute('x', x);
+                if (i) t.setAttribute('dy', String(STORE_LABEL_LINE));
+                t.textContent = line;
+                textEl.appendChild(t);
+            });
+        }
+
+        // 휴대폰: 윗줄 숨기기 (이 기기에서만 기억, 결정 160)
+        function toggleMenuBar(hide) {
+            const on = hide === undefined ? !document.body.classList.contains('menu-hidden') : hide;
+            document.body.classList.toggle('menu-hidden', on);
+            const tab = document.getElementById('btn-menu-tab');
+            if (tab) {
+                tab.setAttribute('aria-expanded', String(!on));
+                tab.innerHTML = on ? '<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg><span>메뉴</span>'
+                    : '<svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg><span>메뉴 숨기기</span>';
+            }
+            if (hide === undefined) { try { localStorage.setItem('map_menu_hidden', on ? '1' : ''); } catch (e) { /* 기억 못 해도 됨 */ } }
+        }
+        try { if (localStorage.getItem('map_menu_hidden') === '1') toggleMenuBar(true); } catch (e) { /* 처음엔 보임 */ }
+
+        // 전체화면: 지도만 화면 가득, 종료 단추만 보임 (결정 160)
+        function toggleMapFullscreen(force) {
+            const on = force === undefined ? !document.body.classList.contains('map-full') : !!force;
+            document.body.classList.toggle('map-full', on);
+            const btn = document.getElementById('btn-fullscreen');
+            if (btn) {
+                btn.title = on ? '전체화면 종료' : '전체화면';
+                btn.innerHTML = on ? '<svg viewBox="0 0 24 24"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg><span>종료</span>'
+                    : '<svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg><span>전체화면</span>';
+            }
+            if (on) closeAllPopovers?.();
+            try { if (window.parent !== window && window.parent.WS_MAP && window.parent.WS_MAP.full) window.parent.WS_MAP.full(on); } catch (e) { /* 혼자 열린 화면 */ }
+            setTimeout(() => resetView(), 250);   // 화면 크기가 바뀐 뒤 지도를 화면에 맞춤
+        }
+
         // 도면의 도형과 매장 대장을 맞추고, 대장의 이름·상세내역을 화면에 씀 (결정 154)
         function applyStoreBook(floor) {
             const key = getStoreBookKey(floor.code);
@@ -583,8 +693,11 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                 s.details = it.details || {};
                 s.fields = StoreBook.fields(items, it);
                 if (it.color) { s.fillColor = it.color; s.polygonElement?.setAttribute('fill', it.color); }
-                const tspan = s.textElement && (s.textElement.querySelector('tspan') || s.textElement);
-                if (tspan && tspan.textContent !== StoreBook.show(it.name)) tspan.textContent = StoreBook.show(it.name);
+                if (s.isCustom) layoutStoreLabel(s.textElement, StoreBook.show(it.name), s.polygonElement);
+                else {
+                    const tspan = s.textElement && (s.textElement.querySelector('tspan') || s.textElement);
+                    if (tspan && tspan.textContent !== StoreBook.show(it.name)) tspan.textContent = StoreBook.show(it.name);
+                }
                 s.groupElement?.setAttribute('data-store-name', it.name);
                 s.groupElement?.setAttribute('data-store-type', s.type);
             });

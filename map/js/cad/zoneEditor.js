@@ -33,6 +33,9 @@ function bringZoneLayersToFront() {
     if (zonesLayer && zonesLayer.parentElement === svgEl) {
         svgEl.appendChild(zonesLayer);
     }
+    // 1-1. 인포 레이어 (엘리베이터·화장실 등 업체 도면 그림): 직접 그린 매장보다 위 (결정 160)
+    const infoLayer = typeof collectInfoLayer === 'function' ? collectInfoLayer(svgEl) : null;
+    if (infoLayer) svgEl.appendChild(infoLayer);
     // 2. 심벌 레이어 (소화기 등 아이콘)
     const symbolsLayer = svgEl.querySelector('#map-symbols-layer');
     if (symbolsLayer && symbolsLayer.parentElement === svgEl) {

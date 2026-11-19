@@ -81,7 +81,7 @@
 
         function adjustStorePolygonClearance(points) {
             if (!points || points.length < 3) return points;
-            const GAP = 8; // 평행 간격 8px
+            const GAP = 1; // 평행 간격 1px (결정 160, 전: 8px)
             const existingPolys = [];
 
             currentStores.forEach(s => {

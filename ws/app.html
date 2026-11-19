@@ -10,9 +10,9 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.19.1"></script>
-<script>window.WS_VERSION = '0.19.1';</script>
-<script src="ws-api.js?v=0.19.1"></script>
+<script src="config.js?v=0.19.2"></script>
+<script>window.WS_VERSION = '0.19.2';</script>
+<script src="ws-api.js?v=0.19.2"></script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -168,6 +168,9 @@ function themeLabel() { return themeDark() ? '밝게' : '어둡게'; }
 @media(max-width:760px){.sp{padding:var(--sp-3)}.spg{grid-template-columns:minmax(0,1fr)}.spside,.pcon{display:none}.spf{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}.spf .old{margin-left:0}
   .spsheet{align-items:flex-end;padding:0}.spsheet .sppv{height:90vh;border-radius:var(--radius) var(--radius) 0 0}}
 .mapframe{display:block;width:100%;height:calc(100dvh - 150px);min-height:420px;border:0}
+.mapview{display:flex;flex-direction:column;height:100dvh}.mapview .mapframe{flex:1;height:auto;min-height:0}
+.mapback{position:fixed;left:var(--sp-3);bottom:calc(var(--sp-3) + env(safe-area-inset-bottom));z-index:15;gap:var(--sp-1)}
+body.mapfull .mapview .mapframe{position:fixed;inset:0;width:100%;height:100dvh;z-index:100}
 .top,.top .ttl,.top .ttl small,.top .ttl b{color:var(--white)}
 .top .btn.pri{background:var(--white);border-color:var(--white);color:var(--navy)}
 .top{background:var(--navy);border-bottom:1px solid var(--navy);position:sticky;top:0;z-index:20}
@@ -642,7 +645,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.19.1' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.19.2' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -906,9 +909,25 @@ function renderMain() {
 }
 /* ── 지도 (결정 130): 도면 앱(fm/map)을 이 화면 안에 띄움 → 주소창은 업무지원 그대로. 자료는 PIN 로그인 표로만 (supabase/13_map.sql) ── */
 function renderMap() {
-  return topbar('업무지원 ›', '지도') + '<iframe class="mapframe" src="../map/index.html" title="에비뉴엘 도면"></iframe>';
+  return '<div class="mapview">' + topbar('업무지원 ›', '지도') + '<iframe class="mapframe" src="../map/index.html" title="에비뉴엘 도면" allow="fullscreen"></iframe>' +
+    '<button class="btn mapback" onclick="back()">' + ICON.back + '뒤로</button></div>';   // 뒤로는 왼쪽 아래 작은 버튼 (결정 160)
 }
-window.WS_MAP = { load: () => call('mapLoad'), save: (k, v, ver) => call('mapSave', k, v, ver), base: (k, v) => call('mapBase', k, v),
+/** 지도 전체화면: 지도 칸을 화면 가득 + 되면 기기 전체화면 (아이폰은 기기 전체화면이 없어 화면 가득만) */
+function mapFull(on) {
+  document.body.classList.toggle('mapfull', !!on);
+  const d = document;
+  try {
+    if (on && !d.fullscreenElement && d.documentElement.requestFullscreen) d.documentElement.requestFullscreen().catch(() => {});
+    if (!on && d.fullscreenElement) d.exitFullscreen().catch(() => {});
+  } catch (e) { /* 전체화면을 못 해도 화면 가득은 됨 */ }
+}
+document.addEventListener('fullscreenchange', () => {   // 기기 뒤로 가기로 전체화면이 풀리면 지도 단추도 되돌림
+  if (document.fullscreenElement || !document.body.classList.contains('mapfull')) return;
+  const fr = document.querySelector('iframe.mapframe');
+  if (fr && fr.contentWindow && fr.contentWindow.toggleMapFullscreen) fr.contentWindow.toggleMapFullscreen(false);
+  else mapFull(false);
+});
+window.WS_MAP = { full: on => mapFull(on), load: () => call('mapLoad'), save: (k, v, ver) => call('mapSave', k, v, ver), base: (k, v) => call('mapBase', k, v),
   days: () => call('mapDays'), at: at => call('mapAt', at), restore: day => call('mapRestore', day) };   // 기록·되돌리기 (결정 132)
 /* ── 시방서 검색 (결정 140, WS_시방서검색.md): 도면협의 지침 검색 자료를 읽기만. 검색 방식은 fm/dw/app.html searchGuide 와 같음 ── */
 const SP_KW = ['방화구획', '방화셔터', '감지기', '방염', '분전반', '스프링클러', '제연'];
@@ -3167,7 +3186,8 @@ function render() {
   else if (S.view === 'set' && isBoss()) html = renderSet();
   else if (S.view === 'risk' && isBoss()) html = renderRisk();
   else html = renderMain();
-  if (PARENT[S.view] && S.token && S.user) {   // 아래 뒤로 버튼 (위 < 는 뺌, 결정 102). 저장 줄이 있으면 그 줄 맨 왼쪽에 (WS-25)
+  if (S.view !== 'map') document.body.classList.remove('mapfull');
+  if (PARENT[S.view] && S.token && S.user && S.view !== 'map') {   // 아래 뒤로 버튼 (위 < 는 뺌, 결정 102). 저장 줄이 있으면 그 줄 맨 왼쪽에 (WS-25)
     const h2 = withBack(html);
     html = h2 !== html ? h2 : html + '<div class="wrap backbar"><button class="btn big" onclick="back()">' + ICON.back + '뒤로</button></div>';
   }

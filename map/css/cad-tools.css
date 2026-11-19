@@ -699,3 +699,6 @@
             opacity: 1 !important;
             z-index: 50;
         }
+
+/* 선택한 매장: 진한 바탕 위 흰 글자 (결정 160) */
+.store-group.selected text, .store-group.selected text.editable-store-name:hover { fill: var(--white) !important; }

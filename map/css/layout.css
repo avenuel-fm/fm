@@ -710,3 +710,12 @@ body.map-ro #btn-excel-up, body.map-ro .btn-edit-action { display: none; }
 .store-check[hidden] { display: none; }
 .store-check summary { min-height: var(--control-h); display: flex; align-items: center; padding: 0 var(--sp-3); cursor: pointer; font-weight: 500; }
 .store-check ul { max-height: 160px; overflow-y: auto; padding: var(--sp-2) var(--sp-3) var(--sp-2) var(--sp-6); border-top: 1px solid var(--line); line-height: 1.5; }
+
+/* 휴대폰 윗줄 숨기기 · 전체화면 (결정 160) */
+.map-btn-full { position: relative; top: auto; right: auto; min-width: 82px; justify-content: center; white-space: nowrap; }
+.menu-tab { display: none; position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 40; height: 28px; padding: 0 var(--sp-3); align-items: center; gap: var(--sp-1); background: var(--white); border: 1px solid var(--line); border-top: 0; border-radius: 0 0 var(--radius) var(--radius); color: var(--navy); font: 600 var(--size-s) var(--font); cursor: pointer; }
+.menu-tab svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.5; }
+@media (max-width: 768px) { .menu-tab { display: inline-flex; } }
+body.menu-hidden header { display: none; }
+body.map-full header, body.map-full .menu-tab, body.map-full .map-top-left-group, body.map-full .panel-sidebar,
+body.map-full .floating-controls, body.map-full .map-btn-store, body.map-full .map-btn-utility { display: none !important; }

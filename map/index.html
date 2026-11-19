@@ -72,6 +72,11 @@
                     </label>
                     <div style="font-size:12px; font-weight:700; color:var(--text-main); margin:6px 0 4px; border-top:1px solid var(--border-light); padding-top:6px;">도면 보조 레이어</div>
                     <label class="symbol-filter-item">
+                        <input type="checkbox" id="chk-info-layer" checked onchange="onInfoLayerChange(this.checked)">
+                        <span class="symbol-badge-dot" style="background:#1f3a5f; color:#ffffff; font-size:12px; font-weight:700;">i</span>
+                        <span>인포</span>
+                    </label>
+                    <label class="symbol-filter-item">
                         <input type="checkbox" id="chk-grid-filter" onchange="onGridCheckboxChange(this.checked)">
                         <span class="symbol-badge-dot" style="background:#64748b; color:#ffffff; font-size:12px; font-weight:700;">#</span>
                         <span>그리드</span>
@@ -165,6 +170,8 @@
     </header>
 
     <div class="main-container">
+        <!-- 휴대폰: 윗줄 숨기기 탭 (결정 160) -->
+        <button type="button" class="menu-tab" id="btn-menu-tab" onclick="toggleMenuBar()" aria-expanded="true"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg><span>메뉴 숨기기</span></button>
         <!-- 좌측 층 선택 사이드바 -->
         <aside class="panel-sidebar floor-panel" id="floor-panel">
             <div class="panel-header">
@@ -206,6 +213,10 @@
                 <button class="map-overlay-btn map-btn-utility" id="btn-map-utility" onclick="openStoreSidebar('utility')" title="기능실 목록 열기/닫기">
                     <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
                     <span>기능실</span>
+                </button>
+                <button class="map-overlay-btn map-btn-full" id="btn-fullscreen" onclick="toggleMapFullscreen()" title="전체화면">
+                    <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                    <span>전체화면</span>
                 </button>
             </div>
 
@@ -285,9 +296,6 @@
                 </button>
                 <button class="ctrl-btn" title="축소" onclick="zoomOut()">
                     <svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg>
-                </button>
-                <button class="ctrl-btn" title="화면 맞춤" onclick="resetView()">
-                    <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
                 </button>
                 <button class="ctrl-btn" id="btn-toggle-freehand" title="도면 위 그리기 (손/펜 메모)" onclick="toggleFreehandDrawing()">
                     <svg viewBox="0 0 24 24"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>

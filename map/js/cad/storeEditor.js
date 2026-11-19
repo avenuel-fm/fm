@@ -381,8 +381,11 @@ var lastCreatedStoreId = null;
 
             // SVG DOM 업데이트
             if (activeSelectedStore.textElement) {
-                const tspan = activeSelectedStore.textElement.querySelector('tspan') || activeSelectedStore.textElement;
-                tspan.textContent = StoreBook.show(newName);
+                if (activeSelectedStore.isCustom) layoutStoreLabel(activeSelectedStore.textElement, StoreBook.show(newName), activeSelectedStore.polygonElement);
+                else {
+                    const tspan = activeSelectedStore.textElement.querySelector('tspan') || activeSelectedStore.textElement;
+                    tspan.textContent = StoreBook.show(newName);
+                }
             }
             if (activeSelectedStore.groupElement) {
                 activeSelectedStore.groupElement.setAttribute('data-store-name', newName);
@@ -679,7 +682,7 @@ var lastCreatedStoreId = null;
             // 2. 매장명 텍스트 요소 생성
             const newText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             newText.setAttribute('font-family', 'Pretendard, sans-serif');
-            newText.setAttribute('font-size', '18');
+            newText.setAttribute('font-size', String(STORE_LABEL_SIZE));
             newText.setAttribute('font-weight', '600');
             newText.setAttribute('fill', '#0f172a');
             newText.setAttribute('text-anchor', 'middle');
@@ -765,6 +768,8 @@ var lastCreatedStoreId = null;
             newPath.onclick = clickHandler;
 
             currentStores.push(storeItem);
+            layoutStoreLabel(newText, '새 매장', newPath);
+            bringZoneLayersToFront();   // 새 매장 층이 생겨도 인포 그림은 그 위로
             applyStoreBook(floor);   // 새 도형에 새 고유번호
             cleanupTempDrawingGroup();
             syncSvgCache();
