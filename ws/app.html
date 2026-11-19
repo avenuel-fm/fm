@@ -10,9 +10,9 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.20.1"></script>
-<script>window.WS_VERSION = '0.20.1';</script>
-<script src="ws-api.js?v=0.20.1"></script>
+<script src="config.js?v=0.19.3"></script>
+<script>window.WS_VERSION = '0.19.3';</script>
+<script src="ws-api.js?v=0.19.3"></script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -155,7 +155,7 @@ function themeLabel() { return themeDark() ? '밝게' : '어둡게'; }
 .sppv-h{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) var(--sp-3);border-bottom:1px solid var(--line3);flex-wrap:wrap}
 .spttl{font-size:var(--size-m);flex:1 1 120px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sptools{display:flex;align-items:center;gap:var(--sp-1);margin-left:auto}
-.sppv-b{flex:1;overflow:auto;overscroll-behavior:contain;background:var(--tint);padding:var(--sp-3);scrollbar-width:none}.sppv-b::-webkit-scrollbar{display:none}.sppv-b.pan{cursor:grab}.sppv-b{touch-action:pan-x pan-y}.sppv-b.drag{cursor:grabbing}
+.sppv-b{flex:1;overflow:auto;overscroll-behavior:contain;background:var(--tint);padding:var(--sp-3);scrollbar-width:none}.sppv-b::-webkit-scrollbar{display:none}.sppv-b.pan{cursor:grab}.sppv-b.drag{cursor:grabbing}
 .sppvw .sppv{height:var(--sppvh,calc(100dvh - 300px))}
 @media(min-width:1001px){.sp:has(~ .backbar){padding-bottom:0}.sp ~ .backbar{padding-top:4px}#spRes{padding-bottom:var(--sp-3)}}
 .sppg{position:relative;margin:0 auto;box-shadow:none;background:var(--white)}.sppg img{display:block;width:100%;height:auto}
@@ -288,7 +288,6 @@ button.nwdate{border:0;font-family:inherit}
 .nwbar{position:sticky;bottom:0;z-index:15;background:var(--white);border-top:1px solid var(--line2);margin:0 calc(var(--sp-4) * -1);padding:var(--sp-2) var(--sp-4) calc(var(--sp-2) + env(safe-area-inset-bottom));display:flex;gap:var(--sp-2);align-items:center}
 .nwbar .btn{flex:1;min-height:var(--control-h);font-size:var(--size-m);font-weight:500}
 .nwbar .btn.green{background:var(--green);border-color:var(--green);color:var(--white)}
-.dslot{display:contents}
 .nwstate{font-size:var(--size-s);color:var(--green);white-space:nowrap}
 .nwstate.dirty{color:var(--orange)}
 .sec{font-size:var(--size-s);font-weight:600;color:var(--muted);margin:var(--sp-2) var(--sp-1) calc(var(--sp-1) * -1)}
@@ -456,11 +455,8 @@ button.attag{cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:n
 .cssrch{flex:1;min-width:0;position:relative}.cssrch input{width:100%;min-height:var(--control-h);border:1px solid var(--line);border-radius:var(--radius);padding:0 var(--sp-3) 0 var(--sp-8);font-size:var(--size-m);background:var(--white);color:var(--ink);font-family:inherit}
 .cssrch::before{content:'';position:absolute;left:13px;top:13px;width:11px;height:11px;border:2px solid var(--muted);border-radius:var(--radius)}.cssrch::after{content:'';position:absolute;left:24px;top:25px;width:6px;height:2px;background:var(--muted);transform:rotate(45deg)}
 .csrd{display:flex;gap:var(--sp-1);margin-top:var(--sp-1);flex-wrap:wrap}.csrd span{font-size:var(--size-s);font-weight:500;border-radius:var(--radius);padding:var(--sp-1) var(--sp-2);white-space:nowrap}
-.csrd .ok{color:var(--green);background:var(--green-bg)}.csrd .bad{color:var(--red);background:var(--red-bg)}.csrd .wait{color:var(--muted);background:var(--tint)}
-.csbtns{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2)}.csbtns .csadd{width:auto}.csbtns .csitb{grid-column:1/-1;min-height:var(--control-h)}
-.csacc{display:flex;align-items:center;gap:var(--sp-2);width:100%;box-sizing:border-box;min-height:52px;padding:0 var(--sp-3);background:none;border:0;font:inherit;color:var(--ink);text-align:left;cursor:pointer}.csacc b{flex:1;min-width:0;font-size:var(--size-m)}.csacc .csn{font-size:var(--size-s);color:var(--muted)}.csacc.on{background:var(--tint)}
-.csacc .csar{width:8px;height:8px;margin:0 var(--sp-1);border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);flex:none}.csacc.on .csar{transform:rotate(45deg)}.csacc+.csrow,.csrow+.csacc,.csacc+.csacc{border-top:1px solid var(--line3)}
-.csdl{display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3);min-height:56px;cursor:pointer}.csdl+.csdl{border-top:1px solid var(--line3)}.csdl input{width:22px;height:22px;flex:none}.csdl small{display:block;color:var(--muted)}
+.csrd .ok{color:var(--green);background:var(--green-bg)}.csrd .bad{color:var(--navy);background:var(--red-bg)}.csrd .wait{color:var(--muted);background:var(--tint)}
+.csbtns{display:flex;gap:var(--sp-2)}.csbtns .csadd{flex:2;width:auto}.csbtns>.btn:not(.csadd){flex:1;min-height:var(--control-h);padding:0 var(--sp-2)}
 .csrtabs{display:flex;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--white)}
 .csrtabs button{flex:1;min-width:0;min-height:var(--control-h);border:0;background:var(--white);font-size:var(--size-m);font-weight:500;color:var(--sub);line-height:1.2;cursor:pointer;font-family:inherit;padding:var(--sp-1)}
 .csrtabs button+button{border-left:1px solid var(--line)}.csrtabs button small{display:block;font-size:var(--size-s);font-weight:500;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -537,7 +533,6 @@ button.attag{cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:n
 .hvin{position:relative;display:block}.hvin .inp{text-align:right;padding-right:var(--sp-8);font-variant-numeric:tabular-nums;font-weight:500}
 .hvin span{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:var(--size-m);color:var(--muted);pointer-events:none}
 .hvin .inp.empty{background:var(--tint);border-color:var(--line)}
-.inp.bad,.lgin.bad{border-color:var(--red);background:var(--red-bg,#FDECEC);outline:2px solid var(--red);outline-offset:-1px}.hverr{color:var(--red);font-size:var(--size-s)}
 .hvw{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2);margin-top:var(--sp-2)}.hvw label{font-size:var(--size-s);color:var(--sub)}
 .hvmeta{font-size:var(--size-s);color:var(--muted);margin-top:var(--sp-2);line-height:1.5}
 .hvchip{display:inline-flex;align-items:center;height:24px;padding:0 var(--sp-2);border-radius:var(--radius);font-size:var(--size-s);font-weight:500;background:var(--orange-bg);color:var(--orange);margin-right:var(--sp-1)}
@@ -651,7 +646,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.20.1' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.19.3' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -737,7 +732,7 @@ function go(view, push) {
 }
 async function refreshFire() { try { const r = await call('bootstrap'); S.fire = r.fire; S.user = r.user; S.fireAt = Date.now(); if (S.view === 'fire') render(); } catch (e) {} }
 try { google.script.history.setChangeHandler(e => { const v = e.state && e.state.v; if (v && S.token) { S.view = v; render(); } }); } catch (e) {}
-const PARENT = { inspect: 'main', fire: 'inspect', eh: 'inspect', thermal: 'inspect', cs: 'inspect', csck: 'cs', qr: 'fire', hyd: 'fire', status: 'fire', floor: 'status', docs: 'main', set: 'main', risk: 'set', map: 'main', spec: 'main', tbm: 'docs', nw: 'docs', log: 'docs', ahu: 'docs', att: 'docs', attup: 'att' };
+const PARENT = { inspect: 'main', fire: 'inspect', eh: 'inspect', cs: 'inspect', csck: 'cs', qr: 'fire', status: 'fire', floor: 'status', docs: 'main', set: 'main', risk: 'set', map: 'main', spec: 'main', tbm: 'docs', nw: 'docs', log: 'docs', ahu: 'docs', att: 'docs', attup: 'att' };
 function back() { if (S.view === 'pdf') return go((S.pdf && S.pdf.from) || 'main'); if (S.view === 'csck') return csLeave(); if (S.view === 'risk' && S.rk && S.rk.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; if (S.view === 'nw' && !nwLeaveOk()) return; if (S.view === 'log' && !lgLeaveOk()) return; if (S.view === 'ahu' && !ahuLeaveOk()) return; if (S.view === 'tbm' && S.tbm && S.tbm.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; go(PARENT[S.view] || 'main'); }
 
 function topbar(sub, title) {
@@ -896,7 +891,7 @@ function renderMain() {
   const u = S.user;
   const today = new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' });
   const c = S.fire ? S.fire.counts : null;
-  const soon = (b = '작업중', sm = '준비 중') => '<button class="tile soon" disabled><span class="ico">' + ICON.soon + '</span><b>' + b + '</b><small>' + sm + '</small></button>';
+  const soon = () => '<button class="tile soon" disabled><span class="ico">' + ICON.soon + '</span><b>작업중</b><small>준비 중</small></button>';
   // 환경설정에서 끈 칸: 직원에게는 「작업중」 칸, 소장·관리자·옵저버에게는 평소 칸 (결정 148)
   const t = (key, label, sub, ico) => menuOff(key) && !menuCanOpen() ? soon() : '<button class="tile" onclick="tile(\'' + key + '\')"><span class="ico">' + ico + '</span><b>' + label + '</b><small>' + sub + '</small></button>';
   return topbar('잠실점 에비뉴엘 · ' + today, '업무지원') + '<div class="wrap" style="display:flex;flex-direction:column;gap:var(--sp-3)">' +
@@ -906,7 +901,7 @@ function renderMain() {
     soon() +
     t('inspect', '점검', c ? '소화기 ' + (c.ok + c.bad) + ' / ' + c.total + '대' : '소화기 점검', ICON.inspect) +
     t('spec', '시방서 검색', '도면협의 지침 찾기', ICON.search) +
-    soon('자재현황', '준비중') +   // 자재현황 자리 (결정 168, WS_자재현황.md)
+    soon() +
     t('map', '지도', '에비뉴엘 도면', ICON.map) +
     '</div>' +
     '<div class="mainfoot"><button class="btn theme-btn" onclick="toggleTheme()">' + themeLabel() + '</button>' +
@@ -1087,8 +1082,7 @@ function spPv() {
         spBoxes(x).map(z => '<span class="hl" style="left:' + ((z[0] - 0.004) * 100) + '%;top:' + ((z[1] - 0.004) * 100) + '%;width:' + ((z[2] - z[0] + 0.008) * 100) + '%;height:' + ((z[3] - z[1] + 0.008) * 100) + '%"></span>').join('') + '</div>';
       const img = b.querySelector('img'), place = () => {   // 100% = 쪽 한 장이 칸 안에 다 들어오는 크기, + 로 키우면 그때 스크롤 (사용자 11-17)
         const fit = Math.min(b.clientWidth - 24, (b.clientHeight - 24) * (img.naturalWidth || 600) / (img.naturalHeight || 848));
-        b._fit = Math.max(200, fit);
-        b.querySelector('.sppg').style.width = Math.round(b._fit * S.sp.zoom) + 'px';
+        b.querySelector('.sppg').style.width = Math.round(Math.max(200, fit) * S.sp.zoom) + 'px';
         const f = b.querySelector('.hl'); b.scrollTop = f && S.sp.zoom > 1 ? Math.max(0, f.offsetTop - b.clientHeight * 0.3) : 0;
         b.classList.toggle('pan', b.scrollWidth > b.clientWidth || b.scrollHeight > b.clientHeight);
       };
@@ -1114,39 +1108,17 @@ document.addEventListener('mousedown', e => {
   const up = () => { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); b.classList.remove('drag'); };
   document.addEventListener('mousemove', move); document.addEventListener('mouseup', up); b.classList.add('drag');
 });
-// 안드로이드·아이패드: 쪽 칸 안에서만 두 손가락으로 확대·축소 (한 손가락 이동은 브라우저, 화면 전체 확대는 touch-action으로 막음)
-document.addEventListener('touchstart', e => {
-  const b = e.touches.length === 2 && e.target.closest && e.target.closest('.sppv-b'), g = b && b.querySelector('.sppg');
-  if (!g || !b._fit) return;
-  const T = e.touches, dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY), r = b.getBoundingClientRect();
-  const d0 = dist(T), w0 = g.offsetWidth, mx = (T[0].clientX + T[1].clientX) / 2 - r.left, my = (T[0].clientY + T[1].clientY) / 2 - r.top;
-  const px = b.scrollLeft + mx, py = b.scrollTop + my;   // 두 손가락 가운데에 있던 곳을 그 자리에 붙잡아 둠
-  const move = m => {
-    if (m.touches.length < 2) return;
-    m.preventDefault();
-    S.sp.zoom = Math.max(0.75, Math.min(2.5, w0 * dist(m.touches) / d0 / b._fit));
-    const w = Math.round(b._fit * S.sp.zoom); g.style.width = w + 'px';
-    b.scrollLeft = px * w / w0 - mx; b.scrollTop = py * w / w0 - my;
-  };
-  const end = () => {
-    ['touchmove', 'touchend', 'touchcancel'].forEach((k, i) => b.removeEventListener(k, i ? end : move));
-    const n = b.closest('.sppv').querySelector('.sptools .spnote'); if (n) n.textContent = Math.round(S.sp.zoom * 100) + '%';
-    b.classList.toggle('pan', b.scrollWidth > b.clientWidth || b.scrollHeight > b.clientHeight);
-  };
-  b.addEventListener('touchmove', move, { passive: false }); b.addEventListener('touchend', end); b.addEventListener('touchcancel', end);
-}, { passive: true });
-document.addEventListener('gesturestart', e => { if (e.target.closest && e.target.closest('.sppv-b')) e.preventDefault(); });   // 아이패드 사파리 화면 전체 확대 막기
 function spPvHtml(x, big) {
   return '<div class="sppv' + (big ? ' big' : '') + '"><div class="sppv-h">' + spTag(x.e.d) + '<b class="spttl">' + h(spWhere(x.e) || spGuide(x.e.d).title) + '</b><span class="spnote pcon">PDF ' + x.e.p + '쪽</span>' +
     '<span class="sptools"><button type="button" class="btn sm" onclick="spZoom(-0.25)" aria-label="작게">−</button><span class="spnote">' + Math.round(S.sp.zoom * 100) + '%</span><button type="button" class="btn sm" onclick="spZoom(0.25)" aria-label="크게">+</button>' +
     '<button type="button" class="btn sm spo" style="display:none">PDF 원본</button>' + (big ? '<button type="button" class="btn sm" onclick="spBigClose()" aria-label="닫기">' + ICON.x + '</button>' : '') + '</span></div>' +
     '<div class="sppv-b"><div class="spnote" style="padding:var(--sp-8);text-align:center">쪽 그림을 불러오는 중…</div></div>' +
-    '<div class="sppv-f"><button type="button" class="btn sm pri" onclick="spCopy(' + S.sp.sel + ')">참조 복사 ' + h(spRef(x.e)) + '</button></div></div>';
+    '<div class="sppv-f"><span class="spnote">노란 표시 = 검색어가 있는 줄</span><button type="button" class="btn sm pri" onclick="spCopy(' + S.sp.sel + ')">참조 복사 ' + h(spRef(x.e)) + '</button></div></div>';
 }
 // PC 마우스 오른쪽 버튼 막기 (휴대폰 길게 누르기는 그대로)
 if (window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches) document.addEventListener('contextmenu', e => e.preventDefault());
 /* ── 메인 메뉴 켜기·끄기 (결정 148): 설정 표 「메인메뉴끄기」, 소장·관리자·옵저버는 꺼진 칸도 엶 ── */
-const MENU = [['docs', '서류작업', 'TBM · 명일 작업 · 종합업무일지 …'], ['inspect', '점검', '소화기 · 전열필증 · 열화상 · 공사장 점검'], ['spec', '시방서 검색', '도면협의 지침 찾기'], ['map', '지도', '에비뉴엘 도면']];
+const MENU = [['docs', '서류작업', 'TBM · 명일 작업 · 종합업무일지 …'], ['inspect', '점검', '소화기 · 전열필증 · 공사장 점검'], ['spec', '시방서 검색', '도면협의 지침 찾기'], ['map', '지도', '에비뉴엘 도면']];
 const menuOff = k => (S.menuOff || []).indexOf(k) !== -1;
 const menuCanOpen = () => !!S.user && ['소장', '관리자', '옵저버'].indexOf(S.user.role) !== -1;
 async function setMenu(k, on) {
@@ -1370,9 +1342,7 @@ function tbmUse(r) {
   if (S.view === 'tbm') render();
 }
 function tbmState() { const r = S.tbm; return r.dirty ? '<span class="nwstate dirty">● 저장 안 함</span>' : r.saved ? '<span class="nwstate">✓ 저장됨</span>' : ''; }
-function tbmDirty() { S.tbm.dirty = true; S.tbm.pdfStale = true; const e = $('tbState'); if (e) e.innerHTML = tbmState(); docSlotSet(tbmDoc()); }
-// PDF를 만든 뒤 고친 것·새 서명이 없으면 [PDF 보기], 아니면 [저장] = 저장 + PDF (결정 72·176)
-function tbmDoc() { const r = S.tbm; return { sid: 'tbState', state: tbmState(), save: 'tbmPdf()', busy: r.busy || r.pdfBusy, pdfBusy: r.pdfBusy, pdf: r.pdf && !r.dirty && !r.pdfStale && r.signs.length <= r.pdf.signs ? { url: r.pdf.url, pv: tbmPv(r) } : null }; }
+function tbmDirty() { S.tbm.dirty = true; S.tbm.pdfStale = true; const e = $('tbState'); if (e) e.innerHTML = tbmState(); }
 function tbmCard(w, i) {
   const r = S.tbm, ed = r.edit === i, cur = r.risks.find(x => x.risk === w.risk);
   const seg = (k) => '<div class="seg tbseg" role="group" aria-label="' + (k === 'p' ? '가능성' : '중대성') + '">' + [1, 2, 3].map(n => '<button type="button" class="' + (Number(w[k]) === n ? 'on' : '') + '" aria-pressed="' + (Number(w[k]) === n) + '" onclick="tbmSet(' + i + ',\'' + k + '\',' + n + ')">' + n + '</button>').join('') + '</div>';
@@ -1420,7 +1390,7 @@ function renderTbm() {
     '<button class="btn sm" onclick="loadTbm()">새로고침</button><button class="btn sm" onclick="S.tbm.showSigns=!S.tbm.showSigns;render()">' + (r.showSigns ? '목록 닫기' : '서명 목록') + '</button></div>' +
     (r.showSigns ? list : '') +
     (r.pdf && r.pdf.shared === false ? '<div class="banner b-red">이 PDF는 <b>공유가 안 되어</b> 구글 로그인을 안 한 휴대폰·PC에서는 열리지 않습니다. 시설팀 공용 계정의 드라이브에서 파일 공유를 「링크가 있는 모든 사용자」로 바꾸거나 관리자에게 알려 주세요.</div>' : '') +
-    (r.pdf ? '<div class="banner ' + (more ? 'b-warn' : 'b-info') + '">PDF 저장됨 ' + h(String(r.pdf.at).slice(11, 16)) + ' · 서명 ' + r.pdf.signs + '명' + (more ? ' — <b>PDF 뒤 서명 ' + more + '명 추가</b>. [저장]을 다시 누르면 PDF를 새로 만듭니다.' : '') + ' ' + pdfBtn(null, 'PDF 보기', r.pdf.url, tbmPv(r)) + '</div>' : '') +
+    (r.pdf ? '<div class="banner ' + (more ? 'b-warn' : 'b-info') + '">PDF 저장됨 ' + h(String(r.pdf.at).slice(11, 16)) + ' · 서명 ' + r.pdf.signs + '명' + (more ? ' — <b>PDF 뒤 서명 ' + more + '명 추가</b>. [PDF로 저장]을 다시 누르면 새로 만듭니다.' : '') + ' ' + pdfBtn(null, 'PDF 열기', r.pdf.url, tbmPv(r)) + '</div>' : '') +
     '<div class="sec">작업 표 — ' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일 명일 작업 예정에서 가져옴</div>' +
     (r.works.length ? r.works.map(tbmCard).join('') : '<div class="banner b-gray">이 날짜의 명일 작업 예정이 없습니다. 아래 [+ 작업 줄 추가]로 넣어 주세요.</div>') +
     '<button class="btn nwadd" onclick="tbmAdd()"' + (r.works.length >= 30 ? ' disabled' : '') + '>+ 작업 줄 추가</button>' +
@@ -1428,8 +1398,11 @@ function renderTbm() {
     '<div class="card tbck">' + TBM_CHECKS.map(k => '<button type="button" class="' + (r.checks[k] ? 'on' : '') + '" aria-pressed="' + !!r.checks[k] + '" onclick="tbmCheck(\'' + k + '\')">' + k + (r.checks[k] ? ' ○' : '') + '</button>').join('') + '</div>' +
     '<div class="sec">사진</div>' +
     '<div class="card tbphs">' + tbmPhotoCell('meet', '회의 사진') + tbmPhotoCell('chant', '구호 사진') + '</div>' +
-    '<div class="nwbar">' + docBar(tbmDoc()) +
-    '</div></div>';
+    '<div class="nwbar"><span id="tbState">' + tbmState() + '</span>' +
+    '<button class="btn" onclick="tbmSaveBtn()"' + (r.busy || r.pdfBusy ? ' disabled' : '') + '>' + (r.busy ? '<span class="spin"></span>' : '저장') + '</button>' +
+    // PDF를 만든 뒤 고친 것·새 서명이 없으면 [PDF 열기] (결정 72)
+    (r.pdf && !r.dirty && !r.pdfStale && !more ? pdfBtn('pri', 'PDF 열기', r.pdf.url, tbmPv(r)) :
+      '<button class="btn pri" onclick="tbmPdf()"' + (r.busy || r.pdfBusy ? ' disabled' : '') + '>' + (r.pdfBusy ? '<span class="spin"></span> PDF 만드는 중' : 'PDF로 저장') + '</button>') + '</div></div>';
 }
 function tbmPv(r) { return { name: r.day + '_TBM.pdf', sub: '서류작업 › TBM ›', meta: '서명 ' + r.pdf.signs + '명 · ' + String(r.pdf.at).slice(11, 16) + ' 만듦' }; }
 function tbmW(i) { return S.tbm.works[i]; }
@@ -1489,7 +1462,7 @@ function loadH2p() {
 }
 async function tbmPdf() {
   const r = S.tbm; if (r.busy || r.pdfBusy) return;
-  if (!(r.up.meet || r.photos.meet) || !(r.up.chant || r.photos.chant)) { if (!confirm('사진이 비어 있습니다. 그래도 저장할까요?')) return; }
+  if (!(r.up.meet || r.photos.meet) || !(r.up.chant || r.photos.chant)) { if (!confirm('사진이 비어 있습니다. 그래도 PDF로 저장할까요?')) return; }
   const save = r.dirty || !r.saved ? { day: r.day, works: r.works, checks: r.checks, meet: r.up.meet || '', chant: r.up.chant || '' } : null;
   r.pdfBusy = true; render();
   try {
@@ -1499,7 +1472,7 @@ async function tbmPdf() {
     r.pdfBusy = false;
     if (!res.ok) { render(); toast(res.error); return; }
     if (save) { Object.assign(r.photos, r.up); r.up = {}; r.saved = true; r.dirty = false; }
-    r.pdf = res.pdf; r.pdfStale = false; render(); toast(res.warn || '저장하고 PDF도 만들었습니다');
+    r.pdf = res.pdf; r.pdfStale = false; render(); toast(res.warn || 'PDF로 저장했습니다');
   } catch (e) { r.pdfBusy = false; render(); toast('PDF를 만들지 못했습니다: ' + (e && e.message ? e.message : e)); }
 }
 /* PDF = A4 가로 2쪽 (1123×794px). 1쪽 평가표, 2쪽 사진. 양식: docs/양식/WS_TBM_양식_*, 시안: WS_TBM_시안_* */
@@ -1626,8 +1599,8 @@ function renderNw() {
     '<div class="nwrows"><div class="nwhd" aria-hidden="true"><span>순번</span><span>부서</span><span>작업장소</span><span>작업 내용</span><span>비고</span><span></span></div>' + rows +
     '<button type="button" class="btn nwadd" onclick="nwAdd()"' + (n.rows.length >= 30 ? ' disabled' : '') + '>' + ICON.plus + '줄 더하기</button></div>' +
     '<div class="nwbar" id="nwBar"><span id="nwState">' + nwState() + '</span>' +
-    '<button class="btn" onclick="nwImage()">' + ICON.dl + '그림으로 저장</button>' +
-    '<button class="btn pri" id="nwSave" onclick="nwSave()"' + (n.busy ? ' disabled' : '') + '>' + (n.busy ? '<span class="spin"></span>' : '저장') + '</button></div></div>';
+    '<button class="btn pri" id="nwSave" onclick="nwSave()"' + (n.busy ? ' disabled' : '') + '>' + (n.busy ? '<span class="spin"></span>' : '저장') + '</button>' +
+    '<button class="btn green" onclick="nwImage()">' + ICON.dl + '그림으로 저장</button></div></div>';
 }
 function nwDirty() { S.nw.dirty = true; const e = $('nwState'); if (e) e.innerHTML = nwState(); }
 // 입력 중에는 다시 그리지 않음 (글자 칸 초점 유지) — 빨간색만 바로 바꿈
@@ -1798,7 +1771,7 @@ function renderAtt() {
   return topbar('서류작업 ›', '출근현황') + '<div class="wrap list">' + head +
     '<div class="atwho">' + (r.canFix ? '상태 칸을 눌러 이날 상태를 고릅니다 · ' : '') + '이름을 누르면 기본 휴일을 봅니다</div>' +
     atOrg(r.people, true) + atSums(r.people) +
-    '<div class="nwbar"><button class="btn" onclick="atCal()">날짜 바꾸기</button><button class="btn" id="atImgBtn" onclick="atImage()">' + ICON.dl + '그림으로 저장</button></div></div>';
+    '<div class="nwbar"><button class="btn" onclick="atCal()">날짜 바꾸기</button><button class="btn pri" id="atImgBtn" onclick="atImage()">' + ICON.dl + '그림으로 저장</button></div></div>';
 }
 /* 달력: 그 달 날짜별 주간 인원 (엑셀 「주간근무총원」과 같은 셈). ‹ ›로 앞뒤 달 */
 function atCal() {
@@ -1933,10 +1906,13 @@ function renderLog() {
     '<div style="display:flex;align-items:center;gap:var(--sp-2);margin-bottom:var(--sp-3)"><button class="nwdate" data-date="' + h(g.day) + '" onclick="lgCal()" aria-label="일자 바꾸기">' + ICON.cal + md(g.day) + '</button>' +
     (g.day < g.srv.workDay ? '<span style="font-size:var(--size-s);color:var(--muted)">지난 날짜입니다 · 고치면 저장할 수 있습니다</span>' : '') + '</div>' +
     '<div id="lgSheet" style="zoom:' + lgZoom() + '">' + lgSheet(true) + '</div>' +
-    '<div class="nwbar" id="lgBar">' + docBar(lgDoc()) + '</div></div>';
+    '<div class="nwbar" id="lgBar"><span id="lgState">' + lgState() + '</span>' +
+    '<button class="btn" onclick="lgPrint()">' + ICON.print + '인쇄 (B4)</button>' +
+    (g.pdf && !g.dirty ? pdfBtn('', ICON.file + 'PDF 열기', g.pdf.url, { name: g.day + '_종합업무일지.pdf', sub: '서류작업 › 종합업무일지 ›' }) : '') +
+    '<button class="btn" id="lgPdf" onclick="lgPdf()"' + (g.busy ? ' disabled' : '') + '>' + ICON.file + (g.pdfBusy ? 'PDF 만드는 중…' : 'PDF로 저장') + '</button>' +
+    '<button class="btn pri" id="lgSave" onclick="lgSave()"' + (g.busy ? ' disabled' : '') + '>' + (g.busy && !g.pdfBusy ? '<span class="spin"></span>' : ICON.ok + '저장') + '</button></div></div>';
 }
-function lgDoc() { const g = S.lg; return { sid: 'lgState', state: lgState(), print: 'lgPrint()', id: 'lgSave', save: 'lgSave()', busy: g.busy, pdfBusy: g.pdfBusy, pdf: g.pdf && !g.dirty ? { url: g.pdf.url, pv: { name: g.day + '_종합업무일지.pdf', sub: '서류작업 › 종합업무일지 ›' } } : null }; }
-function lgDirty() { S.lg.dirty = true; const e = $('lgState'); if (e) e.innerHTML = lgState(); docSlotSet(lgDoc()); }
+function lgDirty() { S.lg.dirty = true; const e = $('lgState'); if (e) e.innerHTML = lgState(); }
 // 입력 중에는 다시 그리지 않음 (초점 유지) — 계산 칸만 바꿈
 function lgIn(el) {
   const k = el.dataset.k; S.lg.f[k] = el.value; lgDirty();
@@ -1952,13 +1928,22 @@ function lgPayload() {
   if (g.nightNew) d.night = g.nightNew;
   return d;
 }
+async function lgSave() {
+  const g = S.lg; if (g.busy) return;
+  g.busy = true; render();
+  try {
+    const r = await call('logSave', g.day, lgPayload(), g.ver || '');
+    if (r.conflict) { lgSet(r); toast(r.error); return; }
+    if (!r.ok) { g.busy = false; render(); toast(r.error); return; }
+    lgSet(r); toast('저장했습니다');
+  } catch (e) { g.busy = false; render(); }
+}
 /* 인쇄 = B4 가로 한 장. 종이 틀(1587×1120)을 0.867배 → 364×257mm */
 function lgPrint() {
   $('print').innerHTML = '<style>@page{size:364mm 257mm;margin:0}</style><div style="zoom:.8668">' + lgSheet(false) + '</div>';
   setTimeout(() => window.print(), 300);
 }
-// [저장] = 일지 저장 + PDF 만들기 한 번에 (결정 176)
-async function lgSave() {
+async function lgPdf() {
   const g = S.lg; if (g.busy) return;
   g.busy = true; g.pdfBusy = true; render();
   try {
@@ -1981,7 +1966,7 @@ async function lgSave() {
     const r = await call('logSavePdf', g.day, uri, g.dirty || !g.ver ? lgPayload() : null, g.ver || '');
     if (r.conflict) { lgSet(r); toast(r.error); return; }
     if (!r.ok) { g.busy = false; g.pdfBusy = false; render(); toast(r.error); return; }
-    lgSet(r); toast(r.warn || '저장하고 PDF도 만들었습니다');
+    lgSet(r); toast(r.warn || 'PDF로 저장했습니다');
   } catch (e) { g.busy = false; g.pdfBusy = false; render(); toast('PDF를 만들지 못했습니다: ' + (e && e.message ? e.message : e)); }
 }
 
@@ -2012,43 +1997,16 @@ function ahuCal() {
 function ahuSlot(t) { S.ahu.slot = t; render(); }
 // 입력 중에는 다시 그리지 않음 (초점 유지)
 function ahuIn(el) {
-  const g = S.ahu, k = el.dataset.k, u = el.dataset.u, t = el.dataset.t, val = ahuNorm(el.value); g.err = '';
+  const g = S.ahu, k = el.dataset.k, u = el.dataset.u, t = el.dataset.t, val = el.value.trim();
   if (u) { g.v.temps[u][t] = val; const c = g.ch.temps = g.ch.temps || {}; (c[u] = c[u] || {})[t] = val; }
   else { g.v[k] = val; g.ch[k] = val; }
   if (el.classList.contains('inp')) el.classList.toggle('empty', !val);
-  el.classList.toggle('bad', !!ahuCheck(k || 'u', val));
   const e = $('ahuState'); if (e) e.innerHTML = ahuState();
-  docSlotSet(ahuDoc());
   const n = t && $('ahuCnt' + t); if (n) n.textContent = ahuCount(t);
 }
-// 「22,5」→「22.5」, 「22.5℃」→「22.5」 (서버가 숫자만 받으므로 미리 고침)
-function ahuNorm(x) { return String(x).replace(/[℃%\s]/g, '').replace(/,/g, '.'); }
-// 칸 하나 검사 (서버 ws_ahu_save 와 같은 범위). 문제 없으면 ''
-function ahuCheck(k, val, name) {
-  if (val === '') return '';
-  const rg = k === 'u' ? [-10, 50] : k.indexOf('out_t') === 0 ? [-30, 50] : k.indexOf('out_h') === 0 ? [0, 100] : [-5, 40];
-  return /^-?\d+(\.\d+)?$/.test(val) && Number(val) >= rg[0] && Number(val) <= rg[1] ? '' : (name || '') + ' ' + rg[0] + ' ~ ' + rg[1] + ' 숫자로 넣어 주세요';
-}
-// 고친 칸 중 문제 있는 칸 [{k, u, t, msg}]
-function ahuBads() {
-  const g = S.ahu, out = [], nm = {};
-  AHU_OUT.forEach(o => { nm[o[0]] = o[1]; });
-  Object.keys(g.ch).forEach(k => {
-    if (k === 'temps') Object.keys(g.ch.temps).forEach(u => Object.keys(g.ch.temps[u]).forEach(t => { const m = ahuCheck('u', g.ch.temps[u][t], u + ' ' + t + ':00'); if (m) out.push({ u, t, msg: m }); }));
-    else { const m = ahuCheck(k, g.ch[k], nm[k.slice(0, 5)] + ' ' + k.slice(5) + ':00'); if (m) out.push({ k, t: k.slice(5), msg: m }); }
-  });
-  return out;
-}
 function ahuCount(t) { const g = S.ahu; return '입력 ' + g.srv.units.filter(u => g.v.temps[u.no][t] !== '').length + '/' + g.srv.units.length; }
-function ahuDoc() {
-  const g = S.ahu, pdf = g.srv.rec && g.srv.rec.pdf;
-  return { sid: 'ahuState', state: ahuState(), print: lgPc() ? 'ahuPrint()' : '', id: 'ahuSave', save: 'ahuPdf()', busy: g.busy, pdfBusy: g.pdfBusy, pdf: pdf && !ahuDirty() ? { url: pdf.url, pv: { name: g.day + '_공조기환기온도.pdf', sub: '서류작업 › 공조기 환기온도 ›' } } : null };
-}
 function ahuState() {
   const g = S.ahu, r = g.srv.rec;
-  const bad = ahuDirty() ? ahuBads() : [];
-  if (bad.length) return '<span class="nwstate dirty"><i class="dot"></i>고칠 칸 ' + bad.length + '개' + (g.err ? '<small class="hverr"> · ' + h(g.err) + '</small>' : '') + '</span>';
-  if (g.err) return '<span class="nwstate dirty"><i class="dot"></i>저장 안 함<small class="hverr"> · ' + h(g.err) + '</small></span>';
   return ahuDirty() ? '<span class="nwstate dirty"><i class="dot"></i>저장 안 함</span>' : r && r.ver ? '<span class="nwstate">' + ICON.ok + '저장됨' + (lgPc() ? ' · ' + h(String(r.ver).slice(11, 16)) + ' ' + h(r.by) : '') + '</span>' : '<span class="nwstate" style="color:var(--muted)">아직 저장 안 함</span>';
 }
 function ahuMd(d, y) { return (y ? d.slice(0, 4) + '년 ' : '') + Number(d.slice(5, 7)) + '월 ' + Number(d.slice(8, 10)) + '일 (' + '일월화수목금토'[new Date(d + 'T12:00:00+09:00').getDay()] + ')'; }
@@ -2058,10 +2016,7 @@ function ahuWx() {
   const w = S.ahu.srv.wx || {}, n = (x, u) => x == null || x === '' ? '—' : x + u;
   return [['날씨', w.weather || '—'], ['최저', n(w.tmin, '℃')], ['최고', n(w.tmax, '℃')], ['습도', n(w.humidity, '%')]];
 }
-function ahuBox(attrs, val, cls) {
-  const m = /data-k="([a-z_0-9]+)"/.exec(attrs), bad = ahuCheck(m ? m[1] : 'u', val) ? ' bad' : '';   // 고쳐야 할 칸은 다시 그려도 빨간 채로
-  return '<input class="' + cls + (val === '' && cls === 'inp' ? ' empty' : '') + bad + '" inputmode="decimal" maxlength="8" value="' + h(val) + '" ' + attrs + ' oninput="ahuIn(this)" onchange="this.value=ahuNorm(this.value)">';
-}
+function ahuBox(attrs, val, cls) { return '<input class="' + cls + (val === '' && cls === 'inp' ? ' empty' : '') + '" inputmode="decimal" maxlength="6" value="' + h(val) + '" ' + attrs + ' oninput="ahuIn(this)">'; }
 /** 종이 (화면·인쇄·PDF 같은 틀) */
 function ahuSheet(edit) {
   const g = S.ahu, us = g.srv.units, val = (a, x) => edit ? ahuBox(a, x, 'lgin') : h(x);
@@ -2084,7 +2039,12 @@ function renderAhu() {
   const g = S.ahu;
   if (!g) return topbar('서류작업 ›', '공조기 환기온도') + '<div class="wrap list"><div class="banner b-gray">불러오는 중…</div></div>';
   const past = g.day < g.srv.workDay ? '<span style="font-size:var(--size-s);color:var(--muted)">지난 날짜입니다 · 고치면 저장할 수 있습니다</span>' : '';
-  const bar = '<div class="nwbar" id="ahuBar">' + docBar(ahuDoc()) + '</div>';
+  const pv = g.srv.rec && g.srv.rec.pdf && !ahuDirty() ? [g.srv.rec.pdf.url, { name: g.day + '_공조기환기온도.pdf', sub: '서류작업 › 공조기 환기온도 ›' }] : null;
+  const pdf = pv ? pdfBtn('', ICON.file + 'PDF 열기', pv[0], pv[1]) : '';   // 휴대폰은 아래 줄이 좁아 위 글자 링크로
+  const bar = '<div class="nwbar" id="ahuBar"><span id="ahuState">' + ahuState() + '</span>' +
+    '<button class="btn pri" id="ahuSave" onclick="ahuSave()"' + (g.busy ? ' disabled' : '') + '>' + (g.busy && !g.pdfBusy ? '<span class="spin"></span>' : '저장') + '</button>' +
+    (lgPc() ? '<button class="btn" onclick="ahuPrint()">' + ICON.print + '인쇄 (B4)</button>' + pdf : '') +
+    '<button class="btn green" id="ahuPdf" onclick="ahuPdf()"' + (g.busy ? ' disabled' : '') + '>' + (g.pdfBusy ? 'PDF 만드는 중…' : 'PDF 만들기') + '</button></div>';
   const date = '<button class="nwdate" data-date="' + h(g.day) + '" onclick="ahuCal()" aria-label="일자 바꾸기">' + ICON.cal + ahuMd(g.day) + '</button>';
   if (lgPc()) return topbar('서류작업 ›', '공조기 환기온도') + '<div class="lgwrap">' +
     '<div style="display:flex;align-items:center;gap:var(--sp-2);margin-bottom:var(--sp-3)">' + date + (past || '<span style="font-size:var(--size-s);color:var(--muted)">칸을 눌러 바로 입력 · 휴대폰에서 넣은 값도 여기 보임</span>') + '</div>' +
@@ -2095,7 +2055,7 @@ function renderAhu() {
     '<label class="hvin">' + ahuBox('data-u="' + h(u.no) + '" data-t="' + t + '" aria-label="' + h(u.no) + ' 환기온도"', g.v.temps[u.no][t], 'inp') + '<span>℃</span></label></div>').join('');
   return topbar('서류작업 ›', '공조기 환기온도') + '<div class="wrap list">' +
     '<div class="card" style="padding:var(--sp-4)"><div class="hvhd"><b>AHU 환기온도 점검일지</b>' + date + '</div>' +
-    '<div class="hvmeta">' + (ahuLong(g.day) ? '<span class="hvchip">연장영업</span>' : '') + '점검자 ' + h(ahuWho()) + (past ? '<br>' + past : '') + '</div>' +
+    '<div class="hvmeta">' + (ahuLong(g.day) ? '<span class="hvchip">연장영업</span>' : '') + '점검자 ' + h(ahuWho()) + (pv ? ' · ' + pdfBtn(null, 'PDF 열기', pv[0], pv[1]) : '') + (past ? '<br>' + past : '') + '</div>' +
     '<div class="seg hvtime" role="group" aria-label="점검 시각">' + ['12', '16'].map(x => '<button type="button" class="' + (x === t ? 'on' : '') + '" aria-pressed="' + (x === t) + '" onclick="ahuSlot(\'' + x + '\')">' + x + ':00<small id="ahuCnt' + x + '">' + ahuCount(x) + '</small></button>').join('') + '</div>' +
     '<div class="hvw">' + AHU_OUT.map(x => '<label>' + x[1] + '<span class="hvin">' + ahuBox('data-k="' + x[0] + t + '"', g.v[x[0] + t], 'inp') + '<span>' + x[2] + '</span></span></label>').join('') + '</div>' +
     '<div class="hvmeta">' + ahuWx().map(x => x[0] + ' ' + h(x[1])).join(' · ') + ' <span style="color:var(--muted)">(종합업무일지에서 자동)</span></div></div>' +
@@ -2104,40 +2064,22 @@ function renderAhu() {
 async function ahuSave(quiet) {
   const g = S.ahu; if (g.busy) return false;
   if (!ahuDirty()) { if (!quiet) toast('바뀐 것이 없습니다'); return true; }
-  const bad = ahuBads();
-  if (bad.length) {   // 서버에 보내기 전에: 첫 문제 칸으로 가서 이유를 아래 줄에 남김 (사라지는 알림만으로는 놓침)
-    const b = bad[0]; g.err = b.msg;
-    if (!lgPc() && g.slot !== b.t) g.slot = b.t;
-    render(); toast(b.msg);
-    const el = document.querySelector(b.u ? '[data-u="' + b.u + '"][data-t="' + b.t + '"]' : '[data-k="' + b.k + '"]');
-    if (el) { el.scrollIntoView({ block: 'center' }); el.focus(); }
-    return false;
-  }
-  const sent = JSON.parse(JSON.stringify(g.ch));
   g.busy = true; render();
   try {
     const r = await call('ahuSave', g.day, g.ch);
-    if (!r.ok) { g.busy = false; g.err = r.error; render(); toast(r.error); return false; }
-    const late = g.ch;   // 저장하는 사이에 더 넣은 값은 지우지 않고 「저장 안 함」으로 남김
-    ahuSet(r); ahuLate(late, sent); if (!quiet) toast('저장했습니다'); return true;
-  } catch (e) { g.busy = false; g.err = '서버에 닿지 않았습니다. 다시 눌러 주세요'; render(); return false; }
-}
-function ahuLate(late, sent) {
-  const g = S.ahu, tp = late.temps || {}, st = sent.temps || {};
-  Object.keys(tp).forEach(u => Object.keys(tp[u]).forEach(t => { const x = tp[u][t]; if ((st[u] || {})[t] !== x) { g.v.temps[u][t] = x; ((g.ch.temps = g.ch.temps || {})[u] = g.ch.temps[u] || {})[t] = x; } }));
-  Object.keys(late).forEach(k => { if (k !== 'temps' && sent[k] !== late[k]) { g.v[k] = late[k]; g.ch[k] = late[k]; } });
-  if (ahuDirty()) render();
+    if (!r.ok) { g.busy = false; render(); toast(r.error); return false; }
+    ahuSet(r); if (!quiet) toast('저장했습니다'); return true;
+  } catch (e) { g.busy = false; render(); return false; }
 }
 /* 인쇄 = B4 가로 한 장 (1376px = 364mm) */
-async function ahuPrint() {
-  if (ahuDirty() && !(await ahuSave(true))) return;   // 저장 안 한 값이 있으면 먼저 저장 (인쇄만 하면 기록에 안 남음)
+function ahuPrint() {
   $('print').innerHTML = '<style>@page{size:364mm 257mm;margin:0}</style>' + ahuSheet(false);
   setTimeout(() => window.print(), 300);
 }
 async function ahuPdf() {
   if (S.ahu.busy) return;
   if (ahuDirty() && !(await ahuSave(true))) return;
-  if (!S.ahu.srv.rec) { toast('먼저 값을 넣어 주세요'); return; }
+  if (!S.ahu.srv.rec) { toast('먼저 값을 넣고 저장해 주세요'); return; }
   const g = S.ahu; g.busy = true; g.pdfBusy = true; render();
   try {
     await loadH2p();
@@ -2158,7 +2100,7 @@ async function ahuPdf() {
     } finally { wrap.remove(); }
     const r = await call('ahuSavePdf', g.day, uri);
     if (!r.ok) { g.busy = false; g.pdfBusy = false; render(); toast(r.error); return; }
-    ahuSet(r); toast('저장하고 PDF도 만들었습니다');
+    ahuSet(r); toast('PDF로 저장했습니다');
   } catch (e) { g.busy = false; g.pdfBusy = false; render(); toast('PDF를 만들지 못했습니다: ' + (e && e.message ? e.message : e)); }
 }
 
@@ -2321,40 +2263,9 @@ function renderInspect() {
   return topbar('업무지원 ›', '점검') + '<div class="wrap list">' +
     '<button class="row" onclick="go(\'fire\')"><span class="ico" style="background:var(--blue-bg);color:var(--blue);font-weight:600">소</span><span class="fname"><b style="font-size:var(--size-m)">소화기 점검</b><small>QR 관리·인쇄 · 월별 점검 현황</small></span>' + ICON.chev + '</button>' +
     '<button class="row" onclick="openEh()"><span class="ico" style="background:var(--orange-bg);color:var(--orange);font-weight:600">전</span><span class="fname"><b style="font-size:var(--size-m)">전열필증</b><small>층·매장별 전열기기 관리 · 신고필증' + (CAN_PRINT ? ' 출력' : ' (출력은 PC에서)') + '</small></span>' + ICON.chev + '</button>' +
-    (thCanOpen()
-      ? '<button class="row" onclick="go(\'thermal\')"><span class="ico" style="background:var(--blue-bg);color:var(--blue);font-weight:600">열</span><span class="fname"><b style="font-size:var(--size-m)">열화상점검</b><small>FLIR 열화상 사진 → 점검 보고서(.atr) · PC 전용</small></span>' + ICON.chev + '</button>'
-      : '<button class="row" disabled style="opacity:.5;cursor:default"><span class="ico" style="background:var(--blue-bg);color:var(--blue);font-weight:600">열</span><span class="fname"><b style="font-size:var(--size-m)">열화상점검</b></span></button>') +
     '<button class="row" onclick="openCs()"><span class="ico" style="background:var(--green-bg);color:var(--green);font-weight:600">공</span><span class="fname"><b style="font-size:var(--size-m)">공사장 점검</b><small>공사 현장 안전 순찰 · 사진 · 날짜별 현장별 PDF</small></span>' + ICON.chev + '</button>' +
     '</div>';
 }
-
-/* ── 열화상점검 (결정 166): 직원은 이름만(눌리지 않음), 소장·부소장·관리자·옵저버만 엶. 앱은 PC 프로그램이라 안내만 ── */
-const thCanOpen = () => !!S.user && ['소장', '부소장', '관리자', '옵저버'].indexOf(S.user.role) !== -1;
-const THERMAL_ON = false;   // shortcut: 작성기 fm/thermal 이 바로가기 페이지에 없어 안내 화면만. 붙이는 날(WS_열화상점검 3장) true
-function renderThermal() {
-  if (!thCanOpen()) return renderInspect();
-  if (window.WS_API && THERMAL_ON) return '<div class="mapview">' + topbar('점검 ›', '열화상점검') + '<iframe class="mapframe" src="../thermal/index.html" title="열화상 보고서 작성" allow="fullscreen"></iframe>' +
-    '<button class="btn mapback" onclick="back()">' + ICON.back + '뒤로</button></div>';   // 작성기(fm/thermal)를 지도처럼 화면 안 창으로 (결정 168)
-  return topbar('점검 ›', '열화상점검') + '<div class="wrap list">' +
-    '<div class="banner b-gray">준비 중입니다. 지금은 사무실 PC에서만 씁니다.</div>' +
-    '<div class="card" style="padding:var(--sp-4)"><h3 style="margin:0 0 var(--sp-2);font-size:var(--size-m)">할 수 있는 일</h3><div style="line-height:1.7">FLIR 열화상 사진(.jpg)을 넣으면 점 3개(R·S·T상) 온도와 상간 온도차를 계산해 FLIR Thermal Studio 보고서(.atr)로 만듭니다.</div></div>' +
-    '<div class="card" style="padding:var(--sp-4)"><h3 style="margin:0 0 var(--sp-2);font-size:var(--size-m)">쓰는 방법 (PC)</h3><div style="line-height:1.7">FLIR Thermal Studio가 깔린 PC에서 <b>run.bat</b>을 두 번 누르면 화면이 열립니다. 사진 이름은 <b>1층1번_일반.jpg</b>처럼 붙입니다.</div></div>' +
-    '</div>';
-}
-
-/* 작성기(fm/thermal)가 부르는 통로 (결정 168, WS_열화상점검 3장). 자료는 PIN 로그인 표로 16_thermal.sql 함수만 */
-const thExt = n => { const m = /\.([A-Za-z0-9]{1,5})$/.exec(String(n || '')); return m ? m[1].toLowerCase() : 'bin'; };
-const thOk = r => { if (!r || !r.ok) throw new Error((r && r.error) || '저장하지 못했습니다'); return r; };
-window.WS_THERMAL = {
-  me: async () => ({ name: S.user ? S.user.name : '', role: S.user ? S.user.role : '' }),
-  boot: async () => { const r = thOk(await call('thermalBoot')); return { me: r.me, model: r.model, template: r.template, template_url: r.template ? r.template.url : '', reports: r.reports }; },
-  saveModel: async m => thOk(await call('thermalSet', 'model', m)),
-  saveTemplate: async t => thOk(await call('thermalSet', 'template', t)),   // t = upload() 결과 + name
-  upload: (blob, name) => WS_API.upload('thermal', blob, thExt(name)),   // 원본 그대로 (줄이지 않음)
-  saveReport: async r => thOk(await call('thermalReport', r)),
-  toDrive: async () => { throw new Error('구글 드라이브로 옮기기는 다음 단계에서 됩니다. 지금은 내려받아 주세요.'); },
-  full: on => mapFull(on)
-};
 
 /* ── 개선 A: 입력 기간 안내 ── */
 function periodBanner(st, counts) {
@@ -2382,14 +2293,9 @@ function renderFire() {
     '<div class="card" style="padding:var(--sp-3) var(--sp-4);display:flex;flex-direction:column;gap:var(--sp-2)"><div style="display:flex;justify-content:space-between;font-size:var(--size-m)"><span style="color:var(--muted)">이번 달 점검</span><span><b style="color:var(--green)">' + done + '</b> / ' + c.total + '대</span></div>' +
     '<div class="bar" style="height:8px"><span style="width:' + pct + '%;background:var(--green)"></span></div></div>' +
     periodBanner(st, c) +
-    '<button class="row" onclick="openQr()"><span class="ico" style="background:var(--blue-bg);color:var(--blue);width:48px;height:48px">QR</span><span class="fname"><b style="font-size:var(--size-l)">① 소화기, 소화전, 공기호흡기 QR 관리 · 인쇄</b><small>매장별 소화기 등록 · 삭제 · QR' + (CAN_PRINT ? ' · 출력' : ' (출력은 PC에서)') + '</small></span>' + ICON.chev + '</button>' +
+    '<button class="row" onclick="openQr()"><span class="ico" style="background:var(--blue-bg);color:var(--blue);width:48px;height:48px">QR</span><span class="fname"><b style="font-size:var(--size-l)">① 소화기 QR 관리 · 인쇄</b><small>매장별 소화기 등록 · 삭제 · QR' + (CAN_PRINT ? ' · 출력' : ' (출력은 PC에서)') + '</small></span>' + ICON.chev + '</button>' +
     '<button class="row" onclick="openStatus()"><span class="ico" style="background:var(--green-bg);color:var(--green);width:48px;height:48px">✓</span><span class="fname"><b style="font-size:var(--size-l)">② 매장별 소화기 점검 현황</b><small>월별 · 층별(B1~6F) · 매장별</small></span>' + ICON.chev + '</button>' +
-    '<button class="row" onclick="go(\'hyd\')"><span class="ico" style="background:var(--blue-bg);color:var(--blue);width:48px;height:48px">③</span><span class="fname"><b style="font-size:var(--size-l)">③ 층별 소화전, 공기호흡기 점검 현황</b><small>수정중</small></span>' + ICON.chev + '</button>' +
     '</div>';
-}
-/* ③ 소화전·공기호흡기: 점검 양식은 추후 올림 → 그때까지 「수정중」 (결정 170) */
-function renderHyd() {
-  return topbar('소화기 점검 ›', '층별 소화전, 공기호흡기 점검 현황') + '<div class="wrap list"><div class="banner b-gray">수정중입니다. 소화전·공기호흡기 점검 양식이 올라오면 이 화면을 만듭니다.</div></div>';
 }
 
 /* ── ① QR 관리 ── */
@@ -2669,14 +2575,6 @@ function withBack(html) { return html.replace(/<div class="(nwbar|csbar-in)"( id
    Supabase 저장소 PDF는 바로 받고, 드라이브로 옮긴 PDF는 구글 웹앱 ?api=pdf 가 대신 받아 줌(「링크가 있는 사람 보기」 파일만). 구글 판은 예전처럼 새 창 */
 const PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
 const PV_Z = [1, 1.5, 2, 3];
-/* 서류 화면 아래 줄 공통 (결정 176) — 왼쪽 상태 글자, 오른쪽 아래 [인쇄] + [저장 ⇄ PDF 보기]. 남색은 「저장」 하나.
-   저장하면 PDF도 같이 만들고, 끝나면 그 자리가 [PDF 보기]. 고치면 다시 [저장]. o = { sid, state, print, id, save, label, busy, pdfBusy, pdf: { url, pv } | null } */
-function docSlot(o) {
-  return o.pdf ? pdfBtn('', 'PDF 보기', o.pdf.url, o.pdf.pv) :
-    '<button class="btn pri"' + (o.id ? ' id="' + o.id + '"' : '') + ' onclick="' + o.save + '"' + (o.busy ? ' disabled' : '') + '>' + (o.busy ? '<span class="spin"></span> ' + (o.pdfBusy ? 'PDF 만드는 중…' : '저장 중…') : o.label || '저장') + '</button>';
-}
-function docBar(o) { return '<span id="' + o.sid + '">' + o.state + '</span>' + (o.print ? '<button class="btn" onclick="' + o.print + '">' + ICON.print + '인쇄 (B4)</button>' : '') + '<div class="dslot" id="' + o.sid + 'Slot">' + docSlot(o) + '</div>'; }
-function docSlotSet(o) { const e = $(o.sid + 'Slot'); if (e) e.innerHTML = docSlot(o); }
 function pdfBtn(cls, label, url, o) {   // o = { name, sub, meta } — 돌아갈 화면은 지금 화면, cls = null 이면 글자 링크
   return '<a' + (cls == null ? '' : ' class="btn ' + cls + '"') + ' href="' + h(url) + '" target="_blank" rel="noopener" data-pv="' + h(JSON.stringify(o)) + '" onclick="return pdfOpen(this)">' + label + '</a>';
 }
@@ -3022,39 +2920,31 @@ function renderCs() {
 }
 function csSitesToday() {
   const r = S.cs, sites = r.sites.map(s => Object.assign({ live: true }, s));
+  r.today.forEach(c => { if (!sites.some(s => s.id === c.site)) sites.push({ id: c.site, name: c.name, work: c.work, co: c.co }); });   // 오늘 점검 뒤 공사 끝낸 현장도 오늘 칸엔 보임
   return sites;
 }
 // 검색하면 이 칸만 다시 그림 (글자 칸은 그대로 — 한글 입력 끊기지 않게)
-function csSearch(v) { S.csQ = v; S.csOpen = {}; const e = $('csRes'); if (e) e.innerHTML = csResHtml(); }
+function csSearch(v) { S.csQ = v; const e = $('csRes'); if (e) e.innerHTML = csResHtml(); }
 function csResHtml() {
   const r = S.cs, q = String(S.csQ || '').replace(/\s/g, '').toLowerCase();
   const by = {}; csGroups(r.today).forEach(g => { by[g.site] = g; });
   const sites = csSitesToday().filter(s => csHit(q, Object.assign({ date: r.day }, s)));
-  const past = csGroups(r.past.concat(r.today.filter(c => !r.sites.some(x => x.id === c.site)))).filter(g => csHit(q, g));   // 공사 완료한 현장의 오늘 점검도 지난 점검으로
-  const days = [];
-  past.forEach(g => { let d = days.find(x => x.date === g.date); if (!d) days.push(d = { date: g.date, g: [] }); d.g.push(g); });
-  days.sort((a, b) => a.date < b.date ? 1 : -1);
-  const more = days.length > 30 ? '<div class="banner b-gray">' + (q ? '찾은 날이 많아 최근 30일만 보입니다. 검색어를 더 넣어 주세요.' : '최근 30일만 보입니다. 날짜·현장으로 검색해 주세요.') + '</div>' : '';
-  const acc = days.slice(0, 30).map((d, i) => {
-    const open = S.csOpen && d.date in S.csOpen ? S.csOpen[d.date] : (q ? true : i === 0), bad = d.g.reduce((a, g) => a + g.list.reduce((b, c) => b + (c.bad || 0), 0), 0);
-    return '<button class="csacc' + (open ? ' on' : '') + '" aria-expanded="' + open + '" onclick="csAcc(\'' + d.date + '\',this)"><b>' + csDay(d.date) + '</b><span class="csn">' + d.g.length + '곳</span>' + (bad ? '<span class="cschip bad">미흡 ' + bad + '건</span>' : '') + '<span class="csar" aria-hidden="true"></span></button>' +
-      (open ? d.g.map(g => csRowHtml({ id: g.site, name: g.name }, g, g.date, 0)).join('') : '');
-  }).join('');
+  const past = csGroups(r.past).filter(g => csHit(q, g));
+  const more = past.length > 60 ? '<div class="banner b-gray">' + (q ? '찾은 것이 많아 60개만 보입니다. 검색어를 더 넣어 주세요.' : '최근 60개만 보입니다. 날짜·현장으로 검색해 주세요.') + '</div>' : '';
   return (sites.length ? '<div class="card cslist">' + sites.map((s, i) => csRowHtml(s, by[s.id], r.day, i + 1)).join('') + '</div>'
     : '<div class="banner b-gray">' + (q ? '오늘 현장 중 「' + h(S.csQ) + '」 없음' : '진행 중인 공사 현장이 없습니다. 아래에서 현장을 추가해 주세요.') + '</div>') +
-    '<div class="csbtns"><button class="btn big csadd" onclick="csSiteOpen()">＋ 새 공사 현장 추가</button><button class="btn big csdone" onclick="csDoneOpen()"' + (r.sites.length ? '' : ' disabled') + '>공사 완료</button>' + (r.admin ? '<button class="btn csitb" onclick="csItemsOpen()">기본 항목 고치기 (' + r.items.filter(x => x.use).length + ' / ' + r.items.length + ')</button>' : '') + '</div>' +
-    (days.length ? '<div class="cssec">지난 점검' + (q ? ' · ' + past.length + '건' : '') + '</div><div class="card cslist">' + acc + '</div>' + more
+    '<div class="csbtns"><button class="btn big csadd" onclick="csSiteOpen()">＋ 새 공사 현장 추가</button>' + (r.admin ? '<button class="btn" onclick="csItemsOpen()">기본 항목 고치기 (' + r.items.filter(x => x.use).length + ' / ' + r.items.length + ')</button>' : '') + '</div>' +
+    (past.length ? '<div class="cssec">지난 점검' + (q ? ' · ' + past.length + '건' : '') + '</div><div class="card cslist">' + past.slice(0, 60).map(g => csRowHtml({ id: g.site, name: g.name }, g, g.date, 0)).join('') + '</div>' + more
       : q ? '<div class="cssec">지난 점검</div><div class="banner b-gray">「' + h(S.csQ) + '」 지난 점검 없음</div>' : '');
 }
-function csAcc(d, el) { S.csOpen = S.csOpen || {}; S.csOpen[d] = el.getAttribute('aria-expanded') !== 'true'; const e = $('csRes'); if (e) e.innerHTML = csResHtml(); }
 function csRowHtml(s, g, date, no) {
   const pdf = g && csDayPdf(g.list), sub = no ? [s.work, s.co].filter(Boolean).join(' · ') : '';
   const round = no ? '' : ',' + Math.min.apply(null, g.list.map(c => c.round));   // 지난 점검은 첫 회차부터 (위 칸으로 다른 회차)
   return '<div class="csrow"><button class="csgo" onclick="csOpen(\'' + date + '\',\'' + h(s.id) + '\'' + round + ')">' + (no ? '<span class="csno">' + no + '</span>' : '') +
-    '<span class="fname"><b>' + h(s.name) + '</b>' + (sub ? '<small>' + h(sub) + '</small>' : '') +
+    '<span class="fname"><b>' + h(no ? s.name : csDay(date) + ' · ' + s.name) + '</b>' + (sub ? '<small>' + h(sub) + '</small>' : '') +
     '<span class="csrd">' + csRds(g && g.r[3]).map(n => csRdChip(g && g.r[n], n)).join('') + '</span></span></button>' +
     (pdf ? pdfBtn('sm', 'PDF', pdf.url, { name: date + '_공사장점검-' + s.name + '.pdf', sub: '공사장 점검 ›' }) : '') +
-    (no && s.live ? '<button class="btn sm ehmore" onclick="csSiteMenu(\'' + h(s.id) + '\')" aria-label="' + h(s.name) + ' 고치기·공사 완료">⋯</button>' : '') + '</div>';
+    (no && s.live ? '<button class="btn sm ehmore" onclick="csSiteMenu(\'' + h(s.id) + '\')" aria-label="' + h(s.name) + ' 고치기·공사 끝">⋯</button>' : '') + '</div>';
 }
 function csSiteOpen(id) {
   const s = (id && S.cs.sites.find(x => x.id === id)) || { name: '', work: '', co: '' };
@@ -3076,29 +2966,14 @@ async function csSiteSaveBtn(id) {
 }
 function csSiteMenu(id) {
   const s = S.cs.sites.find(x => x.id === id); if (!s) return;
-  dialog('<h3 class="ehdh">' + h(s.name) + '</h3><p class="ehdp">공사가 끝나면 「공사 완료」로 목록에서 뺍니다. 지난 점검과 PDF는 그대로 남습니다.</p>' +
-    '<div class="ehda"><button class="btn big" style="flex:1" onclick="csSiteOpen(\'' + h(id) + '\')">고치기</button><button class="btn big warn" style="flex:1" onclick="csSiteEndBtn(\'' + h(id) + '\')">공사 완료</button></div>');
+  dialog('<h3 class="ehdh">' + h(s.name) + '</h3><p class="ehdp">공사가 끝나면 「공사 끝」으로 목록에서 뺍니다. 지난 점검과 PDF는 그대로 남습니다.</p>' +
+    '<div class="ehda"><button class="btn big" style="flex:1" onclick="csSiteOpen(\'' + h(id) + '\')">고치기</button><button class="btn big warn" style="flex:1" onclick="csSiteEndBtn(\'' + h(id) + '\')">공사 끝</button></div>');
 }
 async function csSiteEndBtn(id) {
   if (!confirm('이 현장을 목록에서 뺄까요?')) return;
   const r = await call('csSiteEnd', id);
   if (!r.ok) return toast(r.error);
-  closeDialog(); await loadCs(); toast('공사 완료 — 목록에서 뺐습니다');
-}
-// 공사 완료: 끝난 현장을 여러 곳 골라 한 번에 뺌 (점검 기록·PDF는 지난 점검에 남음)
-function csDoneOpen() {
-  const sites = S.cs.sites; if (!sites.length) return toast('공사 완료할 현장이 없습니다');
-  dialog('<h3 class="ehdh">공사 완료</h3><p class="ehdp">끝난 현장을 고르세요. 오늘 점검할 현장에서 빠지고, 지난 점검 기록·PDF는 그대로 남아 검색됩니다.</p><div class="card cslist">' +
-    sites.map(s => '<label class="csdl"><input type="checkbox" value="' + h(s.id) + '" onchange="csDoneCnt()"><span><b>' + h(s.name) + '</b><small>' + h([s.work, s.co].filter(Boolean).join(' · ')) + '</small></span></label>').join('') + '</div>' +
-    '<div class="ehda"><button class="btn big" style="flex:1" onclick="closeDialog()">취소</button><button class="btn big pri" style="flex:2" id="csDb" disabled onclick="csDoneGo()">현장을 고르세요</button></div>');
-}
-function csDoneCnt() { const n = document.querySelectorAll('.csdl input:checked').length, b = $('csDb'); b.disabled = !n; b.textContent = n ? '선택한 ' + n + '곳 공사 완료' : '현장을 고르세요'; }
-async function csDoneGo() {
-  const ids = [...document.querySelectorAll('.csdl input:checked')].map(x => x.value); if (!ids.length) return;
-  if (!confirm(ids.length + '곳을 공사 완료로 목록에서 뺄까요?\n지난 점검 기록·PDF는 남습니다.')) return;
-  $('csDb').disabled = true; let n = 0, err = '';
-  for (const id of ids) { const r = await call('csSiteEnd', id); if (!r.ok) { err = r.error; break; } n++; }
-  closeDialog(); await loadCs(); toast(err ? '공사 완료 ' + n + '곳 · ' + err : '공사 완료 ' + n + '곳 — 목록에서 뺐습니다');
+  S.cs.sites = r.sites; closeDialog(); render(); toast('공사 끝 — 목록에서 뺐습니다');
 }
 /* 기본 항목 (관리자만, 사용자 11-11): 더하기·지우기 → 새로 시작하는 점검부터 씀 */
 function csItemsOpen() { S.csIt = S.cs.items.map(x => ({ t: x.t, d: x.d, use: !!x.use })); csItemsDraw(); }
@@ -3154,14 +3029,15 @@ function renderCsCk() {
   const k = S.ck;
   if (!k) return topbar('공사장 점검 ›', '불러오는 중') + '<div class="wrap list"><div class="banner b-gray">불러오는 중…</div></div>';
   const c = csCnt(k), left = k.items.length - c['양호'] - c['미흡'] - c['해당없음'];
-  const R = CS_RD[k.round - 1];
+  const R = CS_RD[k.round - 1], dp = csDayPdf(k.rounds);
   return topbar(csDay(k.date) + ' 공사장 점검', k.site.name) + '<div class="wrap list" style="padding-bottom:120px">' + csTabsHtml(k) +
     '<div class="card csmeta"><div><small>현장</small><b>' + h(k.site.name) + '</b></div><div><small>공사 내용 · 업체</small><b>' + h([k.site.work, k.site.co].filter(Boolean).join(' · ') || '-') + '</b></div>' +
     '<div><small>점검자 <em>자동</em></small><b>' + h(k.check ? k.check.by : S.user.name) + '</b></div><div><small>' + R + ' 시각 <em>자동</em></small><b>' + h(k.check ? k.check.at : '처음 저장할 때') + '</b></div></div>' +
     k.items.map(csItemHtml).join('') +
     '<button class="btn big csadd" onclick="csExtraOpen()">＋ 이 현장에 점검 항목 추가</button></div>' +
     '<div class="csbar"><div class="csbar-in"><div><b>미흡 ' + c['미흡'] + ' · 양호 ' + c['양호'] + (c['해당없음'] ? ' · 해당없음 ' + c['해당없음'] : '') + '</b>' + (left ? ' · 안 고름 ' + left : '') + '<br><span id="csSt">' + csStateHtml() + '</span></div>' +
-    '<div class="dslot" id="csSlot">' + csSlotHtml(k) + '</div></div></div>';
+    (dp && !dp.stale && !k.pdfBusy ? pdfBtn('big', 'PDF 열기', dp.url, { name: k.date + '_공사장점검-' + k.site.name + '.pdf', sub: '공사장 점검 ›' }) : '') +
+    '<button class="btn big pri" onclick="csPdf()"' + (k.pdfBusy ? ' disabled' : '') + '>' + (k.pdfBusy ? '<span class="spin"></span> PDF 만드는 중' : dp && !dp.stale ? 'PDF 다시' : '점검 끝 · PDF') + '</button></div></div>';
 }
 function csItemHtml(x, i) {
   return '<div class="card csit' + (x.st === '미흡' ? ' bad' : '') + '"><h3><span>' + (i + 1) + '. ' + h(x.t) + '</span>' + (x.extra ? '<button class="btn sm warn" onclick="csExtraDel(' + i + ')">지우기</button>' : '') + '</h3>' +
@@ -3193,13 +3069,7 @@ function csExtraAdd() {
 function csExtraDel(i) { if (!confirm('「' + S.ck.items[i].t + '」 항목을 지울까요?')) return; S.ck.items.splice(i, 1); csDirty(); render(); }
 let CS_T = null;
 function csDirty(now) { const k = S.ck; k.ver++; k.dirty = true; k.err = false; csStRefresh(); clearTimeout(CS_T); CS_T = setTimeout(csFlush, now ? 0 : 1500); }
-function csStRefresh() { const e = $('csSt'); if (e && S.ck) e.innerHTML = csStateHtml(); const b = $('csSlot'); if (b && S.ck) b.innerHTML = csSlotHtml(S.ck); }
-// [점검 끝] = 저장 + PDF, 끝나면 [PDF 보기], 고치면 다시 [점검 끝] (결정 176)
-function csSlotHtml(k) {
-  const dp = csDayPdf(k.rounds);
-  return dp && !dp.stale && !k.dirty && !k.pdfBusy ? pdfBtn('big', 'PDF 보기', dp.url, { name: k.date + '_공사장점검-' + k.site.name + '.pdf', sub: '공사장 점검 ›' }) :
-    '<button class="btn big pri" onclick="csPdf()"' + (k.pdfBusy ? ' disabled' : '') + '>' + (k.pdfBusy ? '<span class="spin"></span> PDF 만드는 중' : '점검 끝') + '</button>';
-}
+function csStRefresh() { const e = $('csSt'); if (e && S.ck) e.innerHTML = csStateHtml(); }
 function csFlush() {
   const k = S.ck;
   if (!k) return Promise.resolve(true);
@@ -3308,10 +3178,8 @@ function render() {
   else if (S.view === 'att') html = renderAtt();
   else if (S.view === 'attup') html = renderAttUp();
   else if (S.view === 'inspect') html = renderInspect();
-  else if (S.view === 'thermal') html = renderThermal();
   else if (S.view === 'fire') html = renderFire();
   else if (S.view === 'qr') html = renderQr();
-  else if (S.view === 'hyd') html = renderHyd();
   else if (S.view === 'eh') html = renderEh();
   else if (S.view === 'cs') html = renderCs();
   else if (S.view === 'csck') html = renderCsCk();
