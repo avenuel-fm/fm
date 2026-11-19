@@ -575,7 +575,30 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                 layer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                 layer.setAttribute('id', 'info-layer');
             }
+            // 업체 도면은 그림 밑에 50×50 받침 사각형을 따로 그림 → 같이 옮겨야 끌 때 바닥이 보임
+            const at = (el, x, y) => { const m = el.transform && el.transform.baseVal.consolidate(); return m ? [x + m.matrix.e, y + m.matrix.f] : [x, y]; };
+            const spots = icons.map(g => {
+                const im = g.querySelector('image'), n = a => parseFloat(im.getAttribute(a)) || 0;
+                return at(g, n('x') + n('width') / 2, n('y') + n('height') / 2);
+            });
+            const plates = Array.from(svgEl.querySelectorAll('path[stroke="#ffffff"]')).filter(p => {
+                if (p.closest('#info-layer') || !/^#(334155|67615d)$/i.test(p.getAttribute('fill') || '')) return false;
+                const v = (p.getAttribute('d') || '').match(/-?\d+(\.\d+)?/g); if (!v) return false;
+                const xs = v.filter((_, i) => i % 2 === 0).map(Number), ys = v.filter((_, i) => i % 2).map(Number);
+                if (Math.max(...xs) - Math.min(...xs) > 80 || Math.max(...ys) - Math.min(...ys) > 80) return false;
+                const [cx, cy] = at(p, (Math.max(...xs) + Math.min(...xs)) / 2, (Math.max(...ys) + Math.min(...ys)) / 2);
+                return spots.some(([x, y]) => Math.abs(x - cx) <= 10 && Math.abs(y - cy) <= 10);
+            });
+            plates.forEach(p => layer.insertBefore(p, layer.firstChild));
             icons.forEach(g => layer.appendChild(g));
+            // 그림 색 통일: 밝은 부분은 흰색, 나머지는 받침과 같은 남색(#334155)
+            if (!layer.querySelector('#info-tint')) {
+                layer.insertAdjacentHTML('afterbegin', '<defs><filter id="info-tint" color-interpolation-filters="sRGB">'
+                    + '<feColorMatrix type="matrix" values="0.3 0.59 0.11 0 0  0.3 0.59 0.11 0 0  0.3 0.59 0.11 0 0  0 0 0 1 0"/>'
+                    + '<feComponentTransfer><feFuncR type="discrete" tableValues="0.2 1"/><feFuncG type="discrete" tableValues="0.255 1"/><feFuncB type="discrete" tableValues="0.333 1"/></feComponentTransfer>'
+                    + '</filter></defs>');
+            }
+            layer.querySelectorAll('image').forEach(im => im.setAttribute('filter', 'url(#info-tint)'));
             layer.style.pointerEvents = 'none';   // 그림을 눌러도 매장 그리기·선택을 막지 않음
             layer.style.display = infoLayerOn() ? '' : 'none';
             return layer;
