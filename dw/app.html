@@ -12,7 +12,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
   <script src="../apps.js"></script>
   <script src="config.js"></script>
-  <script>window.DW_VERSION = '1.9.3';</script>
+  <script>window.DW_VERSION = '1.9.4';</script>
   <script src="dw-api.js"></script>
   <title>잠실점 에비뉴엘 도면협의</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -438,7 +438,6 @@ canvas.pen-on{cursor:crosshair}
 .stamp{position:absolute;top:39px;right:46px;z-index:2;transform:rotate(-7deg);text-align:center;font-weight:500;letter-spacing:1px;border-radius:8px;padding:4px 12px;line-height:1.2;pointer-events:none}
 .stamp small{display:block;font-size:9px;font-weight:500;letter-spacing:0;margin-top:2px}
 .stamp.ok{color:#C0261A;border:2.5px double #C0261A;font-size:16px;background:rgba(255,255,255,.85)}
-.stamp.draft{color:#7A8494;border:1.5px dashed #9AA4B2;font-size:13px;background:rgba(255,255,255,.85)}
 
 /* 메인차단기 판정 */
 .inp.bad{border:2px solid var(--navy);background:var(--tint)}
@@ -4337,13 +4336,13 @@ var GuideIndexer = (function () {
     var r = S.review, names = [['docInsurance', '영업배상 책임보험'], ['docCad', '설계도면(CAD)'], ['docFR', '방염서류'], ['docFRPlan', '방염계획도']];
     var miss = names.some(function (n) { return r[n[0]] === '미제출'; });
     return names.map(function (n) { return n[1] + ' ' + (r[n[0]] ? choiceOne(n[0]) : DASH); }).join(' &nbsp;·&nbsp; ') +
-      (miss ? ' &nbsp;<span class="r">※ 미제출 시 준공 불가</span>' : '');
+      (miss ? '<br><span class="r">※ 미제출 시 준공 불가</span>' : '');
   }
   function stampHtml() {
     if (S.store && S.store.status === '컨펌완료') {
       return '<div class="stamp ok">컨펌완료<small>' + esc(S.store.confirmedBy || '') + ' · ' + esc(String(S.store.confirmedAt || '').slice(2, 10).replace(/-/g, '.')) + '</small></div>';
     }
-    return '<div class="stamp draft">작성중</div>';
+    return '';
   }
 
   function roundsLine() {
@@ -4371,9 +4370,9 @@ var GuideIndexer = (function () {
       '<tr><td class="h">검토 차수</td><td colspan="6" style="white-space:nowrap">' + roundsLine() + '</td></tr>' +
       '<tr><td class="h">테넌트명</td><td colspan="3">' + txt(r.tenant) + '</td><td class="h">공사위치</td><td colspan="2">' + txt(floorText(r.location)) + '</td></tr>' +
       '<tr><td class="h">매장형태</td><td colspan="3">' + choiceP('storeType') + '</td><td class="h">문서번호</td><td colspan="2">' + txt(docNo) + '</td></tr>' +
-      '<tr><td class="h">발주처</td><td colspan="3" style="line-height:1.6">' + party('owner') + '</td><td class="h">시공업체</td><td colspan="2" style="line-height:1.6">' + party('contractor') + '</td></tr>' +
-      '<tr><td class="h">공사 기간</td><td colspan="2" class="c">' + (r.periodStart || r.periodEnd ? ymdP(r.periodStart) + ' ~ ' + ymdP(r.periodEnd) : DASH) + '</td>' +
-      '<td class="h xs">소방 점검<br>예정일</td><td class="c">' + ymdP(r.fireCheckDate) + '</td><td class="h">오픈 예정일</td><td class="c">' + ymdP(r.openDate) + '</td></tr>' +
+      '<tr><td class="h">공사 기간</td><td colspan="3" class="c">' + (r.periodStart || r.periodEnd ? ymdP(r.periodStart) + ' ~ ' + ymdP(r.periodEnd) : DASH) + '</td><td class="h" rowspan="3">시공업체</td><td colspan="2" rowspan="3" style="line-height:1.6">' + party('contractor') + '</td></tr>' +
+      '<tr><td class="h">오픈 예정일</td><td colspan="3" class="c">' + ymdP(r.openDate) + '</td></tr>' +
+      '<tr><td class="h xs">소방 점검<br>예정일</td><td colspan="3" class="c">' + ymdP(r.fireCheckDate) + '</td></tr>' +
       '<tr><td class="h" rowspan="10">시설항목</td><td class="h">천장</td><td class="c">' + choiceP('ceiling') + '</td><td class="h">바닥</td><td class="c">' + choiceP('floor') + '</td><td class="h">벽면</td><td class="c">' + choiceP('wall') + '</td></tr>' +
       '<tr><td class="h">전기용량</td><td class="c">' + unitP('elecKw', 'kW') + '</td><td class="h">전원 방식</td><td class="c">' + choiceP('powerPhase') + '</td><td class="h xs">메인차단기<br>용량</td><td class="c">' + unitP('mainBreakerA', 'A') + '</td></tr>' +
       '<tr><td class="h">주방공사</td><td class="c">' + choiceP('kitchen') + '</td><td class="h">방수</td><td class="c">' + choiceP('waterproof') + '</td><td class="h xs">담수테스트<br>(72시간)</td><td class="c">' + choiceP('waterTest') + '</td></tr>' +
