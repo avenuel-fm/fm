@@ -10,9 +10,9 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.18.1"></script>
-<script>window.WS_VERSION = '0.18.1';</script>
-<script src="ws-api.js?v=0.18.1"></script>
+<script src="config.js?v=0.18.3"></script>
+<script>window.WS_VERSION = '0.18.3';</script>
+<script src="ws-api.js?v=0.18.3"></script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -642,7 +642,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.18.1' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.18.3' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -1382,13 +1382,14 @@ function tbmAdd() {
 function tbmDel(i) { if (!confirm((i + 1) + '번 줄을 지울까요?')) return; S.tbm.works.splice(i, 1); S.tbm.edit = -1; tbmDirty(); render(); }
 function tbmCheck(k) { S.tbm.checks[k] = !S.tbm.checks[k]; tbmDirty(); render(); }
 // 사진: 카메라·파일 둘 다, 긴 변 1600px·70% JPEG로 줄여 보냄 (03 9장)
-function shrinkJpeg(file, max, q) {
+function shrinkJpeg(file, max, q, gray) {
   return new Promise((ok, no) => {
     const u = URL.createObjectURL(file), im = new Image();
     im.onload = () => {
       const sc = Math.min(1, max / Math.max(im.naturalWidth, im.naturalHeight)), c = document.createElement('canvas');
       c.width = Math.round(im.naturalWidth * sc); c.height = Math.round(im.naturalHeight * sc);
       const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height);
+      if (gray) { const d = g.getImageData(0, 0, c.width, c.height), p = d.data; for (let i = 0; i < p.length; i += 4) p[i] = p[i + 1] = p[i + 2] = Math.round(0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2]); g.putImageData(d, 0, 0); }
       URL.revokeObjectURL(u); ok(c.toDataURL('image/jpeg', q));
     };
     im.onerror = () => { URL.revokeObjectURL(u); no(new Error('사진을 읽지 못했습니다')); };
@@ -1842,13 +1843,13 @@ function lgNight(edit) {
 function lgNightSet(v) { S.lg.nightNew = v; lgDirty(); const e = $('lgNight'); if (e) e.innerHTML = lgNight(true); }
 async function lgNightFile(el) {
   const f = el.files && el.files[0]; if (!f) return;
-  try { lgNightSet(await shrinkJpeg(f, 2400, 0.85)); } catch (e) { toast('그림을 읽지 못했습니다'); }
+  try { lgNightSet(await shrinkJpeg(f, 2400, 0.85, true)); } catch (e) { toast('그림을 읽지 못했습니다'); }
 }
 document.addEventListener('paste', e => {
   if (S.view !== 'log' || !S.lg || !lgPc()) return;
   const it = Array.from((e.clipboardData && e.clipboardData.items) || []).find(x => x.type.indexOf('image/') === 0);
   if (!it) return;
-  e.preventDefault(); shrinkJpeg(it.getAsFile(), 2400, 0.85).then(lgNightSet, () => toast('그림을 읽지 못했습니다'));
+  e.preventDefault(); shrinkJpeg(it.getAsFile(), 2400, 0.85, true).then(lgNightSet, () => toast('그림을 읽지 못했습니다'));
 });
 function lgState() {
   const g = S.lg;
