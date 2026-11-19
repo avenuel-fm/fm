@@ -9,7 +9,7 @@
 <title>시방서 검색 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.19.0"></script>
+<script src="config.js?v=0.19.1"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
@@ -97,11 +97,11 @@ a{color:var(--blue)}
 
 /* 상태는 색이 아니라 모양과 글자로 구분: 문제 = 채움, 정상 = 남색 테두리, 대기 = 회색 테두리 */
 .chip{border:1px solid transparent}
-.c-bad,.c-miss,.chip.orange{background:var(--navy);color:var(--var(--white));border-color:var(--navy)}
-.c-ok,.chip.green{background:var(--var(--white));color:var(--navy);border-color:var(--navy)}
-.c-wait{background:var(--var(--white));color:var(--text-sub);border-color:var(--line)}
+.c-bad,.c-miss,.chip.orange{background:var(--navy);color:var(--white);border-color:var(--navy)}
+.c-ok,.chip.green{background:var(--white);color:var(--navy);border-color:var(--navy)}
+.c-wait{background:var(--white);color:var(--text-sub);border-color:var(--line)}
 .chip.blue{background:var(--tint);color:var(--navy);border-color:var(--line)}
-.btn.warn{background:var(--var(--white));color:var(--navy);border-color:var(--navy)}
+.btn.warn{background:var(--white);color:var(--navy);border-color:var(--navy)}
 </style>
 <style>
 /* 어두운 화면 (결정 98): 화면만 색을 뒤집고 사진·서명·QR은 되돌림. 인쇄·저장 이미지는 그대로 흰 바탕 */
@@ -140,7 +140,7 @@ function themeLabel() { return themeDark() ? '밝게' : '어둡게'; }
 .sphit.on{border:2px solid var(--blue);padding:var(--sp-3) var(--sp-3);box-shadow:none}
 .sphd{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap}
 .pgb{display:inline-flex;align-items:center;gap:var(--sp-1);min-height:30px;padding:0 var(--sp-2);border-radius:var(--radius);background:var(--ink);color:var(--white);font-size:var(--size-s);border:0;cursor:zoom-in}.pgb svg{width:13px;height:13px}
-.mk{background:var(--navy);color:var(--navy);font-weight:500;padding:0 var(--sp-1);border-radius:var(--radius)}
+.mk{background:var(--navy);color:var(--white);font-weight:500;padding:0 var(--sp-1);border-radius:var(--radius)}
 .spwhere{font-size:var(--size-s);color:var(--sub);margin-top:var(--sp-1)}.sptxt{font-size:var(--size-m);line-height:1.7;margin-top:var(--sp-1)}
 .spact{display:flex;gap:var(--sp-1);margin-top:var(--sp-2)}.spact .btn{flex:1;min-width:0;white-space:normal;line-height:1.3;padding-top:var(--sp-1);padding-bottom:var(--sp-1)}.spact .btn.pri{flex:1.4}
 .spnote{font-size:var(--size-s);color:var(--muted);line-height:1.6}
@@ -150,7 +150,9 @@ function themeLabel() { return themeDark() ? '밝게' : '어둡게'; }
 .sppv-h{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) var(--sp-3);border-bottom:1px solid var(--line3);flex-wrap:wrap}
 .spttl{font-size:var(--size-m);flex:1 1 120px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sptools{display:flex;align-items:center;gap:var(--sp-1);margin-left:auto}
-.sppv-b{flex:1;overflow:auto;overscroll-behavior:contain;background:var(--tint);padding:var(--sp-3)}
+.sppv-b{flex:1;overflow:auto;overscroll-behavior:contain;background:var(--tint);padding:var(--sp-3);scrollbar-width:none}.sppv-b::-webkit-scrollbar{display:none}.sppv-b.pan{cursor:grab}.sppv-b.drag{cursor:grabbing}
+.sppvw .sppv{height:var(--sppvh,calc(100dvh - 300px))}
+@media(min-width:1001px){.sp:has(~ .backbar){padding-bottom:0}.sp ~ .backbar{padding-top:4px}#spRes{padding-bottom:var(--sp-3)}}
 .sppg{position:relative;margin:0 auto;box-shadow:none;background:var(--white)}.sppg img{display:block;width:100%;height:auto}
 .hl{position:absolute;background:var(--overlay);outline:2px solid var(--navy);border-radius:var(--radius);pointer-events:none}
 .sppv-t{background:var(--card);border-radius:var(--radius);padding:var(--sp-4);max-width:620px;margin:0 auto;font-size:var(--size-m);line-height:1.8}
@@ -255,9 +257,6 @@ button.nwdate{border:0;font-family:inherit}
 .nwdate:focus-visible{outline:3px solid var(--line);outline-offset:2px}
 .atcal button:disabled{opacity:.35;cursor:default}
 .nwmeta{font-size:var(--size-s);color:var(--muted);margin-top:var(--sp-2);line-height:1.5;font-variant-numeric:tabular-nums}
-.nwnote{display:flex;align-items:center;gap:var(--sp-2);margin-top:var(--sp-3);font-size:var(--size-s);color:var(--sub);line-height:1.5}
-.nwsw{flex:none;width:4px;height:20px;border-radius:var(--radius);background:var(--navy)}
-.nwnote b{color:var(--navy);font-weight:600}
 .nwrows{display:flex;flex-direction:column;gap:var(--sp-3)}
 .nwrow{display:grid;grid-template-columns:30px minmax(0,1fr) minmax(0,1fr) 44px;grid-template-areas:"no dept dept del" "work work work work" "place place note note";gap:var(--sp-2) var(--sp-2);align-items:end;background:var(--white);border:1px solid var(--line2);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4)}
 .nwrow .nwno{grid-area:no;align-self:center}.nwrow .seg{grid-area:dept}.nwrow .nwdel{grid-area:del}
@@ -273,6 +272,7 @@ button.nwdate{border:0;font-family:inherit}
 .nwrow.danger{background:var(--tint);box-shadow:none}
 .nwrow.danger .nwno{background:var(--red-bg);color:var(--navy)}
 .nwrow.danger .inp{color:var(--navy);border-color:var(--line)}
+.nwrow .f-note .inp.nwhot{color:var(--error)}
 .nwhd{display:none}
 .nwadd{width:100%;border-style:dashed;color:var(--blue)}
 .nwstate{display:inline-flex;align-items:center;gap:var(--sp-1)}
@@ -333,8 +333,7 @@ button.attag{cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:n
 .atsec h2{margin:0;font-size:var(--size-m);font-weight:600;padding:var(--sp-3) var(--sp-4);display:flex;align-items:center;border-bottom:1px solid var(--line3);background:var(--tint)}
 .atsec h2 small{margin-left:auto;font-size:var(--size-s);font-weight:400;color:var(--muted);font-variant-numeric:tabular-nums}
 .atppl{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:var(--sp-2);padding:var(--sp-3)}
-.atp{display:flex;align-items:center;gap:var(--sp-2);border:1px solid var(--line2);border-radius:var(--radius);padding:var(--sp-2) var(--sp-3) var(--sp-2) var(--sp-2);min-width:0;background:var(--white)}
-.atav{width:34px;height:34px;line-height:34px;text-align:center;border-radius:var(--radius);flex:none;display:inline-block;font-weight:600;font-size:var(--size-m);background:var(--tint);color:var(--sub)}
+.atp{display:flex;align-items:center;gap:var(--sp-2);border:1px solid var(--line2);border-radius:var(--radius);padding:var(--sp-2) var(--sp-3);min-width:0;background:var(--white)}
 .atnm{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;text-align:left;border:0;background:none;padding:0;cursor:pointer}
 .atnm small{font-size:var(--size-s);color:var(--muted);line-height:1.2}
 .atnm b{font-size:var(--size-m);font-weight:600;line-height:1.3;white-space:nowrap}
@@ -371,10 +370,10 @@ button.attag{cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:n
 .atimg .atorg,.atimg .atduo{grid-template-columns:1fr 1fr}
 .atimg .atsums{grid-template-columns:1fr 2fr;margin-top:var(--sp-3)}
 /* 그림 도구(html2canvas)는 글자를 약 3px 아래로 그림 → 그림 만들 때만 딱지·동그라미 글자를 3px 올림 (WS-21) */
-.atimg.cap .attag{line-height:20px}.atimg.cap .atav{line-height:28px}
+.atimg.cap .attag{line-height:20px}
 .atimg .stamp{margin-top:var(--sp-2);color:var(--muted);font-size:var(--size-s);text-align:right}
 @media(min-width:900px){.wrap .atorg{grid-template-columns:1fr 1fr}.wrap .atsums{grid-template-columns:1fr 2fr}.wrap .atduo{grid-template-columns:1fr 1fr}}
-@media(max-width:480px){.wrap .atppl{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap .atnm b{font-size:var(--size-m)}.wrap .atp{gap:var(--sp-1);padding:var(--sp-2) var(--sp-1)}.wrap .atav{width:28px;height:28px;line-height:28px;font-size:var(--size-s)}.wrap .attag{min-width:0;padding:0 var(--sp-2);font-size:var(--size-s)}.wrap .atppl{gap:var(--sp-1);padding:var(--sp-2)}}
+@media(max-width:480px){.wrap .atppl{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap .atnm b{font-size:var(--size-m)}.wrap .atp{gap:var(--sp-1);padding:var(--sp-2)}.wrap .attag{min-width:0;padding:0 var(--sp-2);font-size:var(--size-s)}.wrap .atppl{gap:var(--sp-1);padding:var(--sp-2)}}
 /* 전열필증 (WS_전열필증 15.3.20, 결정 96) */
 .ehfls{display:flex;gap:var(--sp-1);overflow-x:auto;padding:var(--sp-2) 0 var(--sp-1);scrollbar-width:none}
 .ehfl{flex:none;min-width:60px;min-height:48px;border-radius:var(--radius);border:1px solid var(--line2);background:var(--white);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15;cursor:pointer;padding:var(--sp-1) var(--sp-2)}
@@ -416,6 +415,7 @@ button.attag{cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:n
 .ehtbl td.wr{white-space:normal;word-break:keep-all;overflow-wrap:anywhere;min-width:7em}.ehtbl td.wr small{display:block;font-size:var(--size-s);color:var(--muted)}
 .ehtbl .r{text-align:right;font-variant-numeric:tabular-nums}
 .ehtbl tr.sel td{background:var(--tint)}
+.ehtbl .c-bad{background:none;color:var(--navy)}
 .ehdh{margin:0 0 var(--sp-1);font-size:var(--size-l)}
 .ehdp{margin:0 0 var(--sp-3);font-size:var(--size-m);line-height:1.6;color:var(--sub)}
 .ehf{display:flex;flex-direction:column;gap:var(--sp-1);font-size:var(--size-s);color:var(--sub);margin-bottom:var(--sp-2);min-width:0}
@@ -767,7 +767,7 @@ function spDraw() {
     hits.map((x, i) => '<div class="sphit' + (i === S.sp.sel ? ' on' : '') + '" onclick="spSel(' + i + ')"><div class="sphd"><button type="button" class="pgb" onclick="event.stopPropagation();spSel(' + i + ',1)" aria-label="' + x.e.p + '쪽 크게 보기">' + ICON.search + 'p.' + x.e.p + '</button>' + spTag(x.e.d) + '</div>' +
       (spWhere(x.e) ? '<div class="spwhere">' + h(spWhere(x.e)) + '</div>' : '') + '<div class="sptxt">' + spSnip(x) + '</div>' +
       '<div class="spact"><button type="button" class="btn sm" onclick="event.stopPropagation();spSel(' + i + ',1)">쪽 크게 보기</button><button type="button" class="btn sm pri" onclick="event.stopPropagation();spCopy(' + i + ')">참조 복사 ' + h(spRef(x.e)) + '</button></div></div>').join('');
-  spPv();
+  spFit(); spPv();
 }
 function spOn(id) { S.sp.off[id] = !S.sp.off[id]; S.sp.sel = null; spGo(); }
 function spOld() { S.sp.old = !S.sp.old; S.sp.sel = null; spGo(); }
@@ -808,11 +808,30 @@ function spPv() {
         const fit = Math.min(b.clientWidth - 24, (b.clientHeight - 24) * (img.naturalWidth || 600) / (img.naturalHeight || 848));
         b.querySelector('.sppg').style.width = Math.round(Math.max(200, fit) * S.sp.zoom) + 'px';
         const f = b.querySelector('.hl'); b.scrollTop = f && S.sp.zoom > 1 ? Math.max(0, f.offsetTop - b.clientHeight * 0.3) : 0;
+        b.classList.toggle('pan', b.scrollWidth > b.clientWidth || b.scrollHeight > b.clientHeight);
       };
       if (img.complete) place(); else img.onload = place;
     });
   });
 }
+/** PC 쪽 칸: 아래 끝을 「뒤로」 버튼 5px 위까지 (뒤로 줄 위 여백 5px), 결과를 내려도 칸은 그 자리에 */
+function spFit() {
+  const w = $('spPv'), bar = document.querySelector('.sp ~ .backbar');
+  if (!w || !w.offsetParent) return;
+  const gap = bar ? bar.offsetHeight : 16, top = w.parentElement.getBoundingClientRect().top + scrollY, H = Math.max(420, innerHeight - top - gap);
+  w.style.setProperty('--sppvh', H + 'px'); w.style.top = (innerHeight - gap - H) + 'px';
+}
+window.addEventListener('resize', () => { if (S.view === 'spec' && S.sp && S.sp.boot) { spFit(); spPv(); } });
+// 확대한 쪽을 마우스 왼쪽 버튼으로 끌어서 움직임 (터치는 브라우저가 그대로 처리)
+document.addEventListener('mousedown', e => {
+  const b = e.button === 0 && e.target.closest && e.target.closest('.sppv-b.pan');
+  if (!b) return;
+  e.preventDefault();
+  const x = e.clientX, y = e.clientY, l = b.scrollLeft, t = b.scrollTop;
+  const move = m => { b.scrollLeft = l - (m.clientX - x); b.scrollTop = t - (m.clientY - y); };
+  const up = () => { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); b.classList.remove('drag'); };
+  document.addEventListener('mousemove', move); document.addEventListener('mouseup', up); b.classList.add('drag');
+});
 function spPvHtml(x, big) {
   return '<div class="sppv' + (big ? ' big' : '') + '"><div class="sppv-h">' + spTag(x.e.d) + '<b class="spttl">' + h(spWhere(x.e) || spGuide(x.e.d).title) + '</b><span class="spnote pcon">PDF ' + x.e.p + '쪽</span>' +
     '<span class="sptools"><button type="button" class="btn sm" onclick="spZoom(-0.25)" aria-label="작게">−</button><span class="spnote">' + Math.round(S.sp.zoom * 100) + '%</span><button type="button" class="btn sm" onclick="spZoom(0.25)" aria-label="크게">+</button>' +

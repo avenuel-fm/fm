@@ -93,11 +93,11 @@ a{color:var(--blue)}
 
 /* 상태는 색이 아니라 모양과 글자로 구분: 문제 = 채움, 정상 = 남색 테두리, 대기 = 회색 테두리 */
 .chip{border:1px solid transparent}
-.c-bad,.c-miss,.chip.orange{background:var(--navy);color:var(--var(--white));border-color:var(--navy)}
-.c-ok,.chip.green{background:var(--var(--white));color:var(--navy);border-color:var(--navy)}
-.c-wait{background:var(--var(--white));color:var(--text-sub);border-color:var(--line)}
+.c-bad,.c-miss,.chip.orange{background:var(--navy);color:var(--white);border-color:var(--navy)}
+.c-ok,.chip.green{background:var(--white);color:var(--navy);border-color:var(--navy)}
+.c-wait{background:var(--white);color:var(--text-sub);border-color:var(--line)}
 .chip.blue{background:var(--tint);color:var(--navy);border-color:var(--line)}
-.btn.warn{background:var(--var(--white));color:var(--navy);border-color:var(--navy)}
+.btn.warn{background:var(--white);color:var(--navy);border-color:var(--navy)}
 </style>
 <style>
 /* 어두운 화면 (결정 98): 화면만 색을 뒤집고 사진·서명·QR은 되돌림. 인쇄·저장 이미지는 그대로 흰 바탕 */
@@ -118,29 +118,36 @@ function themeLabel() { return themeDark() ? '밝게' : '어둡게'; }
 <style>
 body{min-height:100vh;word-break:keep-all;overflow-wrap:anywhere}
 b,strong,h1,h2,h3{font-weight:600}
-.page{max-width:520px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--ground)}
-.hd{background:var(--white);border-bottom:1px solid var(--line2);padding:var(--sp-4) var(--sp-4) var(--sp-3);display:flex;flex-direction:column;gap:var(--sp-1)}
-.hd small{font-size:var(--size-s);color:var(--muted)}
-.hd h1{margin:0;font-size:var(--size-l)}
-.main{flex:1;padding:var(--sp-3) var(--sp-4);display:flex;flex-direction:column;gap:var(--sp-4)}
-.lbl{font-size:var(--size-m);font-weight:600}
-.shot{width:100%;aspect-ratio:4/3;border-radius:var(--radius);border:2px dashed var(--blue);background:var(--blue-bg);color:var(--blue);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sp-1);font-size:var(--size-m);font-weight:500;cursor:pointer;padding:0}
-.shot-done{position:relative;width:100%;aspect-ratio:4/3;border-radius:var(--radius);background:var(--tint);overflow:hidden}
+/* 틀 이름에 page를 쓰면 공통 디자인의 「인쇄 양식 제외」에 걸려 옛 색으로 나옴 */
+.fp{max-width:520px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--white)}
+.bar{background:var(--navy);color:var(--white);min-height:48px;padding:0 var(--sp-4);display:flex;align-items:center;font-size:var(--size-m);font-weight:600}
+.hd{padding:var(--sp-6) var(--sp-4) var(--sp-4);border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:var(--sp-1)}
+.hd h1{margin:0;font-size:var(--size-xl);line-height:1.3}
+.hd span{font-size:var(--size-s);color:var(--text-sub)}
+.main{flex:1;padding:0 var(--sp-4);display:flex;flex-direction:column}
+.main section{padding:var(--sp-6) 0;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:var(--sp-3)}
+.main section:last-child{border-bottom:none}
+.note{margin-top:var(--sp-4);background:var(--tint);border:1px solid var(--line);border-radius:var(--radius);padding:var(--sp-3);font-size:var(--size-s);line-height:1.6}
+.lbl{font-size:var(--size-l);font-weight:600}
+.shot{width:100%;aspect-ratio:4/3;border-radius:var(--radius);border:1px solid var(--line);background:var(--tint);color:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sp-1);font-size:var(--size-m);font-weight:600;cursor:pointer;padding:0}
+.shot-done{position:relative;width:100%;aspect-ratio:4/3;border-radius:var(--radius);border:1px solid var(--line);background:var(--tint);overflow:hidden}
 .shot-done img{width:100%;height:100%;object-fit:contain;display:block}
 .shot-done .btn{position:absolute;right:8px;bottom:8px}
 .shot-done svg{position:absolute;left:50%;top:50%;width:62%;height:auto;transform:translate(-50%,-50%);opacity:.35;pointer-events:none}
-.seg{display:flex;gap:var(--sp-2)}
-.seg button{flex:1;min-height:var(--control-h);border-radius:var(--radius);border:1px solid var(--line);background:var(--white);font-size:var(--size-m);color:var(--sub);cursor:pointer}
-.seg button.on{border-color:var(--blue);background:var(--blue-bg);color:var(--blue-d);font-weight:500}
-.seg button.on.bad{border-color:var(--orange);background:var(--orange-bg);color:var(--orange)}
-.pad{position:relative;width:100%;height:120px;border-radius:var(--radius);border:2px dashed var(--line);background:var(--white);touch-action:none;overflow:hidden}
-.pad.inked{border-style:solid;border-color:var(--line)}
+.seg{display:flex}
+.seg button{flex:1;min-height:var(--control-h);border-radius:var(--radius);border:1px solid var(--navy);background:var(--white);font-size:var(--size-m);font-weight:500;color:var(--navy);cursor:pointer}
+.seg button+button{margin-left:-1px}
+.seg button.on{background:var(--navy);color:var(--white);font-weight:600}
+.pad{position:relative;width:100%;height:120px;border-radius:var(--radius);border:1px solid var(--line);background:var(--white);touch-action:none;overflow:hidden}
+.pad.inked{border-color:var(--navy)}
 .pad canvas{position:absolute;left:0;top:0;width:100%;height:100%}
-.pad .clr{position:absolute;right:6px;top:6px;z-index:2;min-height:32px;padding:0 var(--sp-2);border-radius:var(--radius);border:1px solid var(--line);background:var(--white);font-size:var(--size-s);color:var(--sub);cursor:pointer}
-.foot{background:var(--white);border-top:1px solid var(--line2);padding:var(--sp-2) var(--sp-4) calc(var(--sp-4) + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:var(--sp-2);position:sticky;bottom:0}
-.miss{font-size:var(--size-m);font-weight:500;color:var(--red);text-align:center;min-height:20px}
-.send{width:100%;min-height:56px;border-radius:var(--radius);border:none;background:var(--blue);color:var(--white);font-size:var(--size-l);font-weight:500;cursor:pointer}
-.send:disabled{background:var(--tint);color:var(--muted);cursor:default}
+.pad .clr{position:absolute;right:4px;top:4px;z-index:2;min-height:32px;padding:0 var(--sp-2);border-radius:var(--radius);border:1px solid var(--line);background:var(--white);font-size:var(--size-s);color:var(--navy);cursor:pointer}
+.foot{background:var(--white);border-top:1px solid var(--line);padding:var(--sp-2) var(--sp-4) calc(var(--sp-4) + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:var(--sp-2);position:sticky;bottom:0}
+.miss{font-size:var(--size-s);color:var(--error);min-height:20px}
+.send{width:100%;min-height:var(--control-h);border-radius:var(--radius);border:1px solid var(--navy);background:var(--navy);color:var(--white);font-size:var(--size-m);font-weight:600;cursor:pointer}
+.send:disabled{background:var(--tint);border-color:var(--line);color:var(--text-sub);cursor:default}
+.mark{width:64px;height:64px;border-radius:var(--radius);border:2px solid var(--navy);color:var(--navy);display:flex;align-items:center;justify-content:center}
+.mark.bad{background:var(--navy);color:var(--white)}
 .cam{position:fixed;inset:0;z-index:60;background:#0E131A;color:#fff;display:flex;flex-direction:column}
 .cam-top{display:flex;align-items:center;padding:12px;gap:8px}
 .cam-top button{width:44px;height:44px;border:none;background:none;color:#fff;font-size:22px;cursor:pointer}
@@ -159,7 +166,7 @@ b,strong,h1,h2,h3{font-weight:600}
 </style>
 </head>
 <body>
-<div class="page" id="page">
+<div class="fp" id="page">
   <div class="main" style="align-items:center;justify-content:center"><span class="spin" style="color:var(--blue);width:32px;height:32px"></span></div>
 </div>
 <input id="file" type="file" accept="image/*" capture="environment" class="hide">
@@ -197,7 +204,7 @@ const API = window.FM_CHECK || {
 const S = { init: null, photo: '', bad: false, sending: false, done: false };
 const GUIDE = '<svg viewBox="0 0 230 230" fill="none" aria-hidden="true"><circle cx="115" cy="115" r="105" stroke="#fff" stroke-width="4"/><circle cx="115" cy="115" r="90" stroke="#fff" stroke-width="1.5" stroke-dasharray="6 6" opacity=".8"/><path d="M52 150 A70 70 0 1 1 178 150" stroke="#fff" stroke-width="3" opacity=".9"/><g stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".9"><path d="M60 145l9-5"/><path d="M55 108h10"/><path d="M70 72l8 7"/><path d="M115 50v10"/><path d="M160 72l-8 7"/><path d="M175 108h-10"/><path d="M170 145l-9-5"/></g><path d="M115 115l38-30" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="4 5"/><circle cx="115" cy="115" r="7" fill="#fff"/></svg>';
 /* 사진 칸 압력계 그림 (결정 52) — 카메라 안내 원과 같은 모양, 파란 선 */
-const GAUGE_ICON = '<svg width="104" height="104" viewBox="0 0 230 230" fill="none" aria-hidden="true"><circle cx="115" cy="115" r="105" fill="#fff" stroke="currentColor" stroke-width="6"/><path d="M52 150 A70 70 0 1 1 178 150" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><g stroke="currentColor" stroke-width="6" stroke-linecap="round"><path d="M60 145l9-5"/><path d="M55 108h10"/><path d="M70 72l8 7"/><path d="M115 50v10"/><path d="M160 72l-8 7"/><path d="M175 108h-10"/><path d="M170 145l-9-5"/></g><path d="M115 115l38-30" stroke="#C0261A" stroke-width="7" stroke-linecap="round"/><circle cx="115" cy="115" r="11" fill="currentColor"/><text x="115" y="178" text-anchor="middle" font-size="26" font-weight="700" fill="currentColor" font-family="sans-serif">MPa</text></svg>';
+const GAUGE_ICON = '<svg width="104" height="104" viewBox="0 0 230 230" fill="none" aria-hidden="true"><circle cx="115" cy="115" r="105" fill="#fff" stroke="currentColor" stroke-width="6"/><path d="M52 150 A70 70 0 1 1 178 150" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><g stroke="currentColor" stroke-width="6" stroke-linecap="round"><path d="M60 145l9-5"/><path d="M55 108h10"/><path d="M70 72l8 7"/><path d="M115 50v10"/><path d="M160 72l-8 7"/><path d="M175 108h-10"/><path d="M170 145l-9-5"/></g><path d="M115 115l38-30" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><circle cx="115" cy="115" r="11" fill="currentColor"/><text x="115" y="178" text-anchor="middle" font-size="26" font-weight="700" fill="currentColor" font-family="sans-serif">MPa</text></svg>';
 function $(id) { return document.getElementById(id); }
 function h(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
@@ -207,24 +214,24 @@ else API.init(QR).then(r => { if (!r.ok) showError(r.error); else { S.init = r; 
   .catch(e => showError('연결 오류: ' + (e.message || e) + '\n신호를 확인하고 다시 열어 주세요.'));
 
 function showError(msg) {
-  $('page').innerHTML = '<div class="hd"><small>잠실점 에비뉴엘 · 소화기 점검</small><h1>열 수 없습니다</h1></div><div class="main"><div class="card" style="padding:var(--sp-4);font-size:var(--size-m);line-height:1.6">' + h(msg) + '</div></div>';
+  $('page').innerHTML = '<div class="bar">잠실점 에비뉴엘 · 소화기 월 점검</div><div class="hd"><h1>열 수 없습니다</h1></div><div class="main"><div class="note" style="font-size:var(--size-m)">' + h(msg) + '</div></div>';
 }
 
 /* ── 입력 화면 ── */
 function renderForm() {
   const r = S.init, m = Number(r.ym.slice(5, 7));
   $('page').innerHTML =
-    '<div class="hd"><small>잠실점 에비뉴엘 · 소화기 월 점검</small><h1>' + h(r.fe.name) + '</h1>' +
-    '<span style="font-size:var(--size-s);color:var(--sub)">' + h(r.fe.floor) + ' · ' + h(r.monthLabel) + ' · 입력 기간 <b>' + m + '월 ' + r.window.start + '일 ~ ' + r.window.end + '일</b></span></div>' +
+    '<div class="bar">잠실점 에비뉴엘 · 소화기 월 점검</div><div class="hd"><h1>' + h(r.fe.name) + '</h1>' +
+    '<span>' + h(r.fe.floor) + ' · ' + h(r.monthLabel) + ' · 입력 기간 <b>' + m + '월 ' + r.window.start + '일 ~ ' + r.window.end + '일</b></span></div>' +
     '<div class="main">' +
-    (r.late ? '<div class="banner" style="background:var(--orange-bg);color:var(--orange);border-radius:var(--radius);padding:var(--sp-3) var(--sp-3);font-size:var(--size-m);line-height:1.5">입력 기간이 지났지만 지금 입력할 수 있습니다. 「기한 후 입력」으로 표시됩니다.</div>' : '') +
-    (r.exists ? '<div style="background:var(--tint);border-radius:var(--radius);padding:var(--sp-3) var(--sp-3);font-size:var(--size-m);color:var(--sub)">이번 달 입력이 이미 있습니다. 다시 보내면 새 내용으로 바뀝니다.</div>' : '') +
-    '<section style="display:flex;flex-direction:column;gap:var(--sp-1)"><span class="lbl">1. 압력계 사진</span><div id="shotBox"></div></section>' +
-    '<section style="display:flex;flex-direction:column;gap:var(--sp-1)"><span class="lbl">2. 상태</span><div class="seg"><button id="sOk" class="on" aria-pressed="true" onclick="setBad(false)">이상 없음</button><button id="sBad" aria-pressed="false" onclick="setBad(true)">이상 있음</button></div></section>' +
-    '<section style="display:flex;flex-direction:column;gap:var(--sp-2)"><span class="lbl">3. 손가락으로 따라 쓰기</span>' +
+    (r.late ? '<div class="note">입력 기간이 지났지만 지금 입력할 수 있습니다. 「기한 후 입력」으로 표시됩니다.</div>' : '') +
+    (r.exists ? '<div class="note">이번 달 입력이 이미 있습니다. 다시 보내면 새 내용으로 바뀝니다.</div>' : '') +
+    '<section><span class="lbl">1. 압력계 사진</span><div id="shotBox"></div></section>' +
+    '<section><span class="lbl">2. 상태</span><div class="seg"><button id="sOk" class="on" aria-pressed="true" onclick="setBad(false)">이상 없음</button><button id="sBad" aria-pressed="false" onclick="setBad(true)">이상 있음</button></div></section>' +
+    '<section><span class="lbl">3. 손가락으로 따라 쓰기</span>' +
     '<div class="pad" id="padA"><canvas class="g"></canvas><canvas class="i" aria-label="외관 압력 이상무 손글씨 칸"></canvas><button class="clr hide" onclick="PADS.A.clear()">지우기</button></div>' +
     '<div class="pad" id="padB"><canvas class="g"></canvas><canvas class="i" aria-label="이름 손글씨 칸"></canvas><button class="clr hide" onclick="PADS.B.clear()">지우기</button></div>' +
-    '<small style="color:var(--muted)">회색 글자 위에 손가락으로 크게 따라 써 주세요.</small></section>' +
+    '<small style="font-size:var(--size-s);color:var(--text-sub)">회색 글자 위에 손가락으로 크게 따라 써 주세요.</small></section>' +
     '</div>' +
     '<div class="foot"><div class="miss" id="miss" role="alert"></div><button class="send" id="send" onclick="submit()" disabled>전송하기</button></div>';
   renderShot();
@@ -235,13 +242,13 @@ function renderForm() {
 function renderShot() {
   $('shotBox').innerHTML = S.photo
     ? '<div class="shot-done"><img src="' + S.photo + '" alt="찍은 압력계 사진">' + GUIDE + '<button class="btn sm" onclick="openCamera()">다시 찍기</button></div>'
-    : '<button class="shot" onclick="openCamera()" aria-label="압력계 사진 찍기">' + GAUGE_ICON + '<span style="font-size:var(--size-l)">사진 찍기</span><span style="font-size:var(--size-s);font-weight:400;color:var(--blue-d)">압력계 정면이 보이게</span></button>';
+    : '<button class="shot" onclick="openCamera()" aria-label="압력계 사진 찍기">' + GAUGE_ICON + '<span style="font-size:var(--size-l)">사진 찍기</span><span style="font-size:var(--size-s);font-weight:400;color:var(--text-sub)">압력계 정면이 보이게</span></button>';
 }
 function setBad(b) {
   if (S.bad === b) return;
   S.bad = b;
   $('sOk').className = b ? '' : 'on'; $('sOk').setAttribute('aria-pressed', String(!b));
-  $('sBad').className = b ? 'on bad' : ''; $('sBad').setAttribute('aria-pressed', String(b));
+  $('sBad').className = b ? 'on' : ''; $('sBad').setAttribute('aria-pressed', String(b));
   PADS.A.clear();
 }
 function update() {
@@ -414,11 +421,11 @@ function submit(overwrite) {
 function done(r) {
   S.done = true;
   const bad = r.state === '이상있음';
-  $('page').innerHTML = '<div class="hd"><small>잠실점 에비뉴엘 · 소화기 월 점검</small><h1>' + h(S.init.fe.name) + '</h1></div>' +
+  $('page').innerHTML = '<div class="bar">잠실점 에비뉴엘 · 소화기 월 점검</div><div class="hd"><h1>' + h(S.init.fe.name) + '</h1></div>' +
     '<div class="main" style="align-items:center;text-align:center;padding-top:var(--sp-12);gap:var(--sp-3)">' +
-    '<div style="width:72px;height:72px;border-radius:var(--radius);background:' + (bad ? 'var(--orange-bg)' : 'var(--green-bg)') + ';display:flex;align-items:center;justify-content:center"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="' + (bad ? '#B4410F' : '#1F7A4D') + '" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg></div>' +
+    '<div class="mark' + (bad ? ' bad' : '') + '"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (bad ? '<path d="M12 5v9"/><path d="M12 19h.01"/>' : '<path d="M20 6L9 17l-5-5"/>') + '</svg></div>' +
     '<b style="font-size:var(--size-l)">보냈습니다. 감사합니다.</b>' +
-    '<span style="font-size:var(--size-m);color:var(--sub);line-height:1.6">' + h(S.init.monthLabel) + ' 점검이 ' + (bad ? '<b style="color:var(--orange)">이상 있음</b>으로' : '<b style="color:var(--green)">점검완료</b>로') + ' 기록되었습니다.' + (r.late ? '<br>(기한 후 입력)' : '') + '</span>' +
+    '<span style="font-size:var(--size-m);color:var(--sub);line-height:1.6">' + h(S.init.monthLabel) + ' 점검이 ' + (bad ? '<b>이상 있음</b>으로' : '<b>점검완료</b>로') + ' 기록되었습니다.' + (r.late ? '<br>(기한 후 입력)' : '') + '</span>' +
     (r.checkId ? '<span style="font-size:var(--size-s);color:var(--muted);background:var(--tint);border-radius:var(--radius);padding:var(--sp-1) var(--sp-2)">저장 번호 ' + h(r.checkId) + (r.at ? ' · ' + h(r.at) : '') + '</span>' : '') +
     '<span style="font-size:var(--size-s);color:var(--muted)">이 창은 닫으셔도 됩니다.</span></div>';
 }
