@@ -34,10 +34,10 @@
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx' };
   function rid() { return (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2)).replace(/-/g, ''); }
   /** 버킷에 올리고 { path, url } — 경로는 영문·숫자만 (한글 경로는 Supabase가 받지 않음). 사진은 먼저 줄임 */
-  async function upload(kind, blob) {
-    if (blob.type.startsWith('image/') && blob.type !== 'image/png') blob = await compressImage(blob);
+  async function upload(kind, blob, ext) {   // ext 를 주면 줄이지 않고 원본 그대로 (열화상 사진은 줄이면 온도 자료가 사라짐)
+    if (!ext && blob.type.startsWith('image/') && blob.type !== 'image/png') blob = await compressImage(blob);
     const k = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 7);
-    const path = kind + '/' + k + '/' + rid() + '.' + (EXT[blob.type] || 'bin');
+    const path = kind + '/' + k + '/' + rid() + '.' + (ext || EXT[blob.type] || 'bin');
     const { error } = await sb.storage.from(BUCKET).upload(path, blob, { contentType: blob.type, upsert: false });
     if (error) throw new Error('파일을 올리지 못했습니다: ' + error.message);
     return { path, url: sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl };
@@ -79,6 +79,10 @@
     mapDays: (token) => rpc('ws_map_days', { p_token: token }),
     mapAt: (token, at) => rpc('ws_map_at', { p_token: token, p_at: at }),
     mapRestore: (token, day) => rpc('ws_map_restore', { p_token: token, p_day: day }),
+    /* ── 열화상점검 (supabase/16_thermal.sql, 결정 168): 작성기(fm/thermal)가 WS_THERMAL 통로로 부름 ── */
+    thermalBoot: (token) => rpc('ws_thermal_boot', { p_token: token }),
+    thermalSet: (token, k, v) => rpc('ws_thermal_set', { p_token: token, p_k: k, p_v: v }),
+    thermalReport: (token, r) => rpc('ws_thermal_report', { p_token: token, p_r: r }),
 
     nextWorkGet: (token, date) => rpc('ws_next_work_get', { p_token: token, p_date: date || '' }),
     nextWorkSave: (token, date, rows, ver) => rpc('ws_next_work_save', { p_token: token, p_date: date, p_rows: rows || [], p_ver: ver || '' }),

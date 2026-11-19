@@ -10,9 +10,9 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.19.5"></script>
-<script>window.WS_VERSION = '0.19.5';</script>
-<script src="ws-api.js?v=0.19.5"></script>
+<script src="config.js?v=0.19.6"></script>
+<script>window.WS_VERSION = '0.19.6';</script>
+<script src="ws-api.js?v=0.19.6"></script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -155,7 +155,7 @@ function themeLabel() { return themeDark() ? '밝게' : '어둡게'; }
 .sppv-h{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) var(--sp-3);border-bottom:1px solid var(--line3);flex-wrap:wrap}
 .spttl{font-size:var(--size-m);flex:1 1 120px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sptools{display:flex;align-items:center;gap:var(--sp-1);margin-left:auto}
-.sppv-b{flex:1;overflow:auto;overscroll-behavior:contain;background:var(--tint);padding:var(--sp-3);scrollbar-width:none}.sppv-b::-webkit-scrollbar{display:none}.sppv-b.pan{cursor:grab}.sppv-b.drag{cursor:grabbing}
+.sppv-b{flex:1;overflow:auto;overscroll-behavior:contain;background:var(--tint);padding:var(--sp-3);scrollbar-width:none}.sppv-b::-webkit-scrollbar{display:none}.sppv-b.pan{cursor:grab}.sppv-b{touch-action:pan-x pan-y}.sppv-b.drag{cursor:grabbing}
 .sppvw .sppv{height:var(--sppvh,calc(100dvh - 300px))}
 @media(min-width:1001px){.sp:has(~ .backbar){padding-bottom:0}.sp ~ .backbar{padding-top:4px}#spRes{padding-bottom:var(--sp-3)}}
 .sppg{position:relative;margin:0 auto;box-shadow:none;background:var(--white)}.sppg img{display:block;width:100%;height:auto}
@@ -646,7 +646,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.19.5' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.19.6' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -732,7 +732,7 @@ function go(view, push) {
 }
 async function refreshFire() { try { const r = await call('bootstrap'); S.fire = r.fire; S.user = r.user; S.fireAt = Date.now(); if (S.view === 'fire') render(); } catch (e) {} }
 try { google.script.history.setChangeHandler(e => { const v = e.state && e.state.v; if (v && S.token) { S.view = v; render(); } }); } catch (e) {}
-const PARENT = { inspect: 'main', fire: 'inspect', eh: 'inspect', thermal: 'inspect', cs: 'inspect', csck: 'cs', qr: 'fire', status: 'fire', floor: 'status', docs: 'main', set: 'main', risk: 'set', map: 'main', spec: 'main', tbm: 'docs', nw: 'docs', log: 'docs', ahu: 'docs', att: 'docs', attup: 'att' };
+const PARENT = { inspect: 'main', fire: 'inspect', eh: 'inspect', thermal: 'inspect', cs: 'inspect', csck: 'cs', qr: 'fire', hyd: 'fire', status: 'fire', floor: 'status', docs: 'main', set: 'main', risk: 'set', map: 'main', spec: 'main', tbm: 'docs', nw: 'docs', log: 'docs', ahu: 'docs', att: 'docs', attup: 'att' };
 function back() { if (S.view === 'pdf') return go((S.pdf && S.pdf.from) || 'main'); if (S.view === 'csck') return csLeave(); if (S.view === 'risk' && S.rk && S.rk.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; if (S.view === 'nw' && !nwLeaveOk()) return; if (S.view === 'log' && !lgLeaveOk()) return; if (S.view === 'ahu' && !ahuLeaveOk()) return; if (S.view === 'tbm' && S.tbm && S.tbm.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; go(PARENT[S.view] || 'main'); }
 
 function topbar(sub, title) {
@@ -891,7 +891,7 @@ function renderMain() {
   const u = S.user;
   const today = new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' });
   const c = S.fire ? S.fire.counts : null;
-  const soon = () => '<button class="tile soon" disabled><span class="ico">' + ICON.soon + '</span><b>작업중</b><small>준비 중</small></button>';
+  const soon = (b = '작업중', sm = '준비 중') => '<button class="tile soon" disabled><span class="ico">' + ICON.soon + '</span><b>' + b + '</b><small>' + sm + '</small></button>';
   // 환경설정에서 끈 칸: 직원에게는 「작업중」 칸, 소장·관리자·옵저버에게는 평소 칸 (결정 148)
   const t = (key, label, sub, ico) => menuOff(key) && !menuCanOpen() ? soon() : '<button class="tile" onclick="tile(\'' + key + '\')"><span class="ico">' + ico + '</span><b>' + label + '</b><small>' + sub + '</small></button>';
   return topbar('잠실점 에비뉴엘 · ' + today, '업무지원') + '<div class="wrap" style="display:flex;flex-direction:column;gap:var(--sp-3)">' +
@@ -901,7 +901,7 @@ function renderMain() {
     soon() +
     t('inspect', '점검', c ? '소화기 ' + (c.ok + c.bad) + ' / ' + c.total + '대' : '소화기 점검', ICON.inspect) +
     t('spec', '시방서 검색', '도면협의 지침 찾기', ICON.search) +
-    soon() +
+    soon('자재현황', '준비중') +   // 자재현황 자리 (결정 168, WS_자재현황.md)
     t('map', '지도', '에비뉴엘 도면', ICON.map) +
     '</div>' +
     '<div class="mainfoot"><button class="btn theme-btn" onclick="toggleTheme()">' + themeLabel() + '</button>' +
@@ -1082,7 +1082,8 @@ function spPv() {
         spBoxes(x).map(z => '<span class="hl" style="left:' + ((z[0] - 0.004) * 100) + '%;top:' + ((z[1] - 0.004) * 100) + '%;width:' + ((z[2] - z[0] + 0.008) * 100) + '%;height:' + ((z[3] - z[1] + 0.008) * 100) + '%"></span>').join('') + '</div>';
       const img = b.querySelector('img'), place = () => {   // 100% = 쪽 한 장이 칸 안에 다 들어오는 크기, + 로 키우면 그때 스크롤 (사용자 11-17)
         const fit = Math.min(b.clientWidth - 24, (b.clientHeight - 24) * (img.naturalWidth || 600) / (img.naturalHeight || 848));
-        b.querySelector('.sppg').style.width = Math.round(Math.max(200, fit) * S.sp.zoom) + 'px';
+        b._fit = Math.max(200, fit);
+        b.querySelector('.sppg').style.width = Math.round(b._fit * S.sp.zoom) + 'px';
         const f = b.querySelector('.hl'); b.scrollTop = f && S.sp.zoom > 1 ? Math.max(0, f.offsetTop - b.clientHeight * 0.3) : 0;
         b.classList.toggle('pan', b.scrollWidth > b.clientWidth || b.scrollHeight > b.clientHeight);
       };
@@ -1108,12 +1109,34 @@ document.addEventListener('mousedown', e => {
   const up = () => { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); b.classList.remove('drag'); };
   document.addEventListener('mousemove', move); document.addEventListener('mouseup', up); b.classList.add('drag');
 });
+// 안드로이드·아이패드: 쪽 칸 안에서만 두 손가락으로 확대·축소 (한 손가락 이동은 브라우저, 화면 전체 확대는 touch-action으로 막음)
+document.addEventListener('touchstart', e => {
+  const b = e.touches.length === 2 && e.target.closest && e.target.closest('.sppv-b'), g = b && b.querySelector('.sppg');
+  if (!g || !b._fit) return;
+  const T = e.touches, dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY), r = b.getBoundingClientRect();
+  const d0 = dist(T), w0 = g.offsetWidth, mx = (T[0].clientX + T[1].clientX) / 2 - r.left, my = (T[0].clientY + T[1].clientY) / 2 - r.top;
+  const px = b.scrollLeft + mx, py = b.scrollTop + my;   // 두 손가락 가운데에 있던 곳을 그 자리에 붙잡아 둠
+  const move = m => {
+    if (m.touches.length < 2) return;
+    m.preventDefault();
+    S.sp.zoom = Math.max(0.75, Math.min(2.5, w0 * dist(m.touches) / d0 / b._fit));
+    const w = Math.round(b._fit * S.sp.zoom); g.style.width = w + 'px';
+    b.scrollLeft = px * w / w0 - mx; b.scrollTop = py * w / w0 - my;
+  };
+  const end = () => {
+    ['touchmove', 'touchend', 'touchcancel'].forEach((k, i) => b.removeEventListener(k, i ? end : move));
+    const n = b.closest('.sppv').querySelector('.sptools .spnote'); if (n) n.textContent = Math.round(S.sp.zoom * 100) + '%';
+    b.classList.toggle('pan', b.scrollWidth > b.clientWidth || b.scrollHeight > b.clientHeight);
+  };
+  b.addEventListener('touchmove', move, { passive: false }); b.addEventListener('touchend', end); b.addEventListener('touchcancel', end);
+}, { passive: true });
+document.addEventListener('gesturestart', e => { if (e.target.closest && e.target.closest('.sppv-b')) e.preventDefault(); });   // 아이패드 사파리 화면 전체 확대 막기
 function spPvHtml(x, big) {
   return '<div class="sppv' + (big ? ' big' : '') + '"><div class="sppv-h">' + spTag(x.e.d) + '<b class="spttl">' + h(spWhere(x.e) || spGuide(x.e.d).title) + '</b><span class="spnote pcon">PDF ' + x.e.p + '쪽</span>' +
     '<span class="sptools"><button type="button" class="btn sm" onclick="spZoom(-0.25)" aria-label="작게">−</button><span class="spnote">' + Math.round(S.sp.zoom * 100) + '%</span><button type="button" class="btn sm" onclick="spZoom(0.25)" aria-label="크게">+</button>' +
     '<button type="button" class="btn sm spo" style="display:none">PDF 원본</button>' + (big ? '<button type="button" class="btn sm" onclick="spBigClose()" aria-label="닫기">' + ICON.x + '</button>' : '') + '</span></div>' +
     '<div class="sppv-b"><div class="spnote" style="padding:var(--sp-8);text-align:center">쪽 그림을 불러오는 중…</div></div>' +
-    '<div class="sppv-f"><span class="spnote">노란 표시 = 검색어가 있는 줄</span><button type="button" class="btn sm pri" onclick="spCopy(' + S.sp.sel + ')">참조 복사 ' + h(spRef(x.e)) + '</button></div></div>';
+    '<div class="sppv-f"><button type="button" class="btn sm pri" onclick="spCopy(' + S.sp.sel + ')">참조 복사 ' + h(spRef(x.e)) + '</button></div></div>';
 }
 // PC 마우스 오른쪽 버튼 막기 (휴대폰 길게 누르기는 그대로)
 if (window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches) document.addEventListener('contextmenu', e => e.preventDefault());
@@ -2272,14 +2295,31 @@ function renderInspect() {
 
 /* ── 열화상점검 (결정 166): 직원은 이름만(눌리지 않음), 소장·부소장·관리자·옵저버만 엶. 앱은 PC 프로그램이라 안내만 ── */
 const thCanOpen = () => !!S.user && ['소장', '부소장', '관리자', '옵저버'].indexOf(S.user.role) !== -1;
+const THERMAL_ON = false;   // shortcut: 작성기 fm/thermal 이 바로가기 페이지에 없어 안내 화면만. 붙이는 날(WS_열화상점검 3장) true
 function renderThermal() {
   if (!thCanOpen()) return renderInspect();
+  if (window.WS_API && THERMAL_ON) return '<div class="mapview">' + topbar('점검 ›', '열화상점검') + '<iframe class="mapframe" src="../thermal/index.html" title="열화상 보고서 작성" allow="fullscreen"></iframe>' +
+    '<button class="btn mapback" onclick="back()">' + ICON.back + '뒤로</button></div>';   // 작성기(fm/thermal)를 지도처럼 화면 안 창으로 (결정 168)
   return topbar('점검 ›', '열화상점검') + '<div class="wrap list">' +
     '<div class="banner b-gray">준비 중입니다. 지금은 사무실 PC에서만 씁니다.</div>' +
     '<div class="card" style="padding:var(--sp-4)"><h3 style="margin:0 0 var(--sp-2);font-size:var(--size-m)">할 수 있는 일</h3><div style="line-height:1.7">FLIR 열화상 사진(.jpg)을 넣으면 점 3개(R·S·T상) 온도와 상간 온도차를 계산해 FLIR Thermal Studio 보고서(.atr)로 만듭니다.</div></div>' +
     '<div class="card" style="padding:var(--sp-4)"><h3 style="margin:0 0 var(--sp-2);font-size:var(--size-m)">쓰는 방법 (PC)</h3><div style="line-height:1.7">FLIR Thermal Studio가 깔린 PC에서 <b>run.bat</b>을 두 번 누르면 화면이 열립니다. 사진 이름은 <b>1층1번_일반.jpg</b>처럼 붙입니다.</div></div>' +
     '</div>';
 }
+
+/* 작성기(fm/thermal)가 부르는 통로 (결정 168, WS_열화상점검 3장). 자료는 PIN 로그인 표로 16_thermal.sql 함수만 */
+const thExt = n => { const m = /\.([A-Za-z0-9]{1,5})$/.exec(String(n || '')); return m ? m[1].toLowerCase() : 'bin'; };
+const thOk = r => { if (!r || !r.ok) throw new Error((r && r.error) || '저장하지 못했습니다'); return r; };
+window.WS_THERMAL = {
+  me: async () => ({ name: S.user ? S.user.name : '', role: S.user ? S.user.role : '' }),
+  boot: async () => { const r = thOk(await call('thermalBoot')); return { me: r.me, model: r.model, template: r.template, template_url: r.template ? r.template.url : '', reports: r.reports }; },
+  saveModel: async m => thOk(await call('thermalSet', 'model', m)),
+  saveTemplate: async t => thOk(await call('thermalSet', 'template', t)),   // t = upload() 결과 + name
+  upload: (blob, name) => WS_API.upload('thermal', blob, thExt(name)),   // 원본 그대로 (줄이지 않음)
+  saveReport: async r => thOk(await call('thermalReport', r)),
+  toDrive: async () => { throw new Error('구글 드라이브로 옮기기는 다음 단계에서 됩니다. 지금은 내려받아 주세요.'); },
+  full: on => mapFull(on)
+};
 
 /* ── 개선 A: 입력 기간 안내 ── */
 function periodBanner(st, counts) {
@@ -2307,9 +2347,14 @@ function renderFire() {
     '<div class="card" style="padding:var(--sp-3) var(--sp-4);display:flex;flex-direction:column;gap:var(--sp-2)"><div style="display:flex;justify-content:space-between;font-size:var(--size-m)"><span style="color:var(--muted)">이번 달 점검</span><span><b style="color:var(--green)">' + done + '</b> / ' + c.total + '대</span></div>' +
     '<div class="bar" style="height:8px"><span style="width:' + pct + '%;background:var(--green)"></span></div></div>' +
     periodBanner(st, c) +
-    '<button class="row" onclick="openQr()"><span class="ico" style="background:var(--blue-bg);color:var(--blue);width:48px;height:48px">QR</span><span class="fname"><b style="font-size:var(--size-l)">① 소화기 QR 관리 · 인쇄</b><small>매장별 소화기 등록 · 삭제 · QR' + (CAN_PRINT ? ' · 출력' : ' (출력은 PC에서)') + '</small></span>' + ICON.chev + '</button>' +
+    '<button class="row" onclick="openQr()"><span class="ico" style="background:var(--blue-bg);color:var(--blue);width:48px;height:48px">QR</span><span class="fname"><b style="font-size:var(--size-l)">① 소화기, 소화전, 공기호흡기 QR 관리 · 인쇄</b><small>매장별 소화기 등록 · 삭제 · QR' + (CAN_PRINT ? ' · 출력' : ' (출력은 PC에서)') + '</small></span>' + ICON.chev + '</button>' +
     '<button class="row" onclick="openStatus()"><span class="ico" style="background:var(--green-bg);color:var(--green);width:48px;height:48px">✓</span><span class="fname"><b style="font-size:var(--size-l)">② 매장별 소화기 점검 현황</b><small>월별 · 층별(B1~6F) · 매장별</small></span>' + ICON.chev + '</button>' +
+    '<button class="row" onclick="go(\'hyd\')"><span class="ico" style="background:var(--blue-bg);color:var(--blue);width:48px;height:48px">③</span><span class="fname"><b style="font-size:var(--size-l)">③ 층별 소화전, 공기호흡기 점검 현황</b><small>수정중</small></span>' + ICON.chev + '</button>' +
     '</div>';
+}
+/* ③ 소화전·공기호흡기: 점검 양식은 추후 올림 → 그때까지 「수정중」 (결정 170) */
+function renderHyd() {
+  return topbar('소화기 점검 ›', '층별 소화전, 공기호흡기 점검 현황') + '<div class="wrap list"><div class="banner b-gray">수정중입니다. 소화전·공기호흡기 점검 양식이 올라오면 이 화면을 만듭니다.</div></div>';
 }
 
 /* ── ① QR 관리 ── */
@@ -3195,6 +3240,7 @@ function render() {
   else if (S.view === 'thermal') html = renderThermal();
   else if (S.view === 'fire') html = renderFire();
   else if (S.view === 'qr') html = renderQr();
+  else if (S.view === 'hyd') html = renderHyd();
   else if (S.view === 'eh') html = renderEh();
   else if (S.view === 'cs') html = renderCs();
   else if (S.view === 'csck') html = renderCsCk();
