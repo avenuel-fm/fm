@@ -370,10 +370,16 @@
                     <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
                 </button>
             </div>
+            <div class="store-excel-row">
+                <button type="button" class="btn-sm" id="btn-excel-down" onclick="downloadStoreExcel()">엑셀 받기</button>
+                <button type="button" class="btn-sm btn-sm-primary" id="btn-excel-up" onclick="pickStoreExcel()">엑셀 올리기</button>
+                <input type="file" id="store-excel-file" accept=".xlsx,.xls" hidden onchange="onStoreExcelPicked(this)">
+            </div>
             <div class="search-container">
                 <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-                <input type="text" id="store-search-box" placeholder="명칭 검색..." oninput="filterStoreList()">
+                <input type="text" id="store-search-box" placeholder="매장명·고유번호 찾기" oninput="filterStoreList()">
             </div>
+            <details class="store-check" id="store-check" hidden></details>
             <div class="store-list-container" id="store-list-container"></div>
         </aside>
     </div>
@@ -503,6 +509,7 @@
                 <div class="modal-header-title">
                     <span class="badge-facility" id="status-badge">매장 시설 현황</span>
                     <span class="modal-title" id="status-store-name">매장명</span>
+                    <span class="store-id-chip" id="status-store-id" hidden></span>
                 </div>
                 <button class="icon-btn-close" onclick="closeAllPopovers()">
                     <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
@@ -523,8 +530,9 @@
         <div id="edit-modal" class="facility-modal" onclick="event.stopPropagation()">
             <div class="modal-header">
                 <div class="modal-header-title">
-                    <span class="badge-facility" id="edit-badge" style="color:#059669;background:#ecfdf5;border-color:#a7f3d0;">정보 편집</span>
+                    <span class="badge-facility" id="edit-badge">정보 편집</span>
                     <span class="modal-title" id="edit-modal-title">매장 및 시설 수정</span>
+                    <span class="store-id-chip" id="edit-store-id" hidden></span>
                 </div>
                 <button class="icon-btn-close" onclick="cancelStoreEdit()">
                     <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
@@ -548,6 +556,7 @@
                 <div class="form-group">
                     <label for="edit-name" id="edit-name-label">매장명</label>
                     <input type="text" id="edit-name" placeholder="매장명을 입력하세요">
+                    <p class="store-form-note" id="store-name-note" hidden>이름을 바꾸거나 지워도 고유번호와 상세내역은 이 도형에 그대로 남습니다.</p>
                     <!-- 기능실 선택 시 표시되는 주요 기능실 간편 선택 라디오 그룹 -->
                     <div id="utility-type-radio-group" style="display:none; margin-top:8px;">
                         <div style="font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">주요 기능실 선택:</div>
@@ -582,22 +591,12 @@
                 </div>
 
                 <!-- 시설 사양 동적 항목 관리 -->
-                <div class="fields-section">
-                    <div class="fields-section-header">
-                        <span class="fields-section-title">시설 사양 항목</span>
-                        <button type="button" class="btn-add-field" onclick="addDynamicFieldRow()">
-                            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.2" fill="none"><path d="M12 5v14M5 12h14"/></svg>
-                            <span>항목 추가</span>
-                        </button>
-                    </div>
-                    <div class="dynamic-fields-list" id="dynamic-fields-list">
-                        <!-- 동적 필드 행들 -->
-                    </div>
-                </div>
+                <div id="store-detail-form"></div>
             </div>
 
             <div class="modal-footer">
-                <button class="btn-sm btn-sm-danger" id="btn-popover-delete" onclick="deleteCurrentStore()">삭제</button>
+                <button class="btn-sm btn-sm-danger" id="btn-popover-delete" onclick="deleteCurrentStore()">도형 삭제</button>
+                <button class="btn-sm" id="btn-clear-name" onclick="clearStoreName()" hidden>이름만 지우기</button>
                 <button class="btn-sm" onclick="cancelStoreEdit()">취소</button>
                 <button class="btn-sm btn-sm-primary" onclick="saveStoreEdit()">저장</button>
             </div>
@@ -660,6 +659,7 @@
     <script src="js/core/dom.js"></script>
 
     <!-- 3. 저장소 및 실행 취소 (추후 Supabase 연동 모듈) -->
+    <script src="js/storage/storeBook.js"></script>
     <script src="js/storage/storeRepository.js"></script>
     <script src="js/storage/zoneRepository.js"></script>
     <script src="js/storage/utilityLineRepository.js"></script>
@@ -674,6 +674,7 @@
     <!-- 5. 전문 CAD 및 측정 엔진 (축척 캘리브레이션, 매장/기능실 CAD, 구역 CAD, 심벌 CAD, 자유 필기/실측) -->
     <script src="js/scale/scaleCalibrator.js"></script>
     <script src="js/cad/storeEditor.js"></script>
+    <script src="js/cad/storeExcel.js"></script>
     <script src="js/cad/zoneEditor.js"></script>
     <script src="js/cad/symbolEditor.js"></script>
     <script src="js/cad/utilityLineEditor.js"></script>

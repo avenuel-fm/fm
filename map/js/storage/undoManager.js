@@ -18,6 +18,7 @@ var undoStack = [];
                 renamedStores: JSON.parse(JSON.stringify(getRenamedStores(floor.code))),
                 customStores: JSON.parse(JSON.stringify(getCustomStores(floor.code))),
                 storedSpecs: JSON.parse(JSON.stringify(getStoredSpecs(floor.code))),
+                storeBook: getStoreBook(floor.code),
                 vacantPolygons: JSON.parse(JSON.stringify(getVacantPolygons(floor.code))),
                 floorZones: JSON.parse(JSON.stringify(getFloorZones(floor.code))),
                 symbols: JSON.parse(JSON.stringify(typeof loadFloorSymbols === 'function' ? loadFloorSymbols(floor.code) : [])),
@@ -50,6 +51,7 @@ var undoStack = [];
             saveRenamedStores(floorCode, prevState.renamedStores);
             saveCustomStores(floorCode, prevState.customStores);
             saveStoredSpecs(floorCode, prevState.storedSpecs);
+            if (prevState.storeBook) saveStoreBook(floorCode, prevState.storeBook);
             saveVacantPolygons(floorCode, prevState.vacantPolygons);
             saveFloorZones(floorCode, prevState.floorZones);
             if (prevState.symbols && typeof saveFloorSymbols === 'function') {

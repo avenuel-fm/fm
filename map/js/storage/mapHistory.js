@@ -34,7 +34,7 @@ body.map-ro #btn-edit-menu,body.map-ro #btn-undo,body.map-ro #btn-status-edit,bo
 .hist-dlg button{min-height:40px;padding:0 16px;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px}
 .hist-dlg .no{border:1px solid #d6d3d1;background:#fff}.hist-dlg .yes{border:0;background:#b91c1c;color:#fff}`;
 
-    const KIND = { facility_specs: '매장', deleted_stores: '매장', renamed_stores: '매장', custom_stores: '매장', vacant_polygons: '매장',
+    const KIND = { facility_specs: '매장', deleted_stores: '매장', renamed_stores: '매장', custom_stores: '매장', vacant_polygons: '매장', store_book: '매장',
         floor_zones: '구역', symbols: '심벌', util_lines: '연결선', saved_svg: '외벽·도면', base_svg: '업체 도면' };
     const kst = () => new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
     const md = d => Number(d.slice(5, 7)) + '월 ' + Number(d.slice(8, 10)) + '일';
@@ -44,6 +44,7 @@ body.map-ro #btn-edit-menu,body.map-ro #btn-undo,body.map-ro #btn-status-edit,bo
     /** 칸 이름 → 「1F 매장」. 지금 건물 칸만 (다른 건물은 null) */
     function label(k) {
         if (k === 'lotte_scale_settings' + suffix()) return '축척';
+        if (k === 'lotte_store_items' + suffix()) return '상세 항목';
         const m = /^lotte_([a-z_]+?)_([A-Za-z0-9]+)(_(dept|castle))?$/.exec(k);
         if (!m || (m[4] || '') !== suffix().slice(1) || !KIND[m[1]]) return null;
         return m[2] + ' ' + KIND[m[1]];

@@ -223,9 +223,13 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
             const deletedStores = getDeletedStores(floor.code);
             const renamedMap = getRenamedStores(floor.code);
             const storedSpecs = getStoredSpecs(floor.code);
+            const storeBook = getStoreBook(floor.code);
+            const bookShapes = new Set(Object.values(storeBook.items).map(it => it.shape));
+            const shapeLabels = {};
 
             const pathEls = Array.from(svgEl.querySelectorAll('path, polygon')).filter(p => {
                 if (p.classList.contains('building-exterior-wall')) return false;
+                if (p.closest('#custom-stores-top-layer')) return false;   // 직접 그린 매장은 아래에서 따로 묶음
                 const fill = (p.getAttribute('fill') || '').toLowerCase();
                 const stroke = (p.getAttribute('stroke') || '').toLowerCase();
                 const dsW = parseFloat(p.getAttribute('ds-width')) || p.getBBox?.()?.width || 0;
@@ -240,6 +244,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
             });
 
             const textEls = Array.from(svgEl.querySelectorAll('g[group-type="POI_GROUP"] text, text')).filter(t => {
+                if (t.closest('#custom-stores-top-layer')) return false;
                 const tspan = t.querySelector('tspan') || t;
                 const txt = tspan.textContent.trim();
                 if (!txt || txt === 'NaN' || txt.length === 0) return false;
@@ -285,8 +290,18 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                     matchedPolygon = matchingPaths[0];
                 }
 
+                // 도형의 고유값: 한 도형에 글자가 여럿이면 뒤에 #2, #3 (결정 154)
+                let shapeKey = null;
+                if (matchedPolygon) {
+                    const base = matchedPolygon.id || `xy:${matchedPolygon.getAttribute('ds-x')}:${matchedPolygon.getAttribute('ds-y')}`;
+                    shapeLabels[base] = (shapeLabels[base] || 0) + 1;
+                    shapeKey = shapeLabels[base] > 1 ? `${base}#${shapeLabels[base]}` : base;
+                }
+                const shapeDeleted = shapeKey && storeBook.deleted.includes(StoreBook.baseOf(shapeKey));
+                const nameDeleted = !(shapeKey && bookShapes.has(shapeKey)) && (deletedStores.includes(rawName) || (renamedMap[rawName] && deletedStores.includes(renamedMap[rawName])));
+
                 // 삭제된 매장인지 확인하여 도면에서 바닥 색상을 흰색(#ffffff)으로 처리하고 목록에서 제외 (경계선 완전 제거)
-                if (deletedStores.includes(rawName) || (renamedMap[rawName] && deletedStores.includes(renamedMap[rawName]))) {
+                if (shapeDeleted || nameDeleted) {
                     textEl.remove();
                     if (matchedPolygon) {
                         matchedPolygon.setAttribute('fill', '#ffffff');
@@ -337,18 +352,11 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                         itemFields = rawSpec.fields;
                     } else {
                         itemFields = [
-                            { label: '차단기 규격', value: rawSpec.breaker || '3P 50A' },
-                            { label: '수도배관 규격', value: rawSpec.plumbing || '미사용' },
-                            { label: '가스등급 규격', value: rawSpec.gas || '미사용' }
+                            { label: '차단기 규격', value: rawSpec.breaker || '' },
+                            { label: '수도배관 규격', value: rawSpec.plumbing || '' },
+                            { label: '가스등급 규격', value: rawSpec.gas || '' }
                         ];
                     }
-                } else {
-                    const def = generateDefaultSpecs(name, floor.code);
-                    itemFields = [
-                        { label: '차단기 규격', value: def.breaker },
-                        { label: '수도배관 규격', value: def.plumbing },
-                        { label: '가스등급 규격', value: def.gas }
-                    ];
                 }
 
                 let storeGroup = null;
@@ -389,9 +397,9 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                     textElement: textEl,
                     polygonElement: matchedPolygon,
                     groupElement: storeGroup,
-                    breaker: itemFields.find(f => f.label.includes('차단기'))?.value || '3P 50A',
-                    plumbing: itemFields.find(f => f.label.includes('수도') || f.label.includes('배관'))?.value || '미사용',
-                    gas: itemFields.find(f => f.label.includes('가스'))?.value || '미사용'
+                    shapeKey: shapeKey,
+                    shapeW: matchedPolygon ? (parseFloat(matchedPolygon.getAttribute('ds-width')) || 0) : 0,
+                    shapeH: matchedPolygon ? (parseFloat(matchedPolygon.getAttribute('ds-height')) || 0) : 0
                 };
                 currentStores.push(storeItem);
 
@@ -417,9 +425,10 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
             // 사용자가 추가한 커스텀 도형/매장 복원
             const customStores = getCustomStores(floor.code);
             customStores.forEach(cs => {
-                if (deletedStores.includes(cs.name)) return;
+                const customShape = cs.shape || `c:${cs.id}`;
+                if (!bookShapes.has(customShape) && deletedStores.includes(cs.name)) return;
 
-                let existingGroup = svgEl.querySelector(`g.store-group[data-store-id="${cs.id}"]`);
+                let existingGroup = svgEl.querySelector(`#custom-stores-top-layer g.store-group[data-store-id="${cs.id}"]`);
                 let pathEl = null;
                 let textEl = null;
 
@@ -484,9 +493,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                     textElement: textEl,
                     polygonElement: pathEl,
                     groupElement: existingGroup,
-                    breaker: (spec.fields || []).find(f => f.label.includes('차단기'))?.value || spec.breaker || '-',
-                    plumbing: (spec.fields || []).find(f => f.label.includes('수도') || f.label.includes('배관'))?.value || spec.plumbing || '-',
-                    gas: (spec.fields || []).find(f => f.label.includes('가스'))?.value || spec.gas || '-'
+                    shapeKey: customShape
                 };
                 currentStores.push(customItem);
 
@@ -546,6 +553,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                 svgEl.appendChild(wallPolyline);
             }
 
+            applyStoreBook(floor);
             renderStoreList(currentStores);
             if ((typeof isAnyEditModeActive === 'function' && isAnyEditModeActive()) || (typeof isGridLayerExplicitlyOn !== 'undefined' && isGridLayerExplicitlyOn)) {
                 showFloorGrid();
@@ -554,6 +562,60 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
             }
         }
 
+
+        // 도면의 도형과 매장 대장을 맞추고, 대장의 이름·상세내역을 화면에 씀 (결정 154)
+        function applyStoreBook(floor) {
+            const key = getStoreBookKey(floor.code);
+            const write = !mapStore.readOnly();
+            const shapes = currentStores.filter(s => s.shapeKey).map(s => ({
+                shape: s.shapeKey, name: s.name, type: s.type, color: s.fillColor, fields: s.fields, x: s.x, y: s.y, w: s.shapeW, h: s.shapeH
+            }));
+            const r = StoreBook.reconcile(getStoreBook(floor.code), shapes, currentBuildingId, floor.code, write);
+            if (write && (r.changed || !mapStore.getItem(key))) saveStoreBook(floor.code, r.book);
+            const items = StoreBook.itemsWith(getStoreItems(), r.book);
+            currentStores.forEach(s => {
+                const id = s.shapeKey && r.byShape[s.shapeKey];
+                const it = id && r.book.items[id];
+                if (!it) return;
+                s.bookId = id;
+                s.name = it.name;
+                s.type = it.type || s.type;
+                s.details = it.details || {};
+                s.fields = StoreBook.fields(items, it);
+                if (it.color) { s.fillColor = it.color; s.polygonElement?.setAttribute('fill', it.color); }
+                const tspan = s.textElement && (s.textElement.querySelector('tspan') || s.textElement);
+                if (tspan && tspan.textContent !== StoreBook.show(it.name)) tspan.textContent = StoreBook.show(it.name);
+                s.groupElement?.setAttribute('data-store-name', it.name);
+                s.groupElement?.setAttribute('data-store-type', s.type);
+            });
+        }
+
+        // 확인이 필요한 곳: 도면에서 못 찾은 번호 · 도형 하나를 같이 쓰는 글자 · 같은 이름 도형
+        function storeCheckLines() {
+            const lines = [];
+            const book = getStoreBook(FLOORS[currentFloorIdx].code);
+            Object.keys(book.items).forEach(id => {
+                if (book.items[id].lost) lines.push(`${id} 「${StoreBook.show(book.items[id].name)}」: 도면에서 도형을 찾지 못했습니다`);
+            });
+            currentStores.filter(s => s.bookId && String(s.shapeKey).includes('#')).forEach(s => lines.push(`${s.bookId} 「${StoreBook.show(s.name)}」: 다른 글자와 도형 하나를 같이 씁니다`));
+            const count = {};
+            currentStores.filter(s => s.bookId && s.name).forEach(s => { count[s.name] = (count[s.name] || 0) + 1; });
+            Object.keys(count).filter(n => count[n] > 1).forEach(n => lines.push(`「${n}」: 같은 이름 도형이 ${count[n]}개입니다`));
+            return lines;
+        }
+
+        function renderStoreChecks() {
+            const box = document.getElementById('store-check');
+            if (!box) return;
+            const lines = storeCheckLines();
+            box.hidden = !lines.length;
+            box.innerHTML = lines.length ? `<summary>확인 필요 ${lines.length}곳</summary><ul>${lines.map(l => `<li>${escapeHtml(l)}</li>`).join('')}</ul>` : '';
+        }
+
+        function storeCardSummary(item) {
+            const filled = (item.fields || []).filter(f => f.value);
+            return filled.length ? filled.slice(0, 2).map(f => `${f.label} ${f.value}`).join(' · ') : '상세 없음';
+        }
 
         // ================= 필터, 탭, 색상 팔레트 및 동적 필드 관리 =================
         function setStoreFilter(mode) {
@@ -596,9 +658,10 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
             const searchBox = document.getElementById('store-search-box');
             const q = searchBox ? searchBox.value.toLowerCase().trim() : '';
             if (q) {
-                displayList = displayList.filter(s => s.name.toLowerCase().includes(q));
+                displayList = displayList.filter(s => s.name.toLowerCase().includes(q) || String(s.bookId || '').toLowerCase().includes(q));
             }
 
+            renderStoreChecks();
             storeListContainer.innerHTML = '';
             if (displayList.length === 0) {
                 storeListContainer.innerHTML = `<div style="text-align:center;padding:24px 16px;color:var(--text-muted);font-size:13px;">해당 분류의 항목이 없습니다.</div>`;
@@ -620,8 +683,9 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                     <div class="store-card-left">
                         <span class="store-idx-circle ${isUtil ? 'utility-idx' : ''}">${index + 1}</span>
                         <div class="store-card-name-group">
-                            <span class="store-name-text" title="${item.name}">${escapeHtml(item.name)}</span>
+                            <span class="store-name-text" title="${escapeHtml(StoreBook.show(item.name))}">${escapeHtml(StoreBook.show(item.name))}</span>
                             ${isUtil ? '<span class="badge-card-utility">기능실</span>' : ''}
+                            ${item.bookId ? `<span class="store-card-sub">${escapeHtml(item.bookId)} · ${escapeHtml(storeCardSummary(item))}</span>` : ''}
                         </div>
                     </div>
                     <div class="store-card-actions">

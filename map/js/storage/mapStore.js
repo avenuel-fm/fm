@@ -10,7 +10,7 @@ var mapStore = (function () {
     let cache = {}, live = {};
     const vers = {}, bases = {};
     const queue = {};   // 칸마다 저장을 차례로 (나중 값이 마지막에 도착하게, 판도 이어서)
-    let warned = false, canEdit = false, isBoss = false, viewAt = '';
+    let failCount = 0, warned = false, canEdit = false, isBoss = false, viewAt = '';
     const api = (window.parent !== window && window.parent.WS_MAP) || null;
 
     function warnOnce(msg) {
@@ -24,7 +24,7 @@ var mapStore = (function () {
             if (r && r.conflict) { alert(r.error); location.reload(); return; }
             if (!r || r.ok === false) throw new Error(r && r.error);
             vers[k] = r.ver || '';
-        }).catch(e => warnOnce('도면을 저장하지 못했습니다. 인터넷을 확인하고 다시 해 주세요.\n' + (e && e.message ? e.message : e)));
+        }).catch(e => { failCount++; warnOnce('도면을 저장하지 못했습니다. 인터넷을 확인하고 다시 해 주세요.\n' + (e && e.message ? e.message : e)); });
     }
     function readOnly() { return !canEdit || !!viewAt; }
 
@@ -58,6 +58,8 @@ var mapStore = (function () {
         get isBoss() { return isBoss; },
         get viewAt() { return viewAt; },
         readOnly,
+        /** 보낸 저장이 모두 끝날 때까지 기다림. 돌려주는 값 = 실패한 수 */
+        async flush() { const before = failCount; await Promise.all(Object.values(queue)); return failCount - before; },
         /** 업체 바탕 도면을 받으면 그림이 바뀌었을 때만 보관 (결정 132). 보기 중엔 안 함 */
         async keepBase(k, raw) {
             if (!api || viewAt || !raw || !(window.crypto && crypto.subtle)) return;

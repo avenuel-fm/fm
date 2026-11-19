@@ -439,3 +439,41 @@
             outline: none;
             border-color: var(--border-focus);
         }
+
+/* 매장 대장 (결정 154) */
+#edit-modal { max-width: 600px; max-height: calc(100dvh - var(--sp-8)); }
+#edit-modal .edit-fields-wrap { overflow-y: auto; }
+.store-id-chip { width: fit-content; font-size: var(--size-s); font-weight: 500; background: var(--tint); border: 1px solid var(--line); border-radius: var(--radius); padding: 0 var(--sp-2); line-height: 24px; font-variant-numeric: tabular-nums; }
+.store-id-chip[hidden], .store-form-note[hidden], #btn-clear-name[hidden] { display: none; }
+.store-form-note { margin-top: var(--sp-2); font-size: var(--size-s); color: var(--text-sub); line-height: 1.5; }
+.store-form-title { margin: var(--sp-3) 0 var(--sp-2); font-size: var(--size-s); font-weight: 700; color: var(--navy); }
+.store-form-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-2); }
+.facility-group { font-size: var(--size-s); font-weight: 700; color: var(--navy); padding-top: var(--sp-1); }
+.facility-info-table { max-height: min(420px, 60dvh); }
+@media (max-width: 560px) { .store-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.xl-shade { position: fixed; inset: 0; z-index: 5000; background: var(--overlay); display: flex; align-items: center; justify-content: center; padding: var(--sp-4); }
+.xl-box { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); width: 768px; max-width: 100%; max-height: 100%; display: flex; flex-direction: column; color: var(--navy); }
+.xl-head { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-4); border-bottom: 1px solid var(--line); }
+.xl-head h3 { font-size: var(--size-l); font-weight: 700; }
+.xl-tag { font-size: var(--size-s); font-weight: 500; border: 1px solid var(--line); border-radius: var(--radius); padding: 0 var(--sp-2); line-height: 24px; white-space: nowrap; }
+.xl-body { padding: var(--sp-4); overflow-y: auto; overscroll-behavior: contain; min-height: 0; }
+.xl-sum { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-2); margin-bottom: var(--sp-4); }
+.xl-sum div { border: 1px solid var(--line); border-radius: var(--radius); padding: var(--sp-3); }
+.xl-sum b { display: block; font-size: var(--size-xl); font-weight: 700; }
+.xl-sum span { font-size: var(--size-s); color: var(--text-sub); }
+.xl-scroll { overflow-x: auto; }
+.xl-body table { border-collapse: collapse; width: 100%; font-size: var(--size-s); }
+.xl-body th, .xl-body td { border-bottom: 1px solid var(--line); padding: var(--sp-2); text-align: left; font-weight: 400; }
+.xl-body th { background: var(--tint); font-weight: 500; white-space: nowrap; }
+.xl-old { color: var(--text-sub); text-decoration: line-through; margin-right: var(--sp-2); }
+.xl-mark { border: 1px solid var(--navy); border-radius: var(--radius); padding: 0 var(--sp-1); font-weight: 500; margin-right: var(--sp-1); white-space: nowrap; }
+.xl-none { font-size: var(--size-s); color: var(--text-sub); margin-top: var(--sp-2); }
+.xl-warn { background: var(--tint); border: 1px solid var(--line); border-radius: var(--radius); padding: var(--sp-3); font-size: var(--size-s); line-height: 1.5; margin-top: var(--sp-3); }
+.xl-err { color: var(--error); font-weight: 700; }
+.xl-foot { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); border-top: 1px solid var(--line); font-size: var(--size-s); color: var(--text-sub); }
+.xl-foot i { flex: 1; }
+.xl-foot button { min-height: var(--control-h); padding: 0 var(--sp-4); }
+.xl-foot button:disabled { opacity: .4; cursor: not-allowed; }
+@media (max-width: 560px) { .xl-sum { grid-template-columns: repeat(2, minmax(0, 1fr)); } .xl-foot span { display: none; } }
+.modal-overlay:not(.as-toast-overlay) { z-index: 1001; }   /* 길어진 수정 창이 윗줄에 가리지 않게 */

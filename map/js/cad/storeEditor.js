@@ -19,12 +19,7 @@ var lastCreatedStoreId = null;
                 if (editNameLabel) editNameLabel.textContent = '기능실명';
                 if (editNameInput) editNameInput.placeholder = '기능실명을 입력하세요 (예: EPS, AV, 공조실, PS, PD)';
                 if (editModalTitle) editModalTitle.textContent = '기능실 및 시설 수정';
-                if (editBadge) {
-                    editBadge.textContent = '기능실 편집';
-                    editBadge.style.color = '#475569';
-                    editBadge.style.background = '#f1f5f9';
-                    editBadge.style.borderColor = '#cbd5e1';
-                }
+                if (editBadge) editBadge.textContent = '기능실 편집';
                 if (currentEditColor === '#e6f0fc') {
                     selectEditColor('#cbdbe9');
                 }
@@ -35,12 +30,7 @@ var lastCreatedStoreId = null;
                 if (editNameLabel) editNameLabel.textContent = '매장명';
                 if (editNameInput) editNameInput.placeholder = '매장명을 입력하세요';
                 if (editModalTitle) editModalTitle.textContent = '매장 및 시설 수정';
-                if (editBadge) {
-                    editBadge.textContent = '정보 편집';
-                    editBadge.style.color = '#059669';
-                    editBadge.style.background = '#ecfdf5';
-                    editBadge.style.borderColor = '#a7f3d0';
-                }
+                if (editBadge) editBadge.textContent = '정보 편집';
                 if (currentEditColor === '#cbdbe9') {
                     selectEditColor('#e6f0fc');
                 }
@@ -83,100 +73,43 @@ var lastCreatedStoreId = null;
                 .replace(/'/g, '&#039;');
         }
 
-        const FIELD_OPTIONS = ['-', '차단기', '급수', '배수', '가스등급', '에어컨 유무'];
-
-        function normalizeFieldLabel(rawLabel) {
-            if (!rawLabel || rawLabel === '-') return '-';
-            const s = rawLabel.trim();
-            if (s === '-') return '-';
-            if (s.includes('차단기')) return '차단기';
-            if (s.includes('수도') || s.includes('급수')) return '급수';
-            if (s.includes('배수')) return '배수';
-            if (s.includes('가스')) return '가스등급';
-            if (s.includes('에어컨') || s.includes('냉난방')) return '에어컨 유무';
-            return s;
-        }
-
-        function createFieldRowDOM(label = '-', value = '') {
-            const listEl = document.getElementById('dynamic-fields-list');
-            if (!listEl) return null;
-            const emptyNotice = listEl.querySelector('#fields-empty-notice');
-            if (emptyNotice) emptyNotice.remove();
-
-            const norm = normalizeFieldLabel(label);
-            const isStandard = FIELD_OPTIONS.includes(norm);
-
-            let optionsHtml = FIELD_OPTIONS.map(opt => `<option value="${opt}" ${norm === opt ? 'selected' : ''}>${opt}</option>`).join('');
-            if (!isStandard && norm && norm !== '-') {
-                optionsHtml += `<option value="${escapeHtml(norm)}" selected>${escapeHtml(norm)}</option>`;
-            }
-
-            const row = document.createElement('div');
-            row.className = 'dynamic-field-row';
-            row.innerHTML = `
-                <select class="field-label-select">
-                    ${optionsHtml}
-                </select>
-                <input type="text" class="field-value-input" placeholder="사양/내용 입력" value="${escapeHtml(value)}">
-                <button type="button" class="btn-del-field" title="항목 삭제" onclick="removeFieldRow(this)">
-                    <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-            `;
-            listEl.appendChild(row);
-            return row;
-        }
-
-        function addDynamicFieldRow() {
-            const row = createFieldRowDOM('-', '');
-            if (row) {
-                const selectEl = row.querySelector('.field-label-select');
-                if (selectEl) selectEl.focus();
-            }
-        }
-
-        function removeFieldRow(btn) {
-            const row = btn.closest('.dynamic-field-row');
-            if (row) row.remove();
-            const listEl = document.getElementById('dynamic-fields-list');
-            if (listEl && listEl.querySelectorAll('.dynamic-field-row').length === 0) {
-                listEl.innerHTML = `
-                    <div id="fields-empty-notice" style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px 0;">
-                        등록된 사양 항목이 없습니다. 상단 '항목 추가'를 눌러 추가하세요.
-                    </div>
-                `;
-            }
-        }
-
-        function renderDynamicFields(fields = []) {
-            const listEl = document.getElementById('dynamic-fields-list');
-            if (!listEl) return;
-            listEl.innerHTML = '';
-
-            if (!fields || fields.length === 0) {
-                listEl.innerHTML = `
-                    <div id="fields-empty-notice" style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px 0;">
-                        등록된 사양 항목이 없습니다. 상단 '항목 추가'를 눌러 추가하세요.
-                    </div>
-                `;
+        // 수정 창의 상세 항목 칸 (항목은 엑셀에 열을 더해 늘림, 결정 154)
+        function renderStoreDetailForm(store) {
+            const box = document.getElementById('store-detail-form');
+            if (!box) return;
+            if (!store.bookId) {
+                box.innerHTML = '<p class="store-form-note">이 글자는 묶인 도형이 없어 상세내역을 넣을 수 없습니다.</p>';
                 return;
             }
-
-            fields.forEach(f => {
-                createFieldRowDOM(f.label, f.value);
-            });
+            const book = getStoreBook(FLOORS[currentFloorIdx].code);
+            const it = book.items[store.bookId] || { details: {} };
+            box.innerHTML = StoreBook.groups(StoreBook.itemsWith(getStoreItems(), book), it).map(g => `
+                <div class="store-form-title">${escapeHtml(g.title)}</div>
+                <div class="store-form-grid">${g.rows.map(r => `
+                    <div class="form-group"><label>${escapeHtml(r.label)}</label><input type="text" data-detail-key="${escapeHtml(r.key)}" value="${escapeHtml(r.value)}"></div>`).join('')}
+                </div>`).join('');
         }
 
-        function gatherDynamicFields() {
-            const rows = document.querySelectorAll('#dynamic-fields-list .dynamic-field-row');
-            const result = [];
-            rows.forEach(r => {
-                const label = (r.querySelector('.field-label-select')?.value || r.querySelector('.field-label-input')?.value || '').trim();
-                const value = r.querySelector('.field-value-input')?.value.trim();
-                if ((label && label !== '-') || value) {
-                    result.push({ label: (label && label !== '-') ? label : '기타', value: value || '-' });
-                }
+        function gatherStoreDetails() {
+            const out = {};
+            document.querySelectorAll('#store-detail-form [data-detail-key]').forEach(el => {
+                const v = StoreBook.clean(el.value);
+                if (v) out[el.getAttribute('data-detail-key')] = v;
             });
-            return result;
+            return out;
+        }
+
+        function setStoreIdChip(el, store) {
+            if (!el) return;
+            el.textContent = store.bookId || '';
+            el.hidden = !store.bookId;
+        }
+
+        // 이름만 지움: 고유번호·상세내역은 도형에 그대로 남음
+        function clearStoreName() {
+            if (!activeSelectedStore || !activeSelectedStore.bookId) return;
+            if (editNameInput) editNameInput.value = '';
+            saveStoreEdit();
         }
 
         // 매장/기능실 선택 및 모달 열기
@@ -222,34 +155,23 @@ var lastCreatedStoreId = null;
             }
 
             const isUtil = storeItem.type === 'utility';
-            if (statusBadge) {
-                statusBadge.textContent = isUtil ? '기능실 시설 현황' : '매장 시설 현황';
-                statusBadge.style.color = isUtil ? '#475569' : '#1d4ed8';
-                statusBadge.style.background = isUtil ? '#f1f5f9' : '#eff6ff';
-                statusBadge.style.borderColor = isUtil ? '#cbd5e1' : '#bfdbfe';
-            }
+            if (statusBadge) statusBadge.textContent = isUtil ? '기능실 시설 현황' : '매장 시설 현황';
 
-            statusStoreName.textContent = storeItem.name;
+            statusStoreName.textContent = StoreBook.show(storeItem.name);
+            setStoreIdChip(document.getElementById('status-store-id'), storeItem);
 
             // 동적 시설 항목 테이블 렌더링
             const tableEl = document.getElementById('status-facility-table');
             if (tableEl) {
                 tableEl.innerHTML = '';
-                const fields = storeItem.fields || [
-                    { label: '차단기 규격', value: storeItem.breaker || '-' },
-                    { label: '수도배관 규격', value: storeItem.plumbing || '-' },
-                    { label: '가스등급 규격', value: storeItem.gas || '-' }
-                ];
-                if (fields.length > 0) {
-                    fields.forEach(f => {
-                        const row = document.createElement('div');
-                        row.className = 'facility-row';
-                        row.innerHTML = `
-                            <div class="facility-label">${escapeHtml(f.label)}</div>
-                            <div class="facility-value">${escapeHtml(f.value || '-')}</div>
-                        `;
-                        tableEl.appendChild(row);
-                    });
+                const book = getStoreBook(FLOORS[currentFloorIdx].code);
+                const it = storeItem.bookId && book.items[storeItem.bookId];
+                const sections = it ? StoreBook.groups(StoreBook.itemsWith(getStoreItems(), book), it)
+                    : [{ title: '', rows: (storeItem.fields || []) }];
+                if (sections.some(g => g.rows.length)) {
+                    tableEl.innerHTML = sections.map(g => `
+                        ${g.title ? `<div class="facility-group">${escapeHtml(g.title)}</div>` : ''}
+                        ${g.rows.map(f => `<div class="facility-row"><div class="facility-label">${escapeHtml(f.label)}</div><div class="facility-value">${escapeHtml(f.value || '-')}</div></div>`).join('')}`).join('');
                 } else {
                     tableEl.innerHTML = `<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px 0;">등록된 시설 항목이 없습니다.</div>`;
                 }
@@ -271,11 +193,8 @@ var lastCreatedStoreId = null;
             if (!btnConnect && statusModal) {
                 btnConnect = document.createElement('button');
                 btnConnect.id = 'btn-status-connect-util';
-                btnConnect.className = 'btn-sm';
-                btnConnect.style.background = '#2563eb';
-                btnConnect.style.color = '#ffffff';
-                btnConnect.style.borderColor = '#2563eb';
-                btnConnect.innerHTML = '🔗 매장 연결선';
+                btnConnect.className = 'btn-sm btn-sm-primary';
+                btnConnect.textContent = '매장 연결선';
                 btnConnect.onclick = () => {
                     const targetStore = activeSelectedStore;
                     closeAllPopovers();
@@ -304,7 +223,7 @@ var lastCreatedStoreId = null;
         }
 
         function openEditModalForStore(store) {
-            if (!store || isImmutableStore(store.name)) return;
+            if (!store || isImmutableStore(store.name) || mapStore.readOnly()) return;
             closeAllPopovers();
             activeSelectedStore = store;
 
@@ -330,10 +249,10 @@ var lastCreatedStoreId = null;
                 r.checked = (type === 'utility' && r.value === store.name);
             });
 
-            const fields = store.fields && store.fields.length > 0 ? store.fields : [
-                { label: '차단기', value: store.breaker || '3P 50A' }
-            ];
-            renderDynamicFields(fields);
+            renderStoreDetailForm(store);
+            setStoreIdChip(document.getElementById('edit-store-id'), store);
+            document.getElementById('store-name-note').hidden = !store.bookId;
+            document.getElementById('btn-clear-name').hidden = !store.bookId;
 
             btnPopoverDelete.style.display = 'inline-flex';
 
@@ -392,10 +311,11 @@ var lastCreatedStoreId = null;
                 const sId = activeSelectedStore.id;
                 const targetName = activeSelectedStore.name;
                 // 커스텀 매장 목록에서 제거
-                const customList = getCustomStores(floor.code).filter(cs => cs.id !== sId && cs.name !== targetName);
+                const customList = getCustomStores(floor.code).filter(cs => cs.id !== sId);
                 saveCustomStores(floor.code, customList);
+                if (activeSelectedStore.shapeKey) saveStoreBook(floor.code, StoreBook.removeShape(getStoreBook(floor.code), activeSelectedStore.shapeKey, false));
                 // 현재 런타임 매장 목록에서 제거
-                currentStores = currentStores.filter(s => s.id !== sId && s.name !== targetName);
+                currentStores = currentStores.filter(s => s.id !== sId);
                 // DOM 제거
                 if (activeSelectedStore.groupElement) activeSelectedStore.groupElement.remove();
                 if (activeSelectedStore.polygonElement) activeSelectedStore.polygonElement.remove();
@@ -426,7 +346,7 @@ var lastCreatedStoreId = null;
             const newName = editNameInput.value.trim();
             const isUtil = currentEditType === 'utility';
 
-            if (!newName) {
+            if (!newName && !activeSelectedStore.bookId) {
                 return showToast(isUtil ? '기능실명을 입력해주세요.' : '매장명을 입력해주세요.', 1500);
             }
 
@@ -438,24 +358,31 @@ var lastCreatedStoreId = null;
 
             const floor = FLOORS[currentFloorIdx];
             const oldName = activeSelectedStore.name;
-            const fields = gatherDynamicFields();
+            const bookId = activeSelectedStore.bookId;
 
             activeSelectedStore.name = newName;
             activeSelectedStore.type = currentEditType;
             activeSelectedStore.fillColor = currentEditColor;
-            activeSelectedStore.fields = fields;
 
-            const breakerF = fields.find(f => f.label.includes('차단기'));
-            const plumbF = fields.find(f => f.label.includes('수도') || f.label.includes('급수') || f.label.includes('배관'));
-            const gasF = fields.find(f => f.label.includes('가스'));
-            activeSelectedStore.breaker = breakerF ? breakerF.value : '-';
-            activeSelectedStore.plumbing = plumbF ? plumbF.value : '-';
-            activeSelectedStore.gas = gasF ? gasF.value : '-';
+            // 대장에 저장: 번호는 그대로, 이름·상세내역만 바뀜 (결정 154)
+            if (bookId) {
+                const book = getStoreBook(floor.code);
+                const it = book.items[bookId];
+                if (it) {
+                    it.name = newName;
+                    it.type = currentEditType;
+                    it.color = currentEditColor;
+                    it.details = gatherStoreDetails();
+                    saveStoreBook(floor.code, book);
+                    activeSelectedStore.details = it.details;
+                    activeSelectedStore.fields = StoreBook.fields(StoreBook.itemsWith(getStoreItems(), book), it);
+                }
+            }
 
             // SVG DOM 업데이트
             if (activeSelectedStore.textElement) {
                 const tspan = activeSelectedStore.textElement.querySelector('tspan') || activeSelectedStore.textElement;
-                tspan.textContent = newName;
+                tspan.textContent = StoreBook.show(newName);
             }
             if (activeSelectedStore.groupElement) {
                 activeSelectedStore.groupElement.setAttribute('data-store-name', newName);
@@ -468,15 +395,14 @@ var lastCreatedStoreId = null;
             // 커스텀 생성 매장인 경우 customStores 업데이트
             if (activeSelectedStore.isCustom) {
                 const customStores = getCustomStores(floor.code);
-                const targetCs = customStores.find(cs => cs.id === activeSelectedStore.id || cs.name === oldName);
+                const targetCs = customStores.find(cs => cs.id === activeSelectedStore.id);
                 if (targetCs) {
                     targetCs.name = newName;
                     targetCs.type = currentEditType;
                     targetCs.fillColor = currentEditColor;
-                    targetCs.fields = fields;
                     saveCustomStores(floor.code, customStores);
                 }
-            } else if (oldName && oldName !== newName) {
+            } else if (!bookId && oldName && oldName !== newName) {
                 // 원본 매장명 변경 매핑 저장 (새로고침 시 자동 복원)
                 const renamedMap = getRenamedStores(floor.code);
                 let origKey = oldName;
@@ -490,25 +416,20 @@ var lastCreatedStoreId = null;
                 saveRenamedStores(floor.code, renamedMap);
             }
 
-            // 시설 사양 저장
-            const storedSpecs = getStoredSpecs(floor.code);
-            if (oldName && oldName !== newName) {
-                delete storedSpecs[oldName];
+            // 도형 없는 글자만 예전 칸에 종류·색을 남김
+            if (!bookId) {
+                const storedSpecs = getStoredSpecs(floor.code);
+                if (oldName && oldName !== newName) {
+                    delete storedSpecs[oldName];
+                }
+                storedSpecs[newName] = { type: currentEditType, fillColor: currentEditColor, fields: [] };
+                saveStoredSpecs(floor.code, storedSpecs);
             }
-            storedSpecs[newName] = {
-                type: currentEditType,
-                fillColor: currentEditColor,
-                fields: fields,
-                breaker: activeSelectedStore.breaker,
-                plumbing: activeSelectedStore.plumbing,
-                gas: activeSelectedStore.gas
-            };
-            saveStoredSpecs(floor.code, storedSpecs);
 
             syncSvgCache();
             renderStoreList(currentStores);
             closeAllPopovers();
-            showToast(`'${newName}' ${isUtil ? '기능실' : '매장'} 정보가 저장되었습니다.`, 1500);
+            showToast(`'${StoreBook.show(newName)}' ${isUtil ? '기능실' : '매장'} 정보가 저장되었습니다.`, 1500);
         }
 
         // 매장/기능실 도형 및 정보 즉시 삭제 (상단 토스트 1초간 표시, 삭제된 도형은 바닥 색상 흰색(#ffffff)으로 영구 보존)
@@ -517,17 +438,21 @@ var lastCreatedStoreId = null;
             if (isImmutableStore(activeSelectedStore.name)) {
                 return showToast('해당 항목은 삭제할 수 없습니다.', 1500);
             }
+            if (activeSelectedStore.bookId && !confirm('도형을 삭제하면 매장명·고유번호·상세내역이 함께 삭제됩니다. 삭제할까요?')) return;
             pushUndoState('매장 삭제');
 
             const targetName = activeSelectedStore.name;
             const isUtil = activeSelectedStore.type === 'utility';
             const floor = FLOORS[currentFloorIdx];
+            const shapeKey = activeSelectedStore.shapeKey;
+            const shapeBase = shapeKey ? StoreBook.baseOf(shapeKey) : null;
 
             // 1. 사용자가 추가/편집으로 생성한 커스텀 도형인 경우:
             // 흰색(#ffffff) 바닥으로 덮지 않고 도형 자체를 즉시 제거하여 바탕의 원래 색상(#cbdbe9 공용부 등)이 그대로 유지되도록 처리!
             if (activeSelectedStore.isCustom) {
-                const customList = getCustomStores(floor.code).filter(cs => cs.name !== targetName && cs.id !== activeSelectedStore.id);
+                const customList = getCustomStores(floor.code).filter(cs => cs.id !== activeSelectedStore.id);
                 saveCustomStores(floor.code, customList);
+                if (shapeKey) saveStoreBook(floor.code, StoreBook.removeShape(getStoreBook(floor.code), shapeKey, false));
                 activeSelectedStore.groupElement?.remove();
                 activeSelectedStore.polygonElement?.remove();
                 activeSelectedStore.textElement?.remove();
@@ -572,18 +497,24 @@ var lastCreatedStoreId = null;
                     activeSelectedStore.polygonElement.onclick = null;
                 }
 
-                const deletedList = getDeletedStores(floor.code);
-                if (!deletedList.includes(targetName)) {
-                    deletedList.push(targetName);
-                    saveDeletedStores(floor.code, deletedList);
+                if (shapeKey) {
+                    // 도형에 묶어 지움: 같은 이름의 다른 도형은 남고, 이 도형을 같이 쓰던 글자는 함께 지움
+                    saveStoreBook(floor.code, StoreBook.removeShape(getStoreBook(floor.code), shapeKey, true));
+                    currentStores.filter(s => s.shapeKey && StoreBook.baseOf(s.shapeKey) === shapeBase).forEach(s => s.textElement?.remove());
+                } else {
+                    const deletedList = getDeletedStores(floor.code);
+                    if (!deletedList.includes(targetName)) {
+                        deletedList.push(targetName);
+                        saveDeletedStores(floor.code, deletedList);
+                    }
                 }
             }
 
-            currentStores = currentStores.filter(s => s.name !== targetName && s.id !== activeSelectedStore.id);
+            currentStores = currentStores.filter(s => s.id !== activeSelectedStore.id && !(shapeBase && s.shapeKey && StoreBook.baseOf(s.shapeKey) === shapeBase));
             closeAllPopovers();
             renderStoreList(currentStores);
             syncSvgCache();
-            showToast(`${isUtil ? '기능실' : '매장'} '${targetName}'이(가) 삭제되었습니다.`, 1500);
+            showToast(`${isUtil ? '기능실' : '매장'} '${StoreBook.show(targetName)}'이(가) 삭제되었습니다.`, 1500);
         }
 
 
@@ -780,18 +711,15 @@ var lastCreatedStoreId = null;
             }
             customTopLayer.appendChild(newGroup);
 
-            // 4. 기본 시설 사양 목록 구성 및 스토어 객체 등록 (차단기만 유지)
-            const defaultFields = [
-                { label: '차단기', value: '3P 50A' }
-            ];
-
+            // 4. 스토어 객체 등록 (상세내역은 빈 칸으로 시작)
+            const shapeKey = 'c_' + Date.now().toString(36);
             const floor = FLOORS[currentFloorIdx];
             const storeItem = {
                 id: sId,
                 name: '새 매장',
                 type: 'store',
                 fillColor: '#e6f0fc',
-                fields: defaultFields,
+                fields: [],
                 x: centroidX,
                 y: centroidY,
                 pathData: pathData,
@@ -800,9 +728,9 @@ var lastCreatedStoreId = null;
                 textElement: newText,
                 polygonElement: newPath,
                 groupElement: newGroup,
-                breaker: '3P 50A',
-                plumbing: '미사용',
-                gas: '미사용'
+                shapeKey: shapeKey,
+                shapeW: width,
+                shapeH: height
             };
 
             // 커스텀 생성 매장 목록에 저장 (새로고침 시 복원)
@@ -812,11 +740,12 @@ var lastCreatedStoreId = null;
                 name: '새 매장',
                 type: 'store',
                 fillColor: '#e6f0fc',
-                fields: defaultFields,
+                fields: [],
                 pathData: pathData,
                 x: centroidX,
                 y: centroidY,
-                isCustom: true
+                isCustom: true,
+                shape: shapeKey
             });
             saveCustomStores(floor.code, customStores);
 
@@ -836,6 +765,7 @@ var lastCreatedStoreId = null;
             newPath.onclick = clickHandler;
 
             currentStores.push(storeItem);
+            applyStoreBook(floor);   // 새 도형에 새 고유번호
             cleanupTempDrawingGroup();
             syncSvgCache();
             renderStoreList(currentStores);
