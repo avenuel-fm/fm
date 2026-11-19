@@ -819,13 +819,13 @@ function makeSignPad(box, ghostText, onChange) {
     empty: () => len === 0,
     has: () => len > 120 * dpr,   // 너무 짧게 그은 서명은 받지 않음 (개선 A)
     clear: () => { ink.getContext('2d').clearRect(0, 0, ink.width, ink.height); len = 0; ghost(); mark(); },
-    // 가로 600px 흑백 PNG — 흰 바탕·검은 글씨만 남겨 파일을 작게 (결정 60)
+    // 가로 600px 흑백 PNG — 바탕은 투명, 검은 글씨만 남김 (결정 60, 11-19 바탕 없앰)
     png: () => {
       const W = 600, H = Math.round(600 * ink.height / ink.width);
       const out = document.createElement('canvas'); out.width = W; out.height = H;
       const c = out.getContext('2d'); c.fillStyle = '#fff'; c.fillRect(0, 0, W, H); c.drawImage(ink, 0, 0, W, H);
       const im = c.getImageData(0, 0, W, H), d = im.data;
-      for (let i = 0; i < d.length; i += 4) { const v = (d[i] + d[i + 1] + d[i + 2]) / 3 < 170 ? 0 : 255; d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = 255; }
+      for (let i = 0; i < d.length; i += 4) { const v = (d[i] + d[i + 1] + d[i + 2]) / 3 < 170 ? 0 : 255; d[i] = d[i + 1] = d[i + 2] = 0; d[i + 3] = v ? 0 : 255; }
       c.putImageData(im, 0, 0);
       return out.toDataURL('image/png');
     }
