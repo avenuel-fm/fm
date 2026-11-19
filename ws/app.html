@@ -10,9 +10,9 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.18.0"></script>
-<script>window.WS_VERSION = '0.18.0';</script>
-<script src="ws-api.js?v=0.18.0"></script>
+<script src="config.js?v=0.18.1"></script>
+<script>window.WS_VERSION = '0.18.1';</script>
+<script src="ws-api.js?v=0.18.1"></script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -199,8 +199,7 @@ body:has(.csbar) #app{padding-bottom:calc(120px + env(safe-area-inset-bottom))}
 .tile.soon{background:transparent;border-style:dashed;cursor:default}
 .tile.soon .ico{background:var(--tint);color:var(--muted)}
 .tile.soon b{color:var(--sub)}
-.tile.off{opacity:.5;border-style:dashed;background:transparent;cursor:not-allowed}.tile.off .ico{background:var(--tint);color:var(--muted)}.tile.off small svg{vertical-align:-2px;margin-right:var(--sp-1)}
-.tile .offtag{color:var(--orange)}.seg.menuseg{width:150px;flex:none}.seg.menuseg button{flex:1}
+.seg.menuseg{width:150px;flex:none}.seg.menuseg button{flex:1}
 .ico{width:36px;height:36px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center}
 .row{display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3) var(--sp-4);background:var(--white);border:1px solid var(--line2);border-radius:var(--radius);cursor:pointer;width:100%;text-align:left}
 .list{display:flex;flex-direction:column;gap:var(--sp-2)}
@@ -643,7 +642,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.18.0' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.18.1' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -708,7 +707,6 @@ const ICON = {
   dl: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>',
   clip: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.5l-8.6 8.6a5.5 5.5 0 0 1-7.8-7.8l8.6-8.6a3.7 3.7 0 0 1 5.2 5.2l-8.6 8.6a1.8 1.8 0 0 1-2.6-2.6l8-8"/></svg>',
   file: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>',
-  lock: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
   x: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   plus: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
   ok: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>',
@@ -889,20 +887,17 @@ function renderMain() {
   const u = S.user;
   const today = new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' });
   const c = S.fire ? S.fire.counts : null;
-  const t = (key, label, sub, ico) => {   // 환경설정에서 끈 칸: 직원은 흐리게·안 열림, 소장·관리자·옵저버는 「직원에게 꺼짐」 표시 (결정 148)
-    const off = menuOff(key), lock = off && !menuCanOpen();
-    return '<button class="tile' + (lock ? ' off' : '') + '"' + (lock ? ' aria-disabled="true"' : '') + ' onclick="tile(\'' + key + '\')"><span class="ico">' + ico + '</span><b>' + label + '</b><small>' +
-      (lock ? ICON.lock + '지금은 사용 중지' : sub + (off ? ' · <b class="offtag">직원에게 꺼짐</b>' : '')) + '</small></button>';
-  };
-  const soon = (key) => '<button class="tile soon" onclick="tile(\'' + key + '\')"><span class="ico">' + ICON.soon + '</span><b>작업중</b><small>준비 중</small></button>';
+  const soon = () => '<button class="tile soon" disabled><span class="ico">' + ICON.soon + '</span><b>작업중</b><small>준비 중</small></button>';
+  // 환경설정에서 끈 칸: 직원에게는 「작업중」 칸, 소장·관리자·옵저버에게는 평소 칸 (결정 148)
+  const t = (key, label, sub, ico) => menuOff(key) && !menuCanOpen() ? soon() : '<button class="tile" onclick="tile(\'' + key + '\')"><span class="ico">' + ico + '</span><b>' + label + '</b><small>' + sub + '</small></button>';
   return topbar('잠실점 에비뉴엘 · ' + today, '업무지원') + '<div class="wrap" style="display:flex;flex-direction:column;gap:var(--sp-3)">' +
     '<div class="banner b-gray">이 버전은 테스트판 입니다.' + (S.ver ? ' <b>v' + h(S.ver) + '</b>' : '') + '</div>' +
     '<div class="grid6">' +
     t('docs', '서류작업', 'TBM' + (S.docs ? ' · 오늘 서명 ' + S.docs.signs + '명' : ' · 명일 작업 예정'), ICON.docs) +
-    soon('work') +
+    soon() +
     t('inspect', '점검', c ? '소화기 ' + (c.ok + c.bad) + ' / ' + c.total + '대' : '소화기 점검', ICON.inspect) +
     t('spec', '시방서 검색', '도면협의 지침 찾기', ICON.search) +
-    soon('defect') +
+    soon() +
     t('map', '지도', '에비뉴엘 도면', ICON.map) +
     '</div>' +
     '<div class="mainfoot"><button class="btn theme-btn" onclick="toggleTheme()">' + themeLabel() + '</button>' +
@@ -1092,7 +1087,7 @@ async function setMenu(k, on) {
   if (!r.ok) return toast(r.error);
   S.menuOff = r.off; render(); toast(MENU.find(m => m[0] === k)[1] + (on ? ' 켬' : ' 끔 (직원에게 안 열림)'));
 }
-function tile(k) { if (menuOff(k) && !menuCanOpen()) return toast(((MENU.find(m => m[0] === k) || [])[1] || '이 메뉴') + '는 지금 사용 중지입니다'); if (k === 'inspect') go('inspect'); else if (k === 'docs') go('docs'); else if (k === 'spec') { if (window.WS_API) openSpec(); else toast('시방서 검색은 바로가기 앱(Supabase)에서만 열립니다'); } else if (k === 'map') { if (window.WS_API) go('map'); else toast('지도는 바로가기 앱(Supabase)에서만 열립니다'); } else toast('디자인 시안만 있는 메뉴입니다 (준비 중)'); }
+function tile(k) { if (k === 'inspect') go('inspect'); else if (k === 'docs') go('docs'); else if (k === 'spec') { if (window.WS_API) openSpec(); else toast('시방서 검색은 바로가기 앱(Supabase)에서만 열립니다'); } else if (k === 'map') { if (window.WS_API) go('map'); else toast('지도는 바로가기 앱(Supabase)에서만 열립니다'); } }
 
 /* ── 환경설정 (소장만, 결정 102): 알림 시간, 직원 추가·편집·삭제·PIN ── */
 const ROLES = ['소장', '부소장', '파트장', '직원', '관리자', '옵저버'];   // 옵저버: 파트 「관리」 고정 (결정 138)
@@ -1116,7 +1111,7 @@ function renderSet() {
     '<h3 class="sth" style="margin-top:var(--sp-2)">메인 메뉴</h3><div class="card">' + MENU.map(m => { const off = menuOff(m[0]);
       return '<div class="strow"><span class="fname"><b>' + m[1] + '</b><small>' + m[2] + '</small></span><div class="seg setseg menuseg" role="group" aria-label="' + m[1] + ' 켜기·끄기">' +
         '<button type="button" class="' + (off ? '' : 'on') + '" aria-pressed="' + !off + '" onclick="setMenu(\'' + m[0] + '\',1)">켜짐</button><button type="button" class="' + (off ? 'on' : '') + '" aria-pressed="' + off + '" onclick="setMenu(\'' + m[0] + '\',0)">꺼짐</button></div></div>'; }).join('') +
-    '</div><small style="color:var(--muted);line-height:1.6">꺼진 메뉴는 직원 화면에서 흐리게 보이고 눌러도 열리지 않습니다. <b>소장·관리자·옵저버</b>는 꺼진 메뉴도 열 수 있습니다.</small>' +
+    '</div><small style="color:var(--muted);line-height:1.6">꺼진 메뉴는 직원 화면에서 「작업중」 칸으로 보이고 눌리지 않습니다. <b>소장·관리자·옵저버</b>는 꺼진 메뉴도 열 수 있습니다.</small>' +
     '<div style="display:flex;align-items:center;margin-top:var(--sp-2)"><h3 class="sth" style="flex:1">직원 ' + r.staff.length + '명</h3><button class="btn sm pri" onclick="staffDlg()">+ 직원 추가</button></div>' +
     '<div class="card">' + r.staff.map(x => '<div class="strow"><span class="fname"><b>' + h(x.name) + '</b><small>' + h(x.part) + ' · ' + h(x.role) + ' · ' + h(x.staff_id) + '</small></span>' +
       '<button class="btn sm" onclick="staffDlg(\'' + x.staff_id + '\')">편집</button><button class="btn sm" onclick="staffPinDlg(\'' + x.staff_id + '\')">PIN 변경</button>' +
