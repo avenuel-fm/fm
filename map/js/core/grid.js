@@ -33,8 +33,11 @@ function updateGridSpacingUI() {
 
     const badge = document.getElementById('grid-spacing-px-badge');
     if (badge) {
-        badge.textContent = `1칸 = 약 ${Math.round(subGridPx)}px`;
+        // 5px보다 촘촘하면 5px로 그리므로, 실제로 보이는 간격을 알려 줌
+        const shown = +(subGridPx * metersPerPixel).toFixed(2);
+        badge.textContent = shown > spacingMeters + 1e-9 ? `너무 촘촘해 ${shown}m(5px)로 표시` : `1칸 = 약 ${Math.round(subGridPx)}px`;
     }
+    document.querySelectorAll('#scale-modal .scale-preset-chip').forEach(c => c.classList.toggle('on', Math.abs(+c.dataset.v - spacingMeters) < 1e-9));
 }
 
 function applyGridSpacing(svgEl) {

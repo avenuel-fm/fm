@@ -393,118 +393,88 @@
     </div>
 
     
-    <!-- 도면 축척(Scale) 설정 모달 (간결형 실측 캘리브레이션) -->
+    <!-- 도면 축척(Scale) 설정 모달 — 공통 디자인 (결정 166) -->
     <div id="scale-modal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeScaleModal()">
-        <div class="modal-content scale-modal-box" onclick="event.stopPropagation()">
-            <div class="modal-header" style="padding:16px 20px; border-bottom:1px solid var(--border-light); background:#f8fafc;">
-                <div class="panel-title-wrap" style="display:flex; align-items:center; gap:8px;">
-                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--primary);fill:none;stroke-width:2;"><path d="M21.3 15.3l-6.6-6.6a2 2 0 0 0-2.8 0L2.7 18a2 2 0 0 0 0 2.8l1.4 1.4a2 2 0 0 0 2.8 0l9.2-9.2 1.4 1.4-1.4 1.4 2.8 2.8 1.4-1.4 1.4 1.4 1.4-1.4-2.8-2.8 1.4-1.4zM7 17l-1.4-1.4 1.4-1.4 1.4 1.4L7 17z"/></svg>
-                    <span class="modal-title" style="font-size:16px; font-weight:700;">도면 축척 설정</span>
-                </div>
+        <div class="modal-content scale-modal-box sc" onclick="event.stopPropagation()">
+            <div class="sc-head">
+                <div class="sc-title"><svg class="sc-ico" viewBox="0 0 24 24"><path d="M21.3 15.3l-6.6-6.6a2 2 0 0 0-2.8 0L2.7 18a2 2 0 0 0 0 2.8l1.4 1.4a2 2 0 0 0 2.8 0l9.2-9.2 1.4 1.4-1.4 1.4 2.8 2.8 1.4-1.4 1.4 1.4 1.4-1.4-2.8-2.8 1.4-1.4zM7 17l-1.4-1.4 1.4-1.4 1.4 1.4L7 17z"/></svg><span>도면 축척 설정</span></div>
                 <button class="icon-btn-close" onclick="closeScaleModal()" title="닫기">
                     <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
                 </button>
             </div>
-            <div class="modal-body" style="display:flex; flex-direction:column; gap:16px; padding:20px; background:#ffffff;">
-                <!-- 현재 축척 상태 카드 -->
-                <div class="scale-status-card" id="scale-status-card" style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:10px; padding:14px 16px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                        <span style="font-size:12px; font-weight:600; color:var(--text-secondary);">현재 축척 상태</span>
-                        <span id="scale-status-badge" class="badge" style="font-size:11px; padding:3px 10px; border-radius:12px; font-weight:600;">확인 중</span>
+            <div class="sc-body">
+                <div class="sc-card" id="scale-status-card">
+                    <div class="sc-row">
+                        <span class="sc-label">현재 축척</span>
+                        <span id="scale-status-badge" class="sc-badge">확인 중</span>
                     </div>
-                    <div style="font-size:17px; font-weight:700; color:var(--text-main);" id="scale-status-text">
-                        1 : 100 <span style="font-size:12px; font-weight:500; color:var(--text-muted);">(1px = 0.05m)</span>
-                    </div>
+                    <div class="sc-big" id="scale-status-text">1 : 100 <span class="sc-sub">(1px = 0.05m)</span></div>
                 </div>
 
-                <div style="font-size:13px; color:var(--text-secondary); line-height:1.6; background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px 14px;">
-                    도면에서 실제 길이를 알고 있는 기준선(복도 폭, 기둥 간격 등)의 <strong>시작점과 끝점 2점</strong>을 클릭하여 실제 거리를 측정하면 축척이 자동 보정됩니다.
-                </div>
+                <p class="sc-help">도면에서 실제 길이를 아는 기준선(복도 폭, 기둥 간격 등)의 <strong>시작점과 끝점 2점</strong>을 눌러 실제 거리를 넣으면 축척이 맞춰집니다.</p>
 
-                <!-- 기준 거리 측정 버튼 -->
-                <button type="button" class="btn btn-primary" onclick="startScaleCalibrationMeasure()" style="width:100%; justify-content:center; padding:12px 16px; font-size:14px; font-weight:700; gap:8px;">
-                    <svg viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M21.3 15.3l-6.6-6.6a2 2 0 0 0-2.8 0L2.7 18a2 2 0 0 0 0 2.8l1.4 1.4a2 2 0 0 0 2.8 0l9.2-9.2 1.4 1.4-1.4 1.4 2.8 2.8 1.4-1.4 1.4 1.4 1.4-1.4-2.8-2.8 1.4-1.4zM7 17l-1.4-1.4 1.4-1.4 1.4 1.4L7 17z"/></svg>
-                    <span>기준선 2점 측정으로 축척 맞추기</span>
-                </button>
+                <button type="button" class="btn btn-primary sc-main" onclick="startScaleCalibrationMeasure()"><svg class="sc-ico" viewBox="0 0 24 24"><path d="M21.3 15.3l-6.6-6.6a2 2 0 0 0-2.8 0L2.7 18a2 2 0 0 0 0 2.8l1.4 1.4a2 2 0 0 0 2.8 0l9.2-9.2 1.4 1.4-1.4 1.4 2.8 2.8 1.4-1.4 1.4 1.4 1.4-1.4-2.8-2.8 1.4-1.4zM7 17l-1.4-1.4 1.4-1.4 1.4 1.4L7 17z"/></svg><span>기준선 2점 측정으로 축척 맞추기</span></button>
 
-                <!-- 구분선 -->
-                <div style="height:1px; background:var(--border-light); margin:4px 0;"></div>
-
-                <!-- 바닥 그리드(격자) 간격 설정 섹션 -->
-                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px 16px; display:flex; flex-direction:column; gap:10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div style="display:flex; align-items:center; gap:6px;">
-                            <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--primary);fill:none;stroke-width:2;"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
-                            <span style="font-size:13px; font-weight:700; color:var(--text-main);">바닥 그리드(격자) 간격 설정</span>
+                <div class="sc-sec">
+                    <div class="sc-row">
+                        <span class="sc-h">바닥 격자 간격</span>
+                        <span id="grid-spacing-px-badge" class="sc-sub">1칸 = 약 20px</span>
+                    </div>
+                    <div class="sc-inrow">
+                        <div class="sc-unit">
+                            <input type="number" id="input-grid-spacing-meters" class="form-input sc-input" min="0.1" max="50" step="0.5" value="1.0" oninput="onGridSpacingInputChange(this.value)">
+                            <span>m</span>
                         </div>
-                        <span id="grid-spacing-px-badge" style="font-size:11px; padding:2px 8px; border-radius:10px; background:#eff6ff; color:#2563eb; font-weight:600; border:1px solid #bfdbfe;">1칸 = 약 20px</span>
+                        <button type="button" class="btn sc-btn" onclick="saveGridSpacingSettings()">적용</button>
                     </div>
-
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <div style="position:relative; flex:1;">
-                            <input type="number" id="input-grid-spacing-meters" class="form-input" min="0.1" max="50" step="0.5" value="1.0" oninput="onGridSpacingInputChange(this.value)" style="font-size:15px; font-weight:700; padding:8px 36px 8px 12px; width:100%; border:1px solid #cbd5e1; border-radius:6px;">
-                            <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:13px; font-weight:700; color:var(--text-muted); pointer-events:none;">m</span>
-                        </div>
-                        <button type="button" class="btn btn-secondary" onclick="saveGridSpacingSettings()" style="padding:8px 14px; font-size:13px; font-weight:600; white-space:nowrap;">적용</button>
+                    <div class="sc-chips">
+                        <span class="sc-sub">추천 간격</span>
+                        <button type="button" class="scale-preset-chip" data-v="0.5" onclick="setGridSpacingPreset(0.5)">0.5m</button>
+                        <button type="button" class="scale-preset-chip" data-v="1" onclick="setGridSpacingPreset(1.0)">1.0m (기본)</button>
+                        <button type="button" class="scale-preset-chip" data-v="2" onclick="setGridSpacingPreset(2.0)">2.0m</button>
+                        <button type="button" class="scale-preset-chip" data-v="3" onclick="setGridSpacingPreset(3.0)">3.0m</button>
+                        <button type="button" class="scale-preset-chip" data-v="5" onclick="setGridSpacingPreset(5.0)">5.0m</button>
                     </div>
-
-                    <!-- 간격 추천 프리셋 칩 -->
-                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                        <span style="font-size:11px; color:var(--text-muted);">추천 간격:</span>
-                        <button type="button" class="scale-preset-chip" onclick="setGridSpacingPreset(0.5)">0.5m</button>
-                        <button type="button" class="scale-preset-chip" onclick="setGridSpacingPreset(1.0)">1.0m (기본)</button>
-                        <button type="button" class="scale-preset-chip" onclick="setGridSpacingPreset(2.0)">2.0m</button>
-                        <button type="button" class="scale-preset-chip" onclick="setGridSpacingPreset(3.0)">3.0m</button>
-                        <button type="button" class="scale-preset-chip" onclick="setGridSpacingPreset(5.0)">5.0m</button>
-                    </div>
-
-                    <div id="grid-spacing-desc-info" style="font-size:11px; color:var(--text-secondary); line-height:1.4;">
-                        * 편집 모드 및 도면에 표시되는 연회색 그리드의 실제 간격입니다. (5칸마다 굵은 주격자선 표시)
-                    </div>
+                    <p id="grid-spacing-desc-info" class="sc-help">편집할 때 도면에 보이는 연한 격자의 실제 간격입니다. 5칸마다 굵은 선이 그어집니다.</p>
                 </div>
             </div>
-            <div class="modal-footer" style="display:flex; justify-content:flex-end; padding:12px 20px; border-top:1px solid var(--border-light); background:#f8fafc;">
-                <button type="button" class="btn" onclick="closeScaleModal()">닫기</button>
+            <div class="sc-foot">
+                <button type="button" class="btn sc-btn" onclick="closeScaleModal()">닫기</button>
             </div>
         </div>
     </div>
 
     <!-- 기준선 실제 거리 입력 팝업 모달 -->
     <div id="scale-input-modal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeScaleInputModal()">
-        <div class="modal-content scale-input-dialog" onclick="event.stopPropagation()">
-            <div class="modal-header">
-                <div class="panel-title-wrap">
-                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--primary);fill:none;stroke-width:2;"><path d="M21.3 15.3l-6.6-6.6a2 2 0 0 0-2.8 0L2.7 18a2 2 0 0 0 0 2.8l1.4 1.4a2 2 0 0 0 2.8 0l9.2-9.2 1.4 1.4-1.4 1.4 2.8 2.8 1.4-1.4 1.4 1.4 1.4-1.4-2.8-2.8 1.4-1.4zM7 17l-1.4-1.4 1.4-1.4 1.4 1.4L7 17z"/></svg>
-                    <span class="modal-title">기준선 실제 거리 입력</span>
-                </div>
+        <div class="modal-content scale-input-dialog sc" onclick="event.stopPropagation()">
+            <div class="sc-head">
+                <div class="sc-title"><svg class="sc-ico" viewBox="0 0 24 24"><path d="M21.3 15.3l-6.6-6.6a2 2 0 0 0-2.8 0L2.7 18a2 2 0 0 0 0 2.8l1.4 1.4a2 2 0 0 0 2.8 0l9.2-9.2 1.4 1.4-1.4 1.4 2.8 2.8 1.4-1.4 1.4 1.4 1.4-1.4-2.8-2.8 1.4-1.4zM7 17l-1.4-1.4 1.4-1.4 1.4 1.4L7 17z"/></svg><span>기준선 실제 거리 입력</span></div>
                 <button class="icon-btn-close" onclick="closeScaleInputModal()" title="닫기">
                     <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
                 </button>
             </div>
-            <div class="modal-body" style="padding:18px; display:flex; flex-direction:column; gap:14px;">
-                <div class="scale-measure-info-card">
-                    <div style="font-size:12px; color:var(--text-muted); margin-bottom:2px;">선택한 두 점의 도면 거리</div>
-                    <div style="font-size:18px; font-weight:700; color:var(--text-main);"><span id="scale-measured-px">0</span> px</div>
+            <div class="sc-body">
+                <div class="sc-card">
+                    <span class="sc-label">고른 두 점의 도면 거리</span>
+                    <div class="sc-big"><span id="scale-measured-px">0</span> <span class="sc-sub">px</span></div>
                 </div>
-
-                <div class="form-group">
-                    <label class="form-label" style="font-size:13px; font-weight:600; margin-bottom:6px; display:block;">해당 구간의 실제 거리 (미터 m)</label>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <input type="number" id="input-scale-real-meters" class="form-input" min="0.1" max="1000" step="0.1" value="5.0" placeholder="5.0" style="font-size:16px; font-weight:700; padding:10px 14px; flex:1;">
-                        <span style="font-size:15px; font-weight:700; color:var(--text-main);">m</span>
+                <div class="sc-sec">
+                    <label class="sc-h" for="input-scale-real-meters">이 구간의 실제 거리</label>
+                    <div class="sc-unit">
+                        <input type="number" id="input-scale-real-meters" class="form-input sc-input" min="0.1" max="1000" step="0.1" value="5.0" placeholder="5.0">
+                        <span>m</span>
+                    </div>
+                    <div class="sc-chips">
+                        <span class="sc-sub">추천 기준값</span>
+                        <button type="button" class="scale-preset-chip" onclick="setScaleRealMeters(3.0)">3.0m (복도 폭)</button>
+                        <button type="button" class="scale-preset-chip" onclick="setScaleRealMeters(5.0)">5.0m (개구부)</button>
+                        <button type="button" class="scale-preset-chip" onclick="setScaleRealMeters(8.4)">8.4m (기둥 간격)</button>
                     </div>
                 </div>
-
-                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                    <span style="font-size:11px; color:var(--text-muted);">추천 기준값:</span>
-                    <button type="button" class="scale-preset-chip" onclick="setScaleRealMeters(3.0)">3.0m (복도 폭)</button>
-                    <button type="button" class="scale-preset-chip" onclick="setScaleRealMeters(5.0)">5.0m (개구부)</button>
-                    <button type="button" class="scale-preset-chip" onclick="setScaleRealMeters(8.4)">8.4m (기둥 스팬)</button>
-                </div>
             </div>
-            <div class="modal-footer" style="padding:12px 18px; display:flex; justify-content:flex-end; gap:8px; border-top:1px solid var(--border-subtle);">
-                <button type="button" class="btn" onclick="closeScaleInputModal()">취소</button>
-                <button type="button" class="btn btn-primary" onclick="confirmScaleCalibration()">축척 적용</button>
+            <div class="sc-foot">
+                <button type="button" class="btn sc-btn" onclick="closeScaleInputModal()">취소</button>
+                <button type="button" class="btn btn-primary sc-btn" onclick="confirmScaleCalibration()">축척 적용</button>
             </div>
         </div>
     </div>

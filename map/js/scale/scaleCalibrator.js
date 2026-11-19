@@ -70,20 +70,11 @@ var currentScaleRealMeters = 50;
             const badge = document.getElementById('scale-status-badge');
             const text = document.getElementById('scale-status-text');
             if (badge) {
-                if (config.isCalibrated) {
-                    badge.textContent = '✓ 캘리브레이션 완료';
-                    badge.style.color = '#059669';
-                    badge.style.background = '#ecfdf5';
-                    badge.style.border = '1px solid #a7f3d0';
-                } else {
-                    badge.textContent = '! 기준선 측정 필요';
-                    badge.style.color = '#d97706';
-                    badge.style.background = '#fef3c7';
-                    badge.style.border = '1px solid #fde68a';
-                }
+                badge.textContent = config.isCalibrated ? '측정 완료' : '측정 필요';
+                badge.classList.toggle('done', !!config.isCalibrated);
             }
             if (text) {
-                text.innerHTML = `1 : ${config.ratio} <span style="font-size:12px; font-weight:500; color:var(--text-muted);">(1px = ${config.metersPerPixel}m)</span>`;
+                text.innerHTML = `1 : ${config.ratio} <span class="sc-sub">(1px = ${config.metersPerPixel}m)</span>`;
             }
             if (typeof updateGridSpacingUI === 'function') {
                 updateGridSpacingUI();

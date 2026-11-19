@@ -702,3 +702,34 @@
 
 /* 선택한 매장: 진한 바탕 위 흰 글자 (결정 160) */
 .store-group.selected text, .store-group.selected text.editable-store-name:hover { fill: var(--white) !important; }
+
+        /* 축척 팝업 — 공통 디자인 (결정 166): 흰 바탕 · 남색 · 모서리 2px · 글자 13/15/18/24 */
+        .modal-content.sc { padding: 0; gap: 0; }
+        .sc .sc-head { display: flex; justify-content: space-between; align-items: center; padding: var(--sp-4); border-bottom: 1px solid var(--line); background: var(--white); }
+        .sc .sc-title { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--size-l); font-weight: 700; color: var(--navy); }
+        .sc .sc-ico { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; flex-shrink: 0; }
+        .sc .sc-body { display: flex; flex-direction: column; gap: var(--sp-4); padding: var(--sp-4); background: var(--white); }
+        .sc .sc-foot { display: flex; justify-content: flex-end; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); border-top: 1px solid var(--line); background: var(--white); }
+        .sc .sc-card { border: 1px solid var(--line); border-radius: var(--radius); padding: var(--sp-3) var(--sp-4); background: var(--white); }
+        .sc .sc-row { display: flex; justify-content: space-between; align-items: center; gap: var(--sp-2); }
+        .sc .sc-label, .sc .sc-sub { font-size: var(--size-s); font-weight: 400; color: var(--text-sub); }
+        .sc .sc-big { font-size: var(--size-xl); font-weight: 700; color: var(--navy); margin-top: var(--sp-1); }
+        .sc .sc-h { font-size: var(--size-m); font-weight: 700; color: var(--navy); }
+        .sc .sc-help { font-size: var(--size-s); line-height: 1.6; color: var(--text-sub); margin: 0; }
+        .sc .sc-help strong { color: var(--navy); }
+        .sc .sc-badge { font-size: var(--size-s); font-weight: 600; padding: 0 var(--sp-2); line-height: 24px; border-radius: var(--radius); border: 1px solid var(--navy); color: var(--navy); background: var(--white); }
+        .sc .sc-badge.done { background: var(--navy); color: var(--white); }
+        .sc .sc-sec { display: flex; flex-direction: column; gap: var(--sp-3); }
+        .sc .sc-main + .sc-sec { border-top: 1px solid var(--line); padding-top: var(--sp-4); }
+        .sc .sc-inrow { display: flex; gap: var(--sp-2); }
+        .sc .sc-unit { position: relative; flex: 1; }
+        .sc .sc-unit > span { position: absolute; right: var(--sp-3); top: 50%; transform: translateY(-50%); font-size: var(--size-s); color: var(--text-sub); pointer-events: none; }
+        .sc .sc-input { width: 100%; height: var(--control-h); padding: 0 32px 0 var(--sp-3); font-size: var(--size-m); font-weight: 700; color: var(--navy); border: 1px solid var(--line); border-radius: var(--radius); }
+        .sc .sc-input:focus { outline: none; border-color: var(--navy); }
+        .sc .sc-btn, .sc .sc-main { height: var(--control-h); padding: 0 var(--sp-4); font-size: var(--size-m); font-weight: 600; border-radius: var(--radius); white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2); }
+        .sc .sc-btn:not(.btn-primary) { color: var(--navy); border-color: var(--line); background: var(--white); }
+        .sc .sc-main { width: 100%; }
+        .sc .sc-chips { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+        .sc .scale-preset-chip { height: 32px; padding: 0 var(--sp-3); font-size: var(--size-s); font-weight: 600; color: var(--navy); background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); }
+        .sc .scale-preset-chip:hover { border-color: var(--navy); background: var(--white); }
+        .sc .scale-preset-chip.on { background: var(--tint); border-color: var(--navy); }
