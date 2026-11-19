@@ -10,11 +10,54 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
 /* 공통 틀 v0.1 — 도면협의 Styles.html 기준 이름 (통합 설계정의서 12장) */
+/* DESIGN-TOKENS:START */
+/* 디자인 값은 이 파일에만 적습니다. 고친 뒤 python apps/design/sync.py 를 돌리면 모든 앱에 들어갑니다. */
 :root{
-  --ground:#F4F6F8; --card:#FFFFFF; --line2:#DCE1E7; --line3:#EDF0F3; --line:#CBD2DB;
-  --ink:#18202B; --sub:#3F4855; --muted:#5B6573;
+  /* 기본 색 6가지 */
+  --navy:#1E3A5F;     /* 주 색상: 머리줄, 주요 버튼, 강조 숫자, 그래프 */
+  --white:#FFFFFF;    /* 바탕 */
+  --text-sub:#5F6B7A; /* 보조 글자 */
+  --line:#D8DDE5;     /* 구역을 나누는 선, 입력칸 테두리 */
+  --tint:#F1F4F8;     /* 고른 줄, 표 머리 */
+  --error:#B42318;    /* 오류 문구 전용 */
+
+  /* 글자 크기 */
+  --size-s:13px; --size-m:15px; --size-l:18px; --size-xl:24px; --size-xxl:32px;
+  --size-input-touch:16px; /* 휴대폰 입력칸 전용: 16px보다 작으면 아이폰이 화면을 저절로 확대함 */
+
+  /* 간격 (4의 배수) */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-6:24px; --sp-8:32px; --sp-12:48px;
+
+  /* 모양 */
+  --radius:2px;          /* 모든 모서리 */
+  --control-h:40px;      /* 버튼, 입력칸 높이 */
+  --control-h-touch:44px;/* 휴대폰의 버튼, 입력칸 높이 */
+
+  /* 팝업 뒤를 어둡게 하는 막 (남색 45%) */
+  --overlay:rgba(30,58,95,.45);
+  --font:'Noto Sans KR','Malgun Gothic',system-ui,-apple-system,sans-serif;
+}
+@media (pointer:coarse){
+  :root{--control-h:var(--control-h-touch)}
+  input:not([type=checkbox]):not([type=radio]):not(.lgin),textarea:not(.lgin),select:not(.lgin){font-size:var(--size-input-touch)!important}
+}
+
+/* 인쇄·PDF·라벨 양식은 종이 기준이라 원래 색을 그대로 씁니다 (화면 디자인 규칙에서 제외) */
+#print,.tbp,.cspdf,.label,.ehl,.ehlt,.ehg,.hvs,.lgs,.page,.ag-paper,.ag-page{
+  color:#18202B;
+  --ink:#18202B; --ink2:#2A3340; --sub:#3F4855; --muted:#5B6573; --faint:#7A8494;
+  --line:#CBD2DB; --line2:#DCE1E7; --line3:#EDF0F3; --ground:#F4F6F8; --card:#FFFFFF;
   --blue:#1F5FA8; --blue-d:#174A84; --blue-bg:#E8F0FA;
-  --green:#1F7A4D; --green-bg:#EAF5EF; --orange:#B4410F; --orange-bg:#FDF0E8; --red:#C0261A; --red-bg:#FBE9E7;
+  --green:#1F7A4D; --green-d:#155C39; --green-bg:#EAF5EF;
+  --orange:#B4410F; --orange-bg:#FDF0E8; --red:#C0261A; --red-bg:#FBE9E7;
+}
+/* DESIGN-TOKENS:END */
+:root{ /* 예전 이름 → 기본 색 6가지 */
+  --ink:var(--navy); --ink2:var(--navy); --sub:var(--text-sub); --muted:var(--text-sub); --faint:var(--text-sub);
+  --line2:var(--line); --line3:var(--line); --ground:var(--white); --card:var(--white);
+  --blue:var(--navy); --blue-d:var(--navy); --blue-bg:var(--tint);
+  --green:var(--navy); --green-d:var(--navy); --green-bg:var(--tint);
+  --orange:var(--navy); --orange-bg:var(--tint); --red:var(--error); --red-bg:var(--tint);
 }
 *{box-sizing:border-box}
 /* WS-25 화면 다듬기: 단어 중간 줄바꿈 막기, 제목·강조 600 (인쇄·라벨·PDF 양식은 700 그대로) */
@@ -26,27 +69,35 @@ h1,h2,h3,b,strong{font-weight:600}
 html,body{margin:0;background:var(--ground);color:var(--ink);font-family:'Noto Sans KR',system-ui,-apple-system,sans-serif;-webkit-text-size-adjust:100%}
 button,input,select,textarea{font:inherit;color:inherit}
 a{color:var(--blue)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;border-radius:8px;border:1px solid var(--line);background:var(--card);font-size:15px;font-weight:500;color:var(--ink);cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-1);min-height:var(--control-h);padding:0 var(--sp-4);border-radius:var(--radius);border:1px solid var(--line);background:var(--card);font-size:var(--size-m);font-weight:500;color:var(--ink);cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:no-preference){.btn{transition:scale .15s ease-out}.btn:not(:disabled):active{scale:.96}}
 .btn:disabled{opacity:.5;cursor:default}
-.btn.pri{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:500}
-.btn.warn{border-color:#E8B4AE;color:var(--red)}
-.btn.sm{min-height:36px;padding:0 12px;font-size:13px}
-.btn.big{min-height:52px;font-size:16px}
-.inp{width:100%;min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-size:16px;background:#fff}
-.card{background:var(--card);border:1px solid var(--line2);border-radius:12px}
-.chip{display:inline-flex;align-items:center;gap:4px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:var(--white);font-weight:500}
+.btn.warn{border-color:var(--line);color:var(--red)}
+.btn.sm{min-height:var(--control-h);padding:0 var(--sp-3);font-size:var(--size-s)}
+.btn.big{min-height:var(--control-h);font-size:var(--size-m)}
+.inp{width:100%;min-height:var(--control-h);padding:0 var(--sp-3);border:1px solid var(--line);border-radius:var(--radius);font-size:var(--size-m);background:var(--white)}
+.card{background:var(--card);border:1px solid var(--line2);border-radius:var(--radius)}
+.chip{display:inline-flex;align-items:center;gap:var(--sp-1);height:26px;padding:0 var(--sp-2);border-radius:var(--radius);font-size:var(--size-s);font-weight:500;white-space:nowrap}
 .c-ok{background:var(--green-bg);color:var(--green)}
 .c-bad{background:var(--orange-bg);color:var(--orange)}
-.c-wait{background:var(--line3);color:var(--muted)}
+.c-wait{background:var(--tint);color:var(--muted)}
 .c-miss{background:var(--red-bg);color:var(--red)}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 16px;border-radius:12px;font-size:14px;z-index:100;max-width:calc(100% - 32px);box-shadow:0 6px 18px rgba(24,32,43,.25)}
-.dialog-back{position:fixed;inset:0;background:rgba(24,32,43,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center}
-.dialog{width:100%;max-width:520px;background:#fff;border-radius:16px 16px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto;overscroll-behavior:contain}
-@media (min-width:700px){.dialog-back{align-items:center}.dialog{border-radius:16px}}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--white);padding:var(--sp-3) var(--sp-4);border-radius:var(--radius);font-size:var(--size-m);z-index:100;max-width:calc(100% - 32px);box-shadow:none}
+.dialog-back{position:fixed;inset:0;background:var(--overlay);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.dialog{width:100%;max-width:520px;background:var(--white);border-radius:var(--radius) var(--radius) 0 0;padding:var(--sp-4) var(--sp-4) calc(var(--sp-4) + env(safe-area-inset-bottom));max-height:92vh;overflow:auto;overscroll-behavior:contain}
+@media (min-width:700px){.dialog-back{align-items:center}.dialog{border-radius:var(--radius)}}
 .spin{width:18px;height:18px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .8s linear infinite;display:inline-block}
 @keyframes sp{to{transform:rotate(360deg)}}
 .hide{display:none!important}
+
+/* 상태는 색이 아니라 모양과 글자로 구분: 문제 = 채움, 정상 = 남색 테두리, 대기 = 회색 테두리 */
+.chip{border:1px solid transparent}
+.c-bad,.c-miss,.chip.orange{background:var(--navy);color:var(--var(--white));border-color:var(--navy)}
+.c-ok,.chip.green{background:var(--var(--white));color:var(--navy);border-color:var(--navy)}
+.c-wait{background:var(--var(--white));color:var(--text-sub);border-color:var(--line)}
+.chip.blue{background:var(--tint);color:var(--navy);border-color:var(--line)}
+.btn.warn{background:var(--var(--white));color:var(--navy);border-color:var(--navy)}
 </style>
 <style>
 /* 어두운 화면 (결정 98): 화면만 색을 뒤집고 사진·서명·QR은 되돌림. 인쇄·저장 이미지는 그대로 흰 바탕 */

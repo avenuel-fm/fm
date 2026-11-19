@@ -8,23 +8,23 @@
             top: auto;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.98);
+            background: var(--white);
             backdrop-filter: blur(12px);
             border: 1px solid var(--border-medium);
             border-bottom: none;
             border-left: 4px solid var(--primary);
-            border-radius: 14px 14px 0 0;
-            box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.15);
-            padding: 10px 24px;
+            border-radius: var(--radius) var(--radius) 0 0;
+            box-shadow: none;
+            padding: var(--sp-2) var(--sp-6);
             display: flex;
             flex-direction: row;
             flex-wrap: nowrap;
             white-space: nowrap;
             align-items: center;
             justify-content: center;
-            gap: 16px;
+            gap: var(--sp-4);
             z-index: 50;
-            font-size: 13px;
+            font-size: var(--size-s);
             color: var(--text-main);
             user-select: none;
             width: max-content;
@@ -34,7 +34,7 @@
         .guide-content {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: var(--sp-2);
         }
         .guide-content svg {
             width: 16px;
@@ -44,60 +44,60 @@
             stroke-width: 2;
         }
         .btn-guide-close {
-            background: #f1f5f9;
-            border: 1px solid #cbd5e1;
+            background: var(--tint);
+            border: 1px solid var(--line);
             color: var(--text-secondary);
-            font-size: 12px;
+            font-size: var(--size-s);
             font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 6px;
+            padding: var(--sp-1) var(--sp-2);
+            border-radius: var(--radius);
             cursor: pointer;
             transition: all 0.15s;
         }
         .btn-guide-close:hover {
-            background: #e2e8f0;
+            background: var(--tint);
             color: var(--text-main);
         }
 
         /* 구역(방화구역/제연구획/외벽) 드로잉 배너 */
         .zone-guide-banner {
-            border-left-color: #dc2626 !important;
-            padding: 10px 24px;
-            gap: 16px;
+            border-left-color: var(--navy) !important;
+            padding: var(--sp-2) var(--sp-6);
+            gap: var(--sp-4);
         }
         .zone-banner-controls {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: var(--sp-3);
             flex-wrap: nowrap;
             white-space: nowrap;
         }
         .zone-toggle-group {
             display: inline-flex;
-            background: #f1f5f9;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            padding: 2px;
-            gap: 2px;
+            background: var(--tint);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: var(--sp-1);
+            gap: var(--sp-1);
         }
         .zone-toggle-btn {
             background: transparent;
             border: none;
-            padding: 4px 10px;
-            font-size: 12px;
+            padding: var(--sp-1) var(--sp-2);
+            font-size: var(--size-s);
             font-weight: 600;
-            color: #64748b;
-            border-radius: 4px;
+            color: var(--text-sub);
+            border-radius: var(--radius);
             cursor: pointer;
             transition: all 0.15s ease;
         }
         .zone-toggle-btn:hover {
-            color: #0f172a;
+            color: var(--navy);
         }
         .zone-toggle-btn.active {
-            background: #ffffff;
-            color: #dc2626;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            background: var(--white);
+            color: var(--error);
+            box-shadow: none;
         }
         .zone-toggle-btn:disabled {
             opacity: 0.35 !important;
@@ -106,10 +106,10 @@
             filter: grayscale(80%);
         }
         #btn-zone-cat-smoke.active {
-            color: #0284c7;
+            color: var(--navy);
         }
         #btn-zone-cat-wall.active {
-            color: #334155;
+            color: var(--navy);
         }
         .safety-zone-item.selected-zone polygon,
         .safety-zone-item.selected-zone polyline {
@@ -117,33 +117,33 @@
             filter: drop-shadow(0 0 6px rgba(220, 38, 38, 0.85));
         }
         .zone-pts-badge {
-            font-size: 11px;
+            font-size: var(--size-s);
             font-weight: 700;
-            color: #64748b;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            padding: 3px 8px;
-            border-radius: 12px;
+            color: var(--text-sub);
+            background: var(--tint);
+            border: 1px solid var(--line);
+            padding: var(--sp-1) var(--sp-2);
+            border-radius: var(--radius);
         }
         .btn-guide-finish {
-            background: #dc2626;
-            border: 1px solid #dc2626;
-            color: #ffffff;
-            font-size: 12px;
+            background: var(--navy);
+            border: 1px solid var(--navy);
+            color: var(--white);
+            font-size: var(--size-s);
             font-weight: 600;
-            padding: 4px 12px;
-            border-radius: 6px;
+            padding: var(--sp-1) var(--sp-3);
+            border-radius: var(--radius);
             cursor: pointer;
             transition: all 0.15s;
         }
         .btn-guide-finish:hover {
-            background: #b91c1c;
+            background: var(--navy);
         }
 
         /* 매장 삭제 후 바닥 흰색(#ffffff) 표시 - 경계선 완전 제거 */
         .vacant-floor-polygon {
-            fill: #ffffff !important;
-            stroke: #ffffff !important;
+            fill: var(--white) !important;
+            stroke: var(--white) !important;
             stroke-width: 0 !important;
             stroke-opacity: 0 !important;
             pointer-events: none !important;
@@ -172,7 +172,7 @@
             pointer-events: stroke !important;
         }
         .safety-zone-item[data-zone-category="wall"].selected-zone polyline {
-            stroke: #0284c7 !important;
+            stroke: var(--navy) !important;
             stroke-width: 6px !important;
             filter: drop-shadow(0 0 6px rgba(2, 132, 199, 0.85)) !important;
         }
@@ -184,13 +184,13 @@
         }
         .wall-vertex-handle:hover {
             r: 7px;
-            fill: #38bdf8 !important;
-            stroke: #0369a1 !important;
+            fill: var(--navy) !important;
+            stroke: var(--navy) !important;
         }
 
         polyline.building-exterior-wall,
         path.building-exterior-wall-line {
-            stroke: #334155 !important;
+            stroke: var(--navy) !important;
             stroke-width: 3.5px !important;
             stroke-linecap: round !important;
             stroke-linejoin: round !important;
@@ -204,12 +204,12 @@
         }
         .safety-zone-item:hover polyline {
             stroke-width: 5px !important;
-            stroke: #b91c1c !important;
+            stroke: var(--navy) !important;
         }
         .safety-zone-item:hover polygon {
             stroke-width: 3.5px !important;
-            stroke: #b91c1c !important;
-            fill: rgba(220, 38, 38, 0.22) !important;
+            stroke: var(--navy) !important;
+            fill: var(--line) !important;
         }
 
 
@@ -219,21 +219,21 @@
         }
         .store-polygon {
             pointer-events: all;
-            stroke: #c8ddf7;
+            stroke: var(--navy);
             stroke-width: 1px;
             transition: stroke 0.15s ease, stroke-width 0.15s ease, fill 0.15s ease;
         }
         /* 호버 시 부드러운 블루 하이라이트 */
         .store-polygon:hover {
-            stroke: #2563eb !important;
+            stroke: var(--navy) !important;
             stroke-width: 2.5px !important;
-            fill: #dbeafe !important;
+            fill: var(--white) !important;
         }
         /* 선택 시: 흔들림 없는 단정하고 명확한 블루 테두리 및 톤 부각 */
         .store-polygon.selected {
-            stroke: #1d4ed8 !important;
+            stroke: var(--navy) !important;
             stroke-width: 3.5px !important;
-            fill: #bfdbfe !important;
+            fill: var(--navy) !important;
         }
 
         svg text.editable-store-name {
@@ -242,12 +242,12 @@
             transition: fill 0.15s ease;
         }
         svg text.editable-store-name:hover {
-            fill: #1d4ed8 !important;
+            fill: var(--navy) !important;
             font-weight: 600 !important;
         }
         .store-group.selected text {
             font-weight: 700 !important;
-            fill: #1d4ed8 !important;
+            fill: var(--navy) !important;
         }
 
 
@@ -285,14 +285,14 @@
             flex-wrap: nowrap;
             align-items: center;
             justify-content: center;
-            gap: 16px;
-            padding: 10px 24px;
-            background: rgba(255, 255, 255, 0.98);
+            gap: var(--sp-4);
+            padding: var(--sp-2) var(--sp-6);
+            background: var(--white);
             backdrop-filter: blur(12px);
             border: 1px solid var(--border-medium);
             border-bottom: none;
-            border-radius: 14px 14px 0 0;
-            box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.15);
+            border-radius: var(--radius) var(--radius) 0 0;
+            box-shadow: none;
             z-index: 50;
             user-select: none;
             white-space: nowrap;
@@ -303,11 +303,11 @@
         .freehand-tool-badge {
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 13px;
+            gap: var(--sp-1);
+            font-size: var(--size-s);
             font-weight: 700;
             color: var(--text-main);
-            padding-right: 12px;
+            padding-right: var(--sp-3);
             border-right: 1px solid var(--border-light);
             flex-shrink: 0;
             white-space: nowrap;
@@ -322,15 +322,15 @@
         .freehand-colors {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: var(--sp-2);
             flex-shrink: 0;
             white-space: nowrap;
         }
         .color-dot {
             width: 26px;
             height: 26px;
-            border-radius: 50%;
-            border: 2px solid #ffffff;
+            border-radius: var(--radius);
+            border: 2px solid var(--white);
             outline: 2px solid transparent;
             cursor: pointer;
             transition: all 0.15s ease;
@@ -345,19 +345,19 @@
         .freehand-sizes {
             display: flex;
             align-items: center;
-            gap: 4px;
-            padding: 0 8px;
+            gap: var(--sp-1);
+            padding: 0 var(--sp-2);
             border-left: 1px solid var(--border-light);
             border-right: 1px solid var(--border-light);
             flex-shrink: 0;
             white-space: nowrap;
         }
         .size-pill {
-            padding: 4px 10px;
-            border-radius: 6px;
+            padding: var(--sp-1) var(--sp-2);
+            border-radius: var(--radius);
             border: 1px solid var(--border-light);
-            background: #ffffff;
-            font-size: 12px;
+            background: var(--white);
+            font-size: var(--size-s);
             font-weight: 500;
             color: var(--text-muted);
             cursor: pointer;
@@ -366,11 +366,11 @@
             flex-shrink: 0;
         }
         .size-pill:hover {
-            background: #f1f5f9;
+            background: var(--tint);
             color: var(--text-main);
         }
         .size-pill.active {
-            background: #eff6ff;
+            background: var(--tint);
             border-color: var(--primary);
             color: var(--primary);
             font-weight: 700;
@@ -378,7 +378,7 @@
         .freehand-btns {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: var(--sp-2);
             flex-shrink: 0;
             white-space: nowrap;
         }
@@ -391,38 +391,38 @@
         .scale-modal-box {
             width: 440px;
             max-width: 90vw;
-            background: #ffffff;
+            background: var(--white);
             border: 1px solid var(--border-medium);
-            border-radius: 12px;
-            box-shadow: 0 20px 45px -8px rgba(15, 23, 42, 0.25);
+            border-radius: var(--radius);
+            box-shadow: none;
             overflow: hidden;
         }
         .scale-status-card {
             background: var(--bg-subtle);
             border: 1px solid var(--border-subtle);
-            border-radius: 10px;
-            padding: 14px 16px;
+            border-radius: var(--radius);
+            padding: var(--sp-3) var(--sp-4);
         }
         .scale-input-dialog {
             width: 380px;
             max-width: 90vw;
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.22);
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: none;
             overflow: hidden;
         }
         .scale-measure-info-card {
             background: var(--bg-subtle);
             border: 1px solid var(--border-subtle);
-            border-radius: 8px;
-            padding: 12px 16px;
+            border-radius: var(--radius);
+            padding: var(--sp-3) var(--sp-4);
         }
         .scale-preset-chip {
             background: var(--bg-surface);
             border: 1px solid var(--border-medium);
-            border-radius: 14px;
-            padding: 4px 10px;
-            font-size: 11px;
+            border-radius: var(--radius);
+            padding: var(--sp-1) var(--sp-2);
+            font-size: var(--size-s);
             font-weight: 600;
             color: var(--text-secondary);
             cursor: pointer;
@@ -438,17 +438,17 @@
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(15, 23, 42, 0.94);
-            color: #ffffff;
-            padding: 10px 22px;
-            border-radius: 30px;
-            font-size: 13px;
+            background: var(--overlay);
+            color: var(--white);
+            padding: var(--sp-2) var(--sp-6);
+            border-radius: var(--radius);
+            font-size: var(--size-s);
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: var(--sp-3);
             z-index: 60;
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.28);
+            box-shadow: none;
             backdrop-filter: blur(8px);
             pointer-events: auto;
         }
@@ -457,17 +457,17 @@
         .freehand-tool-selector {
             display: flex;
             align-items: center;
-            gap: 4px;
-            padding-right: 12px;
+            gap: var(--sp-1);
+            padding-right: var(--sp-3);
             border-right: 1px solid var(--border-subtle);
         }
         .freehand-tool-selector .tool-btn {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-size: 12px;
+            gap: var(--sp-1);
+            padding: var(--sp-1) var(--sp-2);
+            border-radius: var(--radius);
+            font-size: var(--size-s);
             font-weight: 600;
             border: 1px solid transparent;
             background: transparent;
@@ -508,19 +508,19 @@
         .scale-modal-box {
             width: 440px;
             max-width: 90vw;
-            background: #ffffff;
+            background: var(--white);
             border: 1px solid var(--border-medium);
-            border-radius: 12px;
-            box-shadow: 0 20px 45px -8px rgba(15, 23, 42, 0.25);
+            border-radius: var(--radius);
+            box-shadow: none;
             overflow: hidden;
         }
         .scale-info-alert {
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
-            border-radius: 8px;
-            padding: 10px 12px;
-            font-size: 12px;
-            color: #1e40af;
+            background: var(--tint);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: var(--sp-2) var(--sp-3);
+            font-size: var(--size-s);
+            color: var(--navy);
             line-height: 1.5;
         }
 
@@ -528,13 +528,13 @@
         .symbol-filter-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 7px 10px;
-            border-radius: 6px;
+            gap: var(--sp-2);
+            padding: var(--sp-2) var(--sp-2);
+            border-radius: var(--radius);
             cursor: pointer;
             transition: background 0.15s ease;
             user-select: none;
-            font-size: 13px;
+            font-size: var(--size-s);
             font-weight: 500;
             color: var(--text-main);
         }
@@ -550,49 +550,49 @@
         .symbol-badge-dot {
             width: 12px;
             height: 12px;
-            border-radius: 50%;
+            border-radius: var(--radius);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 8px;
-            border: 1px solid rgba(0, 0, 0, 0.15);
+            font-size: var(--size-s);
+            border: 1px solid var(--line);
             flex-shrink: 0;
         }
 
         /* 심벌 드로잉 배너 & 칩 */
         .symbol-guide-banner {
-            background: rgba(15, 23, 42, 0.92);
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: var(--overlay);
+            color: var(--white);
+            border: 1px solid var(--white);
         }
         .symbol-type-chips {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: var(--sp-1);
             flex-wrap: wrap;
         }
         .symbol-type-chip {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
+            gap: var(--sp-1);
+            padding: var(--sp-1) var(--sp-3);
+            border-radius: var(--radius);
+            font-size: var(--size-s);
             font-weight: 600;
-            background: rgba(255, 255, 255, 0.12);
+            background: var(--white);
             border: 1.5px solid transparent;
-            color: #f1f5f9;
+            color: var(--white);
             cursor: pointer;
             transition: all 0.15s ease;
         }
         .symbol-type-chip:hover {
-            background: rgba(255, 255, 255, 0.22);
+            background: var(--white);
         }
         .symbol-type-chip.active {
-            background: #ffffff;
-            color: #0f172a;
-            border-color: #ffffff;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+            background: var(--white);
+            color: var(--navy);
+            border-color: var(--white);
+            box-shadow: none;
         }
 
         /* 지도 위 심벌 노드 */
@@ -629,7 +629,7 @@
 
         /* EPS (전기): 자 -> 모, 파란색 점선 3px */
         .util-line-eps {
-            stroke: #2563eb !important;
+            stroke: var(--navy) !important;
             stroke-width: 3px !important;
             stroke-dasharray: 8 6;
             animation: utilFlowForward 0.8s linear infinite;
@@ -638,7 +638,7 @@
 
         /* PS / PD (급수): 자 -> 모, 하늘색 점선 3px */
         .util-line-water {
-            stroke: #0284c7 !important;
+            stroke: var(--navy) !important;
             stroke-width: 3px !important;
             stroke-dasharray: 8 6;
             animation: utilFlowForward 0.8s linear infinite;
@@ -647,7 +647,7 @@
 
         /* PS / PD (배수): 모 -> 자, 검은색 점선 3px */
         .util-line-drain {
-            stroke: #0f172a !important;
+            stroke: var(--navy) !important;
             stroke-width: 3px !important;
             stroke-dasharray: 8 6;
             animation: utilFlowReverse 0.8s linear infinite;
@@ -656,7 +656,7 @@
 
         /* 가스: 자 -> 모, 노란색 점선 3px */
         .util-line-gas {
-            stroke: #eab308 !important;
+            stroke: var(--navy) !important;
             stroke-width: 3px !important;
             stroke-dasharray: 8 6;
             animation: utilFlowForward 0.8s linear infinite;
@@ -665,7 +665,7 @@
 
         /* AV (스프링클러): 빨간색 점선 3px (예비 확장) */
         .util-line-sprinkler {
-            stroke: #dc2626 !important;
+            stroke: var(--navy) !important;
             stroke-width: 3px !important;
             stroke-dasharray: 8 6;
             animation: utilFlowForward 0.8s linear infinite;
@@ -674,7 +674,7 @@
 
         /* 공조실 (급기 SA): 청록색 점선 3px (예비 확장) */
         .util-line-air-supply {
-            stroke: #0284c7 !important;
+            stroke: var(--navy) !important;
             stroke-width: 3px !important;
             stroke-dasharray: 8 6;
             animation: utilFlowForward 0.8s linear infinite;
@@ -682,7 +682,7 @@
 
         /* 공조실 (배기 RA): 주황색 점선 3px (예비 확장) */
         .util-line-air-exhaust {
-            stroke: #ea580c !important;
+            stroke: var(--navy) !important;
             stroke-width: 3px !important;
             stroke-dasharray: 8 6;
             animation: utilFlowReverse 0.8s linear infinite;

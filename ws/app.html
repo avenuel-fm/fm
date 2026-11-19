@@ -10,19 +10,62 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.17.0"></script>
-<script>window.WS_VERSION = '0.17.0';</script>
-<script src="ws-api.js?v=0.17.0"></script>
+<script src="config.js?v=0.18.0"></script>
+<script>window.WS_VERSION = '0.18.0';</script>
+<script src="ws-api.js?v=0.18.0"></script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
 /* 공통 틀 v0.1 — 도면협의 Styles.html 기준 이름 (통합 설계정의서 12장) */
+/* DESIGN-TOKENS:START */
+/* 디자인 값은 이 파일에만 적습니다. 고친 뒤 python apps/design/sync.py 를 돌리면 모든 앱에 들어갑니다. */
 :root{
-  --ground:#F4F6F8; --card:#FFFFFF; --line2:#DCE1E7; --line3:#EDF0F3; --line:#CBD2DB;
-  --ink:#18202B; --sub:#3F4855; --muted:#5B6573;
+  /* 기본 색 6가지 */
+  --navy:#1E3A5F;     /* 주 색상: 머리줄, 주요 버튼, 강조 숫자, 그래프 */
+  --white:#FFFFFF;    /* 바탕 */
+  --text-sub:#5F6B7A; /* 보조 글자 */
+  --line:#D8DDE5;     /* 구역을 나누는 선, 입력칸 테두리 */
+  --tint:#F1F4F8;     /* 고른 줄, 표 머리 */
+  --error:#B42318;    /* 오류 문구 전용 */
+
+  /* 글자 크기 */
+  --size-s:13px; --size-m:15px; --size-l:18px; --size-xl:24px; --size-xxl:32px;
+  --size-input-touch:16px; /* 휴대폰 입력칸 전용: 16px보다 작으면 아이폰이 화면을 저절로 확대함 */
+
+  /* 간격 (4의 배수) */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-6:24px; --sp-8:32px; --sp-12:48px;
+
+  /* 모양 */
+  --radius:2px;          /* 모든 모서리 */
+  --control-h:40px;      /* 버튼, 입력칸 높이 */
+  --control-h-touch:44px;/* 휴대폰의 버튼, 입력칸 높이 */
+
+  /* 팝업 뒤를 어둡게 하는 막 (남색 45%) */
+  --overlay:rgba(30,58,95,.45);
+  --font:'Noto Sans KR','Malgun Gothic',system-ui,-apple-system,sans-serif;
+}
+@media (pointer:coarse){
+  :root{--control-h:var(--control-h-touch)}
+  input:not([type=checkbox]):not([type=radio]):not(.lgin),textarea:not(.lgin),select:not(.lgin){font-size:var(--size-input-touch)!important}
+}
+
+/* 인쇄·PDF·라벨 양식은 종이 기준이라 원래 색을 그대로 씁니다 (화면 디자인 규칙에서 제외) */
+#print,.tbp,.cspdf,.label,.ehl,.ehlt,.ehg,.hvs,.lgs,.page,.ag-paper,.ag-page{
+  color:#18202B;
+  --ink:#18202B; --ink2:#2A3340; --sub:#3F4855; --muted:#5B6573; --faint:#7A8494;
+  --line:#CBD2DB; --line2:#DCE1E7; --line3:#EDF0F3; --ground:#F4F6F8; --card:#FFFFFF;
   --blue:#1F5FA8; --blue-d:#174A84; --blue-bg:#E8F0FA;
-  --green:#1F7A4D; --green-bg:#EAF5EF; --orange:#B4410F; --orange-bg:#FDF0E8; --red:#C0261A; --red-bg:#FBE9E7;
+  --green:#1F7A4D; --green-d:#155C39; --green-bg:#EAF5EF;
+  --orange:#B4410F; --orange-bg:#FDF0E8; --red:#C0261A; --red-bg:#FBE9E7;
+}
+/* DESIGN-TOKENS:END */
+:root{ /* 예전 이름 → 기본 색 6가지 */
+  --ink:var(--navy); --ink2:var(--navy); --sub:var(--text-sub); --muted:var(--text-sub); --faint:var(--text-sub);
+  --line2:var(--line); --line3:var(--line); --ground:var(--white); --card:var(--white);
+  --blue:var(--navy); --blue-d:var(--navy); --blue-bg:var(--tint);
+  --green:var(--navy); --green-d:var(--navy); --green-bg:var(--tint);
+  --orange:var(--navy); --orange-bg:var(--tint); --red:var(--error); --red-bg:var(--tint);
 }
 *{box-sizing:border-box}
 /* WS-25 화면 다듬기: 단어 중간 줄바꿈 막기, 제목·강조 600 (인쇄·라벨·PDF 양식은 700 그대로) */
@@ -34,27 +77,35 @@ h1,h2,h3,b,strong{font-weight:600}
 html,body{margin:0;background:var(--ground);color:var(--ink);font-family:'Noto Sans KR',system-ui,-apple-system,sans-serif;-webkit-text-size-adjust:100%}
 button,input,select,textarea{font:inherit;color:inherit}
 a{color:var(--blue)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;border-radius:8px;border:1px solid var(--line);background:var(--card);font-size:15px;font-weight:500;color:var(--ink);cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-1);min-height:var(--control-h);padding:0 var(--sp-4);border-radius:var(--radius);border:1px solid var(--line);background:var(--card);font-size:var(--size-m);font-weight:500;color:var(--ink);cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:no-preference){.btn{transition:scale .15s ease-out}.btn:not(:disabled):active{scale:.96}}
 .btn:disabled{opacity:.5;cursor:default}
-.btn.pri{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:500}
-.btn.warn{border-color:#E8B4AE;color:var(--red)}
-.btn.sm{min-height:36px;padding:0 12px;font-size:13px}
-.btn.big{min-height:52px;font-size:16px}
-.inp{width:100%;min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-size:16px;background:#fff}
-.card{background:var(--card);border:1px solid var(--line2);border-radius:12px}
-.chip{display:inline-flex;align-items:center;gap:4px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:var(--white);font-weight:500}
+.btn.warn{border-color:var(--line);color:var(--red)}
+.btn.sm{min-height:var(--control-h);padding:0 var(--sp-3);font-size:var(--size-s)}
+.btn.big{min-height:var(--control-h);font-size:var(--size-m)}
+.inp{width:100%;min-height:var(--control-h);padding:0 var(--sp-3);border:1px solid var(--line);border-radius:var(--radius);font-size:var(--size-m);background:var(--white)}
+.card{background:var(--card);border:1px solid var(--line2);border-radius:var(--radius)}
+.chip{display:inline-flex;align-items:center;gap:var(--sp-1);height:26px;padding:0 var(--sp-2);border-radius:var(--radius);font-size:var(--size-s);font-weight:500;white-space:nowrap}
 .c-ok{background:var(--green-bg);color:var(--green)}
 .c-bad{background:var(--orange-bg);color:var(--orange)}
-.c-wait{background:var(--line3);color:var(--muted)}
+.c-wait{background:var(--tint);color:var(--muted)}
 .c-miss{background:var(--red-bg);color:var(--red)}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 16px;border-radius:12px;font-size:14px;z-index:100;max-width:calc(100% - 32px);box-shadow:0 6px 18px rgba(24,32,43,.25)}
-.dialog-back{position:fixed;inset:0;background:rgba(24,32,43,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center}
-.dialog{width:100%;max-width:520px;background:#fff;border-radius:16px 16px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto;overscroll-behavior:contain}
-@media (min-width:700px){.dialog-back{align-items:center}.dialog{border-radius:16px}}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--white);padding:var(--sp-3) var(--sp-4);border-radius:var(--radius);font-size:var(--size-m);z-index:100;max-width:calc(100% - 32px);box-shadow:none}
+.dialog-back{position:fixed;inset:0;background:var(--overlay);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.dialog{width:100%;max-width:520px;background:var(--white);border-radius:var(--radius) var(--radius) 0 0;padding:var(--sp-4) var(--sp-4) calc(var(--sp-4) + env(safe-area-inset-bottom));max-height:92vh;overflow:auto;overscroll-behavior:contain}
+@media (min-width:700px){.dialog-back{align-items:center}.dialog{border-radius:var(--radius)}}
 .spin{width:18px;height:18px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .8s linear infinite;display:inline-block}
 @keyframes sp{to{transform:rotate(360deg)}}
 .hide{display:none!important}
+
+/* 상태는 색이 아니라 모양과 글자로 구분: 문제 = 채움, 정상 = 남색 테두리, 대기 = 회색 테두리 */
+.chip{border:1px solid transparent}
+.c-bad,.c-miss,.chip.orange{background:var(--navy);color:var(--var(--white));border-color:var(--navy)}
+.c-ok,.chip.green{background:var(--var(--white));color:var(--navy);border-color:var(--navy)}
+.c-wait{background:var(--var(--white));color:var(--text-sub);border-color:var(--line)}
+.chip.blue{background:var(--tint);color:var(--navy);border-color:var(--line)}
+.btn.warn{background:var(--var(--white));color:var(--navy);border-color:var(--navy)}
 </style>
 <style>
 /* 어두운 화면 (결정 98): 화면만 색을 뒤집고 사진·서명·QR은 되돌림. 인쇄·저장 이미지는 그대로 흰 바탕 */
@@ -73,310 +124,312 @@ function themeLabel() { return themeDark() ? '밝게' : '어둡게'; }
 </script>
 
 <style>
-.wrap{max-width:1100px;margin:0 auto;padding:12px 16px 40px}
+.wrap{max-width:1100px;margin:0 auto;padding:var(--sp-3) var(--sp-4) var(--sp-8)}
 /* 시방서 검색 (결정 140) — PC 3칸(왼쪽 고르기 · 가운데 결과 · 오른쪽 쪽 보기), 760px 아래는 결과만 + 쪽 보기 창 */
-.sp{max-width:1400px;margin:0 auto;padding:16px}
+.sp{max-width:1400px;margin:0 auto;padding:var(--sp-4)}
 .spq{position:relative;display:block}.spq svg{position:absolute;left:14px;top:16px;color:var(--muted)}
-.spq .inp{height:52px;padding-left:44px;border:2px solid var(--blue);font-size:17px}
-.spf{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
-.spf button{white-space:nowrap;flex:none;min-height:38px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:13px;color:var(--sub);cursor:pointer}
-.spf button span{color:var(--muted);margin-left:2px}.spf button.on{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:500}.spf button.on span{color:#C9D1DB}
+.spq .inp{height:var(--control-h);padding-left:var(--sp-12);border:2px solid var(--blue);font-size:var(--size-l)}
+.spf{display:flex;flex-wrap:wrap;gap:var(--sp-1);margin-top:var(--sp-3)}
+.spf button{white-space:nowrap;flex:none;min-height:var(--control-h);padding:0 var(--sp-3);border-radius:var(--radius);border:1px solid var(--line);background:var(--card);font-size:var(--size-s);color:var(--sub);cursor:pointer}
+.spf button span{color:var(--muted);margin-left:var(--sp-1)}.spf button.on{background:var(--ink);border-color:var(--ink);color:var(--white);font-weight:500}.spf button.on span{color:var(--text-sub)}
 .spf .old{border-style:dashed;margin-left:auto}.spf .old.on{background:var(--blue-bg);border-color:var(--blue);color:var(--blue-d)}
-.spg{display:grid;grid-template-columns:240px minmax(0,1fr) minmax(0,1.1fr);gap:16px;margin-top:14px;align-items:start}
-.spside{display:flex;flex-direction:column;gap:12px}.spside .card{padding:14px}.spside h3{font-size:13px;margin:0 0 8px;color:var(--sub)}
-.spchips{display:flex;flex-wrap:wrap;gap:6px}.spchips button{min-height:34px;padding:0 10px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:13px;cursor:pointer}
-.spck{display:flex;align-items:flex-start;gap:8px;margin:0 0 8px;font-size:13px;line-height:1.5;cursor:pointer}.spck input{width:18px;height:18px;margin:1px 0 0;flex:none;accent-color:var(--blue)}
-.spck-t{flex:1;min-width:0}.spck-n{flex:none;font-weight:700;color:var(--ink)}.spck.old{border-top:1px dashed var(--line);padding-top:8px;color:var(--sub)}
+.spg{display:grid;grid-template-columns:240px minmax(0,1fr) minmax(0,1.1fr);gap:var(--sp-4);margin-top:var(--sp-3);align-items:start}
+.spside{display:flex;flex-direction:column;gap:var(--sp-3)}.spside .card{padding:var(--sp-3)}.spside h3{font-size:var(--size-s);margin:0 0 var(--sp-2);color:var(--sub)}
+.spchips{display:flex;flex-wrap:wrap;gap:var(--sp-1)}.spchips button{min-height:var(--control-h);padding:0 var(--sp-2);border-radius:var(--radius);border:1px solid var(--line);background:var(--card);font-size:var(--size-s);cursor:pointer}
+.spck{display:flex;align-items:flex-start;gap:var(--sp-2);margin:0 0 var(--sp-2);font-size:var(--size-s);line-height:1.5;cursor:pointer}.spck input{width:18px;height:18px;margin:1px 0 0;flex:none;accent-color:var(--blue)}
+.spck-t{flex:1;min-width:0}.spck-n{flex:none;font-weight:700;color:var(--ink)}.spck.old{border-top:1px dashed var(--line);padding-top:var(--sp-2);color:var(--sub)}
 @media(min-width:761px){.spf{display:none}}
-.srct{display:inline-block;font-size:11px;font-weight:500;border-radius:4px;padding:2px 6px;white-space:nowrap}
-.srct.s0{background:var(--blue-bg);color:var(--blue-d)}.srct.s1{background:var(--orange-bg);color:var(--orange)}.srct.s2{background:var(--green-bg);color:var(--green)}.srct.s3{background:#F1EAFB;color:#5B3A99}.srct.sold{background:var(--line3);color:var(--muted);margin-left:4px}
-.sphit{background:var(--card);border:1px solid var(--line2);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer}
-.sphit.on{border:2px solid var(--blue);padding:11px 13px;box-shadow:0 0 0 3px var(--blue-bg)}
-.sphd{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.pgb{display:inline-flex;align-items:center;gap:4px;min-height:30px;padding:0 10px;border-radius:6px;background:var(--ink);color:#fff;font-size:13px;border:0;cursor:zoom-in}.pgb svg{width:13px;height:13px}
-.mk{background:#FFE58A;color:#18202B;font-weight:500;padding:0 2px;border-radius:2px}
-.spwhere{font-size:12px;color:var(--sub);margin-top:6px}.sptxt{font-size:14px;line-height:1.7;margin-top:4px}
-.spact{display:flex;gap:6px;margin-top:8px}.spact .btn{flex:1;min-width:0;white-space:normal;line-height:1.3;padding-top:4px;padding-bottom:4px}.spact .btn.pri{flex:1.4}
-.spnote{font-size:12px;color:var(--muted);line-height:1.6}
+.srct{display:inline-block;font-size:var(--size-s);font-weight:500;border-radius:var(--radius);padding:var(--sp-1) var(--sp-1);white-space:nowrap}
+.srct.s0{background:var(--blue-bg);color:var(--blue-d)}.srct.s1{background:var(--orange-bg);color:var(--orange)}.srct.s2{background:var(--green-bg);color:var(--green)}.srct.s3{background:var(--tint);color:var(--navy)}.srct.sold{background:var(--tint);color:var(--muted);margin-left:var(--sp-1)}
+.sphit{background:var(--card);border:1px solid var(--line2);border-radius:var(--radius);padding:var(--sp-3) var(--sp-3);margin-bottom:var(--sp-2);cursor:pointer}
+.sphit.on{border:2px solid var(--blue);padding:var(--sp-3) var(--sp-3);box-shadow:none}
+.sphd{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap}
+.pgb{display:inline-flex;align-items:center;gap:var(--sp-1);min-height:30px;padding:0 var(--sp-2);border-radius:var(--radius);background:var(--ink);color:var(--white);font-size:var(--size-s);border:0;cursor:zoom-in}.pgb svg{width:13px;height:13px}
+.mk{background:var(--navy);color:var(--navy);font-weight:500;padding:0 var(--sp-1);border-radius:var(--radius)}
+.spwhere{font-size:var(--size-s);color:var(--sub);margin-top:var(--sp-1)}.sptxt{font-size:var(--size-m);line-height:1.7;margin-top:var(--sp-1)}
+.spact{display:flex;gap:var(--sp-1);margin-top:var(--sp-2)}.spact .btn{flex:1;min-width:0;white-space:normal;line-height:1.3;padding-top:var(--sp-1);padding-bottom:var(--sp-1)}.spact .btn.pri{flex:1.4}
+.spnote{font-size:var(--size-s);color:var(--muted);line-height:1.6}
 .sppvw{position:sticky;top:12px}
-.sppub{font-size:13px;color:var(--muted);white-space:nowrap}.ttl .spteam{font-size:15px;font-weight:700;color:var(--ink)}
-.sppv{background:var(--card);border:1px solid var(--line2);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;height:calc(100dvh - 300px);min-height:420px}
-.sppv-h{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line3);flex-wrap:wrap}
-.spttl{font-size:14px;flex:1 1 120px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sptools{display:flex;align-items:center;gap:4px;margin-left:auto}
-.sppv-b{flex:1;overflow:auto;overscroll-behavior:contain;background:var(--line3);padding:12px}
-.sppg{position:relative;margin:0 auto;box-shadow:0 2px 8px rgba(0,0,0,.15);background:#fff}.sppg img{display:block;width:100%;height:auto}
-.hl{position:absolute;background:rgba(255,214,0,.32);outline:2px solid #E8A200;border-radius:3px;pointer-events:none}
-.sppv-t{background:var(--card);border-radius:8px;padding:20px;max-width:620px;margin:0 auto;font-size:15px;line-height:1.8}
-.sppv-f{display:flex;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid var(--line3);flex-wrap:wrap}.sppv-f .btn{margin-left:auto}
-.spsheet{position:fixed;inset:0;z-index:60;background:rgba(24,32,43,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.sppub{font-size:var(--size-s);color:var(--muted);white-space:nowrap}.ttl .spteam{font-size:var(--size-m);font-weight:700;color:var(--ink)}
+.sppv{background:var(--card);border:1px solid var(--line2);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;height:calc(100dvh - 300px);min-height:420px}
+.sppv-h{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) var(--sp-3);border-bottom:1px solid var(--line3);flex-wrap:wrap}
+.spttl{font-size:var(--size-m);flex:1 1 120px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sptools{display:flex;align-items:center;gap:var(--sp-1);margin-left:auto}
+.sppv-b{flex:1;overflow:auto;overscroll-behavior:contain;background:var(--tint);padding:var(--sp-3)}
+.sppg{position:relative;margin:0 auto;box-shadow:none;background:var(--white)}.sppg img{display:block;width:100%;height:auto}
+.hl{position:absolute;background:var(--overlay);outline:2px solid var(--navy);border-radius:var(--radius);pointer-events:none}
+.sppv-t{background:var(--card);border-radius:var(--radius);padding:var(--sp-4);max-width:620px;margin:0 auto;font-size:var(--size-m);line-height:1.8}
+.sppv-f{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) var(--sp-3);border-top:1px solid var(--line3);flex-wrap:wrap}.sppv-f .btn{margin-left:auto}
+.spsheet{position:fixed;inset:0;z-index:60;background:var(--overlay);display:flex;align-items:center;justify-content:center;padding:var(--sp-4)}
 .spsheet .sppv{width:100%;max-width:1000px;height:min(94vh,1200px)}
 @media(max-width:1000px){.spg{grid-template-columns:200px minmax(0,1fr)}.sppvw{display:none}}
-@media(max-width:760px){.sp{padding:12px}.spg{grid-template-columns:minmax(0,1fr)}.spside,.pcon{display:none}.spf{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}.spf .old{margin-left:0}
-  .spsheet{align-items:flex-end;padding:0}.spsheet .sppv{height:90vh;border-radius:16px 16px 0 0}}
+@media(max-width:760px){.sp{padding:var(--sp-3)}.spg{grid-template-columns:minmax(0,1fr)}.spside,.pcon{display:none}.spf{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}.spf .old{margin-left:0}
+  .spsheet{align-items:flex-end;padding:0}.spsheet .sppv{height:90vh;border-radius:var(--radius) var(--radius) 0 0}}
 .mapframe{display:block;width:100%;height:calc(100dvh - 150px);min-height:420px;border:0}
-.top{background:#fff;border-bottom:1px solid var(--line2);position:sticky;top:0;z-index:20}
-.top-in{max-width:1100px;margin:0 auto;padding:10px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.backbar{position:sticky;bottom:0;z-index:14;background:var(--ground);border-top:1px solid var(--line2);padding:10px 16px calc(12px + env(safe-area-inset-bottom))}.backbar .btn{width:100%}
+.top,.top .ttl,.top .ttl small,.top .ttl b{color:var(--white)}
+.top .btn.pri{background:var(--white);border-color:var(--white);color:var(--navy)}
+.top{background:var(--navy);border-bottom:1px solid var(--navy);position:sticky;top:0;z-index:20}
+.top-in{max-width:1100px;margin:0 auto;padding:var(--sp-2) var(--sp-3);display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap}
+.backbar{position:sticky;bottom:0;z-index:14;background:var(--ground);border-top:1px solid var(--line2);padding:var(--sp-2) var(--sp-4) calc(var(--sp-3) + env(safe-area-inset-bottom))}.backbar .btn{width:100%}
 /* 앱 안 PDF 보기 (계정 선택 창 없이, 시안 docs/시안/WS-PDF보기) */
-.pv-tool{display:flex;align-items:center;gap:8px;padding:8px max(16px,calc((100% - 1100px)/2 + 12px));background:var(--ground);border-bottom:1px solid var(--line2)}
-.pv-tool .fname{flex:1;min-width:0}.pv-tool .fname b{font-size:14px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pv-tool .fname small{font-size:12px;color:var(--muted)}
-.pv-zoom{display:flex;align-items:center;border:1px solid var(--line2);border-radius:8px;background:var(--card,#fff);overflow:hidden;flex:none}.pv-zoom button{width:40px;height:36px;border:0;background:none;font-size:18px;color:inherit;cursor:pointer}.pv-zoom button:disabled{opacity:.35;cursor:default}.pv-zoom span{min-width:56px;text-align:center;font-size:13px;font-variant-numeric:tabular-nums}
-.pv-pages{background:var(--line3);padding:12px 10px 20px;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:60vh;overflow-x:auto}.pv-pages.big{align-items:flex-start}
-.pv-page{display:block;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.18);flex:none}.pv-no{font-size:12px;color:var(--muted);margin-bottom:8px}
-.pv-bar{display:flex;gap:8px;padding-left:max(16px,calc((100% - 1100px)/2 + 12px))!important;padding-right:max(16px,calc((100% - 1100px)/2 + 12px))!important}.pv-bar .btn{width:auto!important;flex:1}
-.pv-state{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:48px 20px;color:var(--sub)}.pv-state b{color:var(--ink);font-size:17px}.pv-spin{width:30px;height:30px;border:3px solid var(--blue);border-right-color:transparent;border-radius:50%;animation:pvs .8s linear infinite}@keyframes pvs{to{transform:rotate(360deg)}}
-.btn.back-in{flex:none!important;min-width:0!important;margin-right:auto;padding:0 14px 0 8px;gap:2px}
+.pv-tool{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) max(var(--sp-4),calc((100% - 1100px)/2 + var(--sp-3)));background:var(--ground);border-bottom:1px solid var(--line2)}
+.pv-tool .fname{flex:1;min-width:0}.pv-tool .fname b{font-size:var(--size-m);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pv-tool .fname small{font-size:var(--size-s);color:var(--muted)}
+.pv-zoom{display:flex;align-items:center;border:1px solid var(--line2);border-radius:var(--radius);background:var(--card,var(--white));overflow:hidden;flex:none}.pv-zoom button{width:40px;height:var(--control-h);border:0;background:none;font-size:var(--size-l);color:inherit;cursor:pointer}.pv-zoom button:disabled{opacity:.35;cursor:default}.pv-zoom span{min-width:56px;text-align:center;font-size:var(--size-s);font-variant-numeric:tabular-nums}
+.pv-pages{background:var(--tint);padding:var(--sp-3) var(--sp-2) var(--sp-4);display:flex;flex-direction:column;align-items:center;gap:var(--sp-1);min-height:60vh;overflow-x:auto}.pv-pages.big{align-items:flex-start}
+.pv-page{display:block;background:var(--white);box-shadow:none;flex:none}.pv-no{font-size:var(--size-s);color:var(--muted);margin-bottom:var(--sp-2)}
+.pv-bar{display:flex;gap:var(--sp-2);padding-left:max(var(--sp-4),calc((100% - 1100px)/2 + var(--sp-3)))!important;padding-right:max(var(--sp-4),calc((100% - 1100px)/2 + var(--sp-3)))!important}.pv-bar .btn{width:auto!important;flex:1}
+.pv-state{display:flex;flex-direction:column;align-items:center;gap:var(--sp-3);text-align:center;padding:var(--sp-12) var(--sp-4);color:var(--sub)}.pv-state b{color:var(--ink);font-size:var(--size-l)}.pv-spin{width:30px;height:30px;border:3px solid var(--blue);border-right-color:transparent;border-radius:var(--radius);animation:pvs .8s linear infinite}@keyframes pvs{to{transform:rotate(360deg)}}
+.btn.back-in{flex:none!important;min-width:0!important;margin-right:auto;padding:0 var(--sp-3) 0 var(--sp-2);gap:var(--sp-1)}
 body:has(.csbar) #app{padding-bottom:calc(120px + env(safe-area-inset-bottom))}
-@media (max-width:599px){.nwbar{gap:6px}.nwbar .btn{min-width:0;padding:0 10px;font-size:15px}.nwbar .btn.green svg{display:none}.nwbar>span{flex:0 1 auto;min-width:0;font-size:12px}.btn.back-in{padding:0 10px 0 4px}}
-.seg.setseg button{padding:0;white-space:nowrap;font-size:13px;text-align:center}.mainfoot{display:flex;justify-content:space-between;gap:8px}.sth{margin:6px 0 0;font-size:15px}.strow{display:flex;align-items:center;gap:6px;padding:10px 12px;border-bottom:1px solid var(--line3)}.strow:last-child{border-bottom:0}.strow .fname{flex:1;min-width:0}
-.back{width:44px;height:44px;border:none;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px}
+@media (max-width:599px){.nwbar{gap:var(--sp-1)}.nwbar .btn{min-width:0;padding:0 var(--sp-2);font-size:var(--size-m)}.nwbar .btn.green svg{display:none}.nwbar>span{flex:0 1 auto;min-width:0;font-size:var(--size-s)}.btn.back-in{padding:0 var(--sp-2) 0 var(--sp-1)}}
+.seg.setseg button{padding:0;white-space:nowrap;font-size:var(--size-s);text-align:center}.mainfoot{display:flex;justify-content:space-between;gap:var(--sp-2)}.sth{margin:var(--sp-1) 0 0;font-size:var(--size-m)}.strow{display:flex;align-items:center;gap:var(--sp-1);padding:var(--sp-2) var(--sp-3);border-bottom:1px solid var(--line3)}.strow:last-child{border-bottom:0}.strow .fname{flex:1;min-width:0}
+.back{width:44px;height:44px;border:none;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:var(--radius)}
 .ttl{display:flex;flex-direction:column;flex:1 1 150px;min-width:0}
-.ttl small{font-size:12px;color:var(--muted);white-space:nowrap}
-.ttl b{font-size:18px}
-.me{display:inline-flex;align-items:center;height:30px;padding:0 10px;border-radius:999px;background:var(--blue-bg);color:var(--blue-d);font-size:13px;font-weight:500;white-space:nowrap}
-.grid6{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ttl small{font-size:var(--size-s);color:var(--muted);white-space:nowrap}
+.ttl b{font-size:var(--size-l)}
+.me{display:inline-flex;align-items:center;height:30px;padding:0 var(--sp-2);border-radius:var(--radius);background:var(--blue-bg);color:var(--blue-d);font-size:var(--size-s);font-weight:500;white-space:nowrap}
+.grid6{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-2)}
 @media(min-width:700px){.grid6{grid-template-columns:repeat(3,minmax(0,1fr))}}
-.tile{background:#fff;border:1px solid var(--line2);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px;min-height:104px;cursor:pointer;text-align:left}
-.tile b{font-size:17px}
-.tile small{font-size:12px;color:var(--muted)}
-.tile.on{border:2px solid var(--blue);padding:13px}
+.tile{background:var(--white);border:1px solid var(--line2);border-radius:var(--radius);padding:var(--sp-3);display:flex;flex-direction:column;gap:var(--sp-1);min-height:104px;cursor:pointer;text-align:left}
+.tile b{font-size:var(--size-l)}
+.tile small{font-size:var(--size-s);color:var(--muted)}
+.tile.on{border:2px solid var(--blue);padding:var(--sp-3)}
 /* WS-25: 메뉴 칸 선 아이콘, 「준비 중」 칸은 점선·회색 */
 .tile .ico{background:var(--blue-bg);color:var(--blue-d)}
 .tile.soon{background:transparent;border-style:dashed;cursor:default}
-.tile.soon .ico{background:var(--line3);color:var(--muted)}
+.tile.soon .ico{background:var(--tint);color:var(--muted)}
 .tile.soon b{color:var(--sub)}
-.tile.off{opacity:.5;border-style:dashed;background:transparent;cursor:not-allowed}.tile.off .ico{background:var(--line3);color:var(--muted)}.tile.off small svg{vertical-align:-2px;margin-right:3px}
+.tile.off{opacity:.5;border-style:dashed;background:transparent;cursor:not-allowed}.tile.off .ico{background:var(--tint);color:var(--muted)}.tile.off small svg{vertical-align:-2px;margin-right:var(--sp-1)}
 .tile .offtag{color:var(--orange)}.seg.menuseg{width:150px;flex:none}.seg.menuseg button{flex:1}
-.ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center}
-.row{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border:1px solid var(--line2);border-radius:12px;cursor:pointer;width:100%;text-align:left}
-.list{display:flex;flex-direction:column;gap:10px}
-.banner{border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.5}
+.ico{width:36px;height:36px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center}
+.row{display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3) var(--sp-4);background:var(--white);border:1px solid var(--line2);border-radius:var(--radius);cursor:pointer;width:100%;text-align:left}
+.list{display:flex;flex-direction:column;gap:var(--sp-2)}
+.banner{border-radius:var(--radius);padding:var(--sp-3) var(--sp-3);font-size:var(--size-m);line-height:1.5}
 .b-info{background:var(--blue-bg);color:var(--blue-d)}
 .b-warn{background:var(--orange-bg);color:var(--orange)}
-.b-red{background:var(--red-bg);color:var(--red)}
-.b-gray{background:var(--line3);color:var(--sub)}
-.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px;background:#fff;border:1px solid var(--line2);border-radius:12px}
+.b-red{background:var(--red-bg);color:var(--navy)}
+.b-gray{background:var(--tint);color:var(--sub)}
+.tools{display:flex;flex-wrap:wrap;gap:var(--sp-2);align-items:center;padding:var(--sp-2);background:var(--white);border:1px solid var(--line2);border-radius:var(--radius)}
 .tools .inp{flex:1 1 220px}
-.store{background:#fff;border:1px solid var(--line2);border-radius:12px;overflow:hidden}
-.store-h{display:flex;align-items:baseline;gap:8px;padding:10px 14px}
-.store-h b{flex:1;font-size:15px}
-.fe{display:flex;align-items:center;gap:10px;min-height:56px;padding:6px 10px 6px 14px;border-top:1px solid var(--line3)}
+.store{background:var(--white);border:1px solid var(--line2);border-radius:var(--radius);overflow:hidden}
+.store-h{display:flex;align-items:baseline;gap:var(--sp-2);padding:var(--sp-2) var(--sp-3)}
+.store-h b{flex:1;font-size:var(--size-m)}
+.fe{display:flex;align-items:center;gap:var(--sp-2);min-height:56px;padding:var(--sp-1) var(--sp-2) var(--sp-1) var(--sp-3);border-top:1px solid var(--line3)}
 .fe input[type=checkbox]{width:20px;height:20px;accent-color:var(--blue);flex:none}
-.qrmini{width:44px;height:44px;flex:none;background:#fff;border:1px solid var(--line);border-radius:4px;padding:3px;cursor:pointer}
+.qrmini{width:44px;height:44px;flex:none;background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:var(--sp-1);cursor:pointer}
 .qrmini img,.qrmini canvas{width:100%!important;height:100%!important}
 .fname{flex:1;display:flex;flex-direction:column;min-width:0}
-.fname b{font-size:14px}
-.fname small{font-size:12px;color:var(--muted)}
-.floorh{font-size:13px;font-weight:600;color:var(--muted);margin:6px 2px 0}
-.mnav{display:flex;align-items:center;gap:8px}
-.mnav .btn{width:44px;padding:0;font-size:20px}
+.fname b{font-size:var(--size-m)}
+.fname small{font-size:var(--size-s);color:var(--muted)}
+.floorh{font-size:var(--size-s);font-weight:600;color:var(--muted);margin:var(--sp-1) var(--sp-1) 0}
+.mnav{display:flex;align-items:center;gap:var(--sp-2)}
+.mnav .btn{width:44px;padding:0;font-size:var(--size-l)}
 .mnav div{flex:1;text-align:center;display:flex;flex-direction:column}
-.legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:12px 14px;font-size:13px}
+.legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-2);padding:var(--sp-3) var(--sp-3);font-size:var(--size-s)}
 @media(min-width:700px){.legend{grid-template-columns:repeat(4,minmax(0,1fr))}}
-.dot{display:inline-block;width:10px;height:10px;border-radius:5px;margin-right:4px}
-.tree{padding:4px 0 4px 14px}
-.tree-root{display:flex;align-items:center;gap:8px;height:44px;font-weight:600;font-size:14px}
-.floor{display:flex;align-items:center;gap:10px;min-height:56px;padding:6px 12px 6px 0;border-top:1px solid var(--line3);width:100%;background:none;border-left:none;border-right:none;border-bottom:none;cursor:pointer;text-align:left}
-.elbow{width:16px;height:28px;border-left:2px solid var(--line2);border-bottom:2px solid var(--line2);margin:-20px 0 0 6px;flex:none}
-.bar{display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--line3)}
-.fl{min-height:36px;min-width:44px;padding:0 10px;border-radius:999px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:14px}
-.fl.on{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:500}
-.feb{width:100%;background:#fff;border:none;border-top:1px solid var(--line3);display:flex;align-items:center;gap:10px;min-height:56px;padding:6px 14px;text-align:left;cursor:pointer}
+.dot{display:inline-block;width:10px;height:10px;border-radius:var(--radius);margin-right:var(--sp-1)}
+.tree{padding:var(--sp-1) 0 var(--sp-1) var(--sp-3)}
+.tree-root{display:flex;align-items:center;gap:var(--sp-2);height:44px;font-weight:600;font-size:var(--size-m)}
+.floor{display:flex;align-items:center;gap:var(--sp-2);min-height:56px;padding:var(--sp-1) var(--sp-3) var(--sp-1) 0;border-top:1px solid var(--line3);width:100%;background:none;border-left:none;border-right:none;border-bottom:none;cursor:pointer;text-align:left}
+.elbow{width:16px;height:28px;border-left:2px solid var(--line2);border-bottom:2px solid var(--line2);margin:calc(var(--sp-4) * -1) 0 0 var(--sp-1);flex:none}
+.bar{display:flex;height:6px;border-radius:var(--radius);overflow:hidden;background:var(--tint)}
+.fl{min-height:36px;min-width:44px;padding:0 var(--sp-2);border-radius:var(--radius);border:1px solid var(--line);background:var(--white);cursor:pointer;font-size:var(--size-m)}
+.fl.on{background:var(--ink);border-color:var(--ink);color:var(--white);font-weight:500}
+.feb{width:100%;background:var(--white);border:none;border-top:1px solid var(--line3);display:flex;align-items:center;gap:var(--sp-2);min-height:56px;padding:var(--sp-1) var(--sp-3);text-align:left;cursor:pointer}
 .feb:disabled{cursor:default}
-.ph43{aspect-ratio:4/3;background:var(--line3);border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.ph43{aspect-ratio:4/3;background:var(--tint);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;overflow:hidden}
 .ph43 img{max-width:100%;max-height:100%;object-fit:contain}
-.sig{border:1px solid var(--line2);border-radius:8px;min-height:64px;display:flex;align-items:center;justify-content:center;padding:4px;background:#fff}
+.sig{border:1px solid var(--line2);border-radius:var(--radius);min-height:64px;display:flex;align-items:center;justify-content:center;padding:var(--sp-1);background:var(--white)}
 .sig img{max-width:100%;max-height:90px}
-.key{min-height:60px;border-radius:12px;border:1px solid var(--line2);background:#fff;font-size:24px;font-weight:500;cursor:pointer}
-.pin-dot{width:18px;height:18px;border-radius:9px;border:2px solid #9AA4B2}
+.key{min-height:60px;border-radius:var(--radius);border:1px solid var(--line2);background:var(--white);font-size:var(--size-xl);font-weight:500;cursor:pointer}
+.pin-dot{width:18px;height:18px;border-radius:var(--radius);border:2px solid var(--line)}
 .pin-dot.on{background:var(--blue);border-color:var(--blue)}
-.spad{position:relative;width:100%;height:clamp(190px,38vh,320px);border-radius:12px;border:2px dashed #B8C0CB;background:#fff;touch-action:none;overflow:hidden}
+.spad{position:relative;width:100%;height:clamp(190px,38vh,320px);border-radius:var(--radius);border:2px dashed var(--line);background:var(--white);touch-action:none;overflow:hidden}
 .spad.inked{border-style:solid;border-color:var(--line)}
 .spad canvas{position:absolute;left:0;top:0;width:100%;height:100%}
-.sgrow{display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid var(--line3)}
+.sgrow{display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-2) var(--sp-3);border-top:1px solid var(--line3)}
 .sgrow:first-child{border-top:none}
-.sgno{width:28px;height:28px;border-radius:14px;background:var(--line3);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex:none}
-.sgimg{width:120px;height:56px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid var(--line3);border-radius:6px;background:#fff}
+.sgno{width:28px;height:28px;border-radius:var(--radius);background:var(--tint);display:flex;align-items:center;justify-content:center;font-size:var(--size-s);font-weight:500;flex:none}
+.sgimg{width:120px;height:56px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid var(--line3);border-radius:var(--radius);background:var(--white)}
 .sgimg img{max-width:100%;max-height:42px}
-.sgimg small{font-size:10px;color:var(--muted);line-height:1}
+.sgimg small{font-size:var(--size-s);color:var(--muted);line-height:1}
 /* 명일 작업 예정 (WS_서류작업 9장) — 휴대폰은 줄마다 카드, 768px 이상은 표 */
-.nwhead{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
-.nwhead b{flex:1 1 auto;font-size:17px}
-.nwdate{position:relative;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:999px;background:var(--blue-bg);color:var(--blue-d);font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;cursor:pointer}
+.nwhead{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-2) var(--sp-3)}
+.nwhead b{flex:1 1 auto;font-size:var(--size-l)}
+.nwdate{position:relative;display:inline-flex;align-items:center;gap:var(--sp-2);min-height:44px;padding:0 var(--sp-4);border-radius:var(--radius);background:var(--blue-bg);color:var(--blue-d);font-size:var(--size-m);font-weight:600;font-variant-numeric:tabular-nums;cursor:pointer}
 button.nwdate{border:0;font-family:inherit}
-.nwdate:focus-visible{outline:3px solid #9CC0EC;outline-offset:2px}
+.nwdate:focus-visible{outline:3px solid var(--line);outline-offset:2px}
 .atcal button:disabled{opacity:.35;cursor:default}
-.nwmeta{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.5;font-variant-numeric:tabular-nums}
-.nwnote{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--sub);line-height:1.5}
-.nwsw{flex:none;width:4px;height:20px;border-radius:2px;background:var(--red)}
-.nwnote b{color:var(--red);font-weight:600}
-.nwrows{display:flex;flex-direction:column;gap:12px}
-.nwrow{display:grid;grid-template-columns:30px minmax(0,1fr) minmax(0,1fr) 44px;grid-template-areas:"no dept dept del" "work work work work" "place place note note";gap:8px 10px;align-items:end;background:#fff;border:1px solid var(--line2);border-radius:12px;padding:12px 16px}
+.nwmeta{font-size:var(--size-s);color:var(--muted);margin-top:var(--sp-2);line-height:1.5;font-variant-numeric:tabular-nums}
+.nwnote{display:flex;align-items:center;gap:var(--sp-2);margin-top:var(--sp-3);font-size:var(--size-s);color:var(--sub);line-height:1.5}
+.nwsw{flex:none;width:4px;height:20px;border-radius:var(--radius);background:var(--navy)}
+.nwnote b{color:var(--navy);font-weight:600}
+.nwrows{display:flex;flex-direction:column;gap:var(--sp-3)}
+.nwrow{display:grid;grid-template-columns:30px minmax(0,1fr) minmax(0,1fr) 44px;grid-template-areas:"no dept dept del" "work work work work" "place place note note";gap:var(--sp-2) var(--sp-2);align-items:end;background:var(--white);border:1px solid var(--line2);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4)}
 .nwrow .nwno{grid-area:no;align-self:center}.nwrow .seg{grid-area:dept}.nwrow .nwdel{grid-area:del}
 .nwrow .f-work{grid-area:work}.nwrow .f-place{grid-area:place}.nwrow .f-note{grid-area:note}
-.nwrow label{display:flex;flex-direction:column;gap:4px;min-width:0}
-.nwrow label span{font-size:13px;font-weight:500;color:var(--sub)}
-.nwno{width:28px;height:28px;border-radius:14px;background:var(--line3);color:var(--sub);font-weight:500;font-variant-numeric:tabular-nums;display:inline-flex;align-items:center;justify-content:center}
+.nwrow label{display:flex;flex-direction:column;gap:var(--sp-1);min-width:0}
+.nwrow label span{font-size:var(--size-s);font-weight:500;color:var(--sub)}
+.nwno{width:28px;height:28px;border-radius:var(--radius);background:var(--tint);color:var(--sub);font-weight:500;font-variant-numeric:tabular-nums;display:inline-flex;align-items:center;justify-content:center}
 .nwdel{width:44px;padding:0;color:var(--muted)}
-.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;min-height:44px;background:#fff}
-.seg button{flex:1;border:0;background:#fff;font-size:14px;color:var(--sub);padding:0 8px;cursor:pointer;min-width:0}
+.seg{display:flex;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;min-height:var(--control-h);background:var(--white)}
+.seg button{flex:1;border:0;background:var(--white);font-size:var(--size-m);color:var(--sub);padding:0 var(--sp-2);cursor:pointer;min-width:0}
 .seg button+button{border-left:1px solid var(--line)}
-.seg button.on{background:var(--blue);color:#fff;font-weight:500}
-.nwrow.danger{background:#FFFBFA;box-shadow:inset 4px 0 0 var(--red)}
-.nwrow.danger .nwno{background:var(--red-bg);color:var(--red)}
-.nwrow.danger .inp{color:var(--red);border-color:#EBC2BD}
+.seg button.on{background:var(--blue);color:var(--white);font-weight:500}
+.nwrow.danger{background:var(--tint);box-shadow:none}
+.nwrow.danger .nwno{background:var(--red-bg);color:var(--navy)}
+.nwrow.danger .inp{color:var(--navy);border-color:var(--line)}
 .nwhd{display:none}
 .nwadd{width:100%;border-style:dashed;color:var(--blue)}
-.nwstate{display:inline-flex;align-items:center;gap:4px}
-.nwstate .dot{width:8px;height:8px;border-radius:4px;background:currentColor}
-.nwbar{position:sticky;bottom:0;z-index:15;background:#fff;border-top:1px solid var(--line2);margin:0 -16px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px;align-items:center}
-.nwbar .btn{flex:1;min-height:52px;font-size:16px;font-weight:500}
-.nwbar .btn.green{background:var(--green);border-color:var(--green);color:#fff}
-.nwstate{font-size:12.5px;color:var(--green);white-space:nowrap}
+.nwstate{display:inline-flex;align-items:center;gap:var(--sp-1)}
+.nwstate .dot{width:8px;height:8px;border-radius:var(--radius);background:currentColor}
+.nwbar{position:sticky;bottom:0;z-index:15;background:var(--white);border-top:1px solid var(--line2);margin:0 calc(var(--sp-4) * -1);padding:var(--sp-2) var(--sp-4) calc(var(--sp-2) + env(safe-area-inset-bottom));display:flex;gap:var(--sp-2);align-items:center}
+.nwbar .btn{flex:1;min-height:var(--control-h);font-size:var(--size-m);font-weight:500}
+.nwbar .btn.green{background:var(--green);border-color:var(--green);color:var(--white)}
+.nwstate{font-size:var(--size-s);color:var(--green);white-space:nowrap}
 .nwstate.dirty{color:var(--orange)}
-.sec{font-size:13px;font-weight:600;color:var(--muted);margin:8px 2px -2px}
+.sec{font-size:var(--size-s);font-weight:600;color:var(--muted);margin:var(--sp-2) var(--sp-1) calc(var(--sp-1) * -1)}
 /* TBM (WS_서류작업 4~5장) */
-.tbsum{display:flex;align-items:center;gap:8px;padding:12px 14px}
-.tbw{padding:14px;display:flex;flex-direction:column;gap:12px}
-.tbh{display:flex;align-items:flex-start;gap:10px}.tbh .fname b{font-size:15px;line-height:1.35}
-.tbedit{display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:10px;background:var(--ground)}
-.tbf{display:flex;flex-direction:column;gap:5px;min-width:0}
-.tbf>span{font-size:12.5px;font-weight:500;color:var(--sub)}.tbf em{font-style:normal;font-weight:500;color:var(--green);margin-left:4px}
-.tbrisk{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px}.tbrisk small{font-size:12px;color:var(--muted)}
+.tbsum{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-3) var(--sp-3)}
+.tbw{padding:var(--sp-3);display:flex;flex-direction:column;gap:var(--sp-3)}
+.tbh{display:flex;align-items:flex-start;gap:var(--sp-2)}.tbh .fname b{font-size:var(--size-m);line-height:1.35}
+.tbedit{display:flex;flex-direction:column;gap:var(--sp-2);padding:var(--sp-3);border-radius:var(--radius);background:var(--ground)}
+.tbf{display:flex;flex-direction:column;gap:var(--sp-1);min-width:0}
+.tbf>span{font-size:var(--size-s);font-weight:500;color:var(--sub)}.tbf em{font-style:normal;font-weight:500;color:var(--green);margin-left:var(--sp-1)}
+.tbrisk{display:flex;align-items:center;flex-wrap:wrap;gap:var(--sp-1) var(--sp-2)}.tbrisk small{font-size:var(--size-s);color:var(--muted)}
 .tbseg{min-height:40px}.tbseg button{width:40px;flex:none}
-.tblv{margin-left:auto;padding:6px 12px;border-radius:8px;font-size:15px;background:var(--line3)}
-.tblv.hi{background:var(--red-bg);color:var(--red)}.tblv.mid{background:var(--orange-bg);color:var(--orange)}.tblv.lo{background:var(--green-bg);color:var(--green)}
-.tbfx{display:flex;flex-direction:column;gap:6px}
-.tbfx label{display:flex;gap:8px;align-items:flex-start;font-size:14px;line-height:1.4;padding:9px 10px;border:1px solid var(--line2);border-radius:8px;cursor:pointer}
+.tblv{margin-left:auto;padding:var(--sp-1) var(--sp-3);border-radius:var(--radius);font-size:var(--size-m);background:var(--tint)}
+.tblv.hi{background:var(--red-bg);color:var(--navy)}.tblv.mid{background:var(--orange-bg);color:var(--orange)}.tblv.lo{background:var(--green-bg);color:var(--green)}
+.tbfx{display:flex;flex-direction:column;gap:var(--sp-1)}
+.tbfx label{display:flex;gap:var(--sp-2);align-items:flex-start;font-size:var(--size-m);line-height:1.4;padding:var(--sp-2) var(--sp-2);border:1px solid var(--line2);border-radius:var(--radius);cursor:pointer}
 .tbfx label.on{border-color:var(--blue);background:var(--blue-bg)}
 .tbfx input[type=checkbox]{width:18px;height:18px;margin:1px 0 0;accent-color:var(--blue);flex:none}
-.tbown{display:flex;gap:6px}.tbown .inp{flex:1}
-.tbck{display:flex;flex-wrap:wrap;gap:6px;padding:12px}
-.tbck button{min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer}
-.tbck button.on{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:500}
+.tbown{display:flex;gap:var(--sp-1)}.tbown .inp{flex:1}
+.tbck{display:flex;flex-wrap:wrap;gap:var(--sp-1);padding:var(--sp-3)}
+.tbck button{min-height:var(--control-h);padding:0 var(--sp-3);border-radius:var(--radius);border:1px solid var(--line);background:var(--white);font-size:var(--size-s);cursor:pointer}
+.tbck button.on{background:var(--blue);border-color:var(--blue);color:var(--white);font-weight:500}
 .tbphs{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px}
 .tbph{display:flex;flex-direction:column;gap:6px;min-width:0}.tbph>b{font-size:13px}
 .tbpb{display:flex;gap:6px}.tbpb .btn{flex:1;padding:0 6px}
-.nwimg{display:block;max-width:100%;border:1px solid var(--line2);border-radius:8px}
+.nwimg{display:block;max-width:100%;border:1px solid var(--line2);border-radius:var(--radius)}
 @media(min-width:768px){
-  .nwrows{gap:0;border:1px solid var(--line2);border-radius:12px;overflow:hidden;background:#fff}
-  .nwrow,.nwhd{grid-template-columns:44px 200px 170px minmax(0,1fr) 150px 44px;grid-template-areas:"no dept place work note del";align-items:center;border:0;border-top:1px solid var(--line3);border-radius:0;padding:6px 8px}
-  .nwhd{display:grid;gap:8px 10px;background:#F6F7F9;color:var(--muted);font-size:13px;font-weight:500;text-align:center;padding:10px 8px;border-top:0}
+  .nwrows{gap:0;border:1px solid var(--line2);border-radius:var(--radius);overflow:hidden;background:var(--white)}
+  .nwrow,.nwhd{grid-template-columns:44px 200px 170px minmax(0,1fr) 150px 44px;grid-template-areas:"no dept place work note del";align-items:center;border:0;border-top:1px solid var(--line3);border-radius:0;padding:var(--sp-1) var(--sp-2)}
+  .nwhd{display:grid;gap:var(--sp-2) var(--sp-2);background:var(--tint);color:var(--muted);font-size:var(--size-s);font-weight:500;text-align:center;padding:var(--sp-2) var(--sp-2);border-top:0}
   .nwrow .nwno{background:none;color:var(--muted)}
   .nwrow.danger .nwno{background:none}
-  .nwrow.danger{background:#FFF6F5;box-shadow:inset 4px 0 0 var(--red)}
+  .nwrow.danger{background:var(--tint);box-shadow:none}
   .nwrow .nwno{justify-self:center}
-  #nwBar{margin:0;border:1px solid var(--line2);border-radius:12px;bottom:12px;padding:8px}
+  #nwBar{margin:0;border:1px solid var(--line2);border-radius:var(--radius);bottom:12px;padding:var(--sp-2)}
   .nwrow label span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
   .nwrows .nwadd{border:0;border-top:1px solid var(--line3);border-radius:0}
-  .nwbar{justify-content:flex-end;border-radius:12px 12px 0 0}
-  .nwbar .btn{flex:none;min-width:170px;min-height:44px;font-size:15px}
+  .nwbar{justify-content:flex-end;border-radius:var(--radius) var(--radius) 0 0}
+  .nwbar .btn{flex:none;min-width:170px;min-height:var(--control-h);font-size:var(--size-m)}
 }
 /* 출근현황 (WS_출근현황, 결정 88) — 상태 딱지 색은 엑셀 색을 부드럽게 */
-.attag{display:inline-block;text-align:center;line-height:26px;vertical-align:middle;box-sizing:border-box;min-width:42px;height:28px;padding:0 8px;border-radius:6px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;border:1px solid transparent;background:#fff;flex:none}
-button.attag{cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:inset 0 -2px 0 rgba(24,32,43,.12)}   /* 누르는 칸 = 아래 그림자 (▾ 대신) */
+.attag{display:inline-block;text-align:center;line-height:26px;vertical-align:middle;box-sizing:border-box;min-width:42px;height:28px;padding:0 var(--sp-2);border-radius:var(--radius);font-size:var(--size-s);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;border:1px solid transparent;background:var(--white);flex:none}
+button.attag{cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:none}   /* 누르는 칸 = 아래 그림자 (▾ 대신) */
 .s-on{background:var(--green-bg);color:var(--green)}.s-97{color:var(--sub);border-color:var(--line)}
-.s-hu{background:#FFF4C7;color:#7A5A00}.s-yeon{background:#FDE4E1;color:#B3261E}.s-beop{background:#FCE4F1;color:#A3266B}
-.s-ya{background:#E1ECFB;color:var(--blue-d)}.s-bi{background:#ECEEF1;color:#4A5361}.s-sick{background:#F3E8FD;color:#6B3FA0}
-.s-ban{color:#B3261E;border-color:#EDB5AF}.s-gj{background:#DDF3F5;color:#0F6E78}.s-etc{color:var(--muted);border:1px dashed var(--line)}
-.atwho{font-size:15px;color:var(--sub);padding:0 4px;line-height:1.6}
-.atorg{display:grid;gap:12px}
-.atsec{background:#fff;border:1px solid var(--line2);border-radius:12px;overflow:hidden}
-.atsec h2{margin:0;font-size:15px;font-weight:600;padding:12px 16px;display:flex;align-items:center;border-bottom:1px solid var(--line3);background:#F8F9FB}
-.atsec h2 small{margin-left:auto;font-size:13px;font-weight:400;color:var(--muted);font-variant-numeric:tabular-nums}
-.atppl{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;padding:12px}
-.atp{display:flex;align-items:center;gap:8px;border:1px solid var(--line2);border-radius:10px;padding:8px 12px 8px 8px;min-width:0;background:#fff}
-.atav{width:34px;height:34px;line-height:34px;text-align:center;border-radius:17px;flex:none;display:inline-block;font-weight:600;font-size:14px;background:var(--line3);color:var(--sub)}
+.s-hu{background:var(--tint);color:var(--navy)}.s-yeon{background:var(--tint);color:var(--navy)}.s-beop{background:var(--tint);color:var(--navy)}
+.s-ya{background:var(--tint);color:var(--blue-d)}.s-bi{background:var(--tint);color:var(--text-sub)}.s-sick{background:var(--tint);color:var(--navy)}
+.s-ban{color:var(--navy);border-color:var(--line)}.s-gj{background:var(--tint);color:var(--navy)}.s-etc{color:var(--muted);border:1px dashed var(--line)}
+.atwho{font-size:var(--size-m);color:var(--sub);padding:0 var(--sp-1);line-height:1.6}
+.atorg{display:grid;gap:var(--sp-3)}
+.atsec{background:var(--white);border:1px solid var(--line2);border-radius:var(--radius);overflow:hidden}
+.atsec h2{margin:0;font-size:var(--size-m);font-weight:600;padding:var(--sp-3) var(--sp-4);display:flex;align-items:center;border-bottom:1px solid var(--line3);background:var(--tint)}
+.atsec h2 small{margin-left:auto;font-size:var(--size-s);font-weight:400;color:var(--muted);font-variant-numeric:tabular-nums}
+.atppl{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:var(--sp-2);padding:var(--sp-3)}
+.atp{display:flex;align-items:center;gap:var(--sp-2);border:1px solid var(--line2);border-radius:var(--radius);padding:var(--sp-2) var(--sp-3) var(--sp-2) var(--sp-2);min-width:0;background:var(--white)}
+.atav{width:34px;height:34px;line-height:34px;text-align:center;border-radius:var(--radius);flex:none;display:inline-block;font-weight:600;font-size:var(--size-m);background:var(--tint);color:var(--sub)}
 .atnm{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;text-align:left;border:0;background:none;padding:0;cursor:pointer}
-.atnm small{font-size:11px;color:var(--muted);line-height:1.2}
-.atnm b{font-size:15px;font-weight:600;line-height:1.3;white-space:nowrap}
-.atp.vac{border-style:dashed;color:var(--muted);justify-content:center;font-size:13px;min-height:52px}
-.atfix{width:7px;height:7px;border-radius:4px;background:var(--orange);flex:none}
-.atsums{display:grid;gap:12px}
-.atduo{display:grid;gap:12px}
-.atst{font-variant-numeric:tabular-nums;width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line2);border-radius:12px;overflow:hidden;background:#fff;font-size:14px}
-.atst caption{text-align:center;font-weight:600;font-size:14px;padding:0 0 8px}
-.atst th{background:#F8F9FB;color:var(--sub);font-weight:600;padding:8px 6px;font-size:13px}
-.atst td{padding:8px 6px;border-top:1px solid var(--line3);text-align:center}
-.atst td:first-child{text-align:left;padding-left:12px;color:var(--sub)}
+.atnm small{font-size:var(--size-s);color:var(--muted);line-height:1.2}
+.atnm b{font-size:var(--size-m);font-weight:600;line-height:1.3;white-space:nowrap}
+.atp.vac{border-style:dashed;color:var(--muted);justify-content:center;font-size:var(--size-s);min-height:52px}
+.atfix{width:7px;height:7px;border-radius:var(--radius);background:var(--orange);flex:none}
+.atsums{display:grid;gap:var(--sp-3)}
+.atduo{display:grid;gap:var(--sp-3)}
+.atst{font-variant-numeric:tabular-nums;width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line2);border-radius:var(--radius);overflow:hidden;background:var(--white);font-size:var(--size-m)}
+.atst caption{text-align:center;font-weight:600;font-size:var(--size-m);padding:0 0 var(--sp-2)}
+.atst th{background:var(--tint);color:var(--sub);font-weight:600;padding:var(--sp-2) var(--sp-1);font-size:var(--size-s)}
+.atst td{padding:var(--sp-2) var(--sp-1);border-top:1px solid var(--line3);text-align:center}
+.atst td:first-child{text-align:left;padding-left:var(--sp-3);color:var(--sub)}
 .atst td+td,.atst th+th{border-left:1px solid var(--line3)}
-.atst tr.sum td{font-weight:600;background:#F8FAFC}
+.atst tr.sum td{font-weight:600;background:var(--tint)}
 .atst .z{color:var(--muted)}
-.atopts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.atopts .attag{height:44px;line-height:42px;font-size:15px;width:100%;border-radius:10px}
+.atopts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--sp-2)}
+.atopts .attag{height:44px;line-height:42px;font-size:var(--size-m);width:100%;border-radius:var(--radius)}
 .atopts .attag::after{content:none}
 .atopts .attag.sel{outline:3px solid var(--blue);outline-offset:1px}
-.atwk{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
-.atwk button{height:48px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:16px;font-weight:500;cursor:pointer}
-.atwk button.sel{background:#FFF4C7;border-color:#E2C14A;color:#7A5A00}
+.atwk{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:var(--sp-1)}
+.atwk button{height:var(--control-h);border-radius:var(--radius);border:1px solid var(--line);background:var(--white);font-size:var(--size-m);font-weight:500;cursor:pointer}
+.atwk button.sel{background:var(--tint);border-color:var(--navy);color:var(--navy)}
 .atwk button:disabled{cursor:default;opacity:1}
-.atcal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
-.atcal .w{font-size:12px;text-align:center;color:var(--muted)}
-.atcal button{min-height:56px;border:1px solid var(--line3);border-radius:10px;background:#fff;padding:4px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center}
-.atcal button b{font-size:15px}.atcal button small{font-size:10.5px;color:var(--muted)}
-.atcal .sun b{color:var(--red)}.atcal .sat b{color:var(--blue)}
-.atcal button.on{background:var(--blue);border-color:var(--blue)}.atcal button.on b,.atcal button.on small{color:#fff}
+.atcal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:var(--sp-1)}
+.atcal .w{font-size:var(--size-s);text-align:center;color:var(--muted)}
+.atcal button{min-height:var(--control-h);border:1px solid var(--line3);border-radius:var(--radius);background:var(--white);padding:var(--sp-1) var(--sp-1);cursor:pointer;display:flex;flex-direction:column;align-items:center}
+.atcal button b{font-size:var(--size-m)}.atcal button small{font-size:var(--size-s);color:var(--muted)}
+.atcal .sun b{color:var(--navy)}.atcal .sat b{color:var(--blue)}
+.atcal button.on{background:var(--blue);border-color:var(--blue)}.atcal button.on b,.atcal button.on small{color:var(--white)}
 .atcal button.today{border:2px solid var(--blue)}
-.atchk{font-size:13px;line-height:1.7}.atchk svg{vertical-align:-3px;margin-right:4px;color:var(--muted)}.atchk .w svg{color:inherit}.atchk .w{color:var(--orange);font-weight:500}
-.atimg{width:1200px;background:#fff;padding:28px 32px 22px;font-family:'Noto Sans KR',sans-serif;color:var(--ink)}
-.atimg .attl{display:flex;align-items:baseline;gap:14px;margin-bottom:16px}.atimg .attl b{font-size:24px;font-weight:600}.atimg .attl span{font-size:14px;color:var(--muted)}
+.atchk{font-size:var(--size-s);line-height:1.7}.atchk svg{vertical-align:-3px;margin-right:var(--sp-1);color:var(--muted)}.atchk .w svg{color:inherit}.atchk .w{color:var(--orange);font-weight:500}
+.atimg{width:1200px;background:var(--white);padding:var(--sp-6) var(--sp-8) var(--sp-6);font-family:'Noto Sans KR',sans-serif;color:var(--ink)}
+.atimg .attl{display:flex;align-items:baseline;gap:var(--sp-3);margin-bottom:var(--sp-4)}.atimg .attl b{font-size:var(--size-xl);font-weight:600}.atimg .attl span{font-size:var(--size-m);color:var(--muted)}
 .atimg .atorg,.atimg .atduo{grid-template-columns:1fr 1fr}
-.atimg .atsums{grid-template-columns:1fr 2fr;margin-top:14px}
+.atimg .atsums{grid-template-columns:1fr 2fr;margin-top:var(--sp-3)}
 /* 그림 도구(html2canvas)는 글자를 약 3px 아래로 그림 → 그림 만들 때만 딱지·동그라미 글자를 3px 올림 (WS-21) */
 .atimg.cap .attag{line-height:20px}.atimg.cap .atav{line-height:28px}
-.atimg .stamp{margin-top:10px;color:var(--muted);font-size:12px;text-align:right}
+.atimg .stamp{margin-top:var(--sp-2);color:var(--muted);font-size:var(--size-s);text-align:right}
 @media(min-width:900px){.wrap .atorg{grid-template-columns:1fr 1fr}.wrap .atsums{grid-template-columns:1fr 2fr}.wrap .atduo{grid-template-columns:1fr 1fr}}
-@media(max-width:480px){.wrap .atppl{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap .atnm b{font-size:14px}.wrap .atp{gap:6px;padding:7px 6px}.wrap .atav{width:28px;height:28px;line-height:28px;font-size:13px}.wrap .attag{min-width:0;padding:0 7px;font-size:12.5px}.wrap .atppl{gap:6px;padding:8px}}
+@media(max-width:480px){.wrap .atppl{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap .atnm b{font-size:var(--size-m)}.wrap .atp{gap:var(--sp-1);padding:var(--sp-2) var(--sp-1)}.wrap .atav{width:28px;height:28px;line-height:28px;font-size:var(--size-s)}.wrap .attag{min-width:0;padding:0 var(--sp-2);font-size:var(--size-s)}.wrap .atppl{gap:var(--sp-1);padding:var(--sp-2)}}
 /* 전열필증 (WS_전열필증 15.3.20, 결정 96) */
-.ehfls{display:flex;gap:6px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:none}
-.ehfl{flex:none;min-width:60px;min-height:48px;border-radius:10px;border:1px solid var(--line2);background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15;cursor:pointer;padding:4px 8px}
-.ehfl b{font-size:15px}.ehfl small{font-size:11px;color:var(--muted)}
-.ehfl.on{background:var(--blue);border-color:var(--blue);color:#fff}.ehfl.on small{color:#DCE8F6}
-.ehsum{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:10px 0;font-size:13px;color:var(--muted)}
-.ehsum span{flex:1 1 auto}.ehsum b{color:var(--ink);font-size:15px}
-.ehcnt{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;background:var(--blue-bg);color:var(--blue-d);font-size:12px;font-weight:500;white-space:nowrap;flex:none}
-.ehst{margin-bottom:8px}
-.ehsh{display:flex;align-items:center;gap:8px;padding:6px 6px 6px 14px;min-height:56px}
+.ehfls{display:flex;gap:var(--sp-1);overflow-x:auto;padding:var(--sp-2) 0 var(--sp-1);scrollbar-width:none}
+.ehfl{flex:none;min-width:60px;min-height:48px;border-radius:var(--radius);border:1px solid var(--line2);background:var(--white);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15;cursor:pointer;padding:var(--sp-1) var(--sp-2)}
+.ehfl b{font-size:var(--size-m)}.ehfl small{font-size:var(--size-s);color:var(--muted)}
+.ehfl.on{background:var(--blue);border-color:var(--blue);color:var(--white)}.ehfl.on small{color:var(--white)}
+.ehsum{display:flex;align-items:center;flex-wrap:wrap;gap:var(--sp-2);margin:var(--sp-2) 0;font-size:var(--size-s);color:var(--muted)}
+.ehsum span{flex:1 1 auto}.ehsum b{color:var(--ink);font-size:var(--size-m)}
+.ehcnt{display:inline-flex;align-items:center;height:24px;padding:0 var(--sp-2);border-radius:var(--radius);background:var(--blue-bg);color:var(--blue-d);font-size:var(--size-s);font-weight:500;white-space:nowrap;flex:none}
+.ehst{margin-bottom:var(--sp-2)}
+.ehsh{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-1) var(--sp-1) var(--sp-1) var(--sp-3);min-height:56px}
 .ehsh input,.ehit input,.ehtbl input{width:22px;height:22px;accent-color:var(--blue);flex:none;margin:0}
-.ehsn{flex:1;min-width:0;display:flex;align-items:center;gap:10px;min-height:44px;border:0;background:none;padding:0;cursor:pointer;text-align:left}
-.ehsn b{flex:1;min-width:0;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ehchev{width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);margin:0 6px 4px}
+.ehsn{flex:1;min-width:0;display:flex;align-items:center;gap:var(--sp-2);min-height:44px;border:0;background:none;padding:0;cursor:pointer;text-align:left}
+.ehsn b{flex:1;min-width:0;font-size:var(--size-m);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ehchev{width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);margin:0 var(--sp-1) var(--sp-1)}
 .ehchev.up{transform:rotate(-135deg);margin:6px 6px 0}
-.ehmore{width:40px;padding:0;font-size:18px;color:var(--muted);border-color:transparent;background:none}
-.ehit{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 14px;border-top:1px solid var(--line3)}
-.ehit.sel{background:#F5F9FE}
+.ehmore{width:40px;padding:0;font-size:var(--size-l);color:var(--muted);border-color:transparent;background:none}
+.ehit{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-3);border-top:1px solid var(--line3)}
+.ehit.sel{background:var(--tint)}
 .ehl1{display:flex;align-items:baseline;gap:8px;min-width:0}.ehl1 b{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ehno{font-size:12.5px;font-weight:500;color:var(--sub);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ehno{font-size:var(--size-s);font-weight:500;color:var(--sub);font-variant-numeric:tabular-nums;white-space:nowrap}
 .ehnp{font-style:normal;color:var(--orange);font-weight:500;white-space:nowrap}
-.ehw{font-size:14px;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}.ehw small{font-size:11px;color:var(--muted);font-weight:500}
+.ehw{font-size:var(--size-m);font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}.ehw small{font-size:var(--size-s);color:var(--muted);font-weight:500}
 .ehed{width:40px;padding:0;color:var(--muted)}
-.ehadd{padding:10px;border-top:1px solid var(--line3)}.ehadd .btn{width:100%;border-style:dashed;color:var(--blue-d);background:var(--blue-bg);border-color:#A9C3E3}
-.ehpc{display:grid;grid-template-columns:clamp(180px,20vw,260px) minmax(0,1fr);gap:14px;align-items:start}
-.ehside{padding:8px;max-height:calc(100vh - 230px);overflow:auto;position:sticky;top:76px}
-.ehsrow{display:flex;align-items:center;gap:8px;width:100%;min-height:42px;padding:0 10px;border:0;background:none;border-radius:8px;font-size:14px;cursor:pointer;text-align:left}
+.ehadd{padding:var(--sp-2);border-top:1px solid var(--line3)}.ehadd .btn{width:100%;border-style:dashed;color:var(--blue-d);background:var(--blue-bg);border-color:var(--line)}
+.ehpc{display:grid;grid-template-columns:clamp(180px,20vw,260px) minmax(0,1fr);gap:var(--sp-3);align-items:start}
+.ehside{padding:var(--sp-2);max-height:calc(100vh - 230px);overflow:auto;position:sticky;top:76px}
+.ehsrow{display:flex;align-items:center;gap:var(--sp-2);width:100%;min-height:42px;padding:0 var(--sp-2);border:0;background:none;border-radius:var(--radius);font-size:var(--size-m);cursor:pointer;text-align:left}
 .ehsrow span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ehsrow small{color:var(--muted)}
 .ehsrow.on{background:var(--blue-bg);color:var(--blue-d);font-weight:500}
-.ehpanel{padding:16px;min-width:0}
-.ehph{display:flex;align-items:flex-end;flex-wrap:wrap;gap:8px 12px;margin-bottom:12px}
-.ehph .fname{flex:1 1 220px;min-width:0}.ehph .fname b{font-size:20px;line-height:1.3;overflow-wrap:anywhere}
-.ehacts{display:flex;flex-wrap:wrap;gap:8px;margin-left:auto}
+.ehpanel{padding:var(--sp-4);min-width:0}
+.ehph{display:flex;align-items:flex-end;flex-wrap:wrap;gap:var(--sp-2) var(--sp-3);margin-bottom:var(--sp-3)}
+.ehph .fname{flex:1 1 220px;min-width:0}.ehph .fname b{font-size:var(--size-l);line-height:1.3;overflow-wrap:anywhere}
+.ehacts{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin-left:auto}
 
 .ehtw{overflow-x:auto}
-.ehtbl{width:100%;border-collapse:separate;border-spacing:0;font-size:14px}
-.ehtbl th{background:var(--blue-bg);color:var(--blue-d);font-weight:500;padding:9px 8px;font-size:13px;text-align:left;white-space:nowrap}
-.ehtbl td{padding:7px 8px;border-bottom:1px solid var(--line3);white-space:nowrap;vertical-align:middle}
-.ehtbl td.wr{white-space:normal;word-break:keep-all;overflow-wrap:anywhere;min-width:7em}.ehtbl td.wr small{display:block;font-size:12px;color:var(--muted)}
+.ehtbl{width:100%;border-collapse:separate;border-spacing:0;font-size:var(--size-m)}
+.ehtbl th{background:var(--blue-bg);color:var(--blue-d);font-weight:500;padding:var(--sp-2) var(--sp-2);font-size:var(--size-s);text-align:left;white-space:nowrap}
+.ehtbl td{padding:var(--sp-2) var(--sp-2);border-bottom:1px solid var(--line3);white-space:nowrap;vertical-align:middle}
+.ehtbl td.wr{white-space:normal;word-break:keep-all;overflow-wrap:anywhere;min-width:7em}.ehtbl td.wr small{display:block;font-size:var(--size-s);color:var(--muted)}
 .ehtbl .r{text-align:right;font-variant-numeric:tabular-nums}
-.ehtbl tr.sel td{background:#F5F9FE}
-.ehdh{margin:0 0 4px;font-size:18px}
-.ehdp{margin:0 0 12px;font-size:14px;line-height:1.6;color:var(--sub)}
-.ehf{display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--sub);margin-bottom:10px;min-width:0}
-.ehro{min-height:44px;display:flex;align-items:center;gap:8px;padding:0 12px;border-radius:8px;background:var(--ground);border:1px solid var(--line2);font-size:16px;font-weight:500;color:var(--sub)}
-.ehro small{font-size:12px;font-weight:500;color:var(--muted);margin-left:auto}.ehro i{font-style:normal;color:var(--muted);font-weight:500}
-.ehtwo{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.ehmsg{color:var(--red);font-size:13px;min-height:18px}
-.ehda{display:flex;gap:8px;margin-top:8px}
+.ehtbl tr.sel td{background:var(--tint)}
+.ehdh{margin:0 0 var(--sp-1);font-size:var(--size-l)}
+.ehdp{margin:0 0 var(--sp-3);font-size:var(--size-m);line-height:1.6;color:var(--sub)}
+.ehf{display:flex;flex-direction:column;gap:var(--sp-1);font-size:var(--size-s);color:var(--sub);margin-bottom:var(--sp-2);min-width:0}
+.ehro{min-height:44px;display:flex;align-items:center;gap:var(--sp-2);padding:0 var(--sp-3);border-radius:var(--radius);background:var(--ground);border:1px solid var(--line2);font-size:var(--size-m);font-weight:500;color:var(--sub)}
+.ehro small{font-size:var(--size-s);font-weight:500;color:var(--muted);margin-left:auto}.ehro i{font-style:normal;color:var(--muted);font-weight:500}
+.ehtwo{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2)}
+.ehmsg{color:var(--red);font-size:var(--size-s);min-height:18px}
+.ehda{display:flex;gap:var(--sp-2);margin-top:var(--sp-2)}
 /* 필증 라벨 50×50mm — 화면 미리보기·인쇄 같은 모양. 프린터가 흑백이라 로고도 흑백 */
 .ehl{width:50mm;height:50mm;padding:1.8mm;display:flex;flex-direction:column;background:#fff;color:#000;font-family:'Noto Sans KR','Malgun Gothic',sans-serif;overflow:hidden}
 .ehlh{display:flex;align-items:center;gap:1.6mm;height:9.6mm;margin-bottom:1.2mm;flex:none}
@@ -392,50 +445,50 @@ button.attag{cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:i
 .ehg .q img{display:block;image-rendering:pixelated}
 .ehpv .ehl{box-shadow:0 1px 3px rgba(24,32,43,.18)}
 /* 공사장 점검 (WS_공사장점검, 결정 100) */
-.cschip{display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap;flex:none}
-.cschip.ok{color:var(--green);background:var(--green-bg)}.cschip.bad{color:var(--red);background:var(--red-bg)}.cschip.wait{color:var(--muted);background:var(--line3)}
-.cshd{padding:14px}.cshd b{font-size:19px}.cshd small{display:block;font-size:13px;color:var(--muted);margin-top:2px}
-.csrsum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:12px}.csrsum div{background:var(--ground);border-radius:8px;padding:6px 8px;font-size:12px;color:var(--muted)}.csrsum b{display:block;font-size:15px;color:var(--ink)}
-.cssec{display:flex;align-items:center;gap:8px;margin:8px 2px 0;font-size:13px;font-weight:600;color:var(--sub)}.cssec .btn{margin-left:auto}
-.cssrch{flex:1;min-width:0;position:relative}.cssrch input{width:100%;min-height:42px;border:1px solid var(--line);border-radius:999px;padding:0 12px 0 34px;font-size:15px;background:#fff;color:var(--ink);font-family:inherit}
-.cssrch::before{content:'';position:absolute;left:13px;top:13px;width:11px;height:11px;border:2px solid var(--muted);border-radius:50%}.cssrch::after{content:'';position:absolute;left:24px;top:25px;width:6px;height:2px;background:var(--muted);transform:rotate(45deg)}
-.csrd{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}.csrd span{font-size:11.5px;font-weight:500;border-radius:999px;padding:2px 8px;white-space:nowrap}
-.csrd .ok{color:var(--green);background:var(--green-bg)}.csrd .bad{color:var(--red);background:var(--red-bg)}.csrd .wait{color:var(--muted);background:var(--line3)}
-.csbtns{display:flex;gap:8px}.csbtns .csadd{flex:2;width:auto}.csbtns>.btn:not(.csadd){flex:1;min-height:48px;padding:0 8px}
-.csrtabs{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
-.csrtabs button{flex:1;min-width:0;min-height:50px;border:0;background:#fff;font-size:15px;font-weight:500;color:var(--sub);line-height:1.2;cursor:pointer;font-family:inherit;padding:4px}
-.csrtabs button+button{border-left:1px solid var(--line)}.csrtabs button small{display:block;font-size:11px;font-weight:500;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.csrtabs .on{background:var(--blue);color:#fff;cursor:default}.csrtabs .on small{color:#DCE8F6}.csrtabs button:disabled{color:var(--line);cursor:default}
+.cschip{display:inline-flex;align-items:center;height:26px;padding:0 var(--sp-2);border-radius:var(--radius);font-size:var(--size-s);font-weight:500;white-space:nowrap;flex:none}
+.cschip.ok{color:var(--green);background:var(--green-bg)}.cschip.bad{color:var(--navy);background:var(--red-bg)}.cschip.wait{color:var(--muted);background:var(--tint)}
+.cshd{padding:var(--sp-3)}.cshd b{font-size:var(--size-l)}.cshd small{display:block;font-size:var(--size-s);color:var(--muted);margin-top:var(--sp-1)}
+.csrsum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-1);margin-top:var(--sp-3)}.csrsum div{background:var(--ground);border-radius:var(--radius);padding:var(--sp-1) var(--sp-2);font-size:var(--size-s);color:var(--muted)}.csrsum b{display:block;font-size:var(--size-m);color:var(--ink)}
+.cssec{display:flex;align-items:center;gap:var(--sp-2);margin:var(--sp-2) var(--sp-1) 0;font-size:var(--size-s);font-weight:600;color:var(--sub)}.cssec .btn{margin-left:auto}
+.cssrch{flex:1;min-width:0;position:relative}.cssrch input{width:100%;min-height:var(--control-h);border:1px solid var(--line);border-radius:var(--radius);padding:0 var(--sp-3) 0 var(--sp-8);font-size:var(--size-m);background:var(--white);color:var(--ink);font-family:inherit}
+.cssrch::before{content:'';position:absolute;left:13px;top:13px;width:11px;height:11px;border:2px solid var(--muted);border-radius:var(--radius)}.cssrch::after{content:'';position:absolute;left:24px;top:25px;width:6px;height:2px;background:var(--muted);transform:rotate(45deg)}
+.csrd{display:flex;gap:var(--sp-1);margin-top:var(--sp-1);flex-wrap:wrap}.csrd span{font-size:var(--size-s);font-weight:500;border-radius:var(--radius);padding:var(--sp-1) var(--sp-2);white-space:nowrap}
+.csrd .ok{color:var(--green);background:var(--green-bg)}.csrd .bad{color:var(--navy);background:var(--red-bg)}.csrd .wait{color:var(--muted);background:var(--tint)}
+.csbtns{display:flex;gap:var(--sp-2)}.csbtns .csadd{flex:2;width:auto}.csbtns>.btn:not(.csadd){flex:1;min-height:var(--control-h);padding:0 var(--sp-2)}
+.csrtabs{display:flex;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--white)}
+.csrtabs button{flex:1;min-width:0;min-height:var(--control-h);border:0;background:var(--white);font-size:var(--size-m);font-weight:500;color:var(--sub);line-height:1.2;cursor:pointer;font-family:inherit;padding:var(--sp-1)}
+.csrtabs button+button{border-left:1px solid var(--line)}.csrtabs button small{display:block;font-size:var(--size-s);font-weight:500;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.csrtabs .on{background:var(--blue);color:var(--white);cursor:default}.csrtabs .on small{color:var(--white)}.csrtabs button:disabled{color:var(--line);cursor:default}
 .cslist{overflow:hidden}
-.csrow{display:flex;align-items:center;gap:10px;padding:8px 6px 8px 14px;min-height:60px}
+.csrow{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) var(--sp-1) var(--sp-2) var(--sp-3);min-height:60px}
 .csrow+.csrow{border-top:1px solid var(--line3)}
-.csrow .fname b{font-size:16px}
-.csgo{flex:1;min-width:0;display:flex;align-items:center;gap:10px;min-height:44px;border:0;background:none;padding:0;cursor:pointer;text-align:left;color:inherit}
-.csno{width:28px;height:28px;border-radius:50%;background:var(--blue-bg);color:var(--blue-d);font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;flex:none}
-.csadd{width:100%;border-style:dashed;color:var(--blue-d);background:var(--blue-bg);border-color:#A9C3E3;font-weight:500}
-.csday{padding:8px 14px;background:var(--ground);font-size:13px;font-weight:600;color:var(--sub);border-top:1px solid var(--line3)}
+.csrow .fname b{font-size:var(--size-m)}
+.csgo{flex:1;min-width:0;display:flex;align-items:center;gap:var(--sp-2);min-height:44px;border:0;background:none;padding:0;cursor:pointer;text-align:left;color:inherit}
+.csno{width:28px;height:28px;border-radius:var(--radius);background:var(--blue-bg);color:var(--blue-d);font-size:var(--size-s);font-weight:500;display:flex;align-items:center;justify-content:center;flex:none}
+.csadd{width:100%;border-style:dashed;color:var(--blue-d);background:var(--blue-bg);border-color:var(--line);font-weight:500}
+.csday{padding:var(--sp-2) var(--sp-3);background:var(--ground);font-size:var(--size-s);font-weight:600;color:var(--sub);border-top:1px solid var(--line3)}
 .csday:first-child{border-top:0}
-.csmeta{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}
-.csmeta small{display:block;font-size:12px;color:var(--muted)}.csmeta b{font-size:15px;overflow-wrap:anywhere}.csmeta em{font-style:normal;font-size:11px;color:var(--blue-d)}
-.csit{padding:14px}.csit.bad{border-color:#EDB5AF;box-shadow:inset 4px 0 0 var(--red)}
-.csit h3{display:flex;align-items:flex-start;gap:8px;margin:0;font-size:15px}.csit h3 span{flex:1;min-width:0;overflow-wrap:anywhere}
-.csit p{margin:3px 0 10px;font-size:12.5px;color:var(--muted);line-height:1.45}
-.csseg button{font-size:15px;font-weight:500}
-.csseg button.on.bad{background:var(--red)}.csseg button.on.na{background:var(--muted)}
-.csph{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
-.csph .ph43{position:relative;border-radius:8px}
+.csmeta{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2);padding:var(--sp-3)}
+.csmeta small{display:block;font-size:var(--size-s);color:var(--muted)}.csmeta b{font-size:var(--size-m);overflow-wrap:anywhere}.csmeta em{font-style:normal;font-size:var(--size-s);color:var(--blue-d)}
+.csit{padding:var(--sp-3)}.csit.bad{border-color:var(--line);box-shadow:none}
+.csit h3{display:flex;align-items:flex-start;gap:var(--sp-2);margin:0;font-size:var(--size-m)}.csit h3 span{flex:1;min-width:0;overflow-wrap:anywhere}
+.csit p{margin:var(--sp-1) 0 var(--sp-2);font-size:var(--size-s);color:var(--muted);line-height:1.45}
+.csseg button{font-size:var(--size-m);font-weight:500}
+.csseg button.on.bad{background:var(--navy)}.csseg button.on.na{background:var(--muted)}
+.csph{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-2);margin-top:var(--sp-2)}
+.csph .ph43{position:relative;border-radius:var(--radius)}
 .csph .ph43 img{width:100%;height:100%}
-.csph .tm{position:absolute;left:0;right:0;bottom:0;font-size:10.5px;color:#fff;background:rgba(0,0,0,.45);padding:2px 6px}
-.csph .x{position:absolute;right:2px;top:2px;width:32px;height:32px;border:0;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;font-size:14px;cursor:pointer}
-.csph label.ph43{border:2px dashed var(--line);background:#FAFBFC;flex-direction:column;font-size:12px;color:var(--muted);cursor:pointer}
-.csph label.ph43 b{font-size:22px;line-height:1;color:var(--blue)}
-.csmemo{margin-top:10px;min-height:60px;padding:10px 12px;resize:vertical;font-family:inherit}
-.csbar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line2);padding:10px 16px calc(12px + env(safe-area-inset-bottom));box-shadow:0 -2px 10px rgba(24,32,43,.06);z-index:15}
-.csbar-in{max-width:1100px;margin:0 auto;display:flex;gap:8px;align-items:center}
-.csbar-in>div{flex:1;min-width:0;font-size:13px;color:var(--muted);line-height:1.35}.csbar-in>div b{color:var(--ink);font-size:14px}
-.csst{font-size:12px}.csst.ok{color:var(--green)}.csst.dirty{color:var(--orange)}.csst.err{color:var(--red)}
-.csitems .row{padding:10px 12px;align-items:flex-start;cursor:default}
-.csuse{display:inline-flex;align-items:center;gap:8px;min-height:36px;margin-top:4px;font-size:14px;color:var(--sub);cursor:pointer}.csuse input{width:20px;height:20px;margin:0;accent-color:var(--blue)}
+.csph .tm{position:absolute;left:0;right:0;bottom:0;font-size:var(--size-s);color:var(--white);background:var(--overlay);padding:var(--sp-1) var(--sp-1)}
+.csph .x{position:absolute;right:2px;top:2px;width:32px;height:32px;border:0;border-radius:var(--radius);background:var(--overlay);color:var(--white);font-size:var(--size-m);cursor:pointer}
+.csph label.ph43{border:2px dashed var(--line);background:var(--tint);flex-direction:column;font-size:var(--size-s);color:var(--muted);cursor:pointer}
+.csph label.ph43 b{font-size:var(--size-xl);line-height:1;color:var(--blue)}
+.csmemo{margin-top:var(--sp-2);min-height:60px;padding:var(--sp-2) var(--sp-3);resize:vertical;font-family:inherit}
+.csbar{position:fixed;left:0;right:0;bottom:0;background:var(--white);border-top:1px solid var(--line2);padding:var(--sp-2) var(--sp-4) calc(var(--sp-3) + env(safe-area-inset-bottom));box-shadow:none;z-index:15}
+.csbar-in{max-width:1100px;margin:0 auto;display:flex;gap:var(--sp-2);align-items:center}
+.csbar-in>div{flex:1;min-width:0;font-size:var(--size-s);color:var(--muted);line-height:1.35}.csbar-in>div b{color:var(--ink);font-size:var(--size-m)}
+.csst{font-size:var(--size-s)}.csst.ok{color:var(--green)}.csst.dirty{color:var(--orange)}.csst.err{color:var(--navy)}
+.csitems .row{padding:var(--sp-2) var(--sp-3);align-items:flex-start;cursor:default}
+.csuse{display:inline-flex;align-items:center;gap:var(--sp-2);min-height:36px;margin-top:var(--sp-1);font-size:var(--size-m);color:var(--sub);cursor:pointer}.csuse input{width:20px;height:20px;margin:0;accent-color:var(--blue)}
 /* 공사장 점검 PDF: A4 세로 (여백 30px 안쪽 734px) */
 .cspdf{width:734px;background:#fff;color:#000;font-family:'Noto Sans KR','Malgun Gothic',sans-serif}
 .cspdf .pt{text-align:center;font-size:22px;font-weight:700;letter-spacing:2px}
@@ -456,31 +509,31 @@ button.attag{cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:i
 .cspdf .cm{font-size:10px;border:1px solid #888;padding:4px 6px;margin-top:5px;min-height:34px;line-height:1.35;white-space:pre-wrap;overflow-wrap:anywhere}
 .cspdf .ft{display:flex;justify-content:space-between;font-size:10.5px;color:#444;margin-top:10px;border-top:1px solid #000;padding-top:6px}
 #print{display:none}
-.pvbox{display:flex;flex-wrap:wrap;gap:3mm;align-items:center;padding:12px;background:var(--line3);border-radius:10px;max-height:46vh;overflow:auto}
+.pvbox{display:flex;flex-wrap:wrap;gap:3mm;align-items:center;padding:var(--sp-3);background:var(--tint);border-radius:var(--radius);max-height:46vh;overflow:auto}
 .pvbox .label{background:#fff;box-shadow:0 1px 3px rgba(24,32,43,.18);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8mm;padding:1.5mm;overflow:hidden;color:#000}
 .pvbox .label b{display:block;max-width:100%;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pvbox .label img{display:block;image-rendering:pixelated}
-.pvmore{font-size:13px;color:var(--muted)}
-.pvpre{display:flex;gap:6px;flex-wrap:wrap}
-.pvhelp{margin-top:10px;font-size:12px;color:var(--sub);background:var(--ground);border:1px solid var(--line2);border-radius:8px;padding:8px 10px}
+.pvmore{font-size:var(--size-s);color:var(--muted)}
+.pvpre{display:flex;gap:var(--sp-1);flex-wrap:wrap}
+.pvhelp{margin-top:var(--sp-2);font-size:var(--size-s);color:var(--sub);background:var(--ground);border:1px solid var(--line2);border-radius:var(--radius);padding:var(--sp-2) var(--sp-2)}
 .pvhelp summary{cursor:pointer;font-weight:600;color:var(--ink)}
-.pvhelp ol{margin:6px 0 0;padding-left:18px;line-height:1.6}
+.pvhelp ol{margin:var(--sp-1) 0 0;padding-left:var(--sp-4);line-height:1.6}
 /* 공조기 환기온도 (WS_공조기환기온도, 결정 128) — 휴대폰 = 한 대씩 목록, PC = 종이(B4 가로 1376×971px = 364×257mm) 위에 바로 입력 */
-.hvhd{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}.hvhd b{flex:1 1 auto;font-size:17px}
-.hvtime{margin-top:12px}.hvtime button{font-size:15px;line-height:1.25}.hvtime button small{display:block;font-size:11px;opacity:.85;font-weight:400}
-.hvsec{font-size:13px;color:var(--sub);font-weight:500;margin:16px 4px 6px}
-.hvlist{background:#fff;border:1px solid var(--line2);border-radius:12px;overflow:hidden}
-.hvr{display:grid;grid-template-columns:1fr 104px;gap:4px 10px;align-items:center;padding:10px 12px 10px 14px;border-top:1px solid var(--line3)}
+.hvhd{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-2) var(--sp-2)}.hvhd b{flex:1 1 auto;font-size:var(--size-l)}
+.hvtime{margin-top:var(--sp-3)}.hvtime button{font-size:var(--size-m);line-height:1.25}.hvtime button small{display:block;font-size:var(--size-s);opacity:.85;font-weight:400}
+.hvsec{font-size:var(--size-s);color:var(--sub);font-weight:500;margin:var(--sp-4) var(--sp-1) var(--sp-1)}
+.hvlist{background:var(--white);border:1px solid var(--line2);border-radius:var(--radius);overflow:hidden}
+.hvr{display:grid;grid-template-columns:1fr 104px;gap:var(--sp-1) var(--sp-2);align-items:center;padding:var(--sp-2) var(--sp-3) var(--sp-2) var(--sp-3);border-top:1px solid var(--line3)}
 .hvr:first-child{border-top:none}
-.hvr .nm b{font-size:15px;font-variant-numeric:tabular-nums}.hvr .nm i{font-style:normal;font-size:12px;color:var(--muted);margin-left:6px}
-.hvr .nm small{display:block;font-size:12.5px;color:var(--sub);line-height:1.4;margin-top:2px}
-.hvr .nm .prev{display:block;font-size:12px;color:var(--muted);margin-top:2px}
-.hvin{position:relative;display:block}.hvin .inp{text-align:right;padding-right:30px;font-variant-numeric:tabular-nums;font-weight:500}
-.hvin span{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--muted);pointer-events:none}
-.hvin .inp.empty{background:#FFFBEA;border-color:#E9D37A}
-.hvw{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.hvw label{font-size:12.5px;color:var(--sub)}
-.hvmeta{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.5}
-.hvchip{display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:999px;font-size:12px;font-weight:500;background:var(--orange-bg);color:var(--orange);margin-right:6px}
+.hvr .nm b{font-size:var(--size-m);font-variant-numeric:tabular-nums}.hvr .nm i{font-style:normal;font-size:var(--size-s);color:var(--muted);margin-left:var(--sp-1)}
+.hvr .nm small{display:block;font-size:var(--size-s);color:var(--sub);line-height:1.4;margin-top:var(--sp-1)}
+.hvr .nm .prev{display:block;font-size:var(--size-s);color:var(--muted);margin-top:var(--sp-1)}
+.hvin{position:relative;display:block}.hvin .inp{text-align:right;padding-right:var(--sp-8);font-variant-numeric:tabular-nums;font-weight:500}
+.hvin span{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:var(--size-m);color:var(--muted);pointer-events:none}
+.hvin .inp.empty{background:var(--tint);border-color:var(--line)}
+.hvw{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2);margin-top:var(--sp-2)}.hvw label{font-size:var(--size-s);color:var(--sub)}
+.hvmeta{font-size:var(--size-s);color:var(--muted);margin-top:var(--sp-2);line-height:1.5}
+.hvchip{display:inline-flex;align-items:center;height:24px;padding:0 var(--sp-2);border-radius:var(--radius);font-size:var(--size-s);font-weight:500;background:var(--orange-bg);color:var(--orange);margin-right:var(--sp-1)}
 .hvs{width:1376px;height:971px;background:#fff;padding:26px 30px;color:#18202B;font-family:'Noto Sans KR','Malgun Gothic',sans-serif;font-variant-numeric:tabular-nums;display:flex;flex-direction:column;gap:10px;word-break:keep-all;overflow:hidden}
 .lgwrap .hvs{height:auto;min-height:971px;border:1px solid var(--line2);border-radius:12px;margin:0 auto}
 .hvs *{box-sizing:border-box}
@@ -500,8 +553,8 @@ button.attag{cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:i
 .hvt td.v{font-weight:500;font-size:14.5px}
 .hvs .lgin{text-align:center}
 /* 종합업무일지 (WS_종합업무일지, 결정 116) — 종이 1587×1120px = B4 가로(364×257mm)를 0.867배로 찍음. 화면·인쇄·PDF 같은 틀 */
-.lgwrap{max-width:1680px;margin:0 auto;padding:16px 16px 0}
-.lgwrap .nwbar{margin:12px 0 0}
+.lgwrap{max-width:1680px;margin:0 auto;padding:var(--sp-4) var(--sp-4) 0}
+.lgwrap .nwbar{margin:var(--sp-3) 0 0}
 .lgs{width:1587px;height:1120px;background:#fff;padding:36px 44px;display:flex;flex-direction:column;gap:14px;color:#18202B;font-family:'Noto Sans KR','Malgun Gothic',sans-serif;font-variant-numeric:tabular-nums;word-break:keep-all;overflow:hidden}
 .lgwrap .lgs{height:auto;min-height:1120px;border:1px solid var(--line2);border-radius:12px;margin:0 auto}
 .lgs *{box-sizing:border-box}
@@ -520,7 +573,7 @@ button.attag{cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:i
 .lgt thead th{background:#EDF0F3;font-weight:500;text-align:center;color:#3F4855}
 .lgt th.rh{background:#fff;text-align:center;font-weight:500;color:#3F4855}
 .lgt td.p{color:#5B6573}.lgt td.c{font-weight:500}.lgt td.ctr{text-align:center}
-.up{color:#C0261A!important}.dn{color:#1F5FA8!important}
+.up{color:#C0261A!important}.dn{color:var(--navy)!important}
 .lgin{border:1px solid #DCE1E7;background:#fff;border-radius:4px;height:22px;width:100%;text-align:right;padding:0 4px;font:inherit;font-size:13px;font-weight:500;color:#18202B}
 .lgin:focus{outline:2px solid var(--blue);outline-offset:-1px;border-color:var(--blue)}
 select.lgin{text-align:center;padding:0}
@@ -562,13 +615,13 @@ select.lgin{text-align:center;padding:0}
 .lgnight .lgnadd small{color:#5B6573;font-size:12px}
 .lgfoot{display:flex;justify-content:flex-end;font-size:11px;color:#7A8494;margin-top:auto}
 .lgpc{max-width:520px;margin:40px auto;text-align:center}
-.devwrap{max-width:420px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding:48px 24px 28px;gap:24px}
-.devcard{padding:22px 20px;display:flex;flex-direction:column;gap:14px}
-.devlead{font-size:15px;color:var(--sub);line-height:1.6}.devlead b{color:var(--ink)}
-.devf{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--sub)}.devf .inp{font-size:16px}
-.devmsg{font-size:13px;color:var(--red);min-height:18px}
-.devchip{align-self:center;display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:999px;background:var(--green-bg);color:var(--green);font-size:12px}.devchip svg{width:14px;height:14px}
-.devnote{display:block;font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5}
+.devwrap{max-width:420px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding:var(--sp-12) var(--sp-6) var(--sp-6);gap:var(--sp-6)}
+.devcard{padding:var(--sp-6) var(--sp-4);display:flex;flex-direction:column;gap:var(--sp-3)}
+.devlead{font-size:var(--size-m);color:var(--sub);line-height:1.6}.devlead b{color:var(--ink)}
+.devf{display:flex;flex-direction:column;gap:var(--sp-1);font-size:var(--size-m);color:var(--sub)}.devf .inp{font-size:var(--size-m)}
+.devmsg{font-size:var(--size-s);color:var(--red);min-height:18px}
+.devchip{align-self:center;display:inline-flex;align-items:center;gap:var(--sp-1);padding:var(--sp-1) var(--sp-2);border-radius:var(--radius);background:var(--green-bg);color:var(--green);font-size:var(--size-s)}.devchip svg{width:14px;height:14px}
+.devnote{display:block;font-size:var(--size-s);color:var(--muted);margin-top:var(--sp-1);line-height:1.5}
 @media print{
   body > *:not(#print){display:none!important}
   #print{display:block}
@@ -590,7 +643,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.17.0' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.18.0' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -693,15 +746,15 @@ function topbar(sub, title) {
 function renderLogin() {
   const dots = [0, 1, 2, 3].map(i => '<span class="pin-dot' + (i < S.pin.length ? ' on' : '') + '"></span>').join('');
   const keys = ['1','2','3','4','5','6','7','8','9'].map(n => '<button class="key" onclick="pinKey(\'' + n + '\')">' + n + '</button>').join('');
-  return '<div style="max-width:420px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding:48px 24px 28px;gap:24px">' +
-    '<div style="text-align:center;display:flex;flex-direction:column;gap:6px"><small style="color:var(--muted)">잠실점 에비뉴엘 · 시설팀</small><b style="font-size:24px">업무지원</b>' + (window.WS_API ? '<span class="devchip">' + ICON.ok + '등록된 기기</span>' : '<small style="color:var(--muted)">v0.6 · 테스트판</small>') + '</div>' +
-    '<div class="card" style="padding:22px 20px;display:flex;flex-direction:column;align-items:center;gap:14px"><b>PIN 입력</b><span style="font-size:14px;color:var(--muted)">본인 휴대폰 번호 뒷 4자리</span>' +
-    '<div style="display:flex;gap:16px" aria-label="' + S.pin.length + '자리 입력됨">' + dots + '</div>' +
-    '<span id="pinMsg" style="font-size:13px;color:var(--red);min-height:18px" role="alert"></span></div>' +
-    '<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:auto">' + keys +
+  return '<div style="max-width:420px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding:var(--sp-12) var(--sp-6) var(--sp-6);gap:var(--sp-6)">' +
+    '<div style="text-align:center;display:flex;flex-direction:column;gap:var(--sp-1)"><small style="color:var(--muted)">잠실점 에비뉴엘 · 시설팀</small><b style="font-size:var(--size-xl)">업무지원</b>' + (window.WS_API ? '<span class="devchip">' + ICON.ok + '등록된 기기</span>' : '<small style="color:var(--muted)">v0.6 · 테스트판</small>') + '</div>' +
+    '<div class="card" style="padding:var(--sp-6) var(--sp-4);display:flex;flex-direction:column;align-items:center;gap:var(--sp-3)"><b>PIN 입력</b><span style="font-size:var(--size-m);color:var(--muted)">본인 휴대폰 번호 뒷 4자리</span>' +
+    '<div style="display:flex;gap:var(--sp-4)" aria-label="' + S.pin.length + '자리 입력됨">' + dots + '</div>' +
+    '<span id="pinMsg" style="font-size:var(--size-s);color:var(--red);min-height:18px" role="alert"></span></div>' +
+    '<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-2);margin-top:auto">' + keys +
     '<button class="key" onclick="pinBack()" aria-label="지우기" style="border:none;background:none">⌫</button>' +
     '<button class="key" onclick="pinKey(\'0\')">0</button>' +
-    '<button class="key" onclick="doLogin()" style="background:var(--blue);border-color:var(--blue);color:#fff;font-size:17px;font-weight:600">' + (S.busy ? '<span class="spin"></span>' : '로그인') + '</button></div>' +
+    '<button class="key" onclick="doLogin()" style="background:var(--blue);border-color:var(--blue);color:var(--white);font-size:var(--size-l);font-weight:600">' + (S.busy ? '<span class="spin"></span>' : '로그인') + '</button></div>' +
     '<small style="text-align:center;color:var(--muted);line-height:1.6">하루 첫 로그인 때 본인 서명을 받습니다<br>로그인은 다음 날 오전 6시까지 유지됩니다</small></div>';
 }
 function pinKey(n) { if (S.pin.length < 4) { S.pin += n; render(); if (S.pin.length === 4) doLogin(); } }
@@ -724,12 +777,12 @@ function logout(expired) { store('ws_token', null); store('ws_main', null); SHEL
 /* ── 근무일 첫 서명 (결정 56·60) — 서명하지 않으면 로그인되지 않음 ── */
 function renderSign() {
   const g = S.sign;
-  return '<div style="max-width:560px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding:36px 16px 24px;gap:16px">' +
-    '<div style="display:flex;flex-direction:column;gap:6px"><small style="color:var(--muted)">오늘 첫 로그인 · 본인 확인</small><b style="font-size:22px">' + h(g.name) + ' 님, 서명해 주세요</b>' +
-    '<span style="font-size:14px;color:var(--sub);line-height:1.6">이 서명은 오늘 TBM 서명란에 로그인한 순서대로 들어갑니다. 오늘(오전 6시 ~ 다음 날 6시)은 다시 묻지 않습니다.</span></div>' +
+  return '<div style="max-width:560px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding:var(--sp-8) var(--sp-4) var(--sp-6);gap:var(--sp-4)">' +
+    '<div style="display:flex;flex-direction:column;gap:var(--sp-1)"><small style="color:var(--muted)">오늘 첫 로그인 · 본인 확인</small><b style="font-size:var(--size-xl)">' + h(g.name) + ' 님, 서명해 주세요</b>' +
+    '<span style="font-size:var(--size-m);color:var(--sub);line-height:1.6">이 서명은 오늘 TBM 서명란에 로그인한 순서대로 들어갑니다. 오늘(오전 6시 ~ 다음 날 6시)은 다시 묻지 않습니다.</span></div>' +
     '<div class="spad" id="spad"><canvas class="g"></canvas><canvas class="i" aria-label="서명 칸"></canvas></div>' +
-    '<div style="display:flex;gap:8px;align-items:center"><button class="btn" id="sClr" onclick="SPAD.clear()" disabled>지우기</button><span id="sMsg" role="alert" style="flex:1;font-size:13px;color:var(--red)">' + h(g.msg) + '</span></div>' +
-    '<div style="display:flex;flex-direction:column;gap:8px;margin-top:auto">' +
+    '<div style="display:flex;gap:var(--sp-2);align-items:center"><button class="btn" id="sClr" onclick="SPAD.clear()" disabled>지우기</button><span id="sMsg" role="alert" style="flex:1;font-size:var(--size-s);color:var(--red)">' + h(g.msg) + '</span></div>' +
+    '<div style="display:flex;flex-direction:column;gap:var(--sp-2);margin-top:auto">' +
     '<button class="btn pri big" id="sGo" onclick="doSign()" disabled>' + (g.busy ? '<span class="spin"></span>' : '서명하고 로그인') + '</button>' +
     (g.mode === 'pin' ? '<button class="btn" onclick="S.sign=null;S.view=\'login\';render()">PIN 다시 입력</button>' : '<button class="btn" onclick="logout()">다른 사람으로 로그인</button>') +
     '</div></div>';
@@ -825,10 +878,10 @@ async function boot(fromStart) {
   else if (S.view === 'main') render();   // 먼저 보여 준 지난번 화면을 새 숫자로
 }
 function renderLoading() {
-  return '<div class="wrap" style="min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px"><span class="spin" style="color:var(--blue);width:32px;height:32px"></span><span style="color:var(--sub)">불러오는 중…</span></div>';
+  return '<div class="wrap" style="min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sp-3)"><span class="spin" style="color:var(--blue);width:32px;height:32px"></span><span style="color:var(--sub)">불러오는 중…</span></div>';
 }
 function renderRetry() {
-  return '<div class="wrap" style="min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center"><b style="font-size:18px">서버에 연결하지 못했습니다</b><span style="color:var(--sub);line-height:1.6">신호를 확인하고 다시 시도해 주세요.<br>로그인은 그대로 유지됩니다.</span><button class="btn pri big" onclick="S.view=\'loading\';render();boot(true)">다시 시도</button><button class="btn" onclick="logout()">다른 사람으로 로그인</button></div>';
+  return '<div class="wrap" style="min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sp-3);text-align:center"><b style="font-size:var(--size-l)">서버에 연결하지 못했습니다</b><span style="color:var(--sub);line-height:1.6">신호를 확인하고 다시 시도해 주세요.<br>로그인은 그대로 유지됩니다.</span><button class="btn pri big" onclick="S.view=\'loading\';render();boot(true)">다시 시도</button><button class="btn" onclick="logout()">다른 사람으로 로그인</button></div>';
 }
 
 /* ── 메인 ── */
@@ -842,7 +895,7 @@ function renderMain() {
       (lock ? ICON.lock + '지금은 사용 중지' : sub + (off ? ' · <b class="offtag">직원에게 꺼짐</b>' : '')) + '</small></button>';
   };
   const soon = (key) => '<button class="tile soon" onclick="tile(\'' + key + '\')"><span class="ico">' + ICON.soon + '</span><b>작업중</b><small>준비 중</small></button>';
-  return topbar('잠실점 에비뉴엘 · ' + today, '업무지원') + '<div class="wrap" style="display:flex;flex-direction:column;gap:14px">' +
+  return topbar('잠실점 에비뉴엘 · ' + today, '업무지원') + '<div class="wrap" style="display:flex;flex-direction:column;gap:var(--sp-3)">' +
     '<div class="banner b-gray">이 버전은 테스트판 입니다.' + (S.ver ? ' <b>v' + h(S.ver) + '</b>' : '') + '</div>' +
     '<div class="grid6">' +
     t('docs', '서류작업', 'TBM' + (S.docs ? ' · 오늘 서명 ' + S.docs.signs + '명' : ' · 명일 작업 예정'), ICON.docs) +
@@ -936,7 +989,7 @@ function renderSpec() {
     '<div class="spg"><aside class="spside">' +
     '<div class="card"><h3>자주 찾는 말</h3><div class="spchips">' + SP_KW.map(w => '<button type="button" onclick="spQ(\'' + w + '\',1)">' + w + '</button>').join('') + '</div></div>' +
     '<div class="card"><h3>검색하는 지침 (' + cur.length + ')</h3>' + (cur.length ? '<div id="spGL"></div>' : '<div class="spnote">아직 없습니다.</div>') +
-    '<div class="spnote" style="margin-top:6px">' + (window.WS_PUB ? '문의: 에비뉴엘 시설팀 (롯데백화점 지침 최신판)' : '지침 추가·개정은 도면협의 앱 <b>지침 관리</b>에서 합니다. 여기서는 읽기만 합니다.') + '</div></div>' +
+    '<div class="spnote" style="margin-top:var(--sp-1)">' + (window.WS_PUB ? '문의: 에비뉴엘 시설팀 (롯데백화점 지침 최신판)' : '지침 추가·개정은 도면협의 앱 <b>지침 관리</b>에서 합니다. 여기서는 읽기만 합니다.') + '</div></div>' +
     '<div class="spnote" id="spSyn"></div></aside>' +
     '<section id="spRes" aria-live="polite"></section><div id="spPv" class="sppvw"></div></div></div>' +
     '<div id="spBig"></div>';
@@ -971,7 +1024,7 @@ function spDraw() {
   else if (!on.length) box.innerHTML = '<div class="banner b-gray">검색할 지침을 하나 이상 고르세요.</div>';
   else if (!S.sp.q.trim()) box.innerHTML = '<div class="spnote">검색어를 넣거나 자주 찾는 말을 누르세요.</div>';
   else if (!hits.length) box.innerHTML = '<div class="banner b-gray">「' + h(S.sp.q) + '」에 해당하는 내용이 없습니다.</div>';
-  else box.innerHTML = '<div class="spnote" style="margin-bottom:8px">결과 <b style="color:var(--ink)">' + hits.length + (hits.length >= 80 ? '+' : '') + '건</b><span class="pcon"> · 결과를 누르면 오른쪽에 그 쪽이 보입니다</span></div>' +
+  else box.innerHTML = '<div class="spnote" style="margin-bottom:var(--sp-2)">결과 <b style="color:var(--ink)">' + hits.length + (hits.length >= 80 ? '+' : '') + '건</b><span class="pcon"> · 결과를 누르면 오른쪽에 그 쪽이 보입니다</span></div>' +
     hits.map((x, i) => '<div class="sphit' + (i === S.sp.sel ? ' on' : '') + '" onclick="spSel(' + i + ')"><div class="sphd"><button type="button" class="pgb" onclick="event.stopPropagation();spSel(' + i + ',1)" aria-label="' + x.e.p + '쪽 크게 보기">' + ICON.search + 'p.' + x.e.p + '</button>' + spTag(x.e.d) + '</div>' +
       (spWhere(x.e) ? '<div class="spwhere">' + h(spWhere(x.e)) + '</div>' : '') + '<div class="sptxt">' + spSnip(x) + '</div>' +
       '<div class="spact"><button type="button" class="btn sm" onclick="event.stopPropagation();spSel(' + i + ',1)">쪽 크게 보기</button><button type="button" class="btn sm pri" onclick="event.stopPropagation();spCopy(' + i + ')">참조 복사 ' + h(spRef(x.e)) + '</button></div></div>').join('');
@@ -1009,7 +1062,7 @@ function spPv() {
     document.querySelectorAll('.sppv').forEach(pv => {
       const b = pv.querySelector('.sppv-b'), o = pv.querySelector('.spo');
       if (o) { o.style.display = r.pdf ? '' : 'none'; o.onclick = () => window.open(r.pdf, '_blank'); }
-      if (!r.img) { b.innerHTML = '<div class="sppv-t"><div class="spnote" style="margin-bottom:10px">이 쪽의 그림이 없습니다. 도면협의 앱 <b>지침 관리</b>에서 이 지침을 다시 만들면 생깁니다.</div>' + spSnip(x) + '</div>'; return; }
+      if (!r.img) { b.innerHTML = '<div class="sppv-t"><div class="spnote" style="margin-bottom:var(--sp-2)">이 쪽의 그림이 없습니다. 도면협의 앱 <b>지침 관리</b>에서 이 지침을 다시 만들면 생깁니다.</div>' + spSnip(x) + '</div>'; return; }
       b.innerHTML = '<div class="sppg"><img alt="' + h(spGuide(x.e.d).short + ' ' + x.e.p + '쪽') + '" src="' + h(r.img) + '">' +
         spBoxes(x).map(z => '<span class="hl" style="left:' + ((z[0] - 0.004) * 100) + '%;top:' + ((z[1] - 0.004) * 100) + '%;width:' + ((z[2] - z[0] + 0.008) * 100) + '%;height:' + ((z[3] - z[1] + 0.008) * 100) + '%"></span>').join('') + '</div>';
       const img = b.querySelector('img'), place = () => {   // 100% = 쪽 한 장이 칸 안에 다 들어오는 크기, + 로 키우면 그때 스크롤 (사용자 11-17)
@@ -1025,7 +1078,7 @@ function spPvHtml(x, big) {
   return '<div class="sppv' + (big ? ' big' : '') + '"><div class="sppv-h">' + spTag(x.e.d) + '<b class="spttl">' + h(spWhere(x.e) || spGuide(x.e.d).title) + '</b><span class="spnote pcon">PDF ' + x.e.p + '쪽</span>' +
     '<span class="sptools"><button type="button" class="btn sm" onclick="spZoom(-0.25)" aria-label="작게">−</button><span class="spnote">' + Math.round(S.sp.zoom * 100) + '%</span><button type="button" class="btn sm" onclick="spZoom(0.25)" aria-label="크게">+</button>' +
     '<button type="button" class="btn sm spo" style="display:none">PDF 원본</button>' + (big ? '<button type="button" class="btn sm" onclick="spBigClose()" aria-label="닫기">' + ICON.x + '</button>' : '') + '</span></div>' +
-    '<div class="sppv-b"><div class="spnote" style="padding:40px;text-align:center">쪽 그림을 불러오는 중…</div></div>' +
+    '<div class="sppv-b"><div class="spnote" style="padding:var(--sp-8);text-align:center">쪽 그림을 불러오는 중…</div></div>' +
     '<div class="sppv-f"><span class="spnote">노란 표시 = 검색어가 있는 줄</span><button type="button" class="btn sm pri" onclick="spCopy(' + S.sp.sel + ')">참조 복사 ' + h(spRef(x.e)) + '</button></div></div>';
 }
 // PC 마우스 오른쪽 버튼 막기 (휴대폰 길게 누르기는 그대로)
@@ -1054,21 +1107,21 @@ async function openSet() {
 }
 function renderSet() {
   const r = S.set;
-  if (!r) return topbar('업무지원 ›', '환경설정') + '<div class="wrap" style="text-align:center;padding:40px"><span class="spin" style="color:var(--blue)"></span></div>';
+  if (!r) return topbar('업무지원 ›', '환경설정') + '<div class="wrap" style="text-align:center;padding:var(--sp-8)"><span class="spin" style="color:var(--blue)"></span></div>';
   const secs = [1, 1.5, 2, 2.6, 3, 4, 5];
   return topbar('업무지원 ›', '환경설정') + '<div class="wrap list">' +
-    '<h3 class="sth">알림 표시 시간</h3><div class="card" style="padding:14px 16px"><small style="color:var(--muted)">저장·동기화가 끝나면 아래에 뜨는 알림이 보이는 시간입니다. 알림이 여러 개면 0.5초 쉬고 다음 알림을 보여 줍니다.</small>' +
-    '<div class="seg setseg" role="group" aria-label="알림 표시 시간" style="margin-top:10px">' + secs.map(v => '<button type="button" class="' + (Number(r.toastSec) === v ? 'on' : '') + '" aria-pressed="' + (Number(r.toastSec) === v) + '" onclick="setToastSec(' + v + ')">' + v + '초</button>').join('') + '</div></div>' +
-    (window.WS_API ? '<h3 class="sth" style="margin-top:8px">TBM 위험성 목록</h3><div class="card strow"><span class="fname"><b>위험성 목록' + (r.riskN != null ? ' ' + r.riskN + '줄' : '') + '</b><small>TBM 작업 내용의 낱말로 위험요인·개선조치를 고르는 표</small></span><button class="btn sm pri" onclick="openRisk()">고치기</button></div>' : '') +
-    '<h3 class="sth" style="margin-top:8px">메인 메뉴</h3><div class="card">' + MENU.map(m => { const off = menuOff(m[0]);
+    '<h3 class="sth">알림 표시 시간</h3><div class="card" style="padding:var(--sp-3) var(--sp-4)"><small style="color:var(--muted)">저장·동기화가 끝나면 아래에 뜨는 알림이 보이는 시간입니다. 알림이 여러 개면 0.5초 쉬고 다음 알림을 보여 줍니다.</small>' +
+    '<div class="seg setseg" role="group" aria-label="알림 표시 시간" style="margin-top:var(--sp-2)">' + secs.map(v => '<button type="button" class="' + (Number(r.toastSec) === v ? 'on' : '') + '" aria-pressed="' + (Number(r.toastSec) === v) + '" onclick="setToastSec(' + v + ')">' + v + '초</button>').join('') + '</div></div>' +
+    (window.WS_API ? '<h3 class="sth" style="margin-top:var(--sp-2)">TBM 위험성 목록</h3><div class="card strow"><span class="fname"><b>위험성 목록' + (r.riskN != null ? ' ' + r.riskN + '줄' : '') + '</b><small>TBM 작업 내용의 낱말로 위험요인·개선조치를 고르는 표</small></span><button class="btn sm pri" onclick="openRisk()">고치기</button></div>' : '') +
+    '<h3 class="sth" style="margin-top:var(--sp-2)">메인 메뉴</h3><div class="card">' + MENU.map(m => { const off = menuOff(m[0]);
       return '<div class="strow"><span class="fname"><b>' + m[1] + '</b><small>' + m[2] + '</small></span><div class="seg setseg menuseg" role="group" aria-label="' + m[1] + ' 켜기·끄기">' +
         '<button type="button" class="' + (off ? '' : 'on') + '" aria-pressed="' + !off + '" onclick="setMenu(\'' + m[0] + '\',1)">켜짐</button><button type="button" class="' + (off ? 'on' : '') + '" aria-pressed="' + off + '" onclick="setMenu(\'' + m[0] + '\',0)">꺼짐</button></div></div>'; }).join('') +
     '</div><small style="color:var(--muted);line-height:1.6">꺼진 메뉴는 직원 화면에서 흐리게 보이고 눌러도 열리지 않습니다. <b>소장·관리자·옵저버</b>는 꺼진 메뉴도 열 수 있습니다.</small>' +
-    '<div style="display:flex;align-items:center;margin-top:8px"><h3 class="sth" style="flex:1">직원 ' + r.staff.length + '명</h3><button class="btn sm pri" onclick="staffDlg()">+ 직원 추가</button></div>' +
+    '<div style="display:flex;align-items:center;margin-top:var(--sp-2)"><h3 class="sth" style="flex:1">직원 ' + r.staff.length + '명</h3><button class="btn sm pri" onclick="staffDlg()">+ 직원 추가</button></div>' +
     '<div class="card">' + r.staff.map(x => '<div class="strow"><span class="fname"><b>' + h(x.name) + '</b><small>' + h(x.part) + ' · ' + h(x.role) + ' · ' + h(x.staff_id) + '</small></span>' +
       '<button class="btn sm" onclick="staffDlg(\'' + x.staff_id + '\')">편집</button><button class="btn sm" onclick="staffPinDlg(\'' + x.staff_id + '\')">PIN 변경</button>' +
       (x.staff_id === S.user.staff_id ? '' : '<button class="btn sm warn" onclick="staffDel(\'' + x.staff_id + '\')">삭제</button>') + '</div>').join('') + '</div>' +
-    (window.WS_API && S.device ? '<h3 class="sth" style="margin-top:8px">이 기기</h3><div class="card strow"><span class="fname"><b>등록된 계정</b><small>' + h(S.device.email) + (S.device.at ? ' · ' + Number(S.device.at.slice(5, 7)) + '월 ' + Number(S.device.at.slice(8, 10)) + '일 등록' : '') + '</small></span>' +
+    (window.WS_API && S.device ? '<h3 class="sth" style="margin-top:var(--sp-2)">이 기기</h3><div class="card strow"><span class="fname"><b>등록된 계정</b><small>' + h(S.device.email) + (S.device.at ? ' · ' + Number(S.device.at.slice(5, 7)) + '월 ' + Number(S.device.at.slice(8, 10)) + '일 등록' : '') + '</small></span>' +
       '<button class="btn sm warn" onclick="deviceOff()">기기 등록 풀기</button></div><small class="devnote">풀면 이 기기에서는 다시 기기 등록을 해야 합니다. 잃어버리거나 바꾼 기기는 관리자에게 알려 주세요.</small>' : '') + '</div>';
 }
 /* ── TBM 위험성 목록 편집 (Supabase 이관 3-6, 시안 docs/시안/WS-Supabase_위험성목록) — 목록 전체를 한 번에 저장 ── */
@@ -1079,7 +1132,7 @@ async function openRisk() {
 }
 function renderRisk() {
   const k = S.rk, lv = (p, s) => { const v = p * s; return '<b class="tblv ' + (v >= 6 ? 'hi' : v >= 3 ? 'mid' : 'lo') + '">' + (v >= 6 ? '상' : v >= 3 ? '중' : '하') + ' · ' + v + '</b>'; };
-  if (!k) return topbar('환경설정 ›', 'TBM 위험성 목록') + '<div class="wrap" style="text-align:center;padding:40px"><span class="spin" style="color:var(--blue)"></span></div>';
+  if (!k) return topbar('환경설정 ›', 'TBM 위험성 목록') + '<div class="wrap" style="text-align:center;padding:var(--sp-8)"><span class="spin" style="color:var(--blue)"></span></div>';
   const card = (r, i) => {
     const ed = k.open === i, seg = c => '<div class="seg tbseg" role="group" aria-label="' + (c === 'p' ? '가능성' : '중대성') + '">' + [1, 2, 3].map(n => '<button type="button" class="' + (r[c] === n ? 'on' : '') + '" aria-pressed="' + (r[c] === n) + '" onclick="rkSet(' + i + ',\'' + c + '\',' + n + ')">' + n + '</button>').join('') + '</div>';
     return '<div class="card tbw"><div class="tbh"><span class="nwno">' + (i + 1) + '</span><span class="fname"><b>' + h(r.risk || '(위험요인 없음)') + '</b><small>' + h(r.words) + '</small></span>' +
@@ -1091,7 +1144,7 @@ function renderRisk() {
         '<label class="tbf"><span>재해형태</span><input class="inp" maxlength="30" value="' + h(r.kind) + '" oninput="rkIn(' + i + ',\'kind\',this)"></label>' +
         '<div class="tbf"><span>위험성 <em>가능성 × 중대성</em></span><div class="tbrisk"><small>가능성</small>' + seg('p') + '<small>중대성</small>' + seg('s') + lv(r.p, r.s) + '</div></div>' +
         '<div class="tbf"><span>개선조치 <em>4개까지 · ✓ = TBM에서 미리 체크</em></span><div class="tbfx">' +
-          [0, 1, 2, 3].map(j => { const f = r.fixes[j] || { t: '', on: false }; return '<div class="tbown" style="align-items:center"><label style="display:flex;align-items:center;gap:4px;white-space:nowrap"><input type="checkbox" aria-label="미리 체크"' + (f.on ? ' checked' : '') + ' onchange="rkFix(' + i + ',' + j + ',\'on\',this)">✓</label><input class="inp" maxlength="100" placeholder="개선조치 ' + (j + 1) + '" value="' + h(f.t) + '" oninput="rkFix(' + i + ',' + j + ',\'t\',this)"></div>'; }).join('') +
+          [0, 1, 2, 3].map(j => { const f = r.fixes[j] || { t: '', on: false }; return '<div class="tbown" style="align-items:center"><label style="display:flex;align-items:center;gap:var(--sp-1);white-space:nowrap"><input type="checkbox" aria-label="미리 체크"' + (f.on ? ' checked' : '') + ' onchange="rkFix(' + i + ',' + j + ',\'on\',this)">✓</label><input class="inp" maxlength="100" placeholder="개선조치 ' + (j + 1) + '" value="' + h(f.t) + '" oninput="rkFix(' + i + ',' + j + ',\'t\',this)"></div>'; }).join('') +
         '</div></div><button class="btn warn" onclick="rkDel(' + i + ')">이 줄 지우기</button></div>'
        : '<div class="tbf"><span>위험성</span><div class="tbrisk">' + h(r.kind) + ' ' + lv(r.p, r.s) + '</div></div>' +
          '<div class="tbf"><span>개선조치</span><small style="color:var(--sub)">' + r.fixes.filter(f => f.t).map(f => (f.on ? '✓ ' : '') + h(f.t)).join(' · ') + '</small></div>') + '</div>';
@@ -1120,8 +1173,8 @@ async function rkSave() {
 /* ── 기기 등록 (Supabase 이관 3-1, 시안 docs/시안/WS-Supabase_로그인) — 기기마다 처음 한 번, 시설팀 공용 계정 ── */
 function renderDevice() {
   const d = S.dev || {};
-  return '<div class="devwrap"><div style="text-align:center;display:flex;flex-direction:column;gap:6px"><small style="color:var(--muted)">잠실점 에비뉴엘 · 시설팀</small><b style="font-size:24px">업무지원</b></div>' +
-    '<form class="card devcard" onsubmit="event.preventDefault();deviceReg()"><b style="font-size:18px">기기 등록</b>' +
+  return '<div class="devwrap"><div style="text-align:center;display:flex;flex-direction:column;gap:var(--sp-1)"><small style="color:var(--muted)">잠실점 에비뉴엘 · 시설팀</small><b style="font-size:var(--size-xl)">업무지원</b></div>' +
+    '<form class="card devcard" onsubmit="event.preventDefault();deviceReg()"><b style="font-size:var(--size-l)">기기 등록</b>' +
     '<span class="devlead">이 휴대폰(PC)에서 <b>처음 한 번만</b> 합니다.<br>등록하면 다음부터는 PIN만 누릅니다.</span>' +
     '<label class="devf">시설팀 계정 이메일<input class="inp" id="devE" type="email" autocomplete="username" inputmode="email" required value="' + h(d.email || '') + '"></label>' +
     '<label class="devf">비밀번호<input class="inp" id="devP" type="password" autocomplete="current-password" required></label>' +
@@ -1200,11 +1253,11 @@ async function staffDel(id) {
 function renderDocs() {
   const n = S.docs ? S.docs.signs : null;
   return topbar('업무지원 ›', '서류작업') + '<div class="wrap list">' +
-    '<button class="row" onclick="openTbm()"><span class="ico" style="background:var(--green-bg);color:var(--green);font-weight:600">T</span><span class="fname"><b style="font-size:16px">TBM</b><small>오늘 서명 ' + (n == null ? '…' : n + '명') + ' · 작업 표 · 사진 · PDF</small></span>' + ICON.chev + '</button>' +
-    '<button class="row" onclick="openNw()"><span class="ico" style="background:var(--blue-bg);color:var(--blue);font-weight:600">명</span><span class="fname"><b style="font-size:16px">명일 작업 예정</b><small>내일 작업 입력 · 그림으로 저장</small></span>' + ICON.chev + '</button>' +
-    '<button class="row" onclick="openAtt()"><span class="ico" style="background:#FFF4C7;color:#7A5A00;font-weight:600">출</span><span class="fname"><b style="font-size:16px">출근현황</b><small>근무 스케줄 엑셀 → 날짜별 조직도 · 그림으로 저장</small></span>' + ICON.chev + '</button>' +
-    '<button class="row" onclick="openLog()"><span class="ico" style="background:var(--line3);color:var(--sub);font-weight:600">일</span><span class="fname"><b style="font-size:16px">종합업무일지</b><small>에너지 사용량 · 날씨 · 금일작업 · B4 인쇄 (PC)</small></span>' + ICON.chev + '</button>' +
-    '<button class="row" onclick="openAhu()"><span class="ico" style="background:var(--blue-bg);color:var(--blue);font-weight:600">공</span><span class="fname"><b style="font-size:16px">공조기 환기온도</b><small>12:00 · 16:00 · B4 인쇄</small></span>' + ICON.chev + '</button>' +
+    '<button class="row" onclick="openTbm()"><span class="ico" style="background:var(--green-bg);color:var(--green);font-weight:600">T</span><span class="fname"><b style="font-size:var(--size-m)">TBM</b><small>오늘 서명 ' + (n == null ? '…' : n + '명') + ' · 작업 표 · 사진 · PDF</small></span>' + ICON.chev + '</button>' +
+    '<button class="row" onclick="openNw()"><span class="ico" style="background:var(--blue-bg);color:var(--blue);font-weight:600">명</span><span class="fname"><b style="font-size:var(--size-m)">명일 작업 예정</b><small>내일 작업 입력 · 그림으로 저장</small></span>' + ICON.chev + '</button>' +
+    '<button class="row" onclick="openAtt()"><span class="ico" style="background:var(--tint);color:var(--navy);font-weight:600">출</span><span class="fname"><b style="font-size:var(--size-m)">출근현황</b><small>근무 스케줄 엑셀 → 날짜별 조직도 · 그림으로 저장</small></span>' + ICON.chev + '</button>' +
+    '<button class="row" onclick="openLog()"><span class="ico" style="background:var(--tint);color:var(--sub);font-weight:600">일</span><span class="fname"><b style="font-size:var(--size-m)">종합업무일지</b><small>에너지 사용량 · 날씨 · 금일작업 · B4 인쇄 (PC)</small></span>' + ICON.chev + '</button>' +
+    '<button class="row" onclick="openAhu()"><span class="ico" style="background:var(--blue-bg);color:var(--blue);font-weight:600">공</span><span class="fname"><b style="font-size:var(--size-m)">공조기 환기온도</b><small>12:00 · 16:00 · B4 인쇄</small></span>' + ICON.chev + '</button>' +
     '</div>';
 }
 /* 미리 받기 (결정 78): 메인이 뜬 뒤 자주 여는 화면 내용을 뒤에서 받아 두고, 열 때 바로 보여 준 뒤 새로 받음 */
@@ -1297,7 +1350,7 @@ function renderTbm() {
       '<span class="sgimg">' + (x.img ? '<img src="' + x.img + '" alt="' + h(x.name) + ' 서명">' : '') + '<small>' + h(x.at) + '</small></span></div>').join('') + '</div>';
   const past = r.today && r.day < r.today;
   return topbar('서류작업 ›', 'TBM') + '<div class="wrap list">' +
-    '<div class="card" style="padding:16px"><div class="nwhead"><b>TBM</b><button class="nwdate" data-date="' + h(r.day) + '" onclick="tbmCal()" aria-label="날짜 바꾸기">' + ICON.cal + dl + '</button></div>' +
+    '<div class="card" style="padding:var(--sp-4)"><div class="nwhead"><b>TBM</b><button class="nwdate" data-date="' + h(r.day) + '" onclick="tbmCal()" aria-label="날짜 바꾸기">' + ICON.cal + dl + '</button></div>' +
     (past ? '<div class="nwmeta">지난 날짜입니다. 고쳐서 저장하면 이 날짜 TBM이 바뀝니다.</div>' : '') + '</div>' +
     '<div class="card tbsum"><span class="fname"><b>서명 ' + r.signs.length + '명</b><small>관리감독자 ' + (r.manager ? h(r.manager.name) : '없음 (소장·부소장 서명 전)') + ' · 로그인 순서대로</small></span>' +
     '<button class="btn sm" onclick="loadTbm()">새로고침</button><button class="btn sm" onclick="S.tbm.showSigns=!S.tbm.showSigns;render()">' + (r.showSigns ? '목록 닫기' : '서명 목록') + '</button></div>' +
@@ -1504,7 +1557,7 @@ function renderNw() {
     '<label class="f-note"><span>비고</span><input class="inp" maxlength="40" value="' + h(r.note) + '" oninput="nwInput(' + i + ',\'note\',this)"></label>' +
     '<button type="button" class="btn nwdel" onclick="nwDel(' + i + ')" aria-label="' + (i + 1) + '번 줄 지우기">' + ICON.x + '</button></div>').join('');
   return topbar('서류작업 ›', '명일 작업') + '<div class="wrap list">' +
-    '<div class="card" style="padding:16px"><div class="nwhead"><b>명일 작업 일정 현황</b>' +
+    '<div class="card" style="padding:var(--sp-4)"><div class="nwhead"><b>명일 작업 일정 현황</b>' +
     '<button class="nwdate" data-date="' + h(n.date) + '" onclick="nwCal()" aria-label="일자 바꾸기">' + ICON.cal + md(n.date) + ' (' + wd + ')</button></div>' +
     '<div class="nwmeta">' + meta + '</div>' +
     '<div class="nwnote"><i class="nwsw"></i><span>작업 내용·비고에 <b>' + NW_WORDS.join('·') + '</b>가 있으면 그 줄이 빨간색</span></div></div>' +
@@ -1610,10 +1663,10 @@ async function nwImage() {
   const url = nwDraw().toDataURL('image/png'), name = S.nw.date + '_명일작업예정.png';
   const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
   // 앱 화면 안에서 내려받기가 막히는 휴대폰도 있어, 그림을 같이 보여 줌 (길게 눌러 저장)
-  dialog('<div style="display:flex;align-items:center;margin-bottom:10px"><div class="fname"><b style="font-size:17px">그림으로 저장</b><small>' + h(name) + '</small></div><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
+  dialog('<div style="display:flex;align-items:center;margin-bottom:var(--sp-2)"><div class="fname"><b style="font-size:var(--size-l)">그림으로 저장</b><small>' + h(name) + '</small></div><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
     '<img class="nwimg" id="nwImg" src="' + url + '" alt="명일 작업 일정 현황 ' + h(S.nw.date) + '">' +
-    '<div class="banner b-info" style="margin-top:10px">내려받기가 되지 않으면 위 그림을 <b>길게 눌러 「이미지 저장」</b>을 고르세요.</div>' +
-    '<a class="btn pri big" style="width:100%;margin-top:10px" href="' + url + '" download="' + h(name) + '">다시 내려받기</a>');
+    '<div class="banner b-info" style="margin-top:var(--sp-2)">내려받기가 되지 않으면 위 그림을 <b>길게 눌러 「이미지 저장」</b>을 고르세요.</div>' +
+    '<a class="btn pri big" style="width:100%;margin-top:var(--sp-2)" href="' + url + '" download="' + h(name) + '">다시 내려받기</a>');
 }
 
 /* ── 출근현황 (WS_출근현황 15.3.19, 결정 88) ── */
@@ -1674,9 +1727,9 @@ function renderAtt() {
   const a = S.at;
   if (!a) return topbar('서류작업 ›', '출근현황') + '<div class="wrap list"><div class="banner b-gray">불러오는 중…</div></div>';
   const r = a.r, up = r.canBoss;
-  const head = '<div class="card" style="padding:16px"><div class="nwhead"><b>출근현황</b><button class="nwdate" onclick="atCal()" style="border:0;cursor:pointer;padding:0 14px;gap:8px;font-weight:600">' + ICON.cal + h(atKo(r.date)) + '</button></div>' +
+  const head = '<div class="card" style="padding:var(--sp-4)"><div class="nwhead"><b>출근현황</b><button class="nwdate" onclick="atCal()" style="border:0;cursor:pointer;padding:0 var(--sp-3);gap:var(--sp-2);font-weight:600">' + ICON.cal + h(atKo(r.date)) + '</button></div>' +
     '<div class="nwmeta">' + (r.people.length ? h(Number(r.date.slice(5, 7))) + '월 스케줄 · ' + h(r.upAt) + ' ' + h(r.upBy) + ' 올림' : '이 달 근무 스케줄이 아직 없습니다') +
-    (up ? ' · <button class="btn sm" onclick="S.atup=null;go(\'attup\')" style="margin-left:4px">엑셀 올리기</button>' : '') + '</div></div>';
+    (up ? ' · <button class="btn sm" onclick="S.atup=null;go(\'attup\')" style="margin-left:var(--sp-1)">엑셀 올리기</button>' : '') + '</div></div>';
   if (!r.people.length) return topbar('서류작업 ›', '출근현황') + '<div class="wrap list">' + head + '<div class="banner b-gray">' + (up ? '[엑셀 올리기]로 이 달 근무 스케줄 파일을 넣어 주세요.' : '소장·부소장·총무가 이 달 근무 스케줄 엑셀을 올리면 보입니다.') + '</div>' +
     '<div class="nwbar"><button class="btn" onclick="atCal()">날짜 바꾸기</button></div></div>';
   return topbar('서류작업 ›', '출근현황') + '<div class="wrap list">' + head +
@@ -1694,10 +1747,10 @@ function atCal() {
     g += '<button class="' + (wd === 0 ? 'sun ' : wd === 6 ? 'sat ' : '') + (ds === r.date ? 'on ' : '') + (ds === r.today ? 'today' : '') + '" onclick="closeDialog();S.at=null;render();loadAtt(\'' + ds + '\')" aria-label="' + d + '일"><b>' + d + '</b><small>' + (r.ju.length ? '주 ' + r.ju[d - 1] : '') + '</small></button>';
   }
   const mv = k => { const t = new Date(Date.UTC(y, m - 1 + k, 1)).toISOString().slice(0, 10); return 'closeDialog();S.at=null;render();loadAtt(\'' + t + '\').then(()=>S.at&&atCal())'; };
-  dialog('<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><button class="btn sm" onclick="' + mv(-1) + '" aria-label="앞 달">‹</button><b style="flex:1;text-align:center;font-size:17px">' + y + '년 ' + m + '월</b><button class="btn sm" onclick="' + mv(1) + '" aria-label="다음 달">›</button><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
+  dialog('<div style="display:flex;align-items:center;gap:var(--sp-2);margin-bottom:var(--sp-3)"><button class="btn sm" onclick="' + mv(-1) + '" aria-label="앞 달">‹</button><b style="flex:1;text-align:center;font-size:var(--size-l)">' + y + '년 ' + m + '월</b><button class="btn sm" onclick="' + mv(1) + '" aria-label="다음 달">›</button><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
     '<div class="atcal">' + g + '</div>' +
     (r.months.length ? '<div class="nwmeta">스케줄이 있는 달: ' + r.months.map(h).join(', ') + ' · 「주 n」 = 그날 주간 근무 인원</div>' : '') +
-    '<button class="btn" style="width:100%;margin-top:10px" onclick="closeDialog();S.at=null;render();loadAtt(\'\')">오늘 근무일로</button>');
+    '<button class="btn" style="width:100%;margin-top:var(--sp-2)" onclick="closeDialog();S.at=null;render();loadAtt(\'\')">오늘 근무일로</button>');
 }
 /* ── 종합업무일지 (WS_종합업무일지 15.3.22, 결정 116) — PC 전용, B4 가로 한 장 ── */
 const LG_METERS = [['시수', '에비뉴엘 시수'], ['중수', '에비뉴엘 중수'], ['식당시수', '직원식당 시수'], ['식당온수', '직원식당 온수'], ['식당가스', '직원식당 가스'], ['식당분전반', '직원식당 분전반'],
@@ -1809,12 +1862,12 @@ function lgState() {
 function lgZoom() { return Math.min(1, (Math.min(window.innerWidth, 1680) - 34) / 1589); }
 function renderLog() {
   const g = S.lg;
-  if (!lgPc()) return topbar('서류작업 ›', '종합업무일지') + '<div class="wrap"><div class="card lgpc" style="padding:24px"><b>PC에서 열어 주세요</b><p style="color:var(--sub);margin:8px 0 0">종합업무일지는 B4 한 장 크기라 PC 화면(가로 1024px 이상)에서만 씁니다.</p></div></div>';
+  if (!lgPc()) return topbar('서류작업 ›', '종합업무일지') + '<div class="wrap"><div class="card lgpc" style="padding:var(--sp-6)"><b>PC에서 열어 주세요</b><p style="color:var(--sub);margin:var(--sp-2) 0 0">종합업무일지는 B4 한 장 크기라 PC 화면(가로 1024px 이상)에서만 씁니다.</p></div></div>';
   if (!g) return topbar('서류작업 ›', '종합업무일지') + '<div class="wrap list"><div class="banner b-gray">불러오는 중…</div></div>';
   const md = d => Number(d.slice(5, 7)) + '월 ' + Number(d.slice(8, 10)) + '일 (' + '일월화수목금토'[new Date(d + 'T12:00:00+09:00').getDay()] + ')';
   return topbar('서류작업 ›', '종합업무일지') + '<div class="lgwrap">' +
-    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><button class="nwdate" data-date="' + h(g.day) + '" onclick="lgCal()" aria-label="일자 바꾸기">' + ICON.cal + md(g.day) + '</button>' +
-    (g.day < g.srv.workDay ? '<span style="font-size:13px;color:var(--muted)">지난 날짜입니다 · 고치면 저장할 수 있습니다</span>' : '') + '</div>' +
+    '<div style="display:flex;align-items:center;gap:var(--sp-2);margin-bottom:var(--sp-3)"><button class="nwdate" data-date="' + h(g.day) + '" onclick="lgCal()" aria-label="일자 바꾸기">' + ICON.cal + md(g.day) + '</button>' +
+    (g.day < g.srv.workDay ? '<span style="font-size:var(--size-s);color:var(--muted)">지난 날짜입니다 · 고치면 저장할 수 있습니다</span>' : '') + '</div>' +
     '<div id="lgSheet" style="zoom:' + lgZoom() + '">' + lgSheet(true) + '</div>' +
     '<div class="nwbar" id="lgBar"><span id="lgState">' + lgState() + '</span>' +
     '<button class="btn" onclick="lgPrint()">' + ICON.print + '인쇄 (B4)</button>' +
@@ -1948,7 +2001,7 @@ function ahuZoom() { return Math.min(1, (Math.min(window.innerWidth, 1680) - 34)
 function renderAhu() {
   const g = S.ahu;
   if (!g) return topbar('서류작업 ›', '공조기 환기온도') + '<div class="wrap list"><div class="banner b-gray">불러오는 중…</div></div>';
-  const past = g.day < g.srv.workDay ? '<span style="font-size:13px;color:var(--muted)">지난 날짜입니다 · 고치면 저장할 수 있습니다</span>' : '';
+  const past = g.day < g.srv.workDay ? '<span style="font-size:var(--size-s);color:var(--muted)">지난 날짜입니다 · 고치면 저장할 수 있습니다</span>' : '';
   const pv = g.srv.rec && g.srv.rec.pdf && !ahuDirty() ? [g.srv.rec.pdf.url, { name: g.day + '_공조기환기온도.pdf', sub: '서류작업 › 공조기 환기온도 ›' }] : null;
   const pdf = pv ? pdfBtn('', ICON.file + 'PDF 열기', pv[0], pv[1]) : '';   // 휴대폰은 아래 줄이 좁아 위 글자 링크로
   const bar = '<div class="nwbar" id="ahuBar"><span id="ahuState">' + ahuState() + '</span>' +
@@ -1957,14 +2010,14 @@ function renderAhu() {
     '<button class="btn green" id="ahuPdf" onclick="ahuPdf()"' + (g.busy ? ' disabled' : '') + '>' + (g.pdfBusy ? 'PDF 만드는 중…' : 'PDF 만들기') + '</button></div>';
   const date = '<button class="nwdate" data-date="' + h(g.day) + '" onclick="ahuCal()" aria-label="일자 바꾸기">' + ICON.cal + ahuMd(g.day) + '</button>';
   if (lgPc()) return topbar('서류작업 ›', '공조기 환기온도') + '<div class="lgwrap">' +
-    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">' + date + (past || '<span style="font-size:13px;color:var(--muted)">칸을 눌러 바로 입력 · 휴대폰에서 넣은 값도 여기 보임</span>') + '</div>' +
+    '<div style="display:flex;align-items:center;gap:var(--sp-2);margin-bottom:var(--sp-3)">' + date + (past || '<span style="font-size:var(--size-s);color:var(--muted)">칸을 눌러 바로 입력 · 휴대폰에서 넣은 값도 여기 보임</span>') + '</div>' +
     '<div id="ahuSheet" style="zoom:' + ahuZoom() + '">' + ahuSheet(true) + '</div>' + bar + '</div>';
   const t = g.slot, o = t === '16' ? '12' : '';
   const rows = g.srv.units.map(u => '<div class="hvr"><div class="nm"><b>' + h(u.no) + '</b><i>' + h(u.room) + '</i><small>' + h(u.place) + '</small>' +
     (o ? '<span class="prev">12:00 · ' + (g.v.temps[u.no][o] !== '' ? h(g.v.temps[u.no][o]) + '℃' : '—') + '</span>' : '') + '</div>' +
     '<label class="hvin">' + ahuBox('data-u="' + h(u.no) + '" data-t="' + t + '" aria-label="' + h(u.no) + ' 환기온도"', g.v.temps[u.no][t], 'inp') + '<span>℃</span></label></div>').join('');
   return topbar('서류작업 ›', '공조기 환기온도') + '<div class="wrap list">' +
-    '<div class="card" style="padding:16px"><div class="hvhd"><b>AHU 환기온도 점검일지</b>' + date + '</div>' +
+    '<div class="card" style="padding:var(--sp-4)"><div class="hvhd"><b>AHU 환기온도 점검일지</b>' + date + '</div>' +
     '<div class="hvmeta">' + (ahuLong(g.day) ? '<span class="hvchip">연장영업</span>' : '') + '점검자 ' + h(ahuWho()) + (pv ? ' · ' + pdfBtn(null, 'PDF 열기', pv[0], pv[1]) : '') + (past ? '<br>' + past : '') + '</div>' +
     '<div class="seg hvtime" role="group" aria-label="점검 시각">' + ['12', '16'].map(x => '<button type="button" class="' + (x === t ? 'on' : '') + '" aria-pressed="' + (x === t) + '" onclick="ahuSlot(\'' + x + '\')">' + x + ':00<small id="ahuCnt' + x + '">' + ahuCount(x) + '</small></button>').join('') + '</div>' +
     '<div class="hvw">' + AHU_OUT.map(x => '<label>' + x[1] + '<span class="hvin">' + ahuBox('data-k="' + x[0] + t + '"', g.v[x[0] + t], 'inp') + '<span>' + x[2] + '</span></span></label>').join('') + '</div>' +
@@ -2026,19 +2079,19 @@ function pickDraw(ym) {
     g += '<button class="' + (wd === 0 ? 'sun ' : wd === 6 ? 'sat ' : '') + (ds === o.cur ? 'on ' : '') + (ds === o.home ? 'today' : '') + '" data-d="' + ds + '" onclick="pickGo(\'' + ds + '\')" aria-label="' + m + '월 ' + d + '일"' + (o.max && ds > o.max ? ' disabled' : '') + '><b>' + d + '</b></button>';
   }
   const mv = k => new Date(Date.UTC(y, m - 1 + k, 1)).toISOString().slice(0, 7), nx = mv(1);
-  dialog('<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><button class="btn sm" onclick="pickDraw(\'' + mv(-1) + '\')" aria-label="앞 달">‹</button><b style="flex:1;text-align:center;font-size:17px">' + y + '년 ' + m + '월</b>' +
+  dialog('<div style="display:flex;align-items:center;gap:var(--sp-2);margin-bottom:var(--sp-3)"><button class="btn sm" onclick="pickDraw(\'' + mv(-1) + '\')" aria-label="앞 달">‹</button><b style="flex:1;text-align:center;font-size:var(--size-l)">' + y + '년 ' + m + '월</b>' +
     '<button class="btn sm" onclick="pickDraw(\'' + nx + '\')" aria-label="다음 달"' + (o.max && nx > o.max.slice(0, 7) ? ' disabled' : '') + '>›</button><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
-    '<div class="atcal">' + g + '</div><button class="btn" style="width:100%;margin-top:10px" onclick="pickGo(\'' + o.home + '\')">' + h(o.homeLbl) + '</button>');
+    '<div class="atcal">' + g + '</div><button class="btn" style="width:100%;margin-top:var(--sp-2)" onclick="pickGo(\'' + o.home + '\')">' + h(o.homeLbl) + '</button>');
 }
 function pickGo(ds) { closeDialog(); PICK.fn(ds); }
 /* 그날 상태 고르기 (6장) */
 function atFixOpen(i, keep) {
   const r = S.at.r, x = r.people[i]; if (!keep) S.at.pick = x.v;
   const opts = () => AT_CODES.map(c => '<button class="attag s-' + atCls(c) + (c === S.at.pick ? ' sel' : '') + '" aria-pressed="' + (c === S.at.pick) + '" onclick="S.at.pick=' + h(JSON.stringify(c)) + ';atFixOpen(' + i + ',1)">' + atLbl(c) + '</button>').join('');
-  dialog('<div style="display:flex;align-items:center;margin-bottom:4px"><div class="fname"><b style="font-size:17px">' + h(x.name) + ' · ' + h(atKo(r.date)) + '</b><small>엑셀 값: ' + h(atLbl(x.raw)) + (x.fix ? ' · 고침: ' + h(x.fix.by) + ' ' + h(x.fix.at) : '') + ' → 바꿀 상태를 고르세요 (이날만)</small></div><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
-    '<div class="atopts" style="margin-top:10px">' + opts() + '</div>' +
+  dialog('<div style="display:flex;align-items:center;margin-bottom:var(--sp-1)"><div class="fname"><b style="font-size:var(--size-l)">' + h(x.name) + ' · ' + h(atKo(r.date)) + '</b><small>엑셀 값: ' + h(atLbl(x.raw)) + (x.fix ? ' · 고침: ' + h(x.fix.by) + ' ' + h(x.fix.at) : '') + ' → 바꿀 상태를 고르세요 (이날만)</small></div><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
+    '<div class="atopts" style="margin-top:var(--sp-2)">' + opts() + '</div>' +
     '<div class="nwmeta">고친 사람·시각이 남고, 엑셀을 다시 올려도 이날 고친 값은 그대로입니다.</div>' +
-    '<div style="display:flex;gap:8px;margin-top:12px">' + (x.fix ? '<button class="btn" style="flex:1" onclick="atFixSave(' + i + ',\'(되돌림)\')">엑셀 값으로 되돌리기</button>' : '') +
+    '<div style="display:flex;gap:var(--sp-2);margin-top:var(--sp-3)">' + (x.fix ? '<button class="btn" style="flex:1" onclick="atFixSave(' + i + ',\'(되돌림)\')">엑셀 값으로 되돌리기</button>' : '') +
     '<button class="btn pri big" style="flex:1" onclick="atFixSave(' + i + ',S.at.pick)"' + (S.at.pick === x.v ? ' disabled' : '') + '>' + h(atLbl(S.at.pick)) + '(으)로 바꾸기</button></div>');
 }
 async function atFixSave(i, v) {
@@ -2049,10 +2102,10 @@ async function atFixSave(i, v) {
 function atHolOpen(i, sel) {
   const r = S.at.r, x = r.people[i], cur = sel || (x.hol ? x.hol.split(',') : []), ed = r.canBoss;
   S.at.hol = cur;
-  dialog('<div style="display:flex;align-items:center;margin-bottom:4px"><div class="fname"><b style="font-size:17px">' + h(x.name) + ' · ' + h(atRole(x.role)) + ' — 기본 휴일</b><small>' + (ed ? '매주 쉬는 요일을 고르세요 (여러 개)' : '소장·부소장·총무만 고칠 수 있습니다') + '</small></div><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
-    '<div class="atwk" style="margin-top:10px">' + WEEK.map(w => '<button class="' + (cur.indexOf(w) !== -1 ? 'sel' : '') + '" aria-pressed="' + (cur.indexOf(w) !== -1) + '"' + (ed ? ' onclick="atHolTog(' + i + ',\'' + w + '\')"' : ' disabled') + ' style="' + (w === '일' ? 'color:var(--red)' : w === '토' ? 'color:var(--blue)' : '') + '">' + w + '</button>').join('') + '</div>' +
-    '<div class="atchk" style="margin-top:8px">지금: <b>' + (cur.length ? cur.join(' · ') : '없음') + '</b><br>엑셀에서 이 요일이 빈 칸(출근)이면 「휴」로 봅니다. 엑셀에 다른 값(연·9-7 등)이 있으면 엑셀 값이 먼저입니다.</div>' +
-    '<div style="display:flex;gap:8px;margin-top:12px"><button class="btn" style="flex:1" onclick="closeDialog()">닫기</button>' + (ed ? '<button class="btn pri" style="flex:1" onclick="atHolSave(' + i + ')">저장</button>' : '') + '</div>');
+  dialog('<div style="display:flex;align-items:center;margin-bottom:var(--sp-1)"><div class="fname"><b style="font-size:var(--size-l)">' + h(x.name) + ' · ' + h(atRole(x.role)) + ' — 기본 휴일</b><small>' + (ed ? '매주 쉬는 요일을 고르세요 (여러 개)' : '소장·부소장·총무만 고칠 수 있습니다') + '</small></div><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
+    '<div class="atwk" style="margin-top:var(--sp-2)">' + WEEK.map(w => '<button class="' + (cur.indexOf(w) !== -1 ? 'sel' : '') + '" aria-pressed="' + (cur.indexOf(w) !== -1) + '"' + (ed ? ' onclick="atHolTog(' + i + ',\'' + w + '\')"' : ' disabled') + ' style="' + (w === '일' ? 'color:var(--red)' : w === '토' ? 'color:var(--blue)' : '') + '">' + w + '</button>').join('') + '</div>' +
+    '<div class="atchk" style="margin-top:var(--sp-2)">지금: <b>' + (cur.length ? cur.join(' · ') : '없음') + '</b><br>엑셀에서 이 요일이 빈 칸(출근)이면 「휴」로 봅니다. 엑셀에 다른 값(연·9-7 등)이 있으면 엑셀 값이 먼저입니다.</div>' +
+    '<div style="display:flex;gap:var(--sp-2);margin-top:var(--sp-3)"><button class="btn" style="flex:1" onclick="closeDialog()">닫기</button>' + (ed ? '<button class="btn pri" style="flex:1" onclick="atHolSave(' + i + ')">저장</button>' : '') + '</div>');
 }
 function atHolTog(i, w) { const c = S.at.hol.slice(), k = c.indexOf(w); if (k === -1) c.push(w); else c.splice(k, 1); atHolOpen(i, c); }
 async function atHolSave(i) {
@@ -2080,10 +2133,10 @@ async function atImage() {
     finally { window.scrollTo(0, keepY); }
     const name = r.date + '_출근현황.png';
     const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
-    dialog('<div style="display:flex;align-items:center;margin-bottom:10px"><div class="fname"><b style="font-size:17px">그림으로 저장</b><small>' + h(name) + '</small></div><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
+    dialog('<div style="display:flex;align-items:center;margin-bottom:var(--sp-2)"><div class="fname"><b style="font-size:var(--size-l)">그림으로 저장</b><small>' + h(name) + '</small></div><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
       '<img class="nwimg" id="atImg" src="' + url + '" alt="출근현황 ' + h(r.date) + '">' +
-      '<div class="banner b-info" style="margin-top:10px">내려받기가 되지 않으면 위 그림을 <b>길게 눌러 「이미지 저장」</b>을 고르세요.</div>' +
-      '<a class="btn pri big" style="width:100%;margin-top:10px" href="' + url + '" download="' + h(name) + '">다시 내려받기</a>');
+      '<div class="banner b-info" style="margin-top:var(--sp-2)">내려받기가 되지 않으면 위 그림을 <b>길게 눌러 「이미지 저장」</b>을 고르세요.</div>' +
+      '<a class="btn pri big" style="width:100%;margin-top:var(--sp-2)" href="' + url + '" download="' + h(name) + '">다시 내려받기</a>');
   } catch (e) { toast('그림을 만들지 못했습니다: ' + (e && e.message ? e.message : e)); }
   finally { wrap.remove(); if (btn) { btn.disabled = false; btn.innerHTML = ICON.dl + '그림으로 저장'; } }
 }
@@ -2138,19 +2191,19 @@ async function atFile(el) {
 }
 function renderAttUp() {
   const u = S.atup || {};
-  let body = '<div class="card" style="padding:16px"><div class="nwhead"><b>근무 스케줄 엑셀 올리기</b></div>' +
-    '<label class="btn" style="width:100%;min-height:64px;border-style:dashed;color:var(--blue);margin-top:10px">' + ICON.clip + '엑셀 파일(.xlsx) 고르기<input type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onchange="atFile(this)" style="position:absolute;width:1px;height:1px;opacity:0"></label>';
+  let body = '<div class="card" style="padding:var(--sp-4)"><div class="nwhead"><b>근무 스케줄 엑셀 올리기</b></div>' +
+    '<label class="btn" style="width:100%;min-height:64px;border-style:dashed;color:var(--blue);margin-top:var(--sp-2)">' + ICON.clip + '엑셀 파일(.xlsx) 고르기<input type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onchange="atFile(this)" style="position:absolute;width:1px;height:1px;opacity:0"></label>';
   if (u.busy && !u.rows) body += '<div class="nwmeta"><span class="spin"></span> ' + h(u.name) + ' 읽는 중…</div>';
-  else if (u.error) body += '<div class="banner b-red" style="margin-top:10px">' + h(u.error) + '</div>';
+  else if (u.error) body += '<div class="banner b-red" style="margin-top:var(--sp-2)">' + h(u.error) + '</div>';
   else if (u.rows) {
     const named = u.rows.filter(x => x.name).length, unk = Object.keys(u.unknown);
-    body += '<div class="atchk" style="margin-top:10px">' + ICON.file + h(u.name) + ' · ' + (u.ym ? '<b>' + h(ymLabel(u.ym)) + '</b> (제목 줄에서 읽음)' : '<span class="w">몇 월인지 못 읽음 — 아래에서 고르세요</span>') + '<br>' +
+    body += '<div class="atchk" style="margin-top:var(--sp-2)">' + ICON.file + h(u.name) + ' · ' + (u.ym ? '<b>' + h(ymLabel(u.ym)) + '</b> (제목 줄에서 읽음)' : '<span class="w">몇 월인지 못 읽음 — 아래에서 고르세요</span>') + '<br>' +
       ICON.ok + named + '명' + (u.rows.length > named ? ' + 공석 ' + (u.rows.length - named) + '줄' : '') + ' × ' + u.n + '일 읽음 · 빈 칸 = 출근<br>' +
       (u.bad == null ? '<span class="w">' + ICON.warn + '엑셀 「주간근무총원」 줄을 못 찾아 맞춰 보지 못했습니다</span>' : u.bad.length ? '<span class="w">' + ICON.warn + '엑셀 「주간근무총원」과 다른 날: ' + u.bad.join(', ') + '일</span>' : ICON.ok + '엑셀 「주간근무총원」 줄과 앱 계산 ' + u.n + '일 모두 같음') +
       unk.map(k => '<br><span class="w">' + ICON.warn + '처음 보는 기호 「' + h(k) + '」 (' + h(u.unknown[k].filter((x, i, a) => a.indexOf(x) === i).join(', ')) + ' ' + u.unknown[k].length + '칸) → 휴무로 셈</span>').join('') + '</div>' +
-      '<label class="nwmeta" style="display:flex;align-items:center;gap:8px">저장할 달 <input type="month" class="inp" style="width:auto" value="' + h(u.ym) + '" onchange="S.atup.ym=this.value"></label></div>' +
-      '<div class="card" style="padding:16px"><div class="nwhead"><b>미리보기 · ' + u.day + '일</b><button class="btn sm" onclick="S.atup.day=Math.max(1,S.atup.day-1);render()" aria-label="앞 날">‹</button><button class="btn sm" onclick="S.atup.day=Math.min(S.atup.n,S.atup.day+1);render()" aria-label="다음 날">›</button></div>' +
-      '<table class="atst" style="margin-top:10px"><tr><th>구역</th><th>직책</th><th>이름</th><th>' + u.day + '일</th></tr>' +
+      '<label class="nwmeta" style="display:flex;align-items:center;gap:var(--sp-2)">저장할 달 <input type="month" class="inp" style="width:auto" value="' + h(u.ym) + '" onchange="S.atup.ym=this.value"></label></div>' +
+      '<div class="card" style="padding:var(--sp-4)"><div class="nwhead"><b>미리보기 · ' + u.day + '일</b><button class="btn sm" onclick="S.atup.day=Math.max(1,S.atup.day-1);render()" aria-label="앞 날">‹</button><button class="btn sm" onclick="S.atup.day=Math.min(S.atup.n,S.atup.day+1);render()" aria-label="다음 날">›</button></div>' +
+      '<table class="atst" style="margin-top:var(--sp-2)"><tr><th>구역</th><th>직책</th><th>이름</th><th>' + u.day + '일</th></tr>' +
       u.rows.map(x => '<tr><td>' + h(x.sec) + '</td><td>' + h(atRole(x.role)) + '</td><td>' + (x.name ? '<b>' + h(x.name) + '</b>' : '<span class="z">공석</span>') + '</td><td>' + (x.name ? '<span class="attag s-' + atCls(x.days[u.day - 1]) + '">' + h(atLbl(x.days[u.day - 1])) + '</span>' : '') + '</td></tr>').join('') + '</table>' +
       '<div class="nwmeta">같은 달을 다시 올리면 그 달을 새 것으로 바꿉니다. 그날 고친 것과 기본 휴일은 그대로 둡니다. (기본 휴일은 미리보기에 안 보임)</div></div>';
   } else body += '<div class="nwmeta">매월 초 만드는 근무 스케줄 엑셀 파일을 고르세요. 첫 번째 시트를 읽습니다.</div></div>';
@@ -2171,9 +2224,9 @@ async function atUpSave() {
 /* ── 점검 ── */
 function renderInspect() {
   return topbar('업무지원 ›', '점검') + '<div class="wrap list">' +
-    '<button class="row" onclick="go(\'fire\')"><span class="ico" style="background:var(--blue-bg);color:var(--blue);font-weight:600">소</span><span class="fname"><b style="font-size:16px">소화기 점검</b><small>QR 관리·인쇄 · 월별 점검 현황</small></span>' + ICON.chev + '</button>' +
-    '<button class="row" onclick="openEh()"><span class="ico" style="background:var(--orange-bg);color:var(--orange);font-weight:600">전</span><span class="fname"><b style="font-size:16px">전열필증</b><small>층·매장별 전열기기 관리 · 신고필증' + (CAN_PRINT ? ' 출력' : ' (출력은 PC에서)') + '</small></span>' + ICON.chev + '</button>' +
-    '<button class="row" onclick="openCs()"><span class="ico" style="background:var(--green-bg);color:var(--green);font-weight:600">공</span><span class="fname"><b style="font-size:16px">공사장 점검</b><small>공사 현장 안전 순찰 · 사진 · 날짜별 현장별 PDF</small></span>' + ICON.chev + '</button>' +
+    '<button class="row" onclick="go(\'fire\')"><span class="ico" style="background:var(--blue-bg);color:var(--blue);font-weight:600">소</span><span class="fname"><b style="font-size:var(--size-m)">소화기 점검</b><small>QR 관리·인쇄 · 월별 점검 현황</small></span>' + ICON.chev + '</button>' +
+    '<button class="row" onclick="openEh()"><span class="ico" style="background:var(--orange-bg);color:var(--orange);font-weight:600">전</span><span class="fname"><b style="font-size:var(--size-m)">전열필증</b><small>층·매장별 전열기기 관리 · 신고필증' + (CAN_PRINT ? ' 출력' : ' (출력은 PC에서)') + '</small></span>' + ICON.chev + '</button>' +
+    '<button class="row" onclick="openCs()"><span class="ico" style="background:var(--green-bg);color:var(--green);font-weight:600">공</span><span class="fname"><b style="font-size:var(--size-m)">공사장 점검</b><small>공사 현장 안전 순찰 · 사진 · 날짜별 현장별 PDF</small></span>' + ICON.chev + '</button>' +
     '</div>';
 }
 
@@ -2200,11 +2253,11 @@ function renderFire() {
   const pct = c.total ? Math.round(done / c.total * 100) : 0;
   const st = f ? { ym: f.ym, curYm: f.ym, isCurrent: true, day: f.day, window: f.window } : null;
   return topbar('점검 ›', '소화기 점검') + '<div class="wrap list">' +
-    '<div class="card" style="padding:14px 16px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;justify-content:space-between;font-size:14px"><span style="color:var(--muted)">이번 달 점검</span><span><b style="color:var(--green)">' + done + '</b> / ' + c.total + '대</span></div>' +
+    '<div class="card" style="padding:var(--sp-3) var(--sp-4);display:flex;flex-direction:column;gap:var(--sp-2)"><div style="display:flex;justify-content:space-between;font-size:var(--size-m)"><span style="color:var(--muted)">이번 달 점검</span><span><b style="color:var(--green)">' + done + '</b> / ' + c.total + '대</span></div>' +
     '<div class="bar" style="height:8px"><span style="width:' + pct + '%;background:var(--green)"></span></div></div>' +
     periodBanner(st, c) +
-    '<button class="row" onclick="openQr()"><span class="ico" style="background:var(--blue-bg);color:var(--blue);width:48px;height:48px">QR</span><span class="fname"><b style="font-size:17px">① 소화기 QR 관리 · 인쇄</b><small>매장별 소화기 등록 · 삭제 · QR' + (CAN_PRINT ? ' · 출력' : ' (출력은 PC에서)') + '</small></span>' + ICON.chev + '</button>' +
-    '<button class="row" onclick="openStatus()"><span class="ico" style="background:var(--green-bg);color:var(--green);width:48px;height:48px">✓</span><span class="fname"><b style="font-size:17px">② 매장별 소화기 점검 현황</b><small>월별 · 층별(B1~6F) · 매장별</small></span>' + ICON.chev + '</button>' +
+    '<button class="row" onclick="openQr()"><span class="ico" style="background:var(--blue-bg);color:var(--blue);width:48px;height:48px">QR</span><span class="fname"><b style="font-size:var(--size-l)">① 소화기 QR 관리 · 인쇄</b><small>매장별 소화기 등록 · 삭제 · QR' + (CAN_PRINT ? ' · 출력' : ' (출력은 PC에서)') + '</small></span>' + ICON.chev + '</button>' +
+    '<button class="row" onclick="openStatus()"><span class="ico" style="background:var(--green-bg);color:var(--green);width:48px;height:48px">✓</span><span class="fname"><b style="font-size:var(--size-l)">② 매장별 소화기 점검 현황</b><small>월별 · 층별(B1~6F) · 매장별</small></span>' + ICON.chev + '</button>' +
     '</div>';
 }
 
@@ -2260,8 +2313,8 @@ function drawQrs() {
 }
 function bigQr(id) {
   const i = S.qr.items.find(x => x.id === id);
-  dialog('<div style="display:flex;flex-direction:column;align-items:center;gap:12px"><b style="font-size:18px">' + h(i.name) + '</b><small style="color:var(--muted)">' + h(i.floor) + ' · ' + h(i.id) + '</small>' +
-    '<div id="bigqr" style="background:#fff;padding:12px"></div>' +
+  dialog('<div style="display:flex;flex-direction:column;align-items:center;gap:var(--sp-3)"><b style="font-size:var(--size-l)">' + h(i.name) + '</b><small style="color:var(--muted)">' + h(i.floor) + ' · ' + h(i.id) + '</small>' +
+    '<div id="bigqr" style="background:var(--white);padding:var(--sp-3)"></div>' +
     '<small style="color:var(--muted);text-align:center">휴대폰 카메라로 이 화면을 찍으면 점검 입력 페이지가 열립니다 (테스트용)</small>' +
     '<a class="btn" href="' + h(qrUrl(i.token)) + '" target="_blank" rel="noopener">입력 페이지 열기</a>' +
     '<button class="btn big pri" style="width:100%" onclick="closeDialog()">닫기</button></div>');
@@ -2269,13 +2322,13 @@ function bigQr(id) {
 }
 function addDialog() {
   const stores = S.qr ? [...new Set(S.qr.items.map(i => i.store))] : [];
-  dialog('<h2 style="margin:0 0 12px;font-size:18px">소화기 등록</h2>' +
-    '<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--sub);margin-bottom:12px">층<select id="aFloor" class="inp">' + FLOORS.map(f => '<option' + (f === S.floor ? ' selected' : '') + '>' + f + '</option>').join('') + '</select></label>' +
-    '<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--sub);margin-bottom:12px">매장명<input id="aStore" class="inp" list="storeList" maxlength="30" placeholder="예: 샤넬뷰티"><datalist id="storeList">' + stores.map(s => '<option value="' + h(s) + '">').join('') + '</datalist></label>' +
-    '<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--sub);margin-bottom:8px">몇 대를 추가할까요?<input id="aCount" class="inp" type="number" min="1" max="20" value="1" inputmode="numeric"></label>' +
+  dialog('<h2 style="margin:0 0 var(--sp-3);font-size:var(--size-l)">소화기 등록</h2>' +
+    '<label style="display:flex;flex-direction:column;gap:var(--sp-1);font-size:var(--size-s);color:var(--sub);margin-bottom:var(--sp-3)">층<select id="aFloor" class="inp">' + FLOORS.map(f => '<option' + (f === S.floor ? ' selected' : '') + '>' + f + '</option>').join('') + '</select></label>' +
+    '<label style="display:flex;flex-direction:column;gap:var(--sp-1);font-size:var(--size-s);color:var(--sub);margin-bottom:var(--sp-3)">매장명<input id="aStore" class="inp" list="storeList" maxlength="30" placeholder="예: 샤넬뷰티"><datalist id="storeList">' + stores.map(s => '<option value="' + h(s) + '">').join('') + '</datalist></label>' +
+    '<label style="display:flex;flex-direction:column;gap:var(--sp-1);font-size:var(--size-s);color:var(--sub);margin-bottom:var(--sp-2)">몇 대를 추가할까요?<input id="aCount" class="inp" type="number" min="1" max="20" value="1" inputmode="numeric"></label>' +
     '<small style="color:var(--muted)">이름은 「매장명-소화기1」처럼 이어서 붙습니다.</small>' +
-    '<div id="aMsg" role="alert" style="color:var(--red);font-size:13px;min-height:18px;margin-top:6px"></div>' +
-    '<div style="display:flex;gap:10px;margin-top:8px"><button class="btn big" style="flex:1" onclick="closeDialog()">취소</button><button id="aBtn" class="btn big pri" style="flex:2" onclick="doAdd()">등록하고 QR 만들기</button></div>');
+    '<div id="aMsg" role="alert" style="color:var(--red);font-size:var(--size-s);min-height:18px;margin-top:var(--sp-1)"></div>' +
+    '<div style="display:flex;gap:var(--sp-2);margin-top:var(--sp-2)"><button class="btn big" style="flex:1" onclick="closeDialog()">취소</button><button id="aBtn" class="btn big pri" style="flex:2" onclick="doAdd()">등록하고 QR 만들기</button></div>');
 }
 async function doAdd() {
   const d = { floor: $('aFloor').value, store: $('aStore').value, count: $('aCount').value };
@@ -2289,9 +2342,9 @@ async function doAdd() {
 function delDialog() {
   const ids = Object.keys(S.sel).filter(k => S.sel[k]);
   const names = S.qr.items.filter(i => ids.indexOf(i.id) !== -1).map(i => i.name);
-  dialog('<h2 style="margin:0 0 8px;font-size:18px">소화기 ' + ids.length + '대 삭제</h2><p style="margin:0 0 8px;font-size:14px;line-height:1.6">' + names.map(h).join('<br>') + '</p>' +
-    '<p style="margin:0 0 12px;font-size:13px;color:var(--muted)">목록과 현황에서 빠지고, 붙어 있는 QR을 찍으면 「삭제된 QR」로 나옵니다. 지난달까지의 점검 기록은 남습니다.</p>' +
-    '<div style="display:flex;gap:10px"><button class="btn big" style="flex:1" onclick="closeDialog()">취소</button><button id="dBtn" class="btn big warn" style="flex:2" onclick="doDel()">삭제</button></div>');
+  dialog('<h2 style="margin:0 0 var(--sp-2);font-size:var(--size-l)">소화기 ' + ids.length + '대 삭제</h2><p style="margin:0 0 var(--sp-2);font-size:var(--size-m);line-height:1.6">' + names.map(h).join('<br>') + '</p>' +
+    '<p style="margin:0 0 var(--sp-3);font-size:var(--size-s);color:var(--muted)">목록과 현황에서 빠지고, 붙어 있는 QR을 찍으면 「삭제된 QR」로 나옵니다. 지난달까지의 점검 기록은 남습니다.</p>' +
+    '<div style="display:flex;gap:var(--sp-2)"><button class="btn big" style="flex:1" onclick="closeDialog()">취소</button><button id="dBtn" class="btn big warn" style="flex:2" onclick="doDel()">삭제</button></div>');
 }
 async function doDel() {
   const ids = Object.keys(S.sel).filter(k => S.sel[k]);
@@ -2343,18 +2396,18 @@ function printLabels() {
 }
 function renderPreview() {
   const P = S.pv, L = P.L, show = P.items.slice(0, 6);
-  dialog('<div style="display:flex;align-items:center;margin-bottom:10px"><div class="fname"><b style="font-size:17px">라벨 미리보기</b><small>' + P.items.length + '장 · ' + L.w + '×' + L.h + 'mm (실제 크기) · ' + labelDpi() + 'dpi</small></div><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
+  dialog('<div style="display:flex;align-items:center;margin-bottom:var(--sp-2)"><div class="fname"><b style="font-size:var(--size-l)">라벨 미리보기</b><small>' + P.items.length + '장 · ' + L.w + '×' + L.h + 'mm (실제 크기) · ' + labelDpi() + 'dpi</small></div><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
     '<div class="pvbox">' + show.map(i => labelHtml(i, L)).join('') + (P.items.length > show.length ? '<span class="pvmore">외 ' + (P.items.length - show.length) + '장</span>' : '') + '</div>' +
-    '<div style="font-size:13px;color:var(--sub);margin:12px 0 6px">라벨 크기 (가로 × 세로 mm)</div>' +
+    '<div style="font-size:var(--size-s);color:var(--sub);margin:var(--sp-3) 0 var(--sp-1)">라벨 크기 (가로 × 세로 mm)</div>' +
     '<div class="pvpre">' + LABEL_PRESETS.map(p => '<button class="btn sm' + (p[0] === L.w && p[1] === L.h ? ' pri' : '') + '" onclick="pvSize(' + p[0] + ',' + p[1] + ')">' + p[0] + '×' + p[1] + (p[0] === 50 && p[1] === 50 ? ' (지금 라벨)' : '') + '</button>').join('') + '</div>' +
-    '<div style="display:flex;gap:8px;align-items:center;margin-top:8px"><input id="pvW" class="inp" type="number" min="15" max="100" step="0.5" value="' + L.w + '" aria-label="가로 mm" style="width:90px"><span>×</span><input id="pvH" class="inp" type="number" min="15" max="100" step="0.5" value="' + L.h + '" aria-label="세로 mm" style="width:90px"><button class="btn sm" onclick="pvSize($(\'pvW\').value,$(\'pvH\').value)">적용</button></div>' +
+    '<div style="display:flex;gap:var(--sp-2);align-items:center;margin-top:var(--sp-2)"><input id="pvW" class="inp" type="number" min="15" max="100" step="0.5" value="' + L.w + '" aria-label="가로 mm" style="width:90px"><span>×</span><input id="pvH" class="inp" type="number" min="15" max="100" step="0.5" value="' + L.h + '" aria-label="세로 mm" style="width:90px"><button class="btn sm" onclick="pvSize($(\'pvW\').value,$(\'pvH\').value)">적용</button></div>' +
     '<details class="pvhelp"><summary>BIXOLON SLP-TX400 인쇄 설정</summary><ol>' +
       '<li>인쇄 창 <b>대상</b>: BIXOLON SLP-TX400</li>' +
       '<li><b>용지 크기</b>: ' + L.w + '×' + L.h + 'mm (없으면 아래 「드라이버에 용지 만들기」 한 번)</li>' +
       '<li><b>여백</b>: 없음 · <b>배율</b>: 기본(100%) · <b>머리글/바닥글</b>: 끔 · <b>배경 그래픽</b>: 켬</li>' +
       '<li>드라이버에 용지 만들기: Windows 설정 → 프린터 → SLP-TX400 → 인쇄 기본 설정 → 용지 <b>새로 만들기</b> → 가로 ' + L.w + ' · 세로 ' + L.h + 'mm, 여백 0 → 용지 종류 <b>갭(Gap, 라벨 사이 틈)</b></li>' +
       '<li>처음 한 번, 또는 라벨지를 바꾼 뒤 프린터 <b>FEED</b> 버튼으로 라벨 위치를 맞춥니다(캘리브레이션)</li></ol></details>' +
-    '<div style="display:flex;gap:8px;margin-top:12px"><button class="btn" onclick="closeDialog()">닫기</button><button class="btn" style="flex:1" onclick="doPrint(true)">1장 시험 인쇄</button><button id="pvGo" class="btn pri" style="flex:2" onclick="doPrint()">' + ICON.print + ' 인쇄 (' + P.items.length + '장)</button></div>');
+    '<div style="display:flex;gap:var(--sp-2);margin-top:var(--sp-3)"><button class="btn" onclick="closeDialog()">닫기</button><button class="btn" style="flex:1" onclick="doPrint(true)">1장 시험 인쇄</button><button id="pvGo" class="btn pri" style="flex:2" onclick="doPrint()">' + ICON.print + ' 인쇄 (' + P.items.length + '장)</button></div>');
 }
 function pvSize(w, hh) {
   w = Number(w); hh = Number(hh);
@@ -2402,16 +2455,16 @@ function renderStatus() {
     const fc = counts(it);
     const p = n => Math.round(n / fc.total * 100) + '%';
     const storesN = new Set(it.map(i => i.store)).size;
-    return '<button class="floor" onclick="openFloor(\'' + fl + '\')"><span class="elbow"></span><b style="width:34px;font-size:15px">' + fl + '</b>' +
-      '<span class="fname" style="gap:4px"><span class="bar"><span style="width:' + p(fc.ok) + ';background:var(--green)"></span><span style="width:' + p(fc.bad) + ';background:var(--orange)"></span><span style="width:' + p(fc.miss) + ';background:var(--red)"></span></span><small>매장 ' + storesN + ' · 소화기 ' + fc.total + '대</small></span>' +
+    return '<button class="floor" onclick="openFloor(\'' + fl + '\')"><span class="elbow"></span><b style="width:34px;font-size:var(--size-m)">' + fl + '</b>' +
+      '<span class="fname" style="gap:var(--sp-1)"><span class="bar"><span style="width:' + p(fc.ok) + ';background:var(--green)"></span><span style="width:' + p(fc.bad) + ';background:var(--orange)"></span><span style="width:' + p(fc.miss) + ';background:var(--navy)"></span></span><small>매장 ' + storesN + ' · 소화기 ' + fc.total + '대</small></span>' +
       (fc.miss ? '<span class="chip c-miss">미입력 ' + fc.miss + '</span>' : '') + (fc.bad ? '<span class="chip c-bad">이상 ' + fc.bad + '</span>' : '') +
-      '<b style="font-size:13px;color:var(--green)">' + (fc.ok + fc.bad) + '/' + fc.total + '</b>' + ICON.chev + '</button>';
+      '<b style="font-size:var(--size-s);color:var(--green)">' + (fc.ok + fc.bad) + '/' + fc.total + '</b>' + ICON.chev + '</button>';
   }).join('');
   return topbar('소화기 점검 ›', '월별 점검 현황') + '<div class="wrap list">' +
-    '<div class="mnav"><button class="btn" aria-label="이전 달" ' + (prev ? 'onclick="loadStatus(\'' + prev + '\')"' : 'disabled') + '>‹</button><div><b style="font-size:17px">' + ymLabel(st.ym) + '</b><small style="color:var(--muted)">입력 기간 ' + Number(st.ym.slice(5, 7)) + '/' + st.window.start + ' ~ ' + Number(st.ym.slice(5, 7)) + '/' + st.window.end + '</small></div><button class="btn" aria-label="다음 달" ' + (next ? 'onclick="loadStatus(\'' + next + '\')"' : 'disabled') + '>›</button></div>' +
+    '<div class="mnav"><button class="btn" aria-label="이전 달" ' + (prev ? 'onclick="loadStatus(\'' + prev + '\')"' : 'disabled') + '>‹</button><div><b style="font-size:var(--size-l)">' + ymLabel(st.ym) + '</b><small style="color:var(--muted)">입력 기간 ' + Number(st.ym.slice(5, 7)) + '/' + st.window.start + ' ~ ' + Number(st.ym.slice(5, 7)) + '/' + st.window.end + '</small></div><button class="btn" aria-label="다음 달" ' + (next ? 'onclick="loadStatus(\'' + next + '\')"' : 'disabled') + '>›</button></div>' +
     periodBanner(st, c) +
-    '<div class="card legend"><span><span class="dot" style="background:var(--green)"></span>점검완료 <b>' + c.ok + '</b></span><span><span class="dot" style="background:var(--orange)"></span>이상 있음 <b>' + c.bad + '</b></span><span><span class="dot" style="background:#9AA4B2"></span>점검 전 <b>' + c.wait + '</b></span><span><span class="dot" style="background:var(--red)"></span>미입력 <b>' + c.miss + '</b></span></div>' +
-    '<div class="card tree"><div class="tree-root">' + ymLabel(st.ym) + ' · 전체 ' + c.total + '대</div>' + (floors || '<div style="padding:12px 0;color:var(--muted);font-size:14px">이 달에 등록된 소화기가 없습니다.</div>') + '</div>' +
+    '<div class="card legend"><span><span class="dot" style="background:var(--green)"></span>점검완료 <b>' + c.ok + '</b></span><span><span class="dot" style="background:var(--orange)"></span>이상 있음 <b>' + c.bad + '</b></span><span><span class="dot" style="background:var(--line)"></span>점검 전 <b>' + c.wait + '</b></span><span><span class="dot" style="background:var(--navy)"></span>미입력 <b>' + c.miss + '</b></span></div>' +
+    '<div class="card tree"><div class="tree-root">' + ymLabel(st.ym) + ' · 전체 ' + c.total + '대</div>' + (floors || '<div style="padding:var(--sp-3) 0;color:var(--muted);font-size:var(--size-m)">이 달에 등록된 소화기가 없습니다.</div>') + '</div>' +
     '<button class="btn" onclick="loadStatus(\'' + st.ym + '\')">새로고침</button></div>';
 }
 function openFloor(fl) { S.floor = fl; go('floor'); }
@@ -2433,19 +2486,19 @@ function renderFloor() {
       }).join('') + '</div>';
   }).join('') : '<div class="banner b-gray">' + S.floor + '에 등록된 소화기가 없습니다.</div>';
   return topbar('월별 점검 현황 › ' + ymLabel(st.ym) + ' ›', S.floor + ' · 소화기 ' + it.length + '대') + '<div class="wrap list">' +
-    '<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px">' + chips + '</div>' + body +
+    '<div style="display:flex;gap:var(--sp-1);overflow-x:auto;padding-bottom:var(--sp-1)">' + chips + '</div>' + body +
     '<small style="text-align:center;color:var(--muted)">점검완료 · 이상 있음을 누르면 매장에서 입력한 내용을 봅니다</small></div>';
 }
 async function detail(id) {
-  dialog('<div style="display:flex;justify-content:center;padding:40px"><span class="spin" style="color:var(--blue);width:28px;height:28px"></span></div>');
+  dialog('<div style="display:flex;justify-content:center;padding:var(--sp-8)"><span class="spin" style="color:var(--blue);width:28px;height:28px"></span></div>');
   try {
     const r = await call('feDetail', id);
     if (!r.ok) { closeDialog(); toast(r.error); return; }
     const bad = r.state === '이상있음';
-    dialog('<div style="display:flex;align-items:center;margin-bottom:10px"><div class="fname"><b style="font-size:17px">' + h(r.name) + '</b><small>' + h(r.floor) + ' · ' + h(r.at) + ' 입력' + (r.late ? ' · 기한 후' : '') + '</small></div><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
+    dialog('<div style="display:flex;align-items:center;margin-bottom:var(--sp-2)"><div class="fname"><b style="font-size:var(--size-l)">' + h(r.name) + '</b><small>' + h(r.floor) + ' · ' + h(r.at) + ' 입력' + (r.late ? ' · 기한 후' : '') + '</small></div><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
       '<div class="ph43">' + (r.photo ? '<img src="' + r.photo + '" alt="압력계 사진">' : '<small>사진 없음</small>') + '</div>' +
-      '<div style="margin:10px 0"><span class="chip ' + (bad ? 'c-bad' : 'c-ok') + '">' + (bad ? '이상 있음' : '이상 없음') + '</span></div>' +
-      '<div style="display:flex;flex-direction:column;gap:8px"><small style="color:var(--muted)">' + (bad ? '이상 내용' : '외관·압력 이상무') + ' (손글씨)</small><div class="sig">' + (r.signA ? '<img src="' + r.signA + '" alt="문구 손글씨">' : '') + '</div>' +
+      '<div style="margin:var(--sp-2) 0"><span class="chip ' + (bad ? 'c-bad' : 'c-ok') + '">' + (bad ? '이상 있음' : '이상 없음') + '</span></div>' +
+      '<div style="display:flex;flex-direction:column;gap:var(--sp-2)"><small style="color:var(--muted)">' + (bad ? '이상 내용' : '외관·압력 이상무') + ' (손글씨)</small><div class="sig">' + (r.signA ? '<img src="' + r.signA + '" alt="문구 손글씨">' : '') + '</div>' +
       '<small style="color:var(--muted)">이름 (손글씨)</small><div class="sig">' + (r.signB ? '<img src="' + r.signB + '" alt="이름 손글씨">' : '') + '</div></div>');
   } catch (e) { closeDialog(); }
 }
@@ -2598,7 +2651,7 @@ function ehBody() {
     const fl = r.floors.find(f => f.code === r.floor);
     body = '<div class="ehfls" role="tablist">' + r.floors.map(f => '<button class="ehfl' + (f.code === r.floor ? ' on' : '') + '" role="tab" aria-selected="' + (f.code === r.floor) + '" onclick="ehFloorGo(\'' + f.code + '\')"><b>' + f.code + '</b><small>' + f.stores + '곳 · ' + f.items + '</small></button>').join('') + '</div>';
     if (hits) {
-      body += '<div class="list" style="margin-top:10px">' + (hits.length ? hits.slice(0, 50).map(n => '<button class="row" onclick="ehJump(\'' + n[0] + '\',\'' + n[2] + '\')"><span class="ehcnt">' + h(n[0]) + '</span><span class="fname"><b style="font-size:15px">' + h(n[1]) + '</b></span>' + ICON.chev + '</button>').join('') : '<div class="banner b-gray">「' + h(S.ehQ) + '」 매장이 없습니다.</div>') + '</div>';
+      body += '<div class="list" style="margin-top:var(--sp-2)">' + (hits.length ? hits.slice(0, 50).map(n => '<button class="row" onclick="ehJump(\'' + n[0] + '\',\'' + n[2] + '\')"><span class="ehcnt">' + h(n[0]) + '</span><span class="fname"><b style="font-size:var(--size-m)">' + h(n[1]) + '</b></span>' + ICON.chev + '</button>').join('') : '<div class="banner b-gray">「' + h(S.ehQ) + '」 매장이 없습니다.</div>') + '</div>';
     } else {
       body += '<div class="ehsum"><span><b>' + h(r.floor) + '</b> 매장 ' + fl.stores + '곳 · 기기 ' + fl.items + '대</span>' +
         (CAN_PRINT ? '<button class="btn sm" onclick="ehImportDlg(' + !r.empty + ')">' + (r.empty ? '엑셀 가져오기' : '엑셀 다시 가져오기') + '</button>' : '') +
@@ -2729,13 +2782,13 @@ function ehPrint() {
   const list = ehSelIds().map(ehItem).filter(Boolean);
   if (!list.length) return;
   S.ehPv = list.map(i => i.id);
-  dialog('<div style="display:flex;align-items:center;margin-bottom:10px"><div class="fname"><b style="font-size:17px">필증 미리보기</b><small>' + list.length + '장 · 50×50mm (실제 크기) · ' + labelDpi() + 'dpi · 흑백</small></div><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
+  dialog('<div style="display:flex;align-items:center;margin-bottom:var(--sp-2)"><div class="fname"><b style="font-size:var(--size-l)">필증 미리보기</b><small>' + list.length + '장 · 50×50mm (실제 크기) · ' + labelDpi() + 'dpi · 흑백</small></div><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
     '<div class="pvbox ehpv">' + list.slice(0, 6).map(ehLabel).join('') + (list.length > 6 ? '<span class="pvmore">외 ' + (list.length - 6) + '장</span>' : '') + '</div>' +
     '<details class="pvhelp"><summary>BIXOLON SLP-TX400 인쇄 설정</summary><ol>' +
       '<li>인쇄 창 <b>대상</b>: BIXOLON SLP-TX400 · <b>용지 크기</b>: 50×50mm (소화기 라벨과 같음)</li>' +
       '<li><b>여백</b>: 없음 · <b>배율</b>: 기본(100%) · <b>머리글/바닥글</b>: 끔 · <b>배경 그래픽</b>: 켬</li>' +
       '<li>처음 한 번, 또는 라벨지를 바꾼 뒤 프린터 <b>FEED</b> 버튼으로 라벨 위치를 맞춥니다</li></ol></details>' +
-    '<div style="display:flex;gap:8px;margin-top:12px"><button class="btn" onclick="closeDialog()">닫기</button><button class="btn" style="flex:1" onclick="ehDoPrint(true)">1장 시험 인쇄</button><button id="ehGo" class="btn pri" style="flex:2" onclick="ehDoPrint()">' + ICON.print + ' 인쇄 (' + list.length + '장)</button></div>');
+    '<div style="display:flex;gap:var(--sp-2);margin-top:var(--sp-3)"><button class="btn" onclick="closeDialog()">닫기</button><button class="btn" style="flex:1" onclick="ehDoPrint(true)">1장 시험 인쇄</button><button id="ehGo" class="btn pri" style="flex:2" onclick="ehDoPrint()">' + ICON.print + ' 인쇄 (' + list.length + '장)</button></div>');
 }
 function ehDoPrint(one) {
   const ids = one ? S.ehPv.slice(0, 1) : S.ehPv;
@@ -2749,9 +2802,9 @@ function ehDoPrint(one) {
 function ehImportDlg(re) {
   S.ehX = null; S.ehRe = !!re;
   dialog('<h2 class="ehdh">' + (re ? '엑셀 다시 가져오기' : '엑셀 가져오기 (처음 한 번)') + '</h2><p class="ehdp">「전열기 관리대장.xlsx」를 고르면 층 시트(B3F~6F·팝업)의 매장·기기를 읽습니다. 파일은 올리지 않고 읽은 내용만 저장합니다.</p>' +
-    (re ? '<div class="banner b-red" style="margin-bottom:10px">지금 들어 있는 매장·기기를 <b>모두 지우고</b> 새 엑셀 내용으로 바꿉니다. 앱에서 따로 추가·수정한 것도 엑셀에 없으면 사라집니다. 관리번호가 같은 기기는 QR이 그대로라 붙은 필증은 계속 씁니다.</div>' : '') +
+    (re ? '<div class="banner b-red" style="margin-bottom:var(--sp-2)">지금 들어 있는 매장·기기를 <b>모두 지우고</b> 새 엑셀 내용으로 바꿉니다. 앱에서 따로 추가·수정한 것도 엑셀에 없으면 사라집니다. 관리번호가 같은 기기는 QR이 그대로라 붙은 필증은 계속 씁니다.</div>' : '') +
     '<label class="btn" style="width:100%;min-height:64px;border-style:dashed;color:var(--blue);position:relative">' + ICON.clip + ' 엑셀 파일(.xlsx) 고르기<input type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onchange="ehXFile(this)" style="position:absolute;width:1px;height:1px;opacity:0"></label>' +
-    '<div id="ehXo" style="margin-top:12px"></div>');
+    '<div id="ehXo" style="margin-top:var(--sp-3)"></div>');
 }
 async function ehXFile(el) {
   const f = el.files && el.files[0]; if (!f) return;
@@ -2767,7 +2820,7 @@ async function ehXFile(el) {
     S.ehX = sheets; const c = r.check;
     $('ehXo').innerHTML = '<table class="atst"><tr><th>층</th><th>매장</th><th>기기</th></tr>' + c.floors.filter(x => x[1]).map(x => '<tr><td>' + x[0] + '</td><td>' + x[1] + '</td><td>' + x[2] + '</td></tr>').join('') +
       '<tr class="sum"><td>합계</td><td>' + c.stores + '</td><td>' + c.items + '</td></tr></table>' +
-      '<p class="ehdp" style="margin-top:10px">· 관리번호 그대로 ' + (c.items - c.renumbered) + '대 (지하 B1F- → B1- ' + c.bfix + '대)<br>· 번호 없음·겹침 → <b>새 번호 ' + c.renumbered + '대</b><br>· 「폐기·매장철수」 표시 <b>' + c.gone + '대</b>는 삭제 상태로 넣음<br>· 승인일자 빈칸 ' + c.noDate + '대</p>' +
+      '<p class="ehdp" style="margin-top:var(--sp-2)">· 관리번호 그대로 ' + (c.items - c.renumbered) + '대 (지하 B1F- → B1- ' + c.bfix + '대)<br>· 번호 없음·겹침 → <b>새 번호 ' + c.renumbered + '대</b><br>· 「폐기·매장철수」 표시 <b>' + c.gone + '대</b>는 삭제 상태로 넣음<br>· 승인일자 빈칸 ' + c.noDate + '대</p>' +
       '<div class="ehda"><button class="btn big" style="flex:1" onclick="closeDialog()">취소</button><button id="ehXb" class="btn big ' + (S.ehRe ? 'warn' : 'pri') + '" style="flex:2" onclick="ehXSave()">' + (S.ehRe ? '모두 바꿔 넣기' : '가져오기') + '</button></div>';
   } catch (e) { $('ehXo').innerHTML = '<div class="banner b-red">' + h(e && e.message ? e.message : e) + '</div>'; }
 }
@@ -2823,7 +2876,7 @@ function renderCs() {
   const sites = csSitesToday(), today = csGroups(r.today), bad = r.today.reduce((a, c) => a + c.bad, 0);
   const sum = [1, 2].map(n => '<div>' + CS_RD[n - 1] + '<b>' + sites.filter(s => today.some(g => g.site === s.id && g.r[n])).length + ' / ' + sites.length + '곳</b></div>').join('');
   return topbar('점검 ›', '공사장 점검') + '<div class="wrap list">' +
-    '<div class="card cshd"><div style="display:flex;align-items:center;gap:10px"><div style="flex:1;min-width:0"><b>' + csDay(r.day) + ' 공사장 점검</b><small>현장 ' + sites.length + '곳 · 하루 2번 (오후점검 · 퇴실점검)</small></div>' +
+    '<div class="card cshd"><div style="display:flex;align-items:center;gap:var(--sp-2)"><div style="flex:1;min-width:0"><b>' + csDay(r.day) + ' 공사장 점검</b><small>현장 ' + sites.length + '곳 · 하루 2번 (오후점검 · 퇴실점검)</small></div>' +
     (bad ? '<span class="cschip bad">미흡 ' + bad + '건</span>' : '') + '</div><div class="csrsum">' + sum + '</div></div>' +
     '<div class="cssec">오늘 점검할 현장<label class="cssrch"><input id="csQ" type="search" enterkeyhint="search" placeholder="현장명·업체·날짜 검색" aria-label="현장명·업체·날짜 검색" value="' + h(S.csQ || '') + '" oninput="csSearch(this.value)"></label></div>' +
     '<div id="csRes" class="list">' + csResHtml() + '</div></div>';
@@ -2892,7 +2945,7 @@ function csItemsDraw() {
   const L = S.csIt;
   dialog('<h3 class="ehdh">기본 점검 항목 (' + L.length + '개)</h3><p class="ehdp">「점검에 넣기」를 체크한 항목만 오후점검·퇴실점검에 1번부터 차례로 들어갑니다. 새로 시작하는 점검부터 쓰고, 이미 저장한 점검은 그대로입니다.</p>' +
     '<div class="list csitems">' + L.map((x, i) => '<div class="row"><span class="csno">' + (i + 1) + '</span><span class="fname"><b>' + h(x.t) + '</b><small>' + h(x.d) + '</small><label class="csuse"><input type="checkbox"' + (x.use ? ' checked' : '') + ' onchange="csItemUse(' + i + ',this)">점검에 넣기</label></span><button class="btn sm warn" onclick="csItemDel(' + i + ')">지우기</button></div>').join('') + '</div>' +
-    '<div class="card" style="padding:12px;margin-top:10px"><label class="ehf">새 항목 이름<input class="inp" id="ciT" maxlength="30"></label><label class="ehf">설명 (점검 기준)<input class="inp" id="ciD" maxlength="100"></label><button class="btn" style="width:100%" onclick="csItemAdd()">＋ 목록에 더하기</button></div>' +
+    '<div class="card" style="padding:var(--sp-3);margin-top:var(--sp-2)"><label class="ehf">새 항목 이름<input class="inp" id="ciT" maxlength="30"></label><label class="ehf">설명 (점검 기준)<input class="inp" id="ciD" maxlength="100"></label><button class="btn" style="width:100%" onclick="csItemAdd()">＋ 목록에 더하기</button></div>' +
     '<div id="ciM" role="alert" class="ehmsg"></div>' +
     '<div class="ehda"><button class="btn big" style="flex:1" onclick="closeDialog()">취소</button><button class="btn big pri" style="flex:2" id="ciSb" onclick="csItemsSaveBtn()">저장</button></div>');
 }
@@ -3039,7 +3092,7 @@ function csPdfHtml(k, i) {
   const c = csCnt(k), L = { '양호': 'ok', '미흡': 'bad', '해당없음': 'na' };
   return '<div class="cspdf"' + (i ? ' style="page-break-before:always"' : '') + '><div class="pt">공사장 안전점검 보고서</div><div class="ps">에비뉴엘 잠실점 시설팀 · ' + k.date.slice(0, 4) + '년 ' + csDay(k.date) + ' · <b>' + CS_RD[k.round - 1] + '</b></div>' +
     '<table><tr><th>현장</th><td>' + h(k.site.name) + '</td><th>공사 내용</th><td>' + h(k.site.work || '-') + '</td><th>업체</th><td>' + h(k.site.co || '-') + '</td></tr>' +
-    '<tr><th>점검자</th><td>' + h(k.check.by) + '</td><th>점검 시각</th><td>' + h(k.check.at) + '</td><th>결과</th><td>' + (c['미흡'] ? '<b style="color:#C0261A">미흡 ' + c['미흡'] + '</b> · ' : '') + '양호 ' + c['양호'] + ' · 해당없음 ' + c['해당없음'] + '</td></tr></table>' +
+    '<tr><th>점검자</th><td>' + h(k.check.by) + '</td><th>점검 시각</th><td>' + h(k.check.at) + '</td><th>결과</th><td>' + (c['미흡'] ? '<b style="color:var(--error)">미흡 ' + c['미흡'] + '</b> · ' : '') + '양호 ' + c['양호'] + ' · 해당없음 ' + c['해당없음'] + '</td></tr></table>' +
     '<div class="g">' + k.items.map((x, i) => '<div class="pc"><h4><span>' + (i + 1) + '. ' + h(x.t) + '</span><em class="' + (L[x.st] || '') + '">' + (x.st || '안 고름') + '</em></h4><p>' + h(x.d) + '</p>' +
       '<div class="pp n' + x.photos.length + '">' + (x.photos.length ? x.photos.map(p => '<div class="cell"><img src="' + h(p.src) + '" alt=""></div>').join('') : '사진 없음') + '</div>' +
       '<div class="cm">' + h(x.memo) + '</div></div>').join('') + '</div>' +

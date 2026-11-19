@@ -10,11 +10,54 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
 /* 공통 틀 v0.1 — 도면협의 Styles.html 기준 이름 (통합 설계정의서 12장) */
+/* DESIGN-TOKENS:START */
+/* 디자인 값은 이 파일에만 적습니다. 고친 뒤 python apps/design/sync.py 를 돌리면 모든 앱에 들어갑니다. */
 :root{
-  --ground:#F4F6F8; --card:#FFFFFF; --line2:#DCE1E7; --line3:#EDF0F3; --line:#CBD2DB;
-  --ink:#18202B; --sub:#3F4855; --muted:#5B6573;
+  /* 기본 색 6가지 */
+  --navy:#1E3A5F;     /* 주 색상: 머리줄, 주요 버튼, 강조 숫자, 그래프 */
+  --white:#FFFFFF;    /* 바탕 */
+  --text-sub:#5F6B7A; /* 보조 글자 */
+  --line:#D8DDE5;     /* 구역을 나누는 선, 입력칸 테두리 */
+  --tint:#F1F4F8;     /* 고른 줄, 표 머리 */
+  --error:#B42318;    /* 오류 문구 전용 */
+
+  /* 글자 크기 */
+  --size-s:13px; --size-m:15px; --size-l:18px; --size-xl:24px; --size-xxl:32px;
+  --size-input-touch:16px; /* 휴대폰 입력칸 전용: 16px보다 작으면 아이폰이 화면을 저절로 확대함 */
+
+  /* 간격 (4의 배수) */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-6:24px; --sp-8:32px; --sp-12:48px;
+
+  /* 모양 */
+  --radius:2px;          /* 모든 모서리 */
+  --control-h:40px;      /* 버튼, 입력칸 높이 */
+  --control-h-touch:44px;/* 휴대폰의 버튼, 입력칸 높이 */
+
+  /* 팝업 뒤를 어둡게 하는 막 (남색 45%) */
+  --overlay:rgba(30,58,95,.45);
+  --font:'Noto Sans KR','Malgun Gothic',system-ui,-apple-system,sans-serif;
+}
+@media (pointer:coarse){
+  :root{--control-h:var(--control-h-touch)}
+  input:not([type=checkbox]):not([type=radio]):not(.lgin),textarea:not(.lgin),select:not(.lgin){font-size:var(--size-input-touch)!important}
+}
+
+/* 인쇄·PDF·라벨 양식은 종이 기준이라 원래 색을 그대로 씁니다 (화면 디자인 규칙에서 제외) */
+#print,.tbp,.cspdf,.label,.ehl,.ehlt,.ehg,.hvs,.lgs,.page,.ag-paper,.ag-page{
+  color:#18202B;
+  --ink:#18202B; --ink2:#2A3340; --sub:#3F4855; --muted:#5B6573; --faint:#7A8494;
+  --line:#CBD2DB; --line2:#DCE1E7; --line3:#EDF0F3; --ground:#F4F6F8; --card:#FFFFFF;
   --blue:#1F5FA8; --blue-d:#174A84; --blue-bg:#E8F0FA;
-  --green:#1F7A4D; --green-bg:#EAF5EF; --orange:#B4410F; --orange-bg:#FDF0E8; --red:#C0261A; --red-bg:#FBE9E7;
+  --green:#1F7A4D; --green-d:#155C39; --green-bg:#EAF5EF;
+  --orange:#B4410F; --orange-bg:#FDF0E8; --red:#C0261A; --red-bg:#FBE9E7;
+}
+/* DESIGN-TOKENS:END */
+:root{ /* 예전 이름 → 기본 색 6가지 */
+  --ink:var(--navy); --ink2:var(--navy); --sub:var(--text-sub); --muted:var(--text-sub); --faint:var(--text-sub);
+  --line2:var(--line); --line3:var(--line); --ground:var(--white); --card:var(--white);
+  --blue:var(--navy); --blue-d:var(--navy); --blue-bg:var(--tint);
+  --green:var(--navy); --green-d:var(--navy); --green-bg:var(--tint);
+  --orange:var(--navy); --orange-bg:var(--tint); --red:var(--error); --red-bg:var(--tint);
 }
 *{box-sizing:border-box}
 /* WS-25 화면 다듬기: 단어 중간 줄바꿈 막기, 제목·강조 600 (인쇄·라벨·PDF 양식은 700 그대로) */
@@ -26,27 +69,35 @@ h1,h2,h3,b,strong{font-weight:600}
 html,body{margin:0;background:var(--ground);color:var(--ink);font-family:'Noto Sans KR',system-ui,-apple-system,sans-serif;-webkit-text-size-adjust:100%}
 button,input,select,textarea{font:inherit;color:inherit}
 a{color:var(--blue)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;border-radius:8px;border:1px solid var(--line);background:var(--card);font-size:15px;font-weight:500;color:var(--ink);cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-1);min-height:var(--control-h);padding:0 var(--sp-4);border-radius:var(--radius);border:1px solid var(--line);background:var(--card);font-size:var(--size-m);font-weight:500;color:var(--ink);cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:no-preference){.btn{transition:scale .15s ease-out}.btn:not(:disabled):active{scale:.96}}
 .btn:disabled{opacity:.5;cursor:default}
-.btn.pri{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:500}
-.btn.warn{border-color:#E8B4AE;color:var(--red)}
-.btn.sm{min-height:36px;padding:0 12px;font-size:13px}
-.btn.big{min-height:52px;font-size:16px}
-.inp{width:100%;min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-size:16px;background:#fff}
-.card{background:var(--card);border:1px solid var(--line2);border-radius:12px}
-.chip{display:inline-flex;align-items:center;gap:4px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:var(--white);font-weight:500}
+.btn.warn{border-color:var(--line);color:var(--red)}
+.btn.sm{min-height:var(--control-h);padding:0 var(--sp-3);font-size:var(--size-s)}
+.btn.big{min-height:var(--control-h);font-size:var(--size-m)}
+.inp{width:100%;min-height:var(--control-h);padding:0 var(--sp-3);border:1px solid var(--line);border-radius:var(--radius);font-size:var(--size-m);background:var(--white)}
+.card{background:var(--card);border:1px solid var(--line2);border-radius:var(--radius)}
+.chip{display:inline-flex;align-items:center;gap:var(--sp-1);height:26px;padding:0 var(--sp-2);border-radius:var(--radius);font-size:var(--size-s);font-weight:500;white-space:nowrap}
 .c-ok{background:var(--green-bg);color:var(--green)}
 .c-bad{background:var(--orange-bg);color:var(--orange)}
-.c-wait{background:var(--line3);color:var(--muted)}
+.c-wait{background:var(--tint);color:var(--muted)}
 .c-miss{background:var(--red-bg);color:var(--red)}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 16px;border-radius:12px;font-size:14px;z-index:100;max-width:calc(100% - 32px);box-shadow:0 6px 18px rgba(24,32,43,.25)}
-.dialog-back{position:fixed;inset:0;background:rgba(24,32,43,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center}
-.dialog{width:100%;max-width:520px;background:#fff;border-radius:16px 16px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto;overscroll-behavior:contain}
-@media (min-width:700px){.dialog-back{align-items:center}.dialog{border-radius:16px}}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--white);padding:var(--sp-3) var(--sp-4);border-radius:var(--radius);font-size:var(--size-m);z-index:100;max-width:calc(100% - 32px);box-shadow:none}
+.dialog-back{position:fixed;inset:0;background:var(--overlay);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.dialog{width:100%;max-width:520px;background:var(--white);border-radius:var(--radius) var(--radius) 0 0;padding:var(--sp-4) var(--sp-4) calc(var(--sp-4) + env(safe-area-inset-bottom));max-height:92vh;overflow:auto;overscroll-behavior:contain}
+@media (min-width:700px){.dialog-back{align-items:center}.dialog{border-radius:var(--radius)}}
 .spin{width:18px;height:18px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .8s linear infinite;display:inline-block}
 @keyframes sp{to{transform:rotate(360deg)}}
 .hide{display:none!important}
+
+/* 상태는 색이 아니라 모양과 글자로 구분: 문제 = 채움, 정상 = 남색 테두리, 대기 = 회색 테두리 */
+.chip{border:1px solid transparent}
+.c-bad,.c-miss,.chip.orange{background:var(--navy);color:var(--var(--white));border-color:var(--navy)}
+.c-ok,.chip.green{background:var(--var(--white));color:var(--navy);border-color:var(--navy)}
+.c-wait{background:var(--var(--white));color:var(--text-sub);border-color:var(--line)}
+.chip.blue{background:var(--tint);color:var(--navy);border-color:var(--line)}
+.btn.warn{background:var(--var(--white));color:var(--navy);border-color:var(--navy)}
 </style>
 <style>
 /* 어두운 화면 (결정 98): 화면만 색을 뒤집고 사진·서명·QR은 되돌림. 인쇄·저장 이미지는 그대로 흰 바탕 */
@@ -68,39 +119,39 @@ function themeLabel() { return themeDark() ? '밝게' : '어둡게'; }
 body{min-height:100vh;word-break:keep-all;overflow-wrap:anywhere}
 b,strong,h1,h2,h3{font-weight:600}
 .page{max-width:520px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--ground)}
-.hd{background:#fff;border-bottom:1px solid var(--line2);padding:18px 16px 14px;display:flex;flex-direction:column;gap:4px}
-.hd small{font-size:12px;color:var(--muted)}
-.hd h1{margin:0;font-size:20px}
-.main{flex:1;padding:14px 16px;display:flex;flex-direction:column;gap:16px}
-.lbl{font-size:14px;font-weight:600}
-.shot{width:100%;aspect-ratio:4/3;border-radius:10px;border:2px dashed var(--blue);background:var(--blue-bg);color:var(--blue);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:15px;font-weight:500;cursor:pointer;padding:0}
-.shot-done{position:relative;width:100%;aspect-ratio:4/3;border-radius:10px;background:var(--line3);overflow:hidden}
+.hd{background:var(--white);border-bottom:1px solid var(--line2);padding:var(--sp-4) var(--sp-4) var(--sp-3);display:flex;flex-direction:column;gap:var(--sp-1)}
+.hd small{font-size:var(--size-s);color:var(--muted)}
+.hd h1{margin:0;font-size:var(--size-l)}
+.main{flex:1;padding:var(--sp-3) var(--sp-4);display:flex;flex-direction:column;gap:var(--sp-4)}
+.lbl{font-size:var(--size-m);font-weight:600}
+.shot{width:100%;aspect-ratio:4/3;border-radius:var(--radius);border:2px dashed var(--blue);background:var(--blue-bg);color:var(--blue);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sp-1);font-size:var(--size-m);font-weight:500;cursor:pointer;padding:0}
+.shot-done{position:relative;width:100%;aspect-ratio:4/3;border-radius:var(--radius);background:var(--tint);overflow:hidden}
 .shot-done img{width:100%;height:100%;object-fit:contain;display:block}
 .shot-done .btn{position:absolute;right:8px;bottom:8px}
 .shot-done svg{position:absolute;left:50%;top:50%;width:62%;height:auto;transform:translate(-50%,-50%);opacity:.35;pointer-events:none}
-.seg{display:flex;gap:8px}
-.seg button{flex:1;min-height:48px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:15px;color:var(--sub);cursor:pointer}
+.seg{display:flex;gap:var(--sp-2)}
+.seg button{flex:1;min-height:var(--control-h);border-radius:var(--radius);border:1px solid var(--line);background:var(--white);font-size:var(--size-m);color:var(--sub);cursor:pointer}
 .seg button.on{border-color:var(--blue);background:var(--blue-bg);color:var(--blue-d);font-weight:500}
 .seg button.on.bad{border-color:var(--orange);background:var(--orange-bg);color:var(--orange)}
-.pad{position:relative;width:100%;height:120px;border-radius:10px;border:2px dashed #B8C0CB;background:#fff;touch-action:none;overflow:hidden}
+.pad{position:relative;width:100%;height:120px;border-radius:var(--radius);border:2px dashed var(--line);background:var(--white);touch-action:none;overflow:hidden}
 .pad.inked{border-style:solid;border-color:var(--line)}
 .pad canvas{position:absolute;left:0;top:0;width:100%;height:100%}
-.pad .clr{position:absolute;right:6px;top:6px;z-index:2;min-height:32px;padding:0 10px;border-radius:6px;border:1px solid var(--line);background:#fff;font-size:13px;color:var(--sub);cursor:pointer}
-.foot{background:#fff;border-top:1px solid var(--line2);padding:10px 16px calc(20px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;position:sticky;bottom:0}
-.miss{font-size:14px;font-weight:500;color:var(--red);text-align:center;min-height:20px}
-.send{width:100%;min-height:56px;border-radius:10px;border:none;background:var(--blue);color:#fff;font-size:18px;font-weight:500;cursor:pointer}
-.send:disabled{background:var(--line2);color:var(--muted);cursor:default}
+.pad .clr{position:absolute;right:6px;top:6px;z-index:2;min-height:32px;padding:0 var(--sp-2);border-radius:var(--radius);border:1px solid var(--line);background:var(--white);font-size:var(--size-s);color:var(--sub);cursor:pointer}
+.foot{background:var(--white);border-top:1px solid var(--line2);padding:var(--sp-2) var(--sp-4) calc(var(--sp-4) + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:var(--sp-2);position:sticky;bottom:0}
+.miss{font-size:var(--size-m);font-weight:500;color:var(--red);text-align:center;min-height:20px}
+.send{width:100%;min-height:56px;border-radius:var(--radius);border:none;background:var(--blue);color:var(--white);font-size:var(--size-l);font-weight:500;cursor:pointer}
+.send:disabled{background:var(--tint);color:var(--muted);cursor:default}
 .cam{position:fixed;inset:0;z-index:60;background:#0E131A;color:#fff;display:flex;flex-direction:column}
 .cam-top{display:flex;align-items:center;padding:12px;gap:8px}
 .cam-top button{width:44px;height:44px;border:none;background:none;color:#fff;font-size:22px;cursor:pointer}
 .cam-msg{margin:0 auto;background:rgba(14,19,26,.75);border-radius:999px;padding:10px 18px;font-size:16px;font-weight:500}
-.view{position:relative;width:100%;aspect-ratio:4/3;background:#2B333E;overflow:hidden}
+.view{position:relative;width:100%;aspect-ratio:4/3;background:var(--navy);overflow:hidden}
 .view video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .view svg{position:absolute;left:50%;top:50%;width:62%;height:auto;transform:translate(-50%,-50%);pointer-events:none}
 .shutter{width:76px;height:76px;border-radius:38px;border:4px solid #fff;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .shutter span{width:60px;height:60px;border-radius:30px;background:#fff}
-.torch{width:44px;height:44px;border-radius:22px;border:1px solid rgba(255,255,255,.4);background:none;color:#fff;font-size:20px;cursor:pointer}
-.torch.on{background:#FFD54A;border-color:#FFD54A;color:#18202B}
+.torch{width:44px;height:44px;border-radius:var(--radius);border:1px solid var(--white);background:none;color:var(--white);font-size:var(--size-l);cursor:pointer}
+.torch.on{background:var(--navy);border-color:var(--line);color:var(--navy)}
 .view img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .view.check svg{opacity:.45}
 .cam-btns{display:flex;gap:10px;padding:20px 16px calc(32px + env(safe-area-inset-bottom))}
@@ -175,7 +226,7 @@ else API.init(QR).then(r => { if (!r.ok) showError(r.error); else { S.init = r; 
   .catch(e => showError('연결 오류: ' + (e.message || e) + '\n신호를 확인하고 다시 열어 주세요.'));
 
 function showError(msg) {
-  $('page').innerHTML = '<div class="hd"><small>잠실점 에비뉴엘 · 소화기 점검</small><h1>열 수 없습니다</h1></div><div class="main"><div class="card" style="padding:16px;font-size:15px;line-height:1.6">' + h(msg) + '</div></div>';
+  $('page').innerHTML = '<div class="hd"><small>잠실점 에비뉴엘 · 소화기 점검</small><h1>열 수 없습니다</h1></div><div class="main"><div class="card" style="padding:var(--sp-4);font-size:var(--size-m);line-height:1.6">' + h(msg) + '</div></div>';
 }
 
 /* ── 입력 화면 ── */
@@ -183,13 +234,13 @@ function renderForm() {
   const r = S.init, m = Number(r.ym.slice(5, 7));
   $('page').innerHTML =
     '<div class="hd"><small>잠실점 에비뉴엘 · 소화기 월 점검</small><h1>' + h(r.fe.name) + '</h1>' +
-    '<span style="font-size:13px;color:var(--sub)">' + h(r.fe.floor) + ' · ' + h(r.monthLabel) + ' · 입력 기간 <b>' + m + '월 ' + r.window.start + '일 ~ ' + r.window.end + '일</b></span></div>' +
+    '<span style="font-size:var(--size-s);color:var(--sub)">' + h(r.fe.floor) + ' · ' + h(r.monthLabel) + ' · 입력 기간 <b>' + m + '월 ' + r.window.start + '일 ~ ' + r.window.end + '일</b></span></div>' +
     '<div class="main">' +
-    (r.late ? '<div class="banner" style="background:var(--orange-bg);color:var(--orange);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.5">입력 기간이 지났지만 지금 입력할 수 있습니다. 「기한 후 입력」으로 표시됩니다.</div>' : '') +
-    (r.exists ? '<div style="background:var(--line3);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--sub)">이번 달 입력이 이미 있습니다. 다시 보내면 새 내용으로 바뀝니다.</div>' : '') +
-    '<section style="display:flex;flex-direction:column;gap:6px"><span class="lbl">1. 압력계 사진</span><div id="shotBox"></div></section>' +
-    '<section style="display:flex;flex-direction:column;gap:6px"><span class="lbl">2. 상태</span><div class="seg"><button id="sOk" class="on" aria-pressed="true" onclick="setBad(false)">이상 없음</button><button id="sBad" aria-pressed="false" onclick="setBad(true)">이상 있음</button></div></section>' +
-    '<section style="display:flex;flex-direction:column;gap:8px"><span class="lbl">3. 손가락으로 따라 쓰기</span>' +
+    (r.late ? '<div class="banner" style="background:var(--orange-bg);color:var(--orange);border-radius:var(--radius);padding:var(--sp-3) var(--sp-3);font-size:var(--size-m);line-height:1.5">입력 기간이 지났지만 지금 입력할 수 있습니다. 「기한 후 입력」으로 표시됩니다.</div>' : '') +
+    (r.exists ? '<div style="background:var(--tint);border-radius:var(--radius);padding:var(--sp-3) var(--sp-3);font-size:var(--size-m);color:var(--sub)">이번 달 입력이 이미 있습니다. 다시 보내면 새 내용으로 바뀝니다.</div>' : '') +
+    '<section style="display:flex;flex-direction:column;gap:var(--sp-1)"><span class="lbl">1. 압력계 사진</span><div id="shotBox"></div></section>' +
+    '<section style="display:flex;flex-direction:column;gap:var(--sp-1)"><span class="lbl">2. 상태</span><div class="seg"><button id="sOk" class="on" aria-pressed="true" onclick="setBad(false)">이상 없음</button><button id="sBad" aria-pressed="false" onclick="setBad(true)">이상 있음</button></div></section>' +
+    '<section style="display:flex;flex-direction:column;gap:var(--sp-2)"><span class="lbl">3. 손가락으로 따라 쓰기</span>' +
     '<div class="pad" id="padA"><canvas class="g"></canvas><canvas class="i" aria-label="외관 압력 이상무 손글씨 칸"></canvas><button class="clr hide" onclick="PADS.A.clear()">지우기</button></div>' +
     '<div class="pad" id="padB"><canvas class="g"></canvas><canvas class="i" aria-label="이름 손글씨 칸"></canvas><button class="clr hide" onclick="PADS.B.clear()">지우기</button></div>' +
     '<small style="color:var(--muted)">회색 글자 위에 손가락으로 크게 따라 써 주세요.</small></section>' +
@@ -203,7 +254,7 @@ function renderForm() {
 function renderShot() {
   $('shotBox').innerHTML = S.photo
     ? '<div class="shot-done"><img src="' + S.photo + '" alt="찍은 압력계 사진">' + GUIDE + '<button class="btn sm" onclick="openCamera()">다시 찍기</button></div>'
-    : '<button class="shot" onclick="openCamera()" aria-label="압력계 사진 찍기">' + GAUGE_ICON + '<span style="font-size:17px">사진 찍기</span><span style="font-size:12px;font-weight:400;color:var(--blue-d)">압력계 정면이 보이게</span></button>';
+    : '<button class="shot" onclick="openCamera()" aria-label="압력계 사진 찍기">' + GAUGE_ICON + '<span style="font-size:var(--size-l)">사진 찍기</span><span style="font-size:var(--size-s);font-weight:400;color:var(--blue-d)">압력계 정면이 보이게</span></button>';
 }
 function setBad(b) {
   if (S.bad === b) return;
@@ -275,11 +326,11 @@ let stream = null, torchOn = false;
 async function openCamera() {
   $('layer').innerHTML = '<div class="cam keep-color" role="dialog" aria-modal="true" aria-label="압력계 촬영">' +
     '<div class="cam-top"><button onclick="closeCamera()" aria-label="닫기">✕</button><b style="flex:1;text-align:center">' + h(S.init.fe.name) + ' · 압력계</b><button class="torch hide" id="torch" onclick="toggleTorch()" aria-label="손전등 켜기" aria-pressed="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle"><path d="M8 2h8v4l-2 4v12h-4V10L8 6z"/><path d="M8 6h8M12 14v2"/></svg></button><span id="torchGap" style="width:44px"></span></div>' +
-    '<div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px">' +
+    '<div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:var(--sp-4)">' +
     '<div class="cam-msg" id="camMsg">동그라미에 압력계를 맞춰 주세요</div>' +
     '<div class="view" id="view"><video id="vid" playsinline muted autoplay></video>' + GUIDE + '</div>' +
-    '<div id="camNote" style="text-align:center;font-size:13px;color:#CBD2DB;line-height:1.6;padding:0 24px">바늘과 숫자가 보이도록 정면에서 찍어 주세요.</div></div>' +
-    '<div id="camFoot" style="display:flex;align-items:center;justify-content:center;padding:20px 24px calc(32px + env(safe-area-inset-bottom))"><button class="shutter" id="shutter" onclick="snap()" aria-label="찍기"><span></span></button></div></div>';
+    '<div id="camNote" style="text-align:center;font-size:var(--size-s);color:var(--text-sub);line-height:1.6;padding:0 var(--sp-6)">바늘과 숫자가 보이도록 정면에서 찍어 주세요.</div></div>' +
+    '<div id="camFoot" style="display:flex;align-items:center;justify-content:center;padding:var(--sp-4) var(--sp-6) calc(var(--sp-8) + env(safe-area-inset-bottom))"><button class="shutter" id="shutter" onclick="snap()" aria-label="찍기"><span></span></button></div></div>';
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return useFileFallback();
   try {
     stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false });
@@ -363,7 +414,7 @@ function submit(overwrite) {
   update();
   if ($('send').disabled) return;
   if (S.init.exists && !overwrite) {
-    $('layer').innerHTML = '<div class="dialog-back"><div class="dialog" role="dialog" aria-modal="true"><h2 style="margin:0 0 8px;font-size:18px">이번 달 입력이 이미 있습니다</h2><p style="margin:0 0 14px;font-size:14px;color:var(--sub);line-height:1.6">새로 보낸 내용으로 바꿀까요?</p><div style="display:flex;gap:10px"><button class="btn big" style="flex:1" onclick="$(\'layer\').innerHTML=\'\'">취소</button><button class="btn big pri" style="flex:2" onclick="$(\'layer\').innerHTML=\'\';submit(true)">바꾸기</button></div></div></div>';
+    $('layer').innerHTML = '<div class="dialog-back"><div class="dialog" role="dialog" aria-modal="true"><h2 style="margin:0 0 var(--sp-2);font-size:var(--size-l)">이번 달 입력이 이미 있습니다</h2><p style="margin:0 0 var(--sp-3);font-size:var(--size-m);color:var(--sub);line-height:1.6">새로 보낸 내용으로 바꿀까요?</p><div style="display:flex;gap:var(--sp-2)"><button class="btn big" style="flex:1" onclick="$(\'layer\').innerHTML=\'\'">취소</button><button class="btn big pri" style="flex:2" onclick="$(\'layer\').innerHTML=\'\';submit(true)">바꾸기</button></div></div></div>';
     return;
   }
   S.sending = true; update();
@@ -383,15 +434,15 @@ function done(r) {
   S.done = true;
   const bad = r.state === '이상있음';
   $('page').innerHTML = '<div class="hd"><small>잠실점 에비뉴엘 · 소화기 월 점검</small><h1>' + h(S.init.fe.name) + '</h1></div>' +
-    '<div class="main" style="align-items:center;text-align:center;padding-top:48px;gap:14px">' +
-    '<div style="width:72px;height:72px;border-radius:36px;background:' + (bad ? 'var(--orange-bg)' : 'var(--green-bg)') + ';display:flex;align-items:center;justify-content:center"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="' + (bad ? '#B4410F' : '#1F7A4D') + '" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg></div>' +
-    '<b style="font-size:20px">보냈습니다. 감사합니다.</b>' +
-    '<span style="font-size:15px;color:var(--sub);line-height:1.6">' + h(S.init.monthLabel) + ' 점검이 ' + (bad ? '<b style="color:var(--orange)">이상 있음</b>으로' : '<b style="color:var(--green)">점검완료</b>로') + ' 기록되었습니다.' + (r.late ? '<br>(기한 후 입력)' : '') + '</span>' +
-    (r.checkId ? '<span style="font-size:12px;color:var(--muted);background:var(--line3);border-radius:8px;padding:6px 10px">저장 번호 ' + h(r.checkId) + (r.at ? ' · ' + h(r.at) : '') + '</span>' : '') +
-    '<span style="font-size:13px;color:var(--muted)">이 창은 닫으셔도 됩니다.</span></div>';
+    '<div class="main" style="align-items:center;text-align:center;padding-top:var(--sp-12);gap:var(--sp-3)">' +
+    '<div style="width:72px;height:72px;border-radius:var(--radius);background:' + (bad ? 'var(--orange-bg)' : 'var(--green-bg)') + ';display:flex;align-items:center;justify-content:center"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="' + (bad ? '#B4410F' : '#1F7A4D') + '" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg></div>' +
+    '<b style="font-size:var(--size-l)">보냈습니다. 감사합니다.</b>' +
+    '<span style="font-size:var(--size-m);color:var(--sub);line-height:1.6">' + h(S.init.monthLabel) + ' 점검이 ' + (bad ? '<b style="color:var(--orange)">이상 있음</b>으로' : '<b style="color:var(--green)">점검완료</b>로') + ' 기록되었습니다.' + (r.late ? '<br>(기한 후 입력)' : '') + '</span>' +
+    (r.checkId ? '<span style="font-size:var(--size-s);color:var(--muted);background:var(--tint);border-radius:var(--radius);padding:var(--sp-1) var(--sp-2)">저장 번호 ' + h(r.checkId) + (r.at ? ' · ' + h(r.at) : '') + '</span>' : '') +
+    '<span style="font-size:var(--size-s);color:var(--muted)">이 창은 닫으셔도 됩니다.</span></div>';
 }
 function alertBox(msg) {
-  $('layer').innerHTML = '<div class="dialog-back"><div class="dialog" role="alertdialog" aria-modal="true"><p style="margin:0 0 14px;font-size:15px;line-height:1.6">' + h(msg) + '</p><button class="btn big pri" style="width:100%" onclick="$(\'layer\').innerHTML=\'\'">확인</button></div></div>';
+  $('layer').innerHTML = '<div class="dialog-back"><div class="dialog" role="alertdialog" aria-modal="true"><p style="margin:0 0 var(--sp-3);font-size:var(--size-m);line-height:1.6">' + h(msg) + '</p><button class="btn big pri" style="width:100%" onclick="$(\'layer\').innerHTML=\'\'">확인</button></div></div>';
 }
 </script>
 </body>

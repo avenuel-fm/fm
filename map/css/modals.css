@@ -5,14 +5,14 @@
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(15, 23, 42, 0.45);
+            background: var(--overlay);
             backdrop-filter: blur(4px);
             -webkit-backdrop-filter: blur(4px);
             z-index: 100;
             display: none;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: var(--sp-4);
             animation: overlayFade 0.18s ease-out;
         }
         /* 매장 현황 팝업용 투명 & 우측 하단 오버레이 (지도 오버레이 방지) */
@@ -23,13 +23,13 @@
             pointer-events: none !important;
             align-items: flex-end !important;
             justify-content: flex-end !important;
-            padding: 24px !important;
+            padding: var(--sp-6) !important;
             animation: none !important;
         }
         .modal-overlay.as-toast-overlay #status-modal {
             pointer-events: auto !important;
             max-width: 350px !important;
-            box-shadow: 0 12px 36px -4px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(15, 23, 42, 0.08) !important;
+            box-shadow: none!important;
             animation: statusPopBottomRight 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
             margin: 0 !important;
         }
@@ -44,16 +44,16 @@
 
         /* 중앙 모달 카드 */
         .facility-modal {
-            background: #ffffff;
+            background: var(--white);
             border: 1px solid var(--border-medium);
-            box-shadow: 0 20px 45px -8px rgba(15, 23, 42, 0.25);
-            border-radius: 12px;
-            padding: 22px 24px;
+            box-shadow: none;
+            border-radius: var(--radius);
+            padding: var(--sp-6) var(--sp-6);
             width: 100%;
             max-width: 440px;
             display: none;
             flex-direction: column;
-            gap: 14px;
+            gap: var(--sp-3);
             animation: modalPop 0.18s ease-out;
         }
         #zone-modal {
@@ -72,20 +72,20 @@
         .modal-header-title {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: var(--sp-1);
         }
         .badge-facility {
-            font-size: 11px;
+            font-size: var(--size-s);
             font-weight: 600;
             color: var(--primary);
             background: var(--primary-light);
             border: 1px solid var(--primary-border);
-            padding: 2px 8px;
-            border-radius: 12px;
+            padding: var(--sp-1) var(--sp-2);
+            border-radius: var(--radius);
             width: fit-content;
         }
         .modal-title {
-            font-size: 17px;
+            font-size: var(--size-l);
             font-weight: 700;
             color: var(--text-main);
         }
@@ -93,22 +93,22 @@
         /* 매장명 / 기능실 세그먼트 탭 */
         .type-segment-tabs {
             display: flex;
-            background: #f1f5f9;
-            border-radius: 8px;
-            padding: 3px;
-            gap: 4px;
+            background: var(--tint);
+            border-radius: var(--radius);
+            padding: var(--sp-1);
+            gap: var(--sp-1);
         }
         .type-tab-btn {
             flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
-            padding: 7px 12px;
+            gap: var(--sp-1);
+            padding: var(--sp-2) var(--sp-3);
             border: none;
             background: transparent;
-            border-radius: 6px;
-            font-size: 13px;
+            border-radius: var(--radius);
+            font-size: var(--size-s);
             font-weight: 600;
             color: var(--text-secondary);
             cursor: pointer;
@@ -125,20 +125,20 @@
             color: var(--text-main);
         }
         .type-tab-btn.active {
-            background: #ffffff;
+            background: var(--white);
             color: var(--primary);
-            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+            box-shadow: none;
         }
 
         /* 매장 시설 현황 테이블 */
         .facility-info-table {
-            background: #f8fafc;
+            background: var(--tint);
             border: 1px solid var(--border-subtle);
-            border-radius: 8px;
-            padding: 12px 16px;
+            border-radius: var(--radius);
+            padding: var(--sp-3) var(--sp-4);
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: var(--sp-2);
             max-height: 220px;
             overflow-y: auto;
         }
@@ -146,14 +146,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 13px;
+            font-size: var(--size-s);
         }
         .facility-label {
             color: var(--text-secondary);
             font-weight: 500;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: var(--sp-1);
         }
         .facility-value {
             color: var(--text-main);
@@ -169,52 +169,52 @@
         .edit-fields-wrap {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: var(--sp-3);
         }
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: var(--sp-1);
         }
         .form-group label {
-            font-size: 12px;
+            font-size: var(--size-s);
             font-weight: 600;
             color: var(--text-secondary);
         }
         .form-group input[type="text"] {
             width: 100%;
-            padding: 8px 12px;
-            background: #f8fafc;
+            padding: var(--sp-2) var(--sp-3);
+            background: var(--tint);
             border: 1px solid var(--border-medium);
-            border-radius: 6px;
+            border-radius: var(--radius);
             color: var(--text-main);
-            font-size: 13px;
+            font-size: var(--size-s);
             outline: none;
             transition: all 0.15s;
         }
         .form-group input[type="text"]:focus {
-            background: #ffffff;
+            background: var(--white);
             border-color: var(--border-focus);
-            box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+            box-shadow: none;
         }
 
         /* 색상 팔레트 */
         .color-palette-bar {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: var(--sp-2);
             flex-wrap: wrap;
-            padding: 8px 10px;
-            background: #f8fafc;
+            padding: var(--sp-2) var(--sp-2);
+            background: var(--tint);
             border: 1px solid var(--border-subtle);
-            border-radius: 8px;
+            border-radius: var(--radius);
         }
         .color-swatch {
             width: 26px;
             height: 26px;
-            border-radius: 50%;
-            border: 2px solid #ffffff;
-            box-shadow: 0 0 0 1px var(--border-medium);
+            border-radius: var(--radius);
+            border: 2px solid var(--white);
+            box-shadow: none;
             cursor: pointer;
             transition: all 0.15s;
             position: relative;
@@ -225,7 +225,7 @@
         }
         .color-swatch.active {
             transform: scale(1.15);
-            box-shadow: 0 0 0 2px var(--primary);
+            box-shadow: none;
         }
         .color-swatch.active::after {
             content: '✓';
@@ -234,14 +234,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
+            font-size: var(--size-s);
             font-weight: 800;
-            color: #0f172a;
+            color: var(--navy);
         }
         .custom-color-picker-wrap {
             width: 26px;
             height: 26px;
-            border-radius: 50%;
+            border-radius: var(--radius);
             overflow: hidden;
             border: 1px dashed var(--border-medium);
             cursor: pointer;
@@ -250,13 +250,13 @@
             justify-content: center;
             position: relative;
             background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
-            box-shadow: 0 0 0 1px var(--border-subtle);
+            box-shadow: none;
         }
         .custom-color-picker-wrap input[type="color"] {
             position: absolute;
             inset: -10px;
             width: 50px;
-            height: 50px;
+            height: var(--control-h);
             opacity: 0;
             cursor: pointer;
         }
@@ -265,82 +265,82 @@
         .fields-section {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: var(--sp-1);
         }
         .fields-section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 2px;
+            margin-top: var(--sp-1);
         }
         .fields-section-title {
-            font-size: 12px;
+            font-size: var(--size-s);
             font-weight: 600;
             color: var(--text-secondary);
         }
         .btn-add-field {
-            font-size: 11px;
+            font-size: var(--size-s);
             font-weight: 600;
             color: var(--primary);
             background: var(--primary-light);
             border: 1px solid var(--primary-border);
-            padding: 3px 8px;
-            border-radius: 6px;
+            padding: var(--sp-1) var(--sp-2);
+            border-radius: var(--radius);
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: var(--sp-1);
             transition: all 0.15s;
         }
         .btn-add-field:hover {
-            background: #dbeafe;
+            background: var(--tint);
         }
         .dynamic-fields-list {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: var(--sp-1);
             max-height: 160px;
             overflow-y: auto;
-            padding-right: 2px;
+            padding-right: var(--sp-1);
         }
         .dynamic-field-row {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: var(--sp-1);
         }
         .dynamic-field-row .field-label-input {
             width: 120px;
             flex-shrink: 0;
-            padding: 7px 10px;
-            background: #f8fafc;
+            padding: var(--sp-2) var(--sp-2);
+            background: var(--tint);
             border: 1px solid var(--border-medium);
-            border-radius: 6px;
-            font-size: 12px;
+            border-radius: var(--radius);
+            font-size: var(--size-s);
             font-weight: 600;
             color: var(--text-main);
             outline: none;
         }
         .dynamic-field-row .field-value-input {
             flex: 1;
-            padding: 7px 10px;
-            background: #f8fafc;
+            padding: var(--sp-2) var(--sp-2);
+            background: var(--tint);
             border: 1px solid var(--border-medium);
-            border-radius: 6px;
-            font-size: 12px;
+            border-radius: var(--radius);
+            font-size: var(--size-s);
             color: var(--text-main);
             outline: none;
         }
         .dynamic-field-row .field-label-input:focus,
         .dynamic-field-row .field-value-input:focus {
-            background: #ffffff;
+            background: var(--white);
             border-color: var(--border-focus);
         }
         .btn-del-field {
             width: 28px;
-            height: 28px;
-            border-radius: 6px;
+            height: var(--control-h);
+            border-radius: var(--radius);
             border: 1px solid var(--border-medium);
-            background: #ffffff;
+            background: var(--white);
             color: var(--text-muted);
             cursor: pointer;
             display: flex;
@@ -351,25 +351,25 @@
         }
         .btn-del-field:hover {
             background: var(--danger-light);
-            color: var(--danger);
-            border-color: #fca5a5;
+            color: var(--navy);
+            border-color: var(--line);
         }
 
         .modal-footer {
             display: flex;
             justify-content: flex-end;
-            gap: 8px;
+            gap: var(--sp-2);
             border-top: 1px solid var(--border-subtle);
-            padding-top: 14px;
+            padding-top: var(--sp-3);
         }
         .btn-sm {
-            padding: 7px 14px;
-            font-size: 13px;
-            border-radius: 6px;
+            padding: var(--sp-2) var(--sp-3);
+            font-size: var(--size-s);
+            border-radius: var(--radius);
             font-weight: 600;
             cursor: pointer;
             border: 1px solid var(--border-medium);
-            background: #ffffff;
+            background: var(--white);
             color: var(--text-secondary);
             transition: all 0.15s;
         }
@@ -379,16 +379,16 @@
         }
         .btn-sm-danger {
             background: var(--danger-light);
-            color: var(--danger);
-            border-color: #fca5a5;
+            color: var(--navy);
+            border-color: var(--line);
             margin-right: auto;
         }
         .btn-sm-danger:hover {
-            background: #fee2e2;
+            background: var(--tint);
         }
         .btn-sm-primary {
             background: var(--primary);
-            color: #ffffff;
+            color: var(--white);
             border-color: var(--primary);
         }
         .btn-sm-primary:hover {
@@ -400,12 +400,12 @@
         .util-radio-chip {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            padding: 5px 10px;
+            gap: var(--sp-1);
+            padding: var(--sp-1) var(--sp-2);
             background: var(--bg-surface);
             border: 1px solid var(--border-medium);
-            border-radius: 6px;
-            font-size: 12px;
+            border-radius: var(--radius);
+            font-size: var(--size-s);
             font-weight: 600;
             color: var(--text-secondary);
             cursor: pointer;
@@ -426,12 +426,12 @@
         .field-label-select {
             width: 110px;
             flex-shrink: 0;
-            padding: 7px 8px;
+            padding: var(--sp-2) var(--sp-2);
             border: 1px solid var(--border-medium);
-            border-radius: 6px;
-            font-size: 13px;
+            border-radius: var(--radius);
+            font-size: var(--size-s);
             font-weight: 600;
-            background: #ffffff;
+            background: var(--white);
             color: var(--text-main);
             cursor: pointer;
         }
