@@ -2,7 +2,7 @@
  * spot_model.js
  * 스팟 위치 학습 모델 관리자 (다중 샘플 누적 평균 & 정밀 학습)
  * - 파일명/회로명 패턴별 스팟 좌표 누적 학습 및 고도화
- * - 여러 예제 사진 일괄 분석을 통한 스팟 최적 위치 산출
+ * - 여러 예제 사진(.jpg) 및 기존 Thermal Studio 보고서(.atr) 일괄 분석을 통한 최적 좌표 산출
  * - WS_THERMAL 통로 및 브라우저 스토리지 동기화
  */
 
@@ -25,7 +25,6 @@ class SpotModelManager {
         if (modelData.default) this.model.default = modelData.default;
 
         if (modelData.patterns) {
-            // 하위 호환성 (배열 형태 vs 객체 형태)
             for (const [k, v] of Object.entries(modelData.patterns)) {
                 if (Array.isArray(v)) {
                     this.model.patterns[k] = {
@@ -76,7 +75,6 @@ class SpotModelManager {
             const n = existing.count;
             const newSpots = [];
             for (let i = 0; i < 3; i++) {
-                // 누적 가중 평균 산출
                 const avgX = (existing.spots[i].x * n + spots[i].x) / (n + 1);
                 const avgY = (existing.spots[i].y * n + spots[i].y) / (n + 1);
                 newSpots.push({ x: Math.round(avgX), y: Math.round(avgY) });
@@ -102,31 +100,103 @@ class SpotModelManager {
     }
 
     /**
-     * 여러 예제 FLIR 파일로부터 일괄 학습 및 고도화
+     * 여러 예제 FLIR 파일(.jpg, .atr)로부터 일괄 학습 및 고도화
      */
     async trainFromFiles(files, progressCb = null) {
         let learnedCount = 0;
+        let totalCount = 0;
+        const failedFiles = [];
+
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
-            if (progressCb) progressCb(i + 1, files.length, file.name);
+            const isAtr = /\.atr$/i.test(file.name);
+            const isJpg = /\.(jpe?g)$/i.test(file.name);
 
-            try {
-                const parsed = await FlirParser.parse(file);
-                // 원본에 스팟이 있는 경우에만 학습에 반영
-                if (parsed.hasNativeSpots) {
-                    let circuitName = file.name.replace(/\.[^/.]+$/, "");
-                    if (circuitName.includes('_')) {
-                        const parts = circuitName.split('_');
-                        circuitName = parts[parts.length - 1];
+            if (!isAtr && !isJpg) continue;
+
+            if (isAtr) {
+                if (progressCb) progressCb(i + 1, files.length, `${file.name} (.atr 보고서 해제 중)`);
+                try {
+                    const data = (file instanceof Blob || typeof file.arrayBuffer === 'function') ? await file.arrayBuffer() : file;
+                    const zip = await JSZip.loadAsync(data);
+                    const binEntries = [];
+                    zip.forEach((relPath, entry) => {
+                        if (relPath.startsWith('cactus/') && !relPath.endsWith('_MT.bin') && !entry.dir) {
+                            binEntries.push(entry);
+                        }
+                    });
+
+                    let atrLearned = 0;
+                    for (const entry of binEntries) {
+                        try {
+                            const bytes = await entry.async('uint8array');
+                            if (bytes.length > 2 && bytes[0] === 0xFF && bytes[1] === 0xD8) {
+                                totalCount++;
+                                const blob = new Blob([bytes], { type: 'image/jpeg' });
+                                const parsed = await FlirParser.parse(blob);
+
+                                if (parsed.hasNativeSpots) {
+                                    let circuitName = entry.name.replace(/^cactus\//, '').replace(/\.bin$/i, '');
+                                    const mtEntry = zip.file(`${entry.name.replace(/\.bin$/i, '')}_MT.bin`);
+                                    if (mtEntry) {
+                                        try {
+                                            const mt = JSON.parse(await mtEntry.async('string'));
+                                            if (mt.Title) circuitName = mt.Title;
+                                            else if (mt.Name) circuitName = mt.Name;
+                                        } catch (_) {}
+                                    }
+                                    if (circuitName.includes('_')) {
+                                        const parts = circuitName.split('_');
+                                        circuitName = parts[parts.length - 1];
+                                    }
+                                    this.learn(circuitName, parsed.spots);
+                                    learnedCount++;
+                                    atrLearned++;
+                                } else {
+                                    failedFiles.push(`${file.name}:${entry.name}`);
+                                }
+                            }
+                        } catch (e) {
+                            console.warn('ATR entry parse failed:', entry.name, e);
+                        }
                     }
-                    this.learn(circuitName, parsed.spots);
-                    learnedCount++;
+
+                    if (atrLearned === 0) {
+                        failedFiles.push(`${file.name} (스팟 미발견)`);
+                    }
+                } catch (err) {
+                    console.warn('ATR processing error:', file.name, err);
+                    failedFiles.push(`${file.name} (압축 해제 실패: ${err.message})`);
                 }
-            } catch (e) {
-                console.warn('Skipping unparsable training file:', file.name, e);
+            } else {
+                totalCount++;
+                if (progressCb) progressCb(i + 1, files.length, file.name);
+                try {
+                    const parsed = await FlirParser.parse(file);
+                    if (parsed.hasNativeSpots) {
+                        let circuitName = file.name.replace(/\.[^/.]+$/, "");
+                        if (circuitName.includes('_')) {
+                            const parts = circuitName.split('_');
+                            circuitName = parts[parts.length - 1];
+                        }
+                        this.learn(circuitName, parsed.spots);
+                        learnedCount++;
+                    } else {
+                        failedFiles.push(file.name);
+                    }
+                } catch (e) {
+                    console.warn('Skipping unparsable training file:', file.name, e);
+                    failedFiles.push(`${file.name} (파싱 오류)`);
+                }
             }
         }
-        return learnedCount;
+
+        return {
+            ok: learnedCount > 0,
+            totalCount,
+            learnedCount,
+            failedFiles
+        };
     }
 
     normalizeKey(name) {
