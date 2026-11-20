@@ -165,8 +165,9 @@ class AtrGenerator {
 
             // 새 열화상 사진 바이너리 저장
             let thData = null;
-            if (item.patchedBlob) {
-                thData = new Uint8Array(await item.patchedBlob.arrayBuffer());
+            const pb = item.patchedBlob ? (item.patchedBlob.blob || item.patchedBlob) : null;
+            if (pb && pb.arrayBuffer) {
+                thData = new Uint8Array(await pb.arrayBuffer());
             } else if (item.rawBuffer) {
                 thData = new Uint8Array(item.rawBuffer);
             }
