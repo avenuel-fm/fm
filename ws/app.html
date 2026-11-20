@@ -10,9 +10,9 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.20.2"></script>
-<script>window.WS_VERSION = '0.20.2';</script>
-<script src="ws-api.js?v=0.20.2"></script>
+<script src="config.js?v=0.20.3"></script>
+<script>window.WS_VERSION = '0.20.3';</script>
+<script src="ws-api.js?v=0.20.3"></script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -656,7 +656,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.20.2' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.20.3' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -2335,7 +2335,7 @@ function renderInspect() {
 
 /* ── 열화상점검 (결정 166): 직원은 이름만(눌리지 않음), 소장·부소장·관리자·옵저버만 엶. 앱은 PC 프로그램이라 안내만 ── */
 const thCanOpen = () => !!S.user && ['소장', '부소장', '관리자', '옵저버'].indexOf(S.user.role) !== -1;
-const THERMAL_ON = false;   // shortcut: 작성기 fm/thermal 이 바로가기 페이지에 없어 안내 화면만. 붙이는 날(WS_열화상점검 3장) true
+const THERMAL_ON = true;   // 작성기 fm/thermal 이 바로가기 페이지에 올라간 뒤 (결정 168). 구글 웹앱(WS_API 없음)에서는 안내 화면
 function renderThermal() {
   if (!thCanOpen()) return renderInspect();
   if (window.WS_API && THERMAL_ON) return '<div class="mapview">' + topbar('점검 ›', '열화상점검') + '<iframe class="mapframe" src="../thermal/index.html" title="열화상 보고서 작성" allow="fullscreen"></iframe>' +
