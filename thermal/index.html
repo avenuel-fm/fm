@@ -8,6 +8,7 @@
   <!-- 고정 버전 CDN 의존성 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
@@ -16,9 +17,9 @@
     <h1 class="page-title">열화상 리포트 자동 작성</h1>
     <div class="header-actions">
       <button type="button" id="btnReset" class="btn btn-secondary">새 문서 (초기화)</button>
-      <button type="button" id="btnPrint" class="btn btn-secondary">인쇄 / PDF 미리보기</button>
       <button type="button" id="btnModelModal" class="btn btn-secondary">스팟 위치 학습 관리</button>
-      <button type="button" id="btnGenerateAtr" class="btn btn-primary" disabled>리포트(.atr) 생성 및 다운로드</button>
+      <button type="button" id="btnDownloadAtr" class="btn btn-secondary" disabled>내려받기</button>
+      <button type="button" id="btnSavePdf" class="btn btn-primary" disabled>PDF 저장</button>
     </div>
   </header>
 
@@ -102,6 +103,11 @@
         </div>
 
         <button type="button" id="btnDeletePage" class="btn btn-danger" style="height: 40px;">이 쪽 삭제</button>
+      </div>
+
+      <!-- 적용 환경값 안내 (방사율, 반사온도, 거리) -->
+      <div id="envNotice" style="font-size: 12px; color: var(--text-sub); margin-bottom: var(--sp-2);">
+        적용값: 방사율 0.95 · 반사 20℃ · 거리 1m
       </div>
 
       <!-- 실화상 / 열화상 사진 비교 뷰 -->
@@ -191,17 +197,18 @@
       
       <!-- 학습용 예제 파일 추가 구역 -->
       <div class="form-group">
-        <label class="form-label">학습용 예제 사진 파일 추가 (스팟 위치 자동 고도화)</label>
+        <label class="form-label">학습용 예제 파일 추가 (.jpg 사진 또는 .atr 보고서)</label>
         <div id="trainingDropzone" class="training-dropzone">
           <div style="font-weight: 600; color: var(--navy); margin-bottom: 4px;">
-            기존 작성된 FLIR 열화상 사진들을 여기에 끌어다 놓거나 클릭
+            기존 작성된 FLIR 열화상 사진(.jpg)이나 서멀스튜디오 보고서(.atr)를 여기에 끌어다 놓거나 클릭
           </div>
           <div style="font-size: 12px; color: var(--text-sub);">
-            사진 내 스팟 좌표(Sp1, Sp2, Sp3)를 자동 분석하여 위치별 평균 최적 좌표로 누적 학습합니다.
+            사진 또는 보고서 내 스팟 좌표(Sp1, Sp2, Sp3)를 자동 분석하여 위치별 평균 최적 좌표로 누적 학습합니다.
           </div>
         </div>
-        <input type="file" id="trainingFileInput" multiple accept=".jpg,.jpeg" style="display: none;">
+        <input type="file" id="trainingFileInput" multiple accept=".jpg,.jpeg,.atr" style="display: none;">
         <div id="trainingProgress" style="display: none; font-size: 12px; color: var(--navy); margin-top: 4px;"></div>
+        <div id="trainingFailedNotice" style="display: none; font-size: 12px; color: var(--error); margin-top: 6px; line-height: 1.4;"></div>
       </div>
 
       <!-- 현재 쪽 학습 등록 -->
