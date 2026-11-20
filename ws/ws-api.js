@@ -83,6 +83,10 @@
     thermalBoot: (token) => rpc('ws_thermal_boot', { p_token: token }),
     thermalSet: (token, k, v) => rpc('ws_thermal_set', { p_token: token, p_k: k, p_v: v }),
     thermalReport: (token, r) => rpc('ws_thermal_report', { p_token: token, p_r: r }),
+    /* ── CAD 변환된 도면 (supabase/18_cad.sql): 뷰어(fm/cad)가 WS_CAD 통로로 부름 ── */
+    cadList: (token) => rpc('ws_cad_list', { p_token: token }),
+    cadSave: (token, r) => rpc('ws_cad_save', { p_token: token, p_r: r }),
+    cadDelete: (token, id) => rpc('ws_cad_delete', { p_token: token, p_id: id }),
 
     nextWorkGet: (token, date) => rpc('ws_next_work_get', { p_token: token, p_date: date || '' }),
     nextWorkSave: (token, date, rows, ver) => rpc('ws_next_work_save', { p_token: token, p_date: date, p_rows: rows || [], p_ver: ver || '' }),

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>에비뉴엘 도면 뷰어</title>
+<link rel="stylesheet" href="./tokens.css">
+<link rel="stylesheet" href="./styles.css">
+<script src="./mock_bridge.js"></script>
+</head>
+<body>
+
+<!-- 화면 1: 변환된 파일 목록 -->
+<main id="listView" class="list-view">
+  <div class="list-header">
+    <h2 class="list-title">변환된 도면</h2>
+    <input id="searchBox" class="search-box" type="search" placeholder="도면 이름, 층, 메모, 등록자로 찾기" aria-label="도면 검색">
+    <button id="btnUpload" type="button" class="btn btn-primary btn-sm">도면 올리기</button>
+  </div>
+  <dialog id="uploadDlg" class="up-dlg">
+    <h3 class="list-title">도면 올리기</h3>
+    <p class="up-note">CAD 변환기에서 만든 <b>.dxf</b> 파일을 고르세요. 올리면 구글 드라이브에도 저장되고 모든 직원이 봅니다.</p>
+    <input id="upFile" type="file" accept=".dxf" aria-label="DXF 파일 고르기">
+    <input id="upName" class="search-box" placeholder="도면 이름 (같은 이름은 새 파일로 바뀜)" maxlength="120" aria-label="도면 이름">
+    <input id="upFloor" class="search-box" placeholder="층 (예: 1F, B1)" maxlength="20" aria-label="층">
+    <input id="upMemo" class="search-box" placeholder="메모 (선택)" maxlength="200" aria-label="메모">
+    <div id="upMsg" class="up-note" role="status"></div>
+    <div class="up-row"><button id="upCancel" type="button" class="btn btn-secondary btn-sm">닫기</button><button id="upGo" type="button" class="btn btn-primary btn-sm">올리기</button></div>
+  </dialog>
+  <div id="itemsContainer" class="cad-items-container"></div>
+  <div id="emptyState" class="empty-state" hidden>
+    <h3>아직 올라온 도면이 없습니다</h3>
+    <p>CAD 변환기에서 만든 DXF를 「도면 올리기」로 올려 주세요.</p>
+  </div>
+</main>
+
+<!-- 화면 2: 도면 뷰어 -->
+<div id="viewerView" class="viewer-view" hidden>
+  <div class="viewer-toolbar">
+    <button id="btnBackToList" type="button" class="btn btn-secondary btn-sm">‹ 목록</button>
+    <div class="doc-info">
+      <span id="docFloor" class="floor-badge">1F</span>
+      <span id="docTitle" class="doc-name">도면</span>
+    </div>
+    <div class="viewer-actions">
+      <button id="btnFitView" type="button" class="btn btn-secondary btn-sm" title="화면 크기에 맞춤">맞춤</button>
+      <div class="seg" role="group" aria-label="도면 색상">
+        <button id="btnCatMode" type="button" aria-pressed="true">분류색</button>
+        <button id="btnOrigMode" type="button" aria-pressed="false">원본색</button>
+      </div>
+      <div class="seg" role="group" aria-label="화면 밝기">
+        <button id="btnLightTh" type="button" aria-pressed="true">밝게</button>
+        <button id="btnDarkTh" type="button" aria-pressed="false">어둡게</button>
+      </div>
+      <button id="btnToggleLayers" type="button" class="btn btn-secondary btn-sm">레이어</button>
+      <button id="btnFullscreen" type="button" class="btn btn-secondary btn-sm">전체화면</button>
+    </div>
+  </div>
+
+  <div class="stage-area">
+    <canvas id="cv" aria-label="도면 캔버스"></canvas>
+    
+    <!-- 레이어 패널 서랍 -->
+    <div id="layerDrawer" class="layer-drawer" hidden>
+      <div class="layer-drawer-header">
+        <h3>레이어 목록</h3>
+        <button id="btnCloseLayers" type="button" class="btn btn-secondary btn-sm">닫기</button>
+      </div>
+      <div class="layer-drawer-search">
+        <input id="layerSearchInput" type="search" placeholder="레이어 이름 검색">
+      </div>
+      <ul id="layerList" class="layer-list"></ul>
+    </div>
+  </div>
+
+  <footer class="viewer-foot">
+    <span id="coordStat">X -  Y -</span>
+    <span id="elemStat">도형 0개</span>
+  </footer>
+</div>
+
+<div id="toast" class="toast" role="status" hidden></div>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>
