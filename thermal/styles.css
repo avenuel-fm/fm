@@ -59,6 +59,10 @@
   -webkit-font-smoothing: antialiased;
 }
 
+html, body {
+  height: 100%;
+}
+
 body {
   background-color: var(--white);
   color: #111111;
@@ -67,6 +71,35 @@ body {
   padding: var(--sp-4);
   max-width: var(--content-max);
   margin: 0 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: var(--sp-2);
+  }
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--sp-2);
+  }
+  .page-title {
+    font-size: var(--size-l);
+  }
+  .header-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-2);
+    width: 100%;
+  }
+  .header-actions .btn {
+    width: 100%;
+    padding: 0 var(--sp-2);
+    font-size: var(--size-s);
+    text-align: center;
+    white-space: normal;
+  }
 }
 
 /* ==========================================================================
