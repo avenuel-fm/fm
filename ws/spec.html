@@ -9,7 +9,7 @@
 <title>시방서 검색 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.19.3"></script>
+<script src="config.js?v=0.20.2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
@@ -150,7 +150,7 @@ function themeLabel() { return themeDark() ? '밝게' : '어둡게'; }
 .sppv-h{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) var(--sp-3);border-bottom:1px solid var(--line3);flex-wrap:wrap}
 .spttl{font-size:var(--size-m);flex:1 1 120px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sptools{display:flex;align-items:center;gap:var(--sp-1);margin-left:auto}
-.sppv-b{flex:1;overflow:auto;overscroll-behavior:contain;background:var(--tint);padding:var(--sp-3);scrollbar-width:none}.sppv-b::-webkit-scrollbar{display:none}.sppv-b.pan{cursor:grab}.sppv-b.drag{cursor:grabbing}
+.sppv-b{flex:1;overflow:auto;overscroll-behavior:contain;background:var(--tint);padding:var(--sp-3);scrollbar-width:none}.sppv-b::-webkit-scrollbar{display:none}.sppv-b.pan{cursor:grab}.sppv-b{touch-action:pan-x pan-y}.sppv-b.drag{cursor:grabbing}
 .sppvw .sppv{height:var(--sppvh,calc(100dvh - 300px))}
 @media(min-width:1001px){.sp:has(~ .backbar){padding-bottom:0}.sp ~ .backbar{padding-top:4px}#spRes{padding-bottom:var(--sp-3)}}
 .sppg{position:relative;margin:0 auto;box-shadow:none;background:var(--white)}.sppg img{display:block;width:100%;height:auto}
@@ -283,6 +283,7 @@ button.nwdate{border:0;font-family:inherit}
 .nwbar{position:sticky;bottom:0;z-index:15;background:var(--white);border-top:1px solid var(--line2);margin:0 calc(var(--sp-4) * -1);padding:var(--sp-2) var(--sp-4) calc(var(--sp-2) + env(safe-area-inset-bottom));display:flex;gap:var(--sp-2);align-items:center}
 .nwbar .btn{flex:1;min-height:var(--control-h);font-size:var(--size-m);font-weight:500}
 .nwbar .btn.green{background:var(--green);border-color:var(--green);color:var(--white)}
+.dslot{display:contents}
 .nwstate{font-size:var(--size-s);color:var(--green);white-space:nowrap}
 .nwstate.dirty{color:var(--orange)}
 .sec{font-size:var(--size-s);font-weight:600;color:var(--muted);margin:var(--sp-2) var(--sp-1) calc(var(--sp-1) * -1)}
@@ -450,8 +451,16 @@ button.attag{cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:n
 .cssrch{flex:1;min-width:0;position:relative}.cssrch input{width:100%;min-height:var(--control-h);border:1px solid var(--line);border-radius:var(--radius);padding:0 var(--sp-3) 0 var(--sp-8);font-size:var(--size-m);background:var(--white);color:var(--ink);font-family:inherit}
 .cssrch::before{content:'';position:absolute;left:13px;top:13px;width:11px;height:11px;border:2px solid var(--muted);border-radius:var(--radius)}.cssrch::after{content:'';position:absolute;left:24px;top:25px;width:6px;height:2px;background:var(--muted);transform:rotate(45deg)}
 .csrd{display:flex;gap:var(--sp-1);margin-top:var(--sp-1);flex-wrap:wrap}.csrd span{font-size:var(--size-s);font-weight:500;border-radius:var(--radius);padding:var(--sp-1) var(--sp-2);white-space:nowrap}
-.csrd .ok{color:var(--green);background:var(--green-bg)}.csrd .bad{color:var(--navy);background:var(--red-bg)}.csrd .wait{color:var(--muted);background:var(--tint)}
-.csbtns{display:flex;gap:var(--sp-2)}.csbtns .csadd{flex:2;width:auto}.csbtns>.btn:not(.csadd){flex:1;min-height:var(--control-h);padding:0 var(--sp-2)}
+.csrd .ok{color:var(--green);background:var(--green-bg)}.csrd .bad{color:var(--red);background:var(--red-bg)}.csrd .wait{color:var(--muted);background:var(--tint)}
+.csbtns{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2)}.csbtns .csadd{width:auto}.csbtns .csitb{grid-column:1/-1;min-height:var(--control-h)}
+.csacc{display:flex;align-items:center;gap:var(--sp-2);width:100%;box-sizing:border-box;min-height:52px;padding:0 var(--sp-3);background:none;border:0;font:inherit;color:var(--ink);text-align:left;cursor:pointer}.csacc b{flex:1;min-width:0;font-size:var(--size-m)}.csacc .csn{font-size:var(--size-s);color:var(--muted)}.csacc.on{background:var(--tint)}
+.csacc .csar{width:8px;height:8px;margin:0 var(--sp-1);border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);flex:none}.csacc.on .csar{transform:rotate(45deg)}.csacc+.csrow,.csrow+.csacc,.csacc+.csacc{border-top:1px solid var(--line3)}
+.csyrs{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin:var(--sp-2) var(--sp-1)}.csyr{position:relative;cursor:pointer}.csyr input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+.csyr span{display:inline-flex;align-items:center;gap:var(--sp-1);min-height:var(--control-h);padding:0 var(--sp-3);border:1px solid var(--line);border-radius:var(--radius);background:var(--white);font-size:var(--size-m);font-weight:500;color:var(--sub)}
+.csyr span::before{content:'';width:18px;height:18px;border:2px solid var(--line);border-radius:4px;box-sizing:border-box;flex:none}.csyr input:checked+span{border-color:var(--blue);background:var(--blue-bg);color:var(--blue-d)}.csyr input:checked+span::before{border-color:var(--blue);background:var(--blue) no-repeat center/12px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 6.5l2.5 2.5L10 3' fill='none' stroke='%23fff' stroke-width='2'/%3E%3C/svg%3E")}.csyr input:focus-visible+span{outline:2px solid var(--blue);outline-offset:2px}
+.csmons{display:flex;gap:var(--sp-1);overflow-x:auto;margin:var(--sp-1) var(--sp-1) var(--sp-2);padding-bottom:var(--sp-1);-webkit-overflow-scrolling:touch}.csmon{flex:none;min-height:var(--control-h);padding:0 var(--sp-3);border:1px solid var(--line);border-radius:var(--radius);background:var(--white);font:inherit;font-size:var(--size-m);font-weight:500;color:var(--sub);cursor:pointer}.csmon.on{background:var(--blue);border-color:var(--blue);color:var(--white)}
+.cssec.cssub{margin-top:var(--sp-3);font-weight:500}
+.csdl{display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3);min-height:56px;cursor:pointer}.csdl+.csdl{border-top:1px solid var(--line3)}.csdl input{width:22px;height:22px;flex:none}.csdl small{display:block;color:var(--muted)}
 .csrtabs{display:flex;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--white)}
 .csrtabs button{flex:1;min-width:0;min-height:var(--control-h);border:0;background:var(--white);font-size:var(--size-m);font-weight:500;color:var(--sub);line-height:1.2;cursor:pointer;font-family:inherit;padding:var(--sp-1)}
 .csrtabs button+button{border-left:1px solid var(--line)}.csrtabs button small{display:block;font-size:var(--size-s);font-weight:500;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -528,6 +537,7 @@ button.attag{cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:n
 .hvin{position:relative;display:block}.hvin .inp{text-align:right;padding-right:var(--sp-8);font-variant-numeric:tabular-nums;font-weight:500}
 .hvin span{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:var(--size-m);color:var(--muted);pointer-events:none}
 .hvin .inp.empty{background:var(--tint);border-color:var(--line)}
+.inp.bad,.lgin.bad{border-color:var(--red);background:var(--red-bg,#FDECEC);outline:2px solid var(--red);outline-offset:-1px}.hverr{color:var(--red);font-size:var(--size-s)}
 .hvw{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2);margin-top:var(--sp-2)}.hvw label{font-size:var(--size-s);color:var(--sub)}
 .hvmeta{font-size:var(--size-s);color:var(--muted);margin-top:var(--sp-2);line-height:1.5}
 .hvchip{display:inline-flex;align-items:center;height:24px;padding:0 var(--sp-2);border-radius:var(--radius);font-size:var(--size-s);font-weight:500;background:var(--orange-bg);color:var(--orange);margin-right:var(--sp-1)}
@@ -810,7 +820,8 @@ function spPv() {
         spBoxes(x).map(z => '<span class="hl" style="left:' + ((z[0] - 0.004) * 100) + '%;top:' + ((z[1] - 0.004) * 100) + '%;width:' + ((z[2] - z[0] + 0.008) * 100) + '%;height:' + ((z[3] - z[1] + 0.008) * 100) + '%"></span>').join('') + '</div>';
       const img = b.querySelector('img'), place = () => {   // 100% = 쪽 한 장이 칸 안에 다 들어오는 크기, + 로 키우면 그때 스크롤 (사용자 11-17)
         const fit = Math.min(b.clientWidth - 24, (b.clientHeight - 24) * (img.naturalWidth || 600) / (img.naturalHeight || 848));
-        b.querySelector('.sppg').style.width = Math.round(Math.max(200, fit) * S.sp.zoom) + 'px';
+        b._fit = Math.max(200, fit);
+        b.querySelector('.sppg').style.width = Math.round(b._fit * S.sp.zoom) + 'px';
         const f = b.querySelector('.hl'); b.scrollTop = f && S.sp.zoom > 1 ? Math.max(0, f.offsetTop - b.clientHeight * 0.3) : 0;
         b.classList.toggle('pan', b.scrollWidth > b.clientWidth || b.scrollHeight > b.clientHeight);
       };
@@ -836,12 +847,34 @@ document.addEventListener('mousedown', e => {
   const up = () => { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); b.classList.remove('drag'); };
   document.addEventListener('mousemove', move); document.addEventListener('mouseup', up); b.classList.add('drag');
 });
+// 안드로이드·아이패드: 쪽 칸 안에서만 두 손가락으로 확대·축소 (한 손가락 이동은 브라우저, 화면 전체 확대는 touch-action으로 막음)
+document.addEventListener('touchstart', e => {
+  const b = e.touches.length === 2 && e.target.closest && e.target.closest('.sppv-b'), g = b && b.querySelector('.sppg');
+  if (!g || !b._fit) return;
+  const T = e.touches, dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY), r = b.getBoundingClientRect();
+  const d0 = dist(T), w0 = g.offsetWidth, mx = (T[0].clientX + T[1].clientX) / 2 - r.left, my = (T[0].clientY + T[1].clientY) / 2 - r.top;
+  const px = b.scrollLeft + mx, py = b.scrollTop + my;   // 두 손가락 가운데에 있던 곳을 그 자리에 붙잡아 둠
+  const move = m => {
+    if (m.touches.length < 2) return;
+    m.preventDefault();
+    S.sp.zoom = Math.max(0.75, Math.min(2.5, w0 * dist(m.touches) / d0 / b._fit));
+    const w = Math.round(b._fit * S.sp.zoom); g.style.width = w + 'px';
+    b.scrollLeft = px * w / w0 - mx; b.scrollTop = py * w / w0 - my;
+  };
+  const end = () => {
+    ['touchmove', 'touchend', 'touchcancel'].forEach((k, i) => b.removeEventListener(k, i ? end : move));
+    const n = b.closest('.sppv').querySelector('.sptools .spnote'); if (n) n.textContent = Math.round(S.sp.zoom * 100) + '%';
+    b.classList.toggle('pan', b.scrollWidth > b.clientWidth || b.scrollHeight > b.clientHeight);
+  };
+  b.addEventListener('touchmove', move, { passive: false }); b.addEventListener('touchend', end); b.addEventListener('touchcancel', end);
+}, { passive: true });
+document.addEventListener('gesturestart', e => { if (e.target.closest && e.target.closest('.sppv-b')) e.preventDefault(); });   // 아이패드 사파리 화면 전체 확대 막기
 function spPvHtml(x, big) {
   return '<div class="sppv' + (big ? ' big' : '') + '"><div class="sppv-h">' + spTag(x.e.d) + '<b class="spttl">' + h(spWhere(x.e) || spGuide(x.e.d).title) + '</b><span class="spnote pcon">PDF ' + x.e.p + '쪽</span>' +
     '<span class="sptools"><button type="button" class="btn sm" onclick="spZoom(-0.25)" aria-label="작게">−</button><span class="spnote">' + Math.round(S.sp.zoom * 100) + '%</span><button type="button" class="btn sm" onclick="spZoom(0.25)" aria-label="크게">+</button>' +
     '<button type="button" class="btn sm spo" style="display:none">PDF 원본</button>' + (big ? '<button type="button" class="btn sm" onclick="spBigClose()" aria-label="닫기">' + ICON.x + '</button>' : '') + '</span></div>' +
     '<div class="sppv-b"><div class="spnote" style="padding:var(--sp-8);text-align:center">쪽 그림을 불러오는 중…</div></div>' +
-    '<div class="sppv-f"><span class="spnote">노란 표시 = 검색어가 있는 줄</span><button type="button" class="btn sm pri" onclick="spCopy(' + S.sp.sel + ')">참조 복사 ' + h(spRef(x.e)) + '</button></div></div>';
+    '<div class="sppv-f"><button type="button" class="btn sm pri" onclick="spCopy(' + S.sp.sel + ')">참조 복사 ' + h(spRef(x.e)) + '</button></div></div>';
 }
 // PC 마우스 오른쪽 버튼 막기 (휴대폰 길게 누르기는 그대로)
 if (window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches) document.addEventListener('contextmenu', e => e.preventDefault());
