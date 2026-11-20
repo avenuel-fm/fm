@@ -497,3 +497,15 @@ canvas#cv:active {
 .up-dlg input{width:100%;margin-top:8px;box-sizing:border-box}
 .up-note{font-size:14px;line-height:1.5;margin:8px 0}
 .up-row{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+
+/* 분류 */
+.cat-bar{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.cat-chip{border:1px solid var(--navy,#1E3A5F);color:var(--navy,#1E3A5F);background:#fff;border-radius:var(--radius);padding:0 12px;min-height:36px;font:inherit;cursor:pointer}
+.cat-chip[aria-pressed="true"]{background:var(--navy,#1E3A5F);color:#fff}
+.cat-actions{display:flex;gap:8px;margin-bottom:8px}
+.cat-list{margin:10px 0}
+.cat-row{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--line);border-radius:var(--radius);padding:6px 10px;margin-bottom:6px}
+.cat-row .n{color:var(--muted,#5b6573);font-size:12px}
+.cat-del{border:1px solid var(--error,#a32d2d);color:var(--error,#a32d2d);background:#fff;border-radius:var(--radius);min-height:32px;padding:0 10px;font:inherit;cursor:pointer}
+.cat-warn{border:1px solid var(--error,#a32d2d);color:var(--error,#a32d2d);border-radius:var(--radius);padding:8px;margin:8px 0;font-size:13px}
+.cat-sel{min-height:32px;border:1px solid var(--line);border-radius:var(--radius);font:inherit;max-width:110px}

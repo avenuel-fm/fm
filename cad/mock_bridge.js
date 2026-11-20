@@ -226,13 +226,35 @@
       return await idbPut(id, blob);
     },
 
-    async upload({ file, name, floor, memo }) {   // 단독 시험용: 브라우저 저장소에만 올림
+    _cats() { try { const c = JSON.parse(localStorage.getItem('avenuel_cad_mock_cats') || 'null'); if (c) return c; } catch (e) {} return [{ id: 1, name: '공조' }, { id: 2, name: '소방' }, { id: 3, name: '전기' }, { id: 4, name: '건축' }]; },
+    _saveCats(c) { localStorage.setItem('avenuel_cad_mock_cats', JSON.stringify(c)); },
+    async cats() { return { cats: this._cats(), canDel: true }; },
+    async catAdd(name) {
+      const c = this._cats(); name = String(name).trim().slice(0, 20);
+      if (!name) throw new Error('분류 이름을 적어 주세요');
+      if (c.some(x => x.name.toLowerCase() === name.toLowerCase())) throw new Error('같은 이름의 분류가 이미 있습니다');
+      c.push({ id: Date.now(), name }); this._saveCats(c); return { ok: true };
+    },
+    async catDel(id) {
+      this._saveCats(this._cats().filter(x => String(x.id) !== String(id)));
+      let list = []; let moved = 0;
+      try { list = JSON.parse(localStorage.getItem('avenuel_cad_mock_list') || '[]'); } catch (e) {}
+      list.forEach(i => { if (String(i.cat_id) === String(id)) { i.cat_id = ''; i.cat = ''; moved++; } });
+      localStorage.setItem('avenuel_cad_mock_list', JSON.stringify(list)); return { ok: true, moved };
+    },
+    async setCat(id, cat) {
+      let list = []; try { list = JSON.parse(localStorage.getItem('avenuel_cad_mock_list') || '[]'); } catch (e) {}
+      const it = list.find(x => x.id === id); if (it) { it.cat_id = cat || ''; it.cat = (this._cats().find(c => String(c.id) === String(cat)) || {}).name || ''; }
+      localStorage.setItem('avenuel_cad_mock_list', JSON.stringify(list)); return { ok: true };
+    },
+
+    async upload({ file, name, floor, memo, cat_id }) {   // 단독 시험용: 브라우저 저장소에만 올림
       const id = 'up-' + Date.now();
       await idbPut(id, file);
       let list = [];
       try { list = JSON.parse(localStorage.getItem('avenuel_cad_mock_list') || '[]'); } catch (e) {}
       list = list.filter(x => x.name !== name);
-      list.unshift({ id, name, floor, memo, by: '시험', date: new Date().toISOString().slice(0, 10), size: file.size });
+      list.unshift({ id, name, floor, memo, cat_id: cat_id || '', cat: (this._cats().find(c => String(c.id) === String(cat_id)) || {}).name || '', by: '시험', date: new Date().toISOString().slice(0, 10), size: file.size });
       localStorage.setItem('avenuel_cad_mock_list', JSON.stringify(list));
       return { ok: true, id, drive: true };
     },

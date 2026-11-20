@@ -15,12 +15,27 @@
   <div class="list-header">
     <h2 class="list-title">변환된 도면</h2>
     <input id="searchBox" class="search-box" type="search" placeholder="도면 이름, 층, 메모, 등록자로 찾기" aria-label="도면 검색">
-    <button id="btnUpload" type="button" class="btn btn-primary btn-sm">도면 올리기</button>
+    <div id="catBar" class="cat-bar" role="group" aria-label="도면 분류"></div>
+    <div class="cat-actions">
+      <button id="btnCatMgr" type="button" class="btn btn-secondary btn-sm">분류 관리</button>
+      <button id="btnUpload" type="button" class="btn btn-primary btn-sm">도면 올리기</button>
+    </div>
   </div>
+  <dialog id="catDlg" class="up-dlg">
+    <h3 class="list-title">분류 관리</h3>
+    <div class="up-row" style="margin-top:8px">
+      <input id="catNew" class="search-box" placeholder="새 분류 이름 (예: 통신)" maxlength="20" aria-label="새 분류 이름" style="margin-top:0">
+      <button id="catAdd" type="button" class="btn btn-primary btn-sm">추가</button>
+    </div>
+    <div id="catList" class="cat-list"></div>
+    <div id="catMsg" class="up-note" role="status"></div>
+    <div class="up-row"><button id="catClose" type="button" class="btn btn-secondary btn-sm">닫기</button></div>
+  </dialog>
   <dialog id="uploadDlg" class="up-dlg">
     <h3 class="list-title">도면 올리기</h3>
     <p class="up-note">CAD 변환기에서 만든 <b>.dxf</b> 파일을 고르세요. 올리면 구글 드라이브에도 저장되고 모든 직원이 봅니다.</p>
     <input id="upFile" type="file" accept=".dxf" aria-label="DXF 파일 고르기">
+    <select id="upCat" class="search-box" aria-label="분류"></select>
     <input id="upName" class="search-box" placeholder="도면 이름 (같은 이름은 새 파일로 바뀜)" maxlength="120" aria-label="도면 이름">
     <input id="upFloor" class="search-box" placeholder="층 (예: 1F, B1)" maxlength="20" aria-label="층">
     <input id="upMemo" class="search-box" placeholder="메모 (선택)" maxlength="200" aria-label="메모">
@@ -40,6 +55,7 @@
     <button id="btnBackToList" type="button" class="btn btn-secondary btn-sm">‹ 목록</button>
     <div class="doc-info">
       <span id="docFloor" class="floor-badge">1F</span>
+      <select id="docCat" class="cat-sel" aria-label="이 도면의 분류"></select>
       <span id="docTitle" class="doc-name">도면</span>
     </div>
     <div class="viewer-actions">

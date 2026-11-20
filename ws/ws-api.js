@@ -87,6 +87,9 @@
     cadList: (token) => rpc('ws_cad_list', { p_token: token }),
     cadSave: (token, r) => rpc('ws_cad_save', { p_token: token, p_r: r }),
     cadDelete: (token, id) => rpc('ws_cad_delete', { p_token: token, p_id: id }),
+    cadCatAdd: (token, name) => rpc('ws_cad_cat_add', { p_token: token, p_name: name }),
+    cadCatDel: (token, id) => rpc('ws_cad_cat_del', { p_token: token, p_id: id }),
+    cadSetCat: (token, id, cat) => rpc('ws_cad_set_cat', { p_token: token, p_id: id, p_cat: cat }),
 
     nextWorkGet: (token, date) => rpc('ws_next_work_get', { p_token: token, p_date: date || '' }),
     nextWorkSave: (token, date, rows, ver) => rpc('ws_next_work_save', { p_token: token, p_date: date, p_rows: rows || [], p_ver: ver || '' }),
