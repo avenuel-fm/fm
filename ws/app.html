@@ -10,9 +10,9 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.20.3"></script>
-<script>window.WS_VERSION = '0.20.3';</script>
-<script src="ws-api.js?v=0.20.3"></script>
+<script src="config.js?v=0.20.4"></script>
+<script>window.WS_VERSION = '0.20.4';</script>
+<script src="ws-api.js?v=0.20.4"></script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -169,6 +169,7 @@ function themeLabel() { return themeDark() ? '밝게' : '어둡게'; }
   .spsheet{align-items:flex-end;padding:0}.spsheet .sppv{height:90vh;border-radius:var(--radius) var(--radius) 0 0}}
 .mapframe{display:block;width:100%;height:calc(100dvh - 150px);min-height:420px;border:0}
 .mapview{display:flex;flex-direction:column;height:100dvh}.mapview .mapframe{flex:1;height:auto;min-height:0}
+.thview{display:flex;flex-direction:column;height:calc(100dvh - 84px)}.thview .mapframe{flex:1;height:auto;min-height:0}
 .mapback{position:fixed;left:var(--sp-3);bottom:calc(var(--sp-3) + env(safe-area-inset-bottom));z-index:15;gap:var(--sp-1)}
 body.mapfull .mapview .mapframe{position:fixed;inset:0;width:100%;height:100dvh;z-index:100}
 .top,.top .ttl,.top .ttl small,.top .ttl b{color:var(--white)}
@@ -656,7 +657,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.20.3' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.20.4' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -2338,8 +2339,7 @@ const thCanOpen = () => !!S.user && ['소장', '부소장', '관리자', '옵저
 const THERMAL_ON = true;   // 작성기 fm/thermal 이 바로가기 페이지에 올라간 뒤 (결정 168). 구글 웹앱(WS_API 없음)에서는 안내 화면
 function renderThermal() {
   if (!thCanOpen()) return renderInspect();
-  if (window.WS_API && THERMAL_ON) return '<div class="mapview">' + topbar('점검 ›', '열화상점검') + '<iframe class="mapframe" src="../thermal/index.html" title="열화상 보고서 작성" allow="fullscreen"></iframe>' +
-    '<button class="btn mapback" onclick="back()">' + ICON.back + '뒤로</button></div>';   // 작성기(fm/thermal)를 지도처럼 화면 안 창으로 (결정 168)
+  if (window.WS_API && THERMAL_ON) return '<div class="thview">' + topbar('점검 ›', '열화상점검') + '<iframe class="mapframe" src="../thermal/index.html" title="열화상 보고서 작성" allow="fullscreen"></iframe></div>';   // 작성기(fm/thermal)를 화면 안 창으로. 뒤로는 아래 공통 긴 버튼 하나만 (결정 168)
   return topbar('점검 ›', '열화상점검') + '<div class="wrap list">' +
     '<div class="banner b-gray">준비 중입니다. 지금은 사무실 PC에서만 씁니다.</div>' +
     '<div class="card" style="padding:var(--sp-4)"><h3 style="margin:0 0 var(--sp-2);font-size:var(--size-m)">할 수 있는 일</h3><div style="line-height:1.7">FLIR 열화상 사진(.jpg)을 넣으면 점 3개(R·S·T상) 온도와 상간 온도차를 계산해 FLIR Thermal Studio 보고서(.atr)로 만듭니다.</div></div>' +
@@ -2357,7 +2357,13 @@ window.WS_THERMAL = {
   saveTemplate: async t => thOk(await call('thermalSet', 'template', t)),   // t = upload() 결과 + name
   upload: (blob, name) => WS_API.upload('thermal', blob, thExt(name)),   // 원본 그대로 (줄이지 않음)
   saveReport: async r => thOk(await call('thermalReport', r)),
-  toDrive: async () => { throw new Error('구글 드라이브로 옮기기는 다음 단계에서 됩니다. 지금은 내려받아 주세요.'); },
+  toDrive: async (path, name) => {   // 서버에 올린 PDF를 구글 드라이브 폴더로 복사 (구글 웹앱 ?api=thermaldrive, 결정 168)
+    const C = window.WS_CONFIG || {};
+    if (!C.WS_GAS_URL) throw new Error('구글 웹앱 주소가 설정에 없습니다');
+    const r = await (await fetch(C.WS_GAS_URL + '?api=thermaldrive&path=' + encodeURIComponent(path) + '&name=' + encodeURIComponent(name || ''), { credentials: 'omit' })).json();
+    if (!r.ok) throw new Error(r.error || '드라이브로 옮기지 못했습니다');
+    return { ok: true, url: r.url };
+  },
   full: on => mapFull(on)
 };
 
