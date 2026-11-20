@@ -114,7 +114,18 @@
     },
 
     /* ── 공조기 환기온도 (supabase/12_ahu.sql, 결정 128). 저장은 고친 칸만 ── */
-    ahuGet: (token, day) => rpc('ws_ahu_get', { p_token: token, p_day: day || '' }),
+    // 오늘 날씨가 비었으면 구글 웹앱이 네이버에서 읽어 일지에 넣게 한 뒤 다시 받음 (실패해도 화면은 그대로)
+    async ahuGet(token, day) {
+      const g = () => rpc('ws_ahu_get', { p_token: token, p_day: day || '' });
+      let r = await g();
+      if (r && r.ok && r.day === r.workDay && !(r.wx && (r.wx.weather || r.wx.tmin != null))) {
+        try {
+          const j = await (await fetch(C.WS_GAS_URL + '?api=logac&wx=1&day=' + r.day)).json();
+          if (j.ok) r = await g() || r;
+        } catch (e) { /* 날씨는 빈칸으로 둠 */ }
+      }
+      return r;
+    },
     ahuSave: (token, day, c) => rpc('ws_ahu_save', { p_token: token, p_day: day, p_c: c || {} }),
     async ahuSavePdf(token, day, dataUri) {
       const pdf = pdfBlob(dataUri); if (pdf.error) return pdf;
