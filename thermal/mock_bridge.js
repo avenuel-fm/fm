@@ -18,6 +18,8 @@
     };
 
     const MockBridge = {
+        isMock: true,
+
         async me() {
             return {
                 name: "김시설",
@@ -66,7 +68,7 @@
         async upload(blob, name) {
             // 브라우저 로컬 Blob URL 생성
             const url = URL.createObjectURL(blob);
-            const path = `local://thermal_reports/${Date.now()}_${name || 'report.atr'}`;
+            const path = `local://thermal_reports/${Date.now()}_${name || 'report.pdf'}`;
             return {
                 ok: true,
                 path: path,
@@ -74,8 +76,16 @@
             };
         },
 
+        async toDrive(path, name) {
+            console.log('[MockBridge] toDrive called for:', path, name);
+            return {
+                ok: true,
+                url: `https://drive.google.com/mock_file_${Date.now()}`
+            };
+        },
+
         async saveReport(reportData) {
-            // { title, inspector, date, path, pages, max_dt }
+            // { title, inspector, date, path, pdf_path, pdf_url, drive_url, pages, max_dt }
             try {
                 let reports = [];
                 const stored = localStorage.getItem(STORAGE_KEY_REPORTS);
@@ -96,14 +106,6 @@
                 console.error('saveReport error:', e);
                 return { ok: false, error: e.message };
             }
-        },
-
-        async toDrive(path, name) {
-            console.log('[MockBridge] toDrive called for:', path, name);
-            return {
-                ok: true,
-                url: `https://drive.google.com/mock_file_${Date.now()}`
-            };
         },
 
         async full(on) {
