@@ -62,8 +62,10 @@
       return rpc('ws_sign_today', { p_token: token, p_sign_url: f.url, p_sign_path: f.path });
     },
     async bootstrap(token) {
-      const [r, m] = await Promise.all([rpc('ws_bootstrap', { p_token: token }), rpc('ws_menu', { p_token: token }).catch(() => null)]);   // 메인 메뉴 켜기·끄기 (결정 148)
+      const [r, m, t] = await Promise.all([rpc('ws_bootstrap', { p_token: token }), rpc('ws_menu', { p_token: token }).catch(() => null),   // 메인 메뉴 켜기·끄기 (결정 148)
+        rpc('ws_usage_todo', { p_token: token }).catch(() => null)]);   // 메인 「가동시간 미입력」 (결정 194) — 19_climate.sql 전이면 없음
       r.menuOff = m && m.ok ? m.off : [];
+      r.acTodo = t && t.ok ? t : null;
       r.app = { id: 'WS', title: '업무지원', version: window.WS_VERSION || '' };
       return r;
     },
@@ -104,19 +106,28 @@
       s.files.pdf = await upload('tbm_pdf', pdf);
       return rpc('ws_tbm_save_pdf', { p_token: token, p_files: s.files, p_sign_ids: signIds || [], p_d: s.d, p_want: want || '' });
     },
-    async logGet(token, day) { return withAc(await rpc('ws_log_get', { p_token: token, p_day: day || '' })); },
+    async logGet(token, day) { return withAc(await rpc('ws_log_get', { p_token: token, p_day: day || '' }), token); },
     async logSave(token, day, d, ver) {
       const s = await logSplit(d);
-      return withAc(await rpc('ws_log_save', { p_token: token, p_day: day, p_d: s.d, p_ver: ver || '', p_files: s.files }));
+      return withAc(await rpc('ws_log_save', { p_token: token, p_day: day, p_d: s.d, p_ver: ver || '', p_files: s.files }), token);
     },
     async logSavePdf(token, day, dataUri, d, ver) {
       const pdf = pdfBlob(dataUri); if (pdf.error) return pdf;
       const s = d ? await logSplit(d) : { d: null, files: {} };
       s.files.pdf = await upload('log_pdf', pdf);
-      return withAc(await rpc('ws_log_save_pdf', { p_token: token, p_day: day, p_files: s.files, p_d: s.d, p_ver: ver || '' }));
+      return withAc(await rpc('ws_log_save_pdf', { p_token: token, p_day: day, p_files: s.files, p_d: s.d, p_ver: ver || '' }), token);
     },
 
     /* ── 공조기 환기온도 (supabase/12_ahu.sql, 결정 128). 저장은 고친 칸만 ── */
+    /* ── 온습도/공조기/에어커튼 입력 (supabase/19_climate.sql, 결정 192·194·196) ── */
+    usageGet: (token, kind, day) => rpc('ws_usage_get', { p_token: token, p_kind: kind, p_day: day || '' }),
+    usageSave: (token, kind, day, rows) => rpc('ws_usage_save', { p_token: token, p_kind: kind, p_day: day, p_rows: rows || [] }),
+    usageReport: (token, kind, from, to) => rpc('ws_usage_report', { p_token: token, p_kind: kind, p_from: from || '', p_to: to || '' }),
+    climateGet: (token) => rpc('ws_climate_get', { p_token: token }),
+    climateAdd: (token, rows, out) => rpc('ws_climate_add', { p_token: token, p_rows: rows || [], p_out: out || {} }),
+    climateReport: (token, from, to) => rpc('ws_climate_report', { p_token: token, p_from: from || '', p_to: to || '' }),
+    equipKwGet: (token) => rpc('ws_equip_kw_get', { p_token: token }),
+    equipKwSave: (token, d) => rpc('ws_equip_kw_save', { p_token: token, p_d: d || {} }),
     // 오늘 날씨가 비었으면 구글 웹앱이 네이버에서 읽어 일지에 넣게 한 뒤 다시 받음 (실패해도 화면은 그대로)
     async ahuGet(token, day) {
       const g = () => rpc('ws_ahu_get', { p_token: token, p_day: day || '' });
@@ -298,23 +309,24 @@
     if (d.night && d.night !== '-') { files.night = await upload('log_night', dataUrlToBlob(d.night)); delete rest.night; }
     return { d: rest, files };
   }
-  /* 공조기·에어커튼 가동시간은 구글(온습도 앱 읽기)에 남음 → 업무지원 구글 웹앱 ?api=logac 로 받음. 같은 날은 10분 기억 */
+  /* 공조기·에어커튼 가동시간: Supabase ws_log_ac 에서 바로 (결정 194, 전: 구글 ?api=logac 가 옛 온습도 앱을 읽음). 같은 날은 10분 기억 */
   const AC = {};
   // 기다리지 않음: 기억한 값이 없으면 r.acLater(약속)만 붙여 돌려줌 → 화면이 일지를 먼저 그리고 도착하면 그 칸만 채움
-  function withAc(r) {
+  function withAc(r, token) {
     if (!r || !r.day) return r;
     const c = AC[r.day];
     if (c && c.ac && Date.now() - c.at < 600e3) { r.ac = c.ac; return r; }
     if (!c || !c.p || Date.now() - c.at >= 600e3) {
       const day = r.day, p = (async () => {
         try {
-          const j = await (await fetch(C.WS_GAS_URL + '?api=logac&day=' + day)).json();
+          const j = await rpc('ws_log_ac', { p_token: token, p_day: day, p_prev: r.prevDay || '' });
           if (!j.ok) throw new Error(j.error || '');
-          if (!j.ac.err) AC[day] = { at: Date.now(), ac: j.ac }; else delete AC[day];
+          AC[day] = { at: Date.now(), ac: j.ac };
           return j.ac;
-        } catch (e) { delete AC[day]; return { err: '온습도 앱 기록을 불러오지 못했습니다' }; }
+        } catch (e) { delete AC[day]; return { err: '가동시간 기록을 불러오지 못했습니다' }; }
       })();
       AC[day] = { at: Date.now(), p };   // 같은 날을 받는 중이면 다시 부르지 않음
+      fetch(C.WS_GAS_URL + '?api=logac&day=' + day).catch(() => {});   // 날씨가 빠진 날 구글이 채움 (기다리지 않음)
     }
     r.acLater = AC[r.day].p;
     return r;

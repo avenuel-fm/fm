@@ -10,9 +10,9 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.21.4"></script>
-<script>window.WS_VERSION = '0.21.4';</script>
-<script src="ws-api.js?v=0.21.4"></script>
+<script src="config.js?v=0.22.0"></script>
+<script>window.WS_VERSION = '0.22.0';</script>
+<script src="ws-api.js?v=0.22.0"></script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -645,6 +645,55 @@ select.lgin{text-align:center;padding:0}
   .label img{flex:none;display:block;image-rendering:pixelated}
   .ehl{page-break-after:always;break-after:page}
 }
+/* 온습도/공조기/에어커튼 입력 (WS_온습도공조기, 결정 192·196) — 시안 docs/시안/WS-온습도공조기 */
+.cltabs{margin-bottom:var(--sp-3)}.cltabs button{font-size:var(--size-s);line-height:1.3;padding:4px 2px}
+.flnav{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-1);margin-top:var(--sp-3)}
+.flnav button{min-height:44px;border:1px solid var(--line);background:var(--white);border-radius:var(--radius);font:inherit;font-size:var(--size-s);color:var(--sub);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;position:relative;padding:4px 0 4px 6px;cursor:pointer;overflow:hidden}
+.flnav button b{font-size:var(--size-s);color:var(--ink);font-weight:600;text-align:center;line-height:1.25}
+.flnav button i{position:absolute;left:0;top:0;bottom:0;width:6px}
+.flnav button.on{border:2px solid var(--navy)}
+.flname{display:inline-block;padding:2px 8px;border-radius:var(--radius);font-weight:600;color:#18202B}
+.flname small{display:block;font-size:12px;font-weight:400;color:#3F4855}
+.flhd{display:flex;align-items:center;justify-content:space-between;margin:var(--sp-4) 0 var(--sp-2)}.flhd .flname{font-size:var(--size-l)}.flhd small{font-size:var(--size-s);color:var(--muted)}
+.zr{display:grid;grid-template-columns:56px 1fr 1fr;gap:var(--sp-2);align-items:center;padding:var(--sp-2) var(--sp-3);border-top:1px solid var(--line3)}
+.zr:first-child,.secl+.zr{border-top:none}.zr>b{font-size:var(--size-m);font-weight:600}
+.zr .sub{grid-column:2 / 4;display:flex;justify-content:space-between;gap:var(--sp-2);font-size:var(--size-s);color:var(--muted)}
+.ditag{font-size:var(--size-s);color:var(--sub);padding:1px 6px;border:1px solid transparent;border-radius:var(--radius);font-weight:400}
+.ditag b{font-weight:600;color:var(--ink)}.ditag.c{border-color:var(--navy)}.ditag.d{background:var(--navy);color:#fff}.ditag.d b{color:#fff}.ditag.none{color:var(--muted)}
+.adv{font-size:var(--size-s);color:var(--sub);background:var(--tint);padding:var(--sp-2) var(--sp-3);border-top:1px solid var(--line3);line-height:1.5}
+.secl{font-size:var(--size-s);color:var(--sub);font-weight:500;padding:var(--sp-2) var(--sp-3);background:var(--tint);border-bottom:1px solid var(--line3);display:flex;justify-content:space-between}
+.nextfl{display:flex;gap:var(--sp-2);margin:var(--sp-3) 0}.nextfl .btn{flex:1;justify-content:center}
+.hdrow{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-2);margin-top:var(--sp-2)}
+.clnote{font-size:var(--size-s);color:var(--muted);margin:var(--sp-2) 0 0;line-height:1.6}.clmuted{color:var(--muted);font-size:var(--size-s)}
+.uc{padding:var(--sp-3);border-top:1px solid var(--line3);background:var(--white)}.uc:first-child{border-top:none}
+.uc .h{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-2);margin-bottom:var(--sp-2)}.uc .h .flname{font-size:var(--size-m)}
+.uc .off{display:inline-flex;align-items:center;gap:6px;font-size:var(--size-s);color:var(--ink);min-height:44px;cursor:pointer}
+.uc .off input{width:20px;height:20px;margin:0;accent-color:var(--navy)}
+.uc .r{display:grid;grid-template-columns:36px 1fr 1fr 1fr;gap:var(--sp-1);align-items:center;margin-top:var(--sp-1);font-size:var(--size-s);color:var(--sub)}
+.uc select{min-height:var(--control-h);min-width:0;border:1px solid var(--line);border-radius:var(--radius);background:var(--white);font:inherit;font-size:16px;padding:0 4px;color:var(--ink)}
+.uc .f{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-2);font-size:var(--size-s);color:var(--sub);margin-top:var(--sp-2)}.uc .f b{color:var(--ink);font-weight:600}
+.uc.isoff .r{opacity:.45}.uc.isoff{background:var(--tint)}.uc.bad{outline:2px solid var(--red);outline-offset:-2px}
+.ucg{display:flex;flex-direction:column;gap:var(--sp-2)}.ucg .uc{border:1px solid var(--line2);border-radius:var(--radius)}
+.cltbl{width:100%;border-collapse:collapse;background:var(--white);border:1px solid var(--line2);margin-top:var(--sp-3);font-size:var(--size-s)}
+.cltbl th{background:var(--tint);color:var(--sub);font-weight:500;padding:var(--sp-2);border:1px solid var(--line3);text-align:center}
+.cltbl td{border:1px solid var(--line3);padding:var(--sp-2);vertical-align:top}.cltbl td.ctr{text-align:center;vertical-align:middle}.cltbl td.na{color:var(--muted)}
+.cltbl .zr{border:0;padding:0;grid-template-columns:0 1fr 1fr}.cltbl .zr>b{display:none}
+.cltbl.rep td{text-align:right;font-variant-numeric:tabular-nums;vertical-align:middle;white-space:nowrap}.cltbl.rep .l{text-align:left}.cltbl.rep tr.dim td{color:var(--muted)}.cltbl.rep tr.tot td{font-weight:600;background:var(--tint)}
+.clrep h3{font-size:var(--size-m);margin:var(--sp-4) 0 var(--sp-2)}.clrep h3 small{font-size:var(--size-s);color:var(--muted);font-weight:400;margin-left:var(--sp-1)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:var(--sp-2)}
+.kpi{background:var(--white);border:1px solid var(--line2);border-radius:var(--radius);padding:var(--sp-3);display:flex;flex-direction:column;gap:2px}
+.kpi span{font-size:var(--size-s);color:var(--sub)}.kpi strong{font-size:var(--size-l);font-variant-numeric:tabular-nums}.kpi small{font-size:var(--size-s);color:var(--sub)}
+.up{color:var(--red)}.down{color:var(--blue)}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}.scroll .cltbl{margin-top:0}
+.repchart{position:relative;height:300px;background:var(--white);border:1px solid var(--line2);border-radius:var(--radius);padding:var(--sp-2)}
+.cladv{margin:0;padding-left:var(--sp-4);font-size:var(--size-s);color:var(--sub);line-height:1.7}
+.kwin{width:120px;flex:none}
+.todo{border:1px solid var(--line);border-left:4px solid var(--navy);background:var(--white);padding:var(--sp-3);border-radius:var(--radius)}
+.todo-h{font-size:var(--size-m);font-weight:600;color:var(--ink);display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-2);flex-wrap:wrap}
+.todo-h small{font-size:var(--size-s);color:var(--muted);font-weight:400}
+.todo-b{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2);margin-top:var(--sp-2)}
+.todo-b .btn{justify-content:space-between}.todo-b .btn b{font-weight:600;margin-left:auto;margin-right:4px}
+.clprint{font-size:11px;color:#000}.clprint h2{font-size:16px;margin:0 0 8px}.clprint .kpi{border:1px solid #999}
 </style>
 <!-- QR 도구는 QR 화면에서만 씀 → 첫 화면을 막지 않게 따로 받음 (결정 76) -->
 <script async src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" onload="if (typeof S !== 'undefined' && S.view === 'qr') drawQrs()"></script>
@@ -657,7 +706,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.21.4' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.22.0' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -744,6 +793,8 @@ const ICON = {
   warn: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></svg>',
   back: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>',
   chev: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B6573" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>',
+  chart: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+  next: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>',
   print: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/></svg>'
 };
 const STATE = { ok: ['점검완료', 'c-ok'], bad: ['이상 있음', 'c-bad'], wait: ['점검 전', 'c-wait'], miss: ['미입력', 'c-miss'] };
@@ -759,8 +810,8 @@ function go(view, push) {
 }
 async function refreshFire() { try { const r = await call('bootstrap'); S.fire = r.fire; S.user = r.user; S.fireAt = Date.now(); if (S.view === 'fire') render(); } catch (e) {} }
 try { google.script.history.setChangeHandler(e => { const v = e.state && e.state.v; if (v && S.token) { S.view = v; render(); } }); } catch (e) {}
-const PARENT = { inspect: 'main', fire: 'inspect', eh: 'inspect', thermal: 'inspect', cs: 'inspect', csck: 'cs', qr: 'fire', hyd: 'fire', status: 'fire', floor: 'status', docs: 'main', set: 'main', risk: 'set', map: 'main', cad: 'main', spec: 'main', tbm: 'docs', nw: 'docs', log: 'docs', ahu: 'docs', att: 'docs', attup: 'att' };
-function back() { if (S.view === 'pdf') return go((S.pdf && S.pdf.from) || 'main'); if (S.view === 'csck') return csLeave(); if (S.view === 'risk' && S.rk && S.rk.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; if (S.view === 'nw' && !nwLeaveOk()) return; if (S.view === 'log' && !lgLeaveOk()) return; if (S.view === 'ahu' && !ahuLeaveOk()) return; if (S.view === 'tbm' && S.tbm && S.tbm.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; go(PARENT[S.view] || 'main'); }
+const PARENT = { inspect: 'main', fire: 'inspect', eh: 'inspect', thermal: 'inspect', cs: 'inspect', csck: 'cs', qr: 'fire', hyd: 'fire', status: 'fire', floor: 'status', docs: 'main', set: 'main', risk: 'set', map: 'main', cad: 'main', spec: 'main', tbm: 'docs', nw: 'docs', log: 'docs', ahu: 'docs', clim: 'docs', use: 'docs', rep: 'docs', kw: 'set', att: 'docs', attup: 'att' };
+function back() { if (S.view === 'pdf') return go((S.pdf && S.pdf.from) || 'main'); if (S.view === 'csck') return csLeave(); if (S.view === 'risk' && S.rk && S.rk.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; if (S.view === 'nw' && !nwLeaveOk()) return; if (S.view === 'log' && !lgLeaveOk()) return; if (S.view === 'ahu' && !ahuLeaveOk()) return; if ((S.view === 'clim' || S.view === 'use') && !clLeaveOk()) return; if (S.view === 'rep') return repBack(); if (S.view === 'tbm' && S.tbm && S.tbm.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; go(PARENT[S.view] || 'main'); }
 
 function topbar(sub, title) {
   const u = S.user || {};
@@ -896,7 +947,7 @@ async function boot(fromStart) {
   }
   if (my !== bootSeq) return;
   const wasCached = S.cached && S.view === 'main';
-  S.user = r.user; S.fire = r.fire; S.docs = r.docs || null; S.menuOff = r.menuOff || []; S.cached = false; S.fireAt = Date.now();
+  S.user = r.user; S.fire = r.fire; S.docs = r.docs || null; S.menuOff = r.menuOff || []; S.acTodo = r.acTodo || null; S.cached = false; S.fireAt = Date.now();
   S.ver = r.app && r.app.version; store('ws_ver', S.ver || null);
   if (r.toastSec) store('ws_toast_sec', String(r.toastSec));
   if (wasCached && !r.needSign) toast('최신 내용으로 불러왔습니다');
@@ -932,7 +983,7 @@ function renderMain() {
     soon('자재현황', '준비중', ICON.box) +   // 자재현황 자리 (결정 168, WS_자재현황.md)
     t('map', '지도', '에비뉴엘 도면', ICON.map) +
     t0('cad', 'CAD', '도면 보기 · 올리기', ICON.cad) +   // CAD (WS_CAD.md): 전 직원 열람·업로드. 환경설정 끄기 목록에는 아직 없음
-    '</div>' +
+    '</div>' + mainTodo() +
     '<div class="mainfoot"><button class="btn theme-btn" onclick="toggleTheme()">' + themeLabel() + '</button>' +
     (isBoss() ? '<button class="btn" onclick="openSet()">환경설정</button>' : '') + '</div>' +
     '</div>';
@@ -1198,6 +1249,7 @@ function renderSet() {
   return topbar('업무지원 ›', '환경설정') + '<div class="wrap list">' +
     '<h3 class="sth">알림 표시 시간</h3><div class="card" style="padding:var(--sp-3) var(--sp-4)"><small style="color:var(--muted)">저장·동기화가 끝나면 아래에 뜨는 알림이 보이는 시간입니다. 알림이 여러 개면 0.5초 쉬고 다음 알림을 보여 줍니다.</small>' +
     '<div class="seg setseg" role="group" aria-label="알림 표시 시간" style="margin-top:var(--sp-2)">' + secs.map(v => '<button type="button" class="' + (Number(r.toastSec) === v ? 'on' : '') + '" aria-pressed="' + (Number(r.toastSec) === v) + '" onclick="setToastSec(' + v + ')">' + v + '초</button>').join('') + '</div></div>' +
+    (window.WS_API ? '<h3 class="sth" style="margin-top:var(--sp-2)">장비 전력 · 단가</h3><div class="card strow"><span class="fname"><b>공조기·에어커튼 kW · 전기 단가</b><small>가동시간 리포트의 전력량(kWh)·예상 요금에 씀 · 빈 칸은 환산에서 뺌</small></span><button class="btn sm pri" onclick="openKw()">고치기</button></div>' : '') +
     (window.WS_API ? '<h3 class="sth" style="margin-top:var(--sp-2)">TBM 위험성 목록</h3><div class="card strow"><span class="fname"><b>위험성 목록' + (r.riskN != null ? ' ' + r.riskN + '줄' : '') + '</b><small>TBM 작업 내용의 낱말로 위험요인·개선조치를 고르는 표</small></span><button class="btn sm pri" onclick="openRisk()">고치기</button></div>' : '') +
     '<h3 class="sth" style="margin-top:var(--sp-2)">메인 메뉴</h3><div class="card">' + MENU.map(m => { const off = menuOff(m[0]);
       return '<div class="strow"><span class="fname"><b>' + m[1] + '</b><small>' + m[2] + '</small></span><div class="seg setseg menuseg" role="group" aria-label="' + m[1] + ' 켜기·끄기">' +
@@ -1342,7 +1394,7 @@ function renderDocs() {
     '<button class="row" onclick="openTbm()"><span class="ico" style="background:var(--green-bg);color:var(--green)">' + ICON.tbm + '</span><span class="fname"><b style="font-size:var(--size-m)">TBM</b><small>오늘 서명 ' + (n == null ? '…' : n + '명') + ' · 작업 표 · 사진 · PDF</small></span>' + ICON.chev + '</button>' +
     '<button class="row" onclick="openNw()"><span class="ico" style="background:var(--blue-bg);color:var(--blue)">' + ICON.nw + '</span><span class="fname"><b style="font-size:var(--size-m)">명일 작업 예정</b><small>내일 작업 입력 · 그림으로 저장</small></span>' + ICON.chev + '</button>' +
     '<button class="row" onclick="openAtt()"><span class="ico" style="background:var(--tint);color:var(--navy)">' + ICON.att + '</span><span class="fname"><b style="font-size:var(--size-m)">출근현황</b><small>근무 스케줄 엑셀 → 날짜별 조직도 · 그림으로 저장</small></span>' + ICON.chev + '</button>' +
-    '<button class="row" onclick="openAhu()"><span class="ico" style="background:var(--blue-bg);color:var(--blue)">' + ICON.ahu + '</span><span class="fname"><b style="font-size:var(--size-m)">공조기 환기온도</b><small>12:00 · 16:00 · B4 인쇄</small></span>' + ICON.chev + '</button>' +
+    '<button class="row" onclick="openAhu()"><span class="ico" style="background:var(--blue-bg);color:var(--blue)">' + ICON.ahu + '</span><span class="fname"><b style="font-size:var(--size-m)">온습도/공조기/에어커튼 입력</b><small>AHU 환기온도 11:00 · 16:00 · 매장 온습도 · 가동시간 · 리포트</small></span>' + ICON.chev + '</button>' +
     '<button class="row" onclick="openLog()"><span class="ico" style="background:var(--tint);color:var(--sub)">' + ICON.log + '</span><span class="fname"><b style="font-size:var(--size-m)">종합업무일지</b><small>에너지 사용량 · 날씨 · 금일작업 · B4 인쇄 (PC)</small></span>' + ICON.chev + '</button>' +
     '</div>';
 }
@@ -2009,8 +2061,9 @@ async function lgSave() {
   } catch (e) { g.busy = false; g.pdfBusy = false; render(); toast('PDF를 만들지 못했습니다: ' + (e && e.message ? e.message : e)); }
 }
 
-/* ── 공조기 환기온도 (WS_공조기환기온도 15.3.23, 결정 128) — 휴대폰은 12:00·16:00 골라 한 대씩, PC는 B4 종이 위에 바로. 저장은 고친 칸만 ── */
+/* ── 공조기 환기온도 (WS_공조기환기온도 15.3.23, 결정 128) — 휴대폰은 11:00·16:00 골라 (결정 196) 한 대씩, PC는 B4 종이 위에 바로. 저장은 고친 칸만 ── */
 const AHU_OUT = [['out_t', '외기온도', '℃'], ['out_h', '습도', '%'], ['cw_t', '냉수공급온도', '℃']];
+const AHU_HM = { 12: '11:00', 16: '16:00' };   // 저장 칸 「12」 = 첫 회차 11:00 (결정 196, 11-21 전 기록도 11:00 칸에)
 async function openAhu() { S.ahu = null; go('ahu'); await loadAhu(''); }
 async function loadAhu(day) {
   const r = await call('ahuGet', day);
@@ -2022,8 +2075,8 @@ function ahuSet(r) {
   AHU_OUT.forEach(o => ['12', '16'].forEach(t => { v[o[0] + t] = s(rec[o[0] + t]); }));
   r.units.forEach(u => { const t = (rec.temps || {})[u.no] || {}; v.temps[u.no] = { 12: s(t['12']), 16: s(t['16']) }; });
   const old = S.ahu && S.ahu.day === r.day ? S.ahu.slot : '';
-  const kstH = new Date(Date.now() + 9 * 3600e3).getUTCHours();
-  S.ahu = { srv: r, day: r.day, v, ch: {}, slot: old || (r.day === r.workDay && kstH >= 14 ? '16' : '12'), busy: false, pdfBusy: false };
+  const kd = new Date(Date.now() + 9 * 3600e3), kstM = kd.getUTCHours() * 60 + kd.getUTCMinutes();
+  S.ahu = { srv: r, day: r.day, v, ch: {}, slot: old || (r.day === r.workDay && kstM >= 810 ? '16' : '12'), busy: false, pdfBusy: false };
   if (S.view === 'ahu') render();
 }
 function ahuDirty() { return Object.keys(S.ahu.ch).length > 0; }
@@ -2058,8 +2111,8 @@ function ahuBads() {
   const g = S.ahu, out = [], nm = {};
   AHU_OUT.forEach(o => { nm[o[0]] = o[1]; });
   Object.keys(g.ch).forEach(k => {
-    if (k === 'temps') Object.keys(g.ch.temps).forEach(u => Object.keys(g.ch.temps[u]).forEach(t => { const m = ahuCheck('u', g.ch.temps[u][t], u + ' ' + t + ':00'); if (m) out.push({ u, t, msg: m }); }));
-    else { const m = ahuCheck(k, g.ch[k], nm[k.slice(0, 5)] + ' ' + k.slice(5) + ':00'); if (m) out.push({ k, t: k.slice(5), msg: m }); }
+    if (k === 'temps') Object.keys(g.ch.temps).forEach(u => Object.keys(g.ch.temps[u]).forEach(t => { const m = ahuCheck('u', g.ch.temps[u][t], u + ' ' + AHU_HM[t]); if (m) out.push({ u, t, msg: m }); }));
+    else { const m = ahuCheck(k, g.ch[k], nm[k.slice(0, 5)] + ' ' + AHU_HM[k.slice(5)]); if (m) out.push({ k, t: k.slice(5), msg: m }); }
   });
   return out;
 }
@@ -2091,39 +2144,39 @@ function ahuSheet(edit) {
   const g = S.ahu, us = g.srv.units, val = (a, x) => edit ? ahuBox(a, x, 'lgin') : h(x);
   const blocks = [us.slice(0, 13), us.slice(13, 26), us.slice(26)];
   const grid = blocks.map(b => '<table class="hvt"><colgroup><col style="width:84px"><col><col style="width:62px"><col style="width:62px"></colgroup>' +
-    '<thead><tr><th rowspan="2">AHU NO.</th><th rowspan="2">사용장소</th><th colspan="2">환기온도 (℃)</th></tr><tr><th>12:00</th><th>16:00</th></tr></thead><tbody>' +
+    '<thead><tr><th rowspan="2">AHU NO.</th><th rowspan="2">사용장소</th><th colspan="2">환기온도 (℃)</th></tr><tr><th>11:00</th><th>16:00</th></tr></thead><tbody>' +
     b.map(u => '<tr><td class="no">' + h(u.no) + '<small>' + h(u.room) + '</small></td><td class="l" title="' + h(u.place) + '">' + h(u.place) + '</td>' +
-      ['12', '16'].map(t => '<td class="v">' + val('data-u="' + h(u.no) + '" data-t="' + t + '" aria-label="' + h(u.no) + ' ' + t + ':00"', g.v.temps[u.no][t]) + '</td>').join('') + '</tr>').join('') +
+      ['12', '16'].map(t => '<td class="v">' + val('data-u="' + h(u.no) + '" data-t="' + t + '" aria-label="' + h(u.no) + ' ' + AHU_HM[t] + '"', g.v.temps[u.no][t]) + '</td>').join('') + '</tr>').join('') +
     Array(Math.max(0, 13 - b.length)).fill('<tr><td></td><td></td><td></td><td></td></tr>').join('') + '</tbody></table>').join('');
   return '<div class="hvs"><div class="hvsh"><div><h1>에비뉴엘 AHU · 환기온도 점검일지</h1><div class="d">' + ahuMd(g.day, true) + (ahuLong(g.day) ? ' &nbsp;<span class="hvchip">연장영업</span>' : '') + '</div></div>' +
     '<div class="wx">' + ahuWx().map(x => '<span>' + x[0] + ' <b>' + h(x[1]) + '</b></span>').join('') + '<span>점검자 <b>' + h(ahuWho()) + '</b></span></div>' +
     '<table class="hvsign"><tr><th>파트장</th><th>소장</th></tr><tr>' + ['part', 'boss'].map(k => { const x = (g.srv.signs || {})[k]; return '<td>' + (x && x.img ? '<img src="' + h(x.img) + '" alt="' + h(x.name) + ' 서명">' : '') + '</td>'; }).join('') + '</tr></table></div>' +
-    '<div style="display:flex;gap:10px;align-items:stretch"><table class="hvsmall"><tr><th>점검시간</th><th>12:00</th><th>16:00</th></tr>' +
-    AHU_OUT.map(o => '<tr><th>' + o[1] + '</th>' + ['12', '16'].map(t => '<td>' + val('data-k="' + o[0] + t + '" aria-label="' + o[1] + ' ' + t + ':00"', g.v[o[0] + t]) + '</td>').join('') + '</tr>').join('') + '</table>' +
+    '<div style="display:flex;gap:10px;align-items:stretch"><table class="hvsmall"><tr><th>점검시간</th><th>11:00</th><th>16:00</th></tr>' +
+    AHU_OUT.map(o => '<tr><th>' + o[1] + '</th>' + ['12', '16'].map(t => '<td>' + val('data-k="' + o[0] + t + '" aria-label="' + o[1] + ' ' + AHU_HM[t] + '"', g.v[o[0] + t]) + '</td>').join('') + '</tr>').join('') + '</table>' +
     '<div class="hvnote"><b>특이사항</b> · 동절기 -7℃ 일 때 에너지센터 순환펌프 가동 확인 후 공조기 가동<br>공조기 정지시간: 평일 19:50 · 주말(금토일) 20:20</div></div>' +
     '<div class="hvgrid">' + grid + '</div></div>';
 }
 function ahuZoom() { return Math.min(1, (Math.min(window.innerWidth, 1680) - 34) / 1378); }
 function renderAhu() {
   const g = S.ahu;
-  if (!g) return topbar('서류작업 ›', '공조기 환기온도') + '<div class="wrap list"><div class="banner b-gray">불러오는 중…</div></div>';
+  if (!g) return clTop() + '<div class="wrap list">' + clTabs('ahu') + '<div class="banner b-gray">불러오는 중…</div></div>';
   const past = g.day < g.srv.workDay ? '<span style="font-size:var(--size-s);color:var(--muted)">지난 날짜입니다 · 고치면 저장할 수 있습니다</span>' : '';
   const bar = '<div class="nwbar" id="ahuBar">' + docBar(ahuDoc()) + '</div>';
   const date = '<button class="nwdate" data-date="' + h(g.day) + '" onclick="ahuCal()" aria-label="일자 바꾸기">' + ICON.cal + ahuMd(g.day) + '</button>';
-  if (lgPc()) return topbar('서류작업 ›', '공조기 환기온도') + '<div class="lgwrap">' +
+  if (lgPc()) return clTop() + '<div class="lgwrap">' + clTabs('ahu') +
     '<div style="display:flex;align-items:center;gap:var(--sp-2);margin-bottom:var(--sp-3)">' + date + (past || '<span style="font-size:var(--size-s);color:var(--muted)">칸을 눌러 바로 입력 · 휴대폰에서 넣은 값도 여기 보임</span>') + '</div>' +
     '<div id="ahuSheet" style="zoom:' + ahuZoom() + '">' + ahuSheet(true) + '</div>' + bar + '</div>';
   const t = g.slot, o = t === '16' ? '12' : '';
   const rows = g.srv.units.map(u => '<div class="hvr"><div class="nm"><b>' + h(u.no) + '</b><i>' + h(u.room) + '</i><small>' + h(u.place) + '</small>' +
-    (o ? '<span class="prev">12:00 · ' + (g.v.temps[u.no][o] !== '' ? h(g.v.temps[u.no][o]) + '℃' : '—') + '</span>' : '') + '</div>' +
+    (o ? '<span class="prev">11:00 · ' + (g.v.temps[u.no][o] !== '' ? h(g.v.temps[u.no][o]) + '℃' : '—') + '</span>' : '') + '</div>' +
     '<label class="hvin">' + ahuBox('data-u="' + h(u.no) + '" data-t="' + t + '" aria-label="' + h(u.no) + ' 환기온도"', g.v.temps[u.no][t], 'inp') + '<span>℃</span></label></div>').join('');
-  return topbar('서류작업 ›', '공조기 환기온도') + '<div class="wrap list">' +
+  return clTop() + '<div class="wrap list">' + clTabs('ahu') +
     '<div class="card" style="padding:var(--sp-4)"><div class="hvhd"><b>AHU 환기온도 점검일지</b>' + date + '</div>' +
     '<div class="hvmeta">' + (ahuLong(g.day) ? '<span class="hvchip">연장영업</span>' : '') + '점검자 ' + h(ahuWho()) + (past ? '<br>' + past : '') + '</div>' +
-    '<div class="seg hvtime" role="group" aria-label="점검 시각">' + ['12', '16'].map(x => '<button type="button" class="' + (x === t ? 'on' : '') + '" aria-pressed="' + (x === t) + '" onclick="ahuSlot(\'' + x + '\')">' + x + ':00<small id="ahuCnt' + x + '">' + ahuCount(x) + '</small></button>').join('') + '</div>' +
+    '<div class="seg hvtime" role="group" aria-label="점검 시각">' + ['12', '16'].map(x => '<button type="button" class="' + (x === t ? 'on' : '') + '" aria-pressed="' + (x === t) + '" onclick="ahuSlot(\'' + x + '\')">' + AHU_HM[x] + '<small id="ahuCnt' + x + '">' + ahuCount(x) + '</small></button>').join('') + '</div>' +
     '<div class="hvw">' + AHU_OUT.map(x => '<label>' + x[1] + '<span class="hvin">' + ahuBox('data-k="' + x[0] + t + '"', g.v[x[0] + t], 'inp') + '<span>' + x[2] + '</span></span></label>').join('') + '</div>' +
     '<div class="hvmeta">' + ahuWx().map(x => x[0] + ' ' + h(x[1])).join(' · ') + ' <span style="color:var(--muted)">(종합업무일지에서 자동)</span></div></div>' +
-    '<div class="hvsec">공조기 환기온도 (' + t + ':00)</div><div class="hvlist">' + rows + '</div>' + bar + '</div>';
+    '<div class="hvsec">공조기 환기온도 (' + AHU_HM[t] + ')</div><div class="hvlist">' + rows + '</div>' + bar + '</div>';
 }
 async function ahuSave(quiet) {
   const g = S.ahu; if (g.busy) return false;
@@ -2728,6 +2781,466 @@ function ehPickStore(id) { const s = ehStore(id), all = s.items.length && s.item
 // 검색창은 두고 아래만 다시 그림 — 화면 전체를 다시 그리면 한글 조합(ㄱ+ㅏ→가)이 끊겨 자음·모음이 따로 들어감
 function ehSearch(el) { S.ehQ = el.value; const b = $('ehBody'); if (b) b.innerHTML = withBack(ehBody()); }
 /** 아래 저장 줄(.nwbar · 공사장 점검 .csbar-in) 맨 왼쪽에 「뒤로」를 넣음 — 없으면 그대로 돌려줌 (WS-25) */
+/* ── 온습도/공조기/에어커튼 입력 (WS_온습도공조기, 결정 192·194·196) — 옛 [구역별 온습도 확인] 앱 이관. 탭 4개, 자료는 19_climate.sql ── */
+const CL_TITLE = '온습도/공조기/에어커튼 입력';
+const CL_TABS = [['ahu', 'AHU 환기온도 점검일지'], ['clim', '온습도'], ['hvac', '공조기 가동시간'], ['curtain', '에어커튼 가동시간']];
+// 예외 색 2가지 (사용자 11-21): 층 색 · 에어커튼 OUT 주황·IN 하늘·후방 연두 — 옛 앱 style.css .hv-name[data-tone] 값 그대로
+const CL_TONE = { f6: '#f1e1e6', f5: '#e8e1f5', f4: '#f6ebd3', f3: '#fbf1c2', f2: '#dce7fb', f1: '#dcefe5', b1: '#e3e8f3', b3: '#ece6df', f1out: '#fde2cc', f1in: '#d6ecfa' };
+const CL_FL = { '6F': ['6층', 'f6'], '5F': ['5층', 'f5'], '4F': ['4층', 'f4'], '3F': ['3층', 'f3'], '2F': ['2층', 'f2'], '1F': ['1층', 'f1'], 'B1F': ['B1층', 'b1'] };
+const CL_LV = [[74, '쾌적', '현재 공조 설정을 유지하세요.'], [78, '주의', '불쾌감이 올라가는 구간입니다. 공조기 설정을 점검하세요.'], [1e9, '불쾌', '고객 불쾌 구간입니다. 공조기 가동을 즉시 조정하세요.']];
+const CL_RG = { t: [23, 26], h: [40, 60] };   // 쾌적 범위 (옛 config ranges)
+const CL_ADV = { tH: '온도가 높습니다. 냉방 강화 또는 설정온도를 낮추세요.', tL: '온도가 낮습니다. 과냉방 가능성이 있어요. 설정온도를 올리면 에너지를 절감할 수 있습니다.',
+  hH: '습도가 높습니다. 제습 운전 또는 환기량을 늘리세요.', hL: '습도가 낮습니다. 가습을 검토하세요.' };
+const CL_KIND = { hvac: '공조기', curtain: '에어커튼' };
+function clTop() { return topbar('서류작업 ›', CL_TITLE); }
+function clTabs(on) {
+  return '<div class="seg cltabs" role="tablist" aria-label="입력 종류">' + CL_TABS.map(t => '<button type="button" role="tab" aria-selected="' + (t[0] === on) + '" class="' + (t[0] === on ? 'on' : '') + '" onclick="clTab(\'' + t[0] + '\')">' + t[1] + '</button>').join('') + '</div>';
+}
+function clCur() { return S.view === 'use' ? S.use && S.use.kind : S.view; }
+function clLeaveOk() { return S.view === 'ahu' ? ahuLeaveOk() : S.view === 'clim' ? climLeaveOk() : S.view === 'use' ? useLeaveOk() : true; }
+function clTab(k) { if (k === clCur() || !clLeaveOk()) return; if (k === 'ahu') openAhu(); else if (k === 'clim') openClim(); else openUse(k); }
+function clName(txt, tone, sub) { return '<span class="flname" style="background:' + (CL_TONE[tone] || 'transparent') + '">' + h(txt) + (sub ? '<small>' + h(sub) + '</small>' : '') + '</span>'; }
+function clNav(items, on, fn) {   // items = [[이름, 색, 입력 수 글]]
+  return '<div class="flnav">' + items.map((f, i) => '<button type="button" class="' + (i === on ? 'on' : '') + '" aria-pressed="' + (i === on) + '" onclick="' + fn + '(' + i + ')"><i style="background:' + (CL_TONE[f[1]] || 'var(--line)') + '"></i><b>' + h(f[0]) + '</b><small>' + f[2] + '</small></button>').join('') + '</div>';
+}
+function clPager(i, items, fn, word) {
+  return '<div class="nextfl"><button class="btn" onclick="' + fn + '(' + (i - 1) + ')"' + (i ? '' : ' disabled') + '>' + ICON.back + '이전 ' + word + '</button>' +
+    '<button class="btn" onclick="' + fn + '(' + (i + 1) + ')"' + (i < items.length - 1 ? '' : ' disabled') + '>' + (i < items.length - 1 ? '다음 · ' + h(items[i + 1][0]) : '마지막 ' + word) + ICON.next + '</button></div>';
+}
+function clRepBtn(kind) { return '<button class="btn sm" onclick="openRep(\'' + kind + '\')">' + ICON.chart + '리포트</button>'; }
+function clDi(t, hm) { return Math.round((0.81 * t + 0.01 * hm * (0.99 * t - 14.3) + 46.3) * 10) / 10; }
+function clLv(d) { return CL_LV.find(x => d < x[0]); }
+function clDiTag(t, hm) {   // 단계는 모양으로 (주의 = 테두리, 불쾌 = 남색 바탕). 옛 초록·주황·빨강은 안 씀
+  if (t === '' || hm === '' || isNaN(t) || isNaN(hm)) return '<span class="ditag none">불쾌지수 —</span>';
+  const d = clDi(Number(t), Number(hm)), l = clLv(d)[1];
+  return '<span class="ditag' + (l === '주의' ? ' c' : l === '불쾌' ? ' d' : '') + '">불쾌지수 <b>' + d + '</b> · ' + l + '</span>';
+}
+function clAdvice(t, hm) {
+  const a = [];
+  if (t > CL_RG.t[1]) a.push(CL_ADV.tH); else if (t < CL_RG.t[0]) a.push(CL_ADV.tL);
+  if (hm > CL_RG.h[1]) a.push(CL_ADV.hH); else if (hm < CL_RG.h[0]) a.push(CL_ADV.hL);
+  if (!a.length) { const l = clLv(clDi(t, hm)); if (l[1] !== '쾌적') a.push(l[2]); }
+  return a;
+}
+function clNum(x) { return String(x == null ? '' : x).replace(/[℃%\s]/g, '').replace(/,/g, '.'); }
+function clBad(v, lo, hi) { return v !== '' && !(/^-?\d+(\.\d+)?$/.test(v) && Number(v) >= lo && Number(v) <= hi); }
+function clMd(d) { return Number(d.slice(5, 7)) + '월 ' + Number(d.slice(8, 10)) + '일 (' + '일월화수목금토'[new Date(d + 'T12:00:00+09:00').getDay()] + ')'; }
+function clKst() { const k = new Date(Date.now() + 9 * 3600e3); return k.toISOString().slice(11, 16); }
+
+/* ── 실외 날씨 (옛 앱과 같은 Open-Meteo, 10분 기억). 빈 칸만 채움, 고치면 그대로 (Q2) ── */
+let CL_WX = null;
+async function clWeather() {
+  if (CL_WX && Date.now() - CL_WX.at < 600e3) return CL_WX;
+  try {
+    const j = await (await fetch('https://api.open-meteo.com/v1/forecast?latitude=37.5131&longitude=127.1043&current=temperature_2m,relative_humidity_2m&timezone=Asia%2FSeoul', { cache: 'no-store' })).json();
+    const c = j && j.current;
+    if (c && typeof c.temperature_2m === 'number') CL_WX = { at: Date.now(), t: c.temperature_2m.toFixed(1), h: String(Math.round(c.relative_humidity_2m)) };
+  } catch (e) { /* 인터넷이 안 되면 실외는 빈 칸 (직접 넣거나 비워도 저장됨) */ }
+  return CL_WX;
+}
+
+/* ── 탭 ② 온습도: 층 한 쪽씩, 구역마다 온도·습도. 저장한 때가 측정 시각, 쌓기만 (옛 앱과 같음) ── */
+async function openClim() {
+  S.clim = { srv: null, v: {}, out: { t: '', h: '', auto: false }, fi: S.climFi || 0, busy: false, err: '' };
+  go('clim');
+  const r = await call('climateGet'); if (!r.ok) { toast(r.error); return; }
+  S.clim.srv = r; if (S.view === 'clim') render();
+  const w = await clWeather(), g = S.clim;
+  if (w && g && g.out.t === '' && g.out.h === '') { g.out = { t: w.t, h: w.h, auto: true }; if (S.view === 'clim') render(); }
+}
+function climFloors() {
+  const fl = [];
+  (S.clim.srv.zones || []).forEach(([f, z]) => { let x = fl.find(a => a.f === f); if (!x) fl.push(x = { f, zs: [] }); x.zs.push(z); });
+  return fl;
+}
+function climLast(f, z) { const a = S.clim.srv.recs.filter(r => r.floor === f && r.zone === z); return a[a.length - 1]; }
+function climDirty() { return Object.keys(S.clim.v).some(k => S.clim.v[k].t !== '' || S.clim.v[k].h !== ''); }
+function climLeaveOk() { return !(S.clim && S.clim.srv && climDirty()) || confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?'); }
+function climGo(i) { const fl = climFloors(); S.clim.fi = S.climFi = Math.max(0, Math.min(fl.length - 1, i)); render(); window.scrollTo(0, 0); }
+function climVal(k) { return S.clim.v[k] || { t: '', h: '' }; }
+function climIn(el) {
+  const g = S.clim, k = el.dataset.z, f = el.dataset.f, val = clNum(el.value); g.err = '';
+  if (k) { (g.v[k] = g.v[k] || { t: '', h: '' })[f] = val; }
+  else { g.out[f] = val; g.out.auto = false; }
+  el.classList.toggle('bad', f === 't' ? clBad(val, k ? -10 : -30, 50) : clBad(val, 0, 100));
+  el.classList.toggle('empty', !val);
+  if (k) { const v = g.v[k], e = $('di-' + k.replace('|', '-')); if (e) e.innerHTML = clDiTag(v.t, v.h); const a = $('climAdv'); if (a) a.outerHTML = climAdvBox(); }
+  const st = $('climState'); if (st) st.innerHTML = climState();
+}
+function climBox(attrs, val, unit, cls) { return '<label class="hvin"><input class="inp' + (val === '' ? ' empty' : '') + (cls || '') + '" inputmode="decimal" maxlength="6" value="' + h(val) + '" ' + attrs + ' oninput="climIn(this)" onchange="this.value=clNum(this.value)"><span>' + unit + '</span></label>'; }
+function climAdvBox() {
+  const g = S.clim, f = climFloors()[g.fi], out = [];
+  f.zs.forEach(z => { const v = climVal(f.f + '|' + z); if (v.t !== '' && v.h !== '' && !clBad(v.t, -10, 50) && !clBad(v.h, 0, 100)) { const a = clAdvice(Number(v.t), Number(v.h)); if (a.length) out.push(z + ': ' + a.join(' · ')); } });
+  return '<div id="climAdv"' + (out.length ? ' class="adv"' : '') + '>' + out.map(h).join('<br>') + '</div>';
+}
+function climState() {
+  const g = S.clim;
+  if (g.err) return '<span class="nwstate dirty"><i class="dot"></i>저장 안 함<small class="hverr"> · ' + h(g.err) + '</small></span>';
+  return climDirty() ? '<span class="nwstate dirty"><i class="dot"></i>저장 안 함</span>' : '<span class="nwstate" style="color:var(--muted)">' + (g.srv.recs.length ? '오늘 ' + g.srv.recs.length + '건 저장됨' : '오늘 기록 없음') + '</span>';
+}
+function renderClim() {
+  const g = S.clim;
+  if (!g || !g.srv) return clTop() + '<div class="wrap list">' + clTabs('clim') + '<div class="banner b-gray">불러오는 중…</div></div>';
+  const fl = climFloors(), pc = lgPc(), done = f => f.zs.filter(z => climLast(f.f, z)).length + '/' + f.zs.length;
+  const zoneRow = (f, z) => {
+    const k = f.f + '|' + z, v = climVal(k), last = climLast(f.f, z);
+    return '<div class="zr"><b>' + z + '</b>' + climBox('data-z="' + k + '" data-f="t" aria-label="' + CL_FL[f.f][0] + ' ' + z + ' 실내온도"', v.t, '℃', clBad(v.t, -10, 50) ? ' bad' : '') +
+      climBox('data-z="' + k + '" data-f="h" aria-label="' + CL_FL[f.f][0] + ' ' + z + ' 실내습도"', v.h, '%', clBad(v.h, 0, 100) ? ' bad' : '') +
+      '<div class="sub"><span>' + (last ? '오늘 ' + last.at + ' · ' + last.t + '℃ ' + last.h + '%' : '오늘 기록 없음') + '</span><span id="di-' + k.replace('|', '-') + '">' + clDiTag(v.t, v.h) + '</span></div></div>';
+  };
+  const head = '<div class="card" style="padding:var(--sp-4)"><div class="hvhd"><b>매장 온도 · 습도</b>' + clRepBtn('climate') + '</div>' +
+    '<div class="hvmeta">측정 시각은 저장한 때 (지금 ' + clKst() + ') · 하루 여러 번 넣어도 모두 남음</div>' +
+    '<div class="hvw">' + [['t', '실외온도', '℃'], ['h', '실외습도', '%']].map(x => '<label>' + x[1] + climBox('data-f="' + x[0] + '" aria-label="' + x[1] + '"', g.out[x[0]], x[2], (x[0] === 't' ? clBad(g.out.t, -30, 50) : clBad(g.out.h, 0, 100)) ? ' bad' : '') + '</label>').join('') + '</div>' +
+    '<div class="hvmeta">실외는 날씨에서 자동 (10분마다, 고칠 수 있음)' + (g.out.auto ? '' : '') + '</div>' +
+    (pc ? '' : clNav(fl.map(f => [CL_FL[f.f][0], CL_FL[f.f][1], done(f)]), g.fi, 'climGo')) + '</div>';
+  const bar = '<div class="nwbar"><span id="climState">' + climState() + '</span><div class="dslot"><button class="btn pri" id="climSave" onclick="climSave()"' + (g.busy ? ' disabled' : '') + '>' + (g.busy ? '<span class="spin"></span> 저장 중…' : '저장') + '</button></div></div>';
+  if (pc) return clTop() + '<div class="lgwrap">' + clTabs('clim') + head +
+    '<table class="cltbl"><thead><tr><th style="width:80px">층</th><th>1구역 · 온도 / 습도</th><th>2구역 · 온도 / 습도</th><th>3구역 · 온도 / 습도</th></tr></thead><tbody>' +
+    fl.map(f => '<tr><td class="ctr">' + clName(CL_FL[f.f][0], CL_FL[f.f][1]) + '</td>' + ['1구역', '2구역', '3구역'].map(z => f.zs.indexOf(z) === -1 ? '<td class="ctr na">—</td>' : '<td>' + zoneRow(f, z) + '</td>').join('') + '</tr>').join('') +
+    '</tbody></table>' + clLegend() + withBack(bar) + '</div>';
+  const f = fl[g.fi];
+  return clTop() + '<div class="wrap list">' + clTabs('clim') + head +
+    '<div class="flhd">' + clName(CL_FL[f.f][0], CL_FL[f.f][1]) + '<small>층 ' + (g.fi + 1) + '/' + fl.length + '</small></div>' +
+    '<div class="hvlist"><div class="secl"><span>실내 (지금)</span><span>온도 ℃ · 습도 %</span></div>' + f.zs.map(z => zoneRow(f, z)).join('') + climAdvBox() + '</div>' +
+    clPager(g.fi, fl.map(x => [CL_FL[x.f][0]]), 'climGo', '층') + clLegend() + withBack(bar) + '</div>';
+}
+function clLegend() { return '<p class="clnote">불쾌지수 = 0.81T + 0.01H(0.99T−14.3) + 46.3 · 쾌적 74 미만 · 주의 78 미만 · 불쾌 78 이상 · 쾌적 범위 23~26℃, 40~60%</p>'; }
+async function climSave() {
+  const g = S.clim; if (g.busy) return;
+  const rows = [], fl = climFloors();
+  let bad = '';
+  fl.forEach(f => f.zs.forEach(z => {
+    const v = climVal(f.f + '|' + z); if (v.t === '' && v.h === '') return;
+    const nm = CL_FL[f.f][0] + ' ' + z;
+    if (!bad && (v.t === '' || v.h === '')) bad = nm + ': 온도와 습도를 둘 다 넣어 주세요';
+    if (!bad && clBad(v.t, -10, 50)) bad = nm + ' 온도는 -10 ~ 50 숫자로 넣어 주세요';
+    if (!bad && clBad(v.h, 0, 100)) bad = nm + ' 습도는 0 ~ 100 숫자로 넣어 주세요';
+    if (!bad) rows.push({ floor: f.f, zone: z, t: v.t, h: v.h });
+  }));
+  if (!bad && clBad(g.out.t, -30, 50)) bad = '실외온도는 -30 ~ 50 숫자로 넣어 주세요';
+  if (!bad && clBad(g.out.h, 0, 100)) bad = '실외습도는 0 ~ 100 숫자로 넣어 주세요';
+  if (!bad && !rows.length) bad = '온도·습도를 넣은 구역이 없습니다';
+  if (bad) { g.err = bad; render(); toast(bad); return; }
+  g.busy = true; render();
+  try {
+    const r = await call('climateAdd', rows, { t: g.out.t, h: g.out.h });
+    g.busy = false;
+    if (!r.ok) { g.err = r.error; render(); toast(r.error); return; }
+    g.srv = r; g.v = {}; g.err = ''; render(); toast(rows.length + '곳 저장했습니다');
+  } catch (e) { g.busy = false; g.err = '서버에 닿지 않았습니다. 다시 눌러 주세요'; render(); }
+}
+
+/* ── 탭 ③④ 공조기·에어커튼 가동시간: 시각 = 오전/오후·시·10분. 미가동 = 0시간, 빈 칸 = 통계 제외 (옛 앱 규칙) ── */
+function useParts(m) { if (m == null || m === '') return ['', '', '']; if (m >= 1440) return ['am', '12', '0']; const h24 = Math.floor(m / 60); return [h24 < 12 ? 'am' : 'pm', String(h24 % 12 || 12), String(m % 60)]; }
+function useMin(ap, hh, mm) { if (!ap || !hh || mm === '') return null; return (Number(hh) % 12 + (ap === 'pm' ? 12 : 0)) * 60 + Number(mm); }
+function useDur(m) { return Math.floor(m / 60) + '시간' + (m % 60 ? ' ' + String(m % 60).padStart(2, '0') + '분' : ''); }
+function useHm(m) { const p = useParts(m); return (p[0] === 'am' ? '오전 ' : '오후 ') + p[1] + ':' + String(p[2]).padStart(2, '0'); }
+async function openUse(kind, day) {
+  S.use = { kind, srv: null, v: {}, ch: {}, pg: S.usePg && S.usePg[kind] || 0, busy: false, err: '' };
+  go('use');
+  await loadUse(day || '');
+}
+async function loadUse(day) {
+  const r = await call('usageGet', S.use.kind, day); if (!r.ok) { toast(r.error); return; }
+  useSet(r);
+}
+function useSet(r) {
+  const g = S.use; g.srv = r; g.day = r.day; g.v = {}; g.ch = {}; g.err = '';
+  r.units.forEach(u => { const x = r.recs[u.u]; g.v[u.u] = x ? { s: x.s, e: x.e, off: !!x.off, saved: true } : { s: u.s, e: r.wkend ? u.ew : u.e, off: false, saved: false }; });
+  if (S.view === 'use') render();
+}
+function useGroups() { const out = []; S.use.srv.units.forEach(u => { let x = out.find(a => a.g === u.grp); if (!x) out.push(x = { g: u.grp, tone: u.tone, us: [] }); x.us.push(u); }); return out; }
+function useDirty() { return Object.keys(S.use.ch).length > 0; }
+function useLeaveOk() { return !(S.use && S.use.srv && useDirty()) || confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?'); }
+function useGo(i) { const n = useGroups().length; S.use.pg = Math.max(0, Math.min(n - 1, i)); (S.usePg = S.usePg || {})[S.use.kind] = S.use.pg; render(); window.scrollTo(0, 0); }
+function useCal() {
+  const g = S.use, t = g.srv.workDay;
+  pickDate({ cur: g.day, home: t, max: t, homeLbl: '오늘로 (' + Number(t.slice(5, 7)) + '월 ' + Number(t.slice(8, 10)) + '일)', fn: ds => { if (ds !== g.day && useLeaveOk()) loadUse(ds); } });
+}
+// 카드 하나의 값 → { s, e, off, err } (err 가 있으면 저장 안 함)
+function useParse(v) {
+  if (v.off) return { s: null, e: null, off: true };
+  if (v.s == null && v.e == null) return { s: null, e: null, off: false, empty: true };
+  if (v.s == null || v.e == null) return { err: '시작과 종료의 오전/오후·시·분을 모두 고르세요' };
+  let e = v.e; if (e <= v.s) { if (e === 0) e = 1440; else return { err: '종료가 시작보다 빠릅니다' }; }
+  return { s: v.s, e, off: false };
+}
+function useSel(u, f, val, nm) {
+  const p = useParts(val), o = (k, opts) => '<select data-u="' + h(u.u) + '" data-f="' + f + k + '" aria-label="' + h(nm) + '" onchange="useIn(this)">' + opts.map(x => '<option value="' + x[0] + '"' + (String(x[0]) === String(p[k === 'a' ? 0 : k === 'h' ? 1 : 2]) ? ' selected' : '') + '>' + x[1] + '</option>').join('') + '</select>';
+  const hrs = [['', '시']].concat(Array.from({ length: 12 }, (_, i) => [String(i + 1), (i + 1) + '시'])), mins = [['', '분']].concat([0, 10, 20, 30, 40, 50].map(m => [String(m), String(m).padStart(2, '0') + '분']));
+  return o('a', [['', '구분'], ['am', '오전'], ['pm', '오후']]) + o('h', hrs) + o('m', mins);
+}
+function useCard(u) {
+  const g = S.use, v = g.v[u.u], p = useParse(v), nm = (u.sub ? u.sub + ' ' : '') + u.name;
+  const foot = p.err ? '<span class="hverr">' + p.err + '</span>' : p.off ? '미가동 · <b>0시간</b>' : p.empty ? '입력 없음' : '가동 <b>' + useDur(p.e - p.s) + '</b>';
+  const st = g.ch[u.u] ? '<span class="nwstate dirty"><i class="dot"></i>저장 안 함</span>' : v.saved ? '<span class="nwstate">' + ICON.ok + '저장됨</span>' : '<span class="clmuted">기본 시각</span>';
+  return '<div class="uc' + (v.off ? ' isoff' : '') + (p.err ? ' bad' : '') + '" data-card="' + h(u.u) + '"><div class="h">' + clName(u.name, u.tone, u.sub) +
+    '<label class="off"><input type="checkbox" data-u="' + h(u.u) + '" data-f="off"' + (v.off ? ' checked' : '') + ' onchange="useIn(this)" aria-label="' + h(nm) + ' 미가동">미가동</label></div>' +
+    '<div class="r"><span>시작</span>' + useSel(u, 's', v.s, nm + ' 시작') + '</div><div class="r"><span>종료</span>' + useSel(u, 'e', v.e, nm + ' 종료') + '</div>' +
+    '<div class="f"><span>' + foot + '</span>' + st + '</div></div>';
+}
+function useIn(el) {
+  const g = S.use, u = el.dataset.u, f = el.dataset.f, v = g.v[u];
+  if (f === 'off') v.off = el.checked;
+  else {
+    const c = el.closest('.uc'), q = k => c.querySelector('[data-f="' + f[0] + k + '"]').value;
+    v[f[0]] = useMin(q('a'), q('h'), q('m'));
+  }
+  g.ch[u] = 1; g.err = '';
+  const unit = g.srv.units.find(x => x.u === u), c = document.querySelector('[data-card="' + CSS.escape(u) + '"]');
+  if (c) c.outerHTML = useCard(unit);
+  const st = $('useState'); if (st) st.innerHTML = useState();
+}
+function useState() {
+  const g = S.use, n = Object.keys(g.ch).length;
+  if (g.err) return '<span class="nwstate dirty"><i class="dot"></i>저장 안 함<small class="hverr"> · ' + h(g.err) + '</small></span>';
+  return n ? '<span class="nwstate dirty"><i class="dot"></i>' + n + '대 저장 안 함</span>' : '<span class="nwstate" style="color:var(--muted)">' + useMiss() + '</span>';
+}
+function useMiss() { const g = S.use, n = g.srv.units.filter(u => !(g.srv.recs[u.u] && (g.srv.recs[u.u].off || g.srv.recs[u.u].s != null))).length; return n ? '미입력 ' + n + '대' : '모두 입력함'; }
+function renderUse() {
+  const g = S.use, kn = CL_KIND[g && g.kind] || '';
+  if (!g || !g.srv) return clTop() + '<div class="wrap list">' + clTabs(g ? g.kind : 'hvac') + '<div class="banner b-gray">불러오는 중…</div></div>';
+  const gs = useGroups(), pc = lgPc(), r = g.srv, u0 = r.units[0] || {};
+  const dflt = useHm(u0.s) + ' ~ ' + useHm(r.wkend ? u0.ew : u0.e) + (r.wkend ? ' (금토일)' : '');
+  const cnt = x => x.us.filter(u => r.recs[u.u] && (r.recs[u.u].off || r.recs[u.u].s != null)).length + '/' + x.us.length;
+  const past = g.day < r.workDay ? '<br>지난 날짜입니다 · 31일 안은 고칠 수 있습니다' : '';
+  const head = '<div class="card" style="padding:var(--sp-4)"><div class="hvhd"><b>' + kn + ' 가동시간</b><button class="nwdate" data-date="' + h(g.day) + '" onclick="useCal()" aria-label="일자 바꾸기">' + ICON.cal + clMd(g.day) + '</button></div>' +
+    '<div class="hdrow"><span class="hvmeta" style="margin:0">' + useMiss() + ' · 기본 ' + dflt + (g.kind === 'hvac' ? ' · 6층 21:50 · B3층 08:30~18:40' : '') + past + '</span>' + clRepBtn(g.kind) + '</div>' +
+    (pc ? '' : clNav(gs.map(x => [x.g, x.tone, cnt(x)]), g.pg, 'useGo')) + '</div>';
+  const bar = '<div class="nwbar"><span id="useState">' + useState() + '</span><div class="dslot"><button class="btn pri" id="useSave" onclick="useSave()"' + (g.busy ? ' disabled' : '') + '>' + (g.busy ? '<span class="spin"></span> 저장 중…' : '저장') + '</button></div></div>';
+  const note = '<p class="clnote">시각은 오전/오후 · 시 · 10분 단위. 미가동 체크 = 0시간, 빈 칸 = 통계에서 뺌. [저장]은 고친 장비와 ' + (pc ? '화면의' : '이 쪽의') + ' 아직 저장 안 한 장비(기본 시각)를 함께 저장합니다.</p>';
+  if (pc) {
+    const Z = ['1구역', '2구역', '3구역'], zoned = g.kind === 'hvac';
+    const rows = gs.map(x => {
+      if (!zoned || x.us.every(u => !u.zone)) return '<tr><td class="ctr">' + clName(x.g, x.tone) + '</td><td colspan="' + (zoned ? 3 : 1) + '"><div class="ucg">' + x.us.map(useCard).join('') + '</div></td></tr>';
+      return '<tr><td class="ctr">' + clName(x.g, x.tone) + '</td>' + Z.map(z => '<td><div class="ucg">' + x.us.filter(u => u.zone === z).map(useCard).join('') + '</div></td>').join('') + '</tr>';
+    }).join('');
+    return clTop() + '<div class="lgwrap">' + clTabs(g.kind) + head + '<table class="cltbl ucpc"><thead><tr><th style="width:80px">' + (zoned ? '층' : '묶음') + '</th>' + (zoned ? Z.map(z => '<th>' + z + '</th>').join('') : '<th>' + kn + '</th>') + '</tr></thead><tbody>' + rows + '</tbody></table>' + note + withBack(bar) + '</div>';
+  }
+  const x = gs[g.pg] || gs[0];
+  return clTop() + '<div class="wrap list">' + clTabs(g.kind) + head +
+    '<div class="flhd">' + clName(x.g, x.tone) + '<small>' + x.us.length + '대 · ' + (g.kind === 'hvac' ? '층' : '묶음') + ' ' + (g.pg + 1) + '/' + gs.length + '</small></div>' +
+    '<div class="hvlist">' + x.us.map(useCard).join('') + '</div>' + clPager(g.pg, gs.map(y => [y.g]), 'useGo', g.kind === 'hvac' ? '층' : '묶음') + note + withBack(bar) + '</div>';
+}
+async function useSave() {
+  const g = S.use; if (g.busy) return;
+  const gs = useGroups(), vis = lgPc() ? g.srv.units : (gs[g.pg] || gs[0]).us, rows = [];
+  let bad = null;
+  g.srv.units.forEach(u => {
+    const v = g.v[u.u]; if (!g.ch[u.u] && !(vis.indexOf(u) !== -1 && !v.saved)) return;
+    const p = useParse(v);
+    if (p.err) { if (!bad) bad = { u, msg: (u.sub ? u.sub + ' ' : '') + u.name + ': ' + p.err }; return; }
+    if (p.empty && !v.saved) return;
+    rows.push({ u: u.u, s: p.s, e: p.e, off: p.off });
+  });
+  if (bad) { g.err = bad.msg; if (!lgPc()) g.pg = gs.findIndex(x => x.us.indexOf(bad.u) !== -1); render(); toast(bad.msg); return; }
+  if (!rows.length) { toast('저장할 변경 내용이 없습니다'); return; }
+  g.busy = true; render();
+  try {
+    const r = await call('usageSave', g.kind, g.day, rows);
+    g.busy = false;
+    if (!r.ok) { g.err = r.error; render(); toast(r.error); return; }
+    useSet(r); toast(rows.length + '대 저장했습니다 (' + clMd(g.day) + ')');
+  } catch (e) { g.busy = false; g.err = '서버에 닿지 않았습니다. 다시 눌러 주세요'; render(); }
+}
+
+/* ── 리포트 (각 탭의 [리포트]): 공조기·에어커튼 = 옛 앱 사용시간 리포트 + 전력(kWh)·예상 요금 (결정 194), 온습도 = 옛 실내 온습도 리포트 ── */
+const REP_PER = [['30', '30일', 30], ['90', '90일', 90], ['365', '1년', 365], ['all', '전체', 0]];
+let CHARTJS = null;
+function loadChart() {
+  if (window.Chart) return Promise.resolve();
+  return CHARTJS || (CHARTJS = new Promise((ok, no) => {
+    const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
+    sc.onload = ok; sc.onerror = () => { CHARTJS = null; no(new Error('그래프 도구를 불러오지 못했습니다')); };
+    document.head.appendChild(sc);
+  }));
+}
+function repDay(d, k) { return new Date(Date.parse(d + 'T00:00:00Z') + k * 864e5).toISOString().slice(0, 10); }
+async function openRep(kind) {
+  const from = S.view === 'use' ? 'use' : S.view;
+  if (!clLeaveOk()) return;
+  S.rep = { kind, per: (S.rep && S.rep.per) || '30', srv: null, from, fromKind: S.use && S.use.kind };
+  go('rep'); await loadRep();
+}
+async function loadRep() {
+  const p = S.rep, wd = (S.docs && S.docs.day) || new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10), per = REP_PER.find(x => x[0] === p.per);
+  let from = per[2] ? repDay(wd, -(per[2] - 1)) : '';
+  if (p.kind !== 'climate' && from) { const pm = repDay(wd.slice(0, 8) + '01', -1).slice(0, 8) + '01'; if (pm < from) from = pm; }   // 지난달 대비용
+  p.srv = null; p.busy = true; if (S.view === 'rep') render();
+  const r = p.kind === 'climate' ? await call('climateReport', from, wd) : await call('usageReport', p.kind, from, wd);
+  p.busy = false; if (!r.ok) { toast(r.error); return; }
+  p.srv = r; p.day = wd; p.from0 = per[2] ? repDay(wd, -(per[2] - 1)) : r.from;
+  if (S.view === 'rep') { render(); repChart(); }
+}
+function repBack() { const p = S.rep; if (p.from === 'use') openUse(p.fromKind); else if (p.from === 'clim') openClim(); else go(p.from || 'docs'); }
+function repPer(k) { S.rep.per = k; loadRep(); }
+function repKpi(l, v, sub) { return '<div class="kpi"><span>' + l + '</span><strong>' + v + '</strong>' + (sub ? '<small>' + sub + '</small>' : '') + '</div>'; }
+function repArrow(c, p, unit, dg) { if (c == null || p == null) return '—'; const d = c - p, t = (d > 0 ? '▲ ' : d < 0 ? '▼ ' : '') + Math.abs(d).toLocaleString('ko-KR', { minimumFractionDigits: dg == null ? 1 : dg, maximumFractionDigits: dg == null ? 1 : dg }) + unit; return '<span class="' + (d > 0 ? 'up' : d < 0 ? 'down' : '') + '">' + t + '</span>'; }
+// 기간 안 장비별 하루 분 → 묶음 계산 (옛 computeStats 와 같은 식)
+function repStats() {
+  const p = S.rep, r = p.srv, kwOf = {}, price = r.price == null ? null : Number(r.price);
+  r.units.forEach(u => { kwOf[u.u] = u.kw == null ? null : Number(u.kw); });
+  const day = {}, per = {}, from = p.from0, to = p.day, last3 = [-4, -3, -2, -1].map(k => repDay(to, k));
+  r.rows.forEach(([d, u, m]) => {
+    if (!(u in kwOf)) return;   // 옛 3·37·38번은 통계에서 뺌
+    const x = day[d] = day[d] || { n: 0, min: 0, kwh: 0 }; x.n++; x.min += m; if (kwOf[u] != null) x.kwh += m / 60 * kwOf[u];
+    const q = per[u] = per[u] || { days: 0, min: 0, cmp: [null, null, null, null] };
+    if (d >= from && d <= to) { q.days++; q.min += m; }
+    const i = last3.indexOf(d); if (i !== -1) q.cmp[i] = m;
+  });
+  const sum = (a, b, f) => Object.keys(day).filter(d => d >= a && d <= b).reduce((s, d) => s + day[d][f], 0);
+  const ms = to.slice(0, 8) + '01', pms = repDay(ms, -1).slice(0, 8) + '01', pTo = pms.slice(0, 8) + String(Math.min(Number(to.slice(8)), Number(repDay(ms, -1).slice(8)))).padStart(2, '0');
+  return { day, per, last3, price, kwOf, noKw: r.units.filter(u => u.kw == null).length, sum, ms, pms, pTo };
+}
+function renderRep() {
+  const p = S.rep, kn = p.kind === 'climate' ? '온습도' : CL_KIND[p.kind];
+  const seg = '<div class="seg" role="group" aria-label="기간" style="max-width:360px">' + REP_PER.map(x => '<button type="button" class="' + (x[0] === p.per ? 'on' : '') + '" aria-pressed="' + (x[0] === p.per) + '" onclick="repPer(\'' + x[0] + '\')">' + x[1] + '</button>').join('') + '</div>';
+  const bar = '<div class="nwbar"><span></span>' + (p.srv ? '<button class="btn" onclick="repCsv()">' + ICON.dl + 'CSV</button><button class="btn" onclick="repPrint()">' + ICON.print + '인쇄</button>' : '') + '</div>';
+  const top = topbar(CL_TITLE + ' ›', kn + ' 리포트');
+  if (!p.srv) return top + '<div class="wrap list">' + seg + '<div class="banner b-gray">불러오는 중…</div>' + bar + '</div>';
+  return top + '<div class="wrap list clrep">' + seg + '<div id="repBody">' + (p.kind === 'climate' ? repClimHtml() : repUseHtml()) + '</div>' + bar + '</div>';
+}
+function repUseHtml() {
+  const p = S.rep, r = p.srv, st = repStats(), kn = CL_KIND[p.kind], to = p.day, tot = r.units.length, H = m => (m / 60).toFixed(1);
+  const today = st.day[to], miss = tot - (today ? today.n : 0), pd = st.day;
+  const inP = Object.keys(pd).filter(d => d >= p.from0 && d <= to), nRec = inP.reduce((s, d) => s + pd[d].n, 0), tMin = inP.reduce((s, d) => s + pd[d].min, 0);
+  const won = k => st.price == null ? null : k * st.price, fW = x => x == null ? '—' : Math.round(x).toLocaleString('ko-KR') + '원', fK = x => x.toFixed(1) + 'kWh';
+  const mMin = st.sum(st.ms, to, 'min'), pmMin = st.sum(st.pms, st.pTo, 'min'), mK = st.sum(st.ms, to, 'kwh'), pmK = st.sum(st.pms, st.pTo, 'kwh');
+  let html = '<h3>요약 <small>' + (p.per === 'all' ? r.from : p.from0) + ' ~ ' + to + '</small></h3><div class="kpis">' +
+    repKpi('오늘 미입력', miss ? miss + '대 / ' + tot + '대' : '전체 입력 완료') + repKpi('오늘 가동시간 합계', today ? H(today.min) + '시간' : '—') +
+    repKpi('1대 1일 평균', nRec ? H(tMin / nRec) + '시간' : '—') + repKpi(REP_PER.find(x => x[0] === p.per)[1] + ' 합계', H(tMin) + '시간') + repKpi('기록된 날', inP.length + '일') + '</div>';
+  html += '<h3>전력 · 예상 요금 <small>' + (st.price == null ? '단가 미입력' : '단가 ' + st.price + '원/kWh') + (st.noKw ? ' · kW 미입력 ' + st.noKw + '대 (환산에서 뺌)' : '') + '</small></h3><div class="kpis">' +
+    repKpi('오늘', today ? fK(today.kwh) : '—', today ? fW(won(today.kwh)) : '') + repKpi('이달 (' + Number(st.ms.slice(5, 7)) + '월 1일~)', fK(mK), fW(won(mK))) +
+    repKpi('지난달 같은 날까지', fK(pmK), fW(won(pmK))) +
+    repKpi('지난달 대비', repArrow(mMin / 60, pmMin / 60, '시간'), repArrow(mK, pmK, 'kWh') + (st.price == null ? '' : ' · ' + repArrow(won(mK), won(pmK), '원', 0))) + '</div>' +
+    '<p class="clnote">예상 요금 = kWh × 단가 (기본요금·누진·부가세 없음). kW·단가는 환경설정 › 장비 전력·단가에서 넣습니다.</p>';
+  const rows = r.units.map(u => ({ u, q: st.per[u.u] || { days: 0, min: 0, cmp: [null, null, null, null] } }));
+  const dl = st.last3.slice(1), tc = [0, 1, 2, 3].map(i => { const v = rows.reduce((s, x) => x.q.cmp[i] == null ? s : (s || 0) + x.q.cmp[i], null); return v; });
+  const cmp = (a, i) => { const v = a[i], pv = a[i - 1]; if (v == null) return '—'; const t = H(v) + 'h'; return pv != null && v > pv ? '<span class="up">▲ ' + t + '</span>' : pv != null && v < pv ? '<span class="down">▼ ' + t + '</span>' : t; };
+  html += '<h3>' + kn + ' 사용시간 <small>오늘 뺀 최근 3일 · ▲ 전날보다 길어짐 · ▼ 짧아짐 · — 미입력</small></h3><div class="scroll"><table class="cltbl rep"><thead><tr><th class="l">' + kn + '</th><th>입력일</th><th>1일 평균</th><th>기간 합계</th><th>kW</th>' +
+    dl.map((d, i) => '<th>' + (3 - i) + '일 전<br><small>' + Number(d.slice(5, 7)) + '/' + Number(d.slice(8)) + '</small></th>').join('') + '</tr></thead><tbody>' +
+    '<tr class="tot"><td class="l">전체 합계</td><td>' + inP.length + '</td><td>' + (nRec ? H(tMin / nRec) + 'h' : '—') + '</td><td>' + H(tMin) + 'h</td><td></td>' + [1, 2, 3].map(i => '<td>' + cmp(tc, i) + '</td>').join('') + '</tr>' +
+    rows.map(x => '<tr' + (x.q.days ? '' : ' class="dim"') + '><td class="l">' + h((x.u.sub ? x.u.sub + ' ' : '') + x.u.name) + '</td><td>' + x.q.days + '</td><td>' + (x.q.days ? useDur(Math.round(x.q.min / x.q.days)) : '—') + '</td><td>' + (x.q.days ? H(x.q.min) + 'h' : '—') + '</td><td>' + (x.u.kw == null ? '<span class="clmuted">—</span>' : h(x.u.kw)) + '</td>' +
+      [1, 2, 3].map(i => '<td>' + cmp(x.q.cmp, i) + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
+  html += '<h3>일별 사용시간 추이</h3><div class="repchart"><canvas id="repCv" height="300"></canvas></div>';
+  let dr = ''; for (let i = 0; i < 31; i++) { const d = repDay(to, -i), a = pd[d]; dr += '<tr' + (a ? '' : ' class="dim"') + '><td class="l">' + d + '</td><td>' + (a ? a.n + ' / ' + tot : '미입력') + '</td><td>' + (a ? H(a.min) + 'h' : '—') + '</td><td>' + (a ? H(a.min / a.n) + 'h' : '—') + '</td><td>' + (a ? fK(a.kwh) : '—') + '</td><td>' + (a ? fW(won(a.kwh)) : '—') + '</td></tr>'; }
+  html += '<h3>일일 기록 <small>최근 31일</small></h3><div class="scroll"><table class="cltbl rep"><thead><tr><th class="l">날짜</th><th>입력 대수</th><th>합계</th><th>1대 평균</th><th>전력량</th><th>예상 요금</th></tr></thead><tbody>' + dr + '</tbody></table></div>' +
+    '<p class="clnote">미가동은 0시간으로 계산합니다. 기록은 기간 제한 없이 보관됩니다 (첫 기록 ' + (r.first || '—') + ').</p>';
+  return html;
+}
+function repClimHtml() {
+  const p = S.rep, r = p.srv, rows = r.rows.filter(x => x[0].slice(0, 10) >= p.from0);
+  if (!rows.length) return '<p class="clnote">이 기간에 저장된 기록이 없습니다</p>';
+  const avg = a => a.reduce((s, x) => s + x, 0) / a.length, T = rows.map(x => Number(x[3])), Hm = rows.map(x => Number(x[4])), D = rows.map(x => Number(x[5]));
+  const cnt = [0, 0, 0]; D.forEach(d => { cnt[CL_LV.indexOf(clLv(d))]++; });
+  const wo = rows.filter(x => x[6] != null), dT = wo.length ? avg(wo.map(x => x[3] - x[6])) : null;
+  let html = '<h3>요약 <small>' + (p.per === 'all' ? r.from : p.from0) + ' ~ ' + p.day + '</small></h3><div class="kpis">' +
+    repKpi('측정 건수', rows.length + '건') + repKpi('평균 온도', avg(T).toFixed(1) + '℃') + repKpi('평균 습도', avg(Hm).toFixed(0) + '%') + repKpi('평균 불쾌지수', avg(D).toFixed(1)) +
+    repKpi('최고 / 최저 온도', Math.max(...T).toFixed(1) + ' / ' + Math.min(...T).toFixed(1) + '℃') + repKpi('쾌적 비율', Math.round(cnt[0] / rows.length * 100) + '%', '주의 ' + cnt[1] + '건 · 불쾌 ' + cnt[2] + '건') +
+    repKpi('실내외 평균 온도차', dT == null ? '—' : (dT > 0 ? '+' : '') + dT.toFixed(1) + '℃') + '</div>';
+  const fl = []; r.zones.forEach(([f, z]) => { let x = fl.find(a => a.f === f); if (!x) fl.push(x = { f, zs: [] }); x.zs.push(z); });
+  const adv = [];
+  html += '<h3>층·구역별 평균 불쾌지수</h3><div class="scroll"><table class="cltbl rep"><thead><tr><th class="l">층</th><th>1구역</th><th>2구역</th><th>3구역</th></tr></thead><tbody>' +
+    fl.map(f => '<tr><td class="l">' + clName(CL_FL[f.f][0], CL_FL[f.f][1]) + '</td>' + ['1구역', '2구역', '3구역'].map(z => {
+      if (f.zs.indexOf(z) === -1) return '<td class="clmuted">해당 없음</td>';
+      const g = rows.filter(x => x[1] === f.f && x[2] === z); if (!g.length) return '<td>—</td>';
+      const t = avg(g.map(x => Number(x[3]))), hm = avg(g.map(x => Number(x[4]))), d = avg(g.map(x => Number(x[5]))), l = clLv(d)[1];
+      clAdvice(t, hm).forEach(a => adv.push(CL_FL[f.f][0] + ' ' + z + ' (평균 ' + t.toFixed(1) + '℃, ' + hm.toFixed(0) + '%): ' + a));
+      return '<td><b class="ditag' + (l === '주의' ? ' c' : l === '불쾌' ? ' d' : '') + '">' + d.toFixed(1) + ' ' + l + '</b><br><small>' + t.toFixed(1) + '℃ · ' + hm.toFixed(0) + '% · ' + g.length + '건</small></td>';
+    }).join('') + '</tr>').join('') + '</tbody></table></div>';
+  html += '<h3>조치 권고</h3>' + (adv.length ? '<ul class="cladv">' + adv.slice(0, 14).map(a => '<li>' + h(a) + '</li>').join('') + '</ul>' : '<p class="clnote">평균 기준으로 조정이 필요한 구역이 없습니다.</p>');
+  html += '<h3>추이 그래프 <small>일별 평균 온도·습도</small></h3><div class="repchart"><canvas id="repCv" height="300"></canvas></div>';
+  html += '<h3>상세 기록 <small>최근 ' + Math.min(200, rows.length) + '건</small></h3><div class="scroll"><table class="cltbl rep"><thead><tr><th class="l">시각</th><th>층</th><th>구역</th><th>온도</th><th>습도</th><th>불쾌지수</th><th>실외 온도</th><th>실외 습도</th></tr></thead><tbody>' +
+    rows.slice(-200).reverse().map(x => '<tr><td class="l">' + h(x[0]) + '</td><td>' + h(CL_FL[x[1]] ? CL_FL[x[1]][0] : x[1]) + '</td><td>' + h(x[2]) + '</td><td>' + x[3] + '</td><td>' + x[4] + '</td><td>' + x[5] + ' ' + clLv(Number(x[5]))[1] + '</td><td>' + (x[6] == null ? '—' : x[6]) + '</td><td>' + (x[7] == null ? '—' : x[7]) + '</td></tr>').join('') + '</tbody></table></div>' +
+    '<p class="clnote">불쾌지수 = 0.81×T + 0.01×H×(0.99×T−14.3) + 46.3 · 쾌적 74 미만 · 주의 78 미만 · 불쾌 78 이상 · 쾌적 범위 23~26℃, 40~60%</p>';
+  return html;
+}
+async function repChart() {
+  const cv = $('repCv'); if (!cv) return;
+  try { await loadChart(); } catch (e) { cv.outerHTML = '<p class="clnote">그래프 도구를 불러오지 못했습니다 (인터넷 연결 확인).</p>'; return; }
+  const p = S.rep, el = $('repCv'); if (!el || !window.Chart) return;
+  const navy = '#1E3A5F', sub = '#5F6B7A';
+  let cfg;
+  if (p.kind === 'climate') {
+    const by = {}; p.srv.rows.filter(x => x[0].slice(0, 10) >= p.from0).forEach(x => { const d = x[0].slice(0, 10), a = by[d] = by[d] || { t: 0, h: 0, n: 0 }; a.t += Number(x[3]); a.h += Number(x[4]); a.n++; });
+    const ds = Object.keys(by).sort();
+    cfg = { type: 'line', data: { labels: ds.map(d => Number(d.slice(5, 7)) + '/' + Number(d.slice(8))), datasets: [
+      { label: '평균 온도(℃)', data: ds.map(d => +(by[d].t / by[d].n).toFixed(1)), borderColor: navy, backgroundColor: navy, yAxisID: 'y', tension: .2 },
+      { label: '평균 습도(%)', data: ds.map(d => +(by[d].h / by[d].n).toFixed(0)), borderColor: sub, backgroundColor: sub, borderDash: [4, 3], yAxisID: 'y2', tension: .2 }] },
+      options: { animation: false, maintainAspectRatio: false, scales: { y: { title: { display: true, text: '℃' } }, y2: { position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: '%' } } } } };
+  } else {
+    const st = repStats(), to = p.day, n = Math.round((Date.parse(to) - Date.parse(p.from0)) / 864e5) + 1, monthly = p.per === 'all' || n > 120;
+    let lab = [], tot = [], av = [];
+    if (monthly) { const mm = {}; Object.keys(st.day).filter(d => d >= p.from0).forEach(d => { const k = d.slice(0, 7), a = mm[k] = mm[k] || { min: 0, n: 0 }; a.min += st.day[d].min; a.n += st.day[d].n; }); Object.keys(mm).sort().forEach(k => { lab.push(k); tot.push(+(mm[k].min / 60).toFixed(1)); av.push(+(mm[k].min / mm[k].n / 60).toFixed(1)); }); }
+    else for (let i = n - 1; i >= 0; i--) { const d = repDay(to, -i), a = st.day[d]; lab.push(Number(d.slice(5, 7)) + '/' + Number(d.slice(8))); tot.push(a ? +(a.min / 60).toFixed(1) : 0); av.push(a ? +(a.min / a.n / 60).toFixed(1) : null); }
+    cfg = { type: 'bar', data: { labels: lab, datasets: [
+      { type: 'bar', label: monthly ? '월 합계(시간)' : '일 합계(시간)', data: tot, backgroundColor: navy, yAxisID: 'y' },
+      { type: 'line', label: '1대 평균(시간)', data: av, borderColor: sub, backgroundColor: sub, borderDash: [4, 3], yAxisID: 'y2', spanGaps: true }] },
+      options: { animation: false, maintainAspectRatio: false, scales: { x: { ticks: { autoSkip: true, maxTicksLimit: 12, maxRotation: 0 } }, y: { beginAtZero: true, suggestedMax: monthly ? undefined : 500, title: { display: true, text: '합계(시간)' } }, y2: { position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, title: { display: true, text: '1대 평균(시간)' } } } } };
+  }
+  if (S.repChartObj) try { S.repChartObj.destroy(); } catch (e) {}
+  S.repChartObj = new window.Chart(el, cfg);
+}
+function repCsv() {
+  const p = S.rep, r = p.srv, cell = v => { v = v == null ? '' : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+  let head, out;
+  if (p.kind === 'climate') { head = ['측정시각', '층', '구역', '실내온도', '실내습도', '불쾌지수', '실외온도', '실외습도']; out = r.rows; }
+  else {
+    const U = {}; r.units.forEach(u => { U[u.u] = u; });
+    head = ['날짜', CL_KIND[p.kind], '가동시간(시간)', 'kW', '전력량(kWh)', '예상 요금(원)'];
+    out = r.rows.filter(x => U[x[1]]).map(([d, u, m]) => { const kw = U[u].kw == null ? null : Number(U[u].kw), k = kw == null ? null : m / 60 * kw;
+      return [d, (U[u].sub ? U[u].sub + ' ' : '') + U[u].name, (m / 60).toFixed(1), kw, k == null ? '' : k.toFixed(1), k == null || r.price == null ? '' : Math.round(k * Number(r.price))]; });
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + [head].concat(out).map(x => x.map(cell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' }));
+  a.download = (p.kind === 'climate' ? '온습도' : CL_KIND[p.kind]) + '_기록_' + (p.per === 'all' ? r.from : p.from0) + '_' + p.day + '.csv';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  toast('CSV 저장: ' + out.length + '줄');
+}
+function repPrint() {
+  const p = S.rep, cv = $('repCv'), img = cv && cv.toDataURL ? '<img src="' + cv.toDataURL('image/png') + '" style="width:100%" alt="추이 그래프">' : '';
+  const body = $('repBody').innerHTML.replace(/<canvas[^>]*><\/canvas>/, img);
+  $('print').innerHTML = '<style>@page{size:A4;margin:12mm}</style><div class="clrep clprint"><h2>에비뉴엘 ' + (p.kind === 'climate' ? '실내 온습도' : CL_KIND[p.kind] + ' 사용시간') + ' 리포트</h2>' + body + '</div>';
+  setTimeout(() => window.print(), 50);
+}
+
+/* ── 환경설정 › 장비 전력(kW)·단가 (소장만, 결정 194). 빈 칸 = 모름 → 리포트 환산에서 뺌 ── */
+async function openKw() {
+  S.kw = null; go('kw');
+  const r = await call('equipKwGet'); if (!r.ok) { toast(r.error); return back(); }
+  S.kw = { srv: r, ch: {}, busy: false }; if (S.view === 'kw') render();
+}
+function kwIn(el) { const k = el.dataset.k; S.kw.ch[k] = clNum(el.value); el.classList.toggle('bad', S.kw.ch[k] !== '' && clBad(S.kw.ch[k], 0, k === 'price' ? 10000 : 1000)); const e = $('kwSt'); if (e) e.textContent = '고친 내용 있음'; }
+function renderKw() {
+  const k = S.kw;
+  if (!k) return topbar('환경설정 ›', '장비 전력 · 단가') + '<div class="wrap" style="text-align:center;padding:var(--sp-8)"><span class="spin" style="color:var(--blue)"></span></div>';
+  const r = k.srv, box = (key, val, unit, lbl) => '<label class="hvin kwin"><input class="inp' + (val == null || val === '' ? ' empty' : '') + '" inputmode="decimal" maxlength="8" data-k="' + h(key) + '" value="' + h(key in k.ch ? k.ch[key] : val == null ? '' : val) + '" oninput="kwIn(this)" aria-label="' + h(lbl) + '"><span>' + unit + '</span></label>';
+  const list = (kind, us) => '<h3 class="sth" style="margin-top:var(--sp-2)">' + CL_KIND[kind] + ' ' + us.length + '대 <small style="color:var(--muted);font-weight:400">kW 미입력 ' + us.filter(u => u.kw == null).length + '대</small></h3><div class="card">' +
+    us.map(u => '<div class="strow"><span class="fname">' + clName(u.name, u.tone) + '<small>' + h(u.sub || u.grp) + '</small></span>' + box('u:' + u.u, u.kw, 'kW', (u.sub ? u.sub + ' ' : '') + u.name + ' 전력') + '</div>').join('') + '</div>';
+  return topbar('환경설정 ›', '장비 전력 · 단가') + '<div class="wrap list"><div class="banner b-gray" style="line-height:1.6">모르는 칸은 비워 두세요. 빈 장비는 리포트의 전력량·요금 환산에서 빠지고 「kW 미입력 n대」로 보입니다.</div>' +
+    '<h3 class="sth">전력 단가</h3><div class="card strow"><span class="fname"><b>단가</b><small>원/kWh · 예상 요금 = kWh × 단가</small></span>' + box('price', r.price, '원', '전력 단가') + '</div>' +
+    list('hvac', r.hvac) + list('curtain', r.curtain) +
+    '<div class="nwbar"><span id="kwSt">' + (Object.keys(k.ch).length ? '고친 내용 있음' : '') + '</span><button class="btn pri" onclick="kwSave()"' + (k.busy ? ' disabled' : '') + '>' + (k.busy ? '<span class="spin"></span>' : '저장') + '</button></div></div>';
+}
+async function kwSave() {
+  const k = S.kw; if (k.busy) return;
+  const d = { hvac: {}, curtain: {} }, bad = Object.keys(k.ch).find(x => k.ch[x] !== '' && clBad(k.ch[x], 0, x === 'price' ? 10000 : 1000));
+  if (bad) { toast((bad === 'price' ? '단가는 0 ~ 10000' : '전력은 0 ~ 1000') + ' 숫자로 넣어 주세요'); return; }
+  Object.keys(k.ch).forEach(x => { if (x === 'price') d.price = k.ch[x]; else { const u = x.slice(2); d[k.srv.hvac.some(a => a.u === u) ? 'hvac' : 'curtain'][u] = k.ch[x]; } });
+  if (!Object.keys(k.ch).length) { toast('바뀐 것이 없습니다'); return; }
+  k.busy = true; render();
+  try { const r = await call('equipKwSave', d); k.busy = false; if (!r.ok) { render(); toast(r.error); return; } S.kw = { srv: r, ch: {}, busy: false }; render(); toast('저장했습니다'); }
+  catch (e) { k.busy = false; render(); }
+}
+
+/* ── 메인 「오늘 가동시간 미입력」 (결정 194): 기본 종료 시각 뒤부터 오늘, 그 전에는 어제 남은 것. 미가동 = 입력 ── */
+function mainTodo() {
+  const t = S.acTodo;
+  if (!t || !t.ok || (!t.hvac && !t.curtain) || (menuOff('docs') && !menuCanOpen())) return '';
+  const b = (k, n) => n ? '<button class="btn" onclick="openUse(\'' + k + '\', \'' + t.day + '\')">' + CL_KIND[k] + ' <b>' + n + '대</b>' + ICON.next + '</button>' : '';
+  return '<div class="todo"><div class="todo-h">' + t.when + ' 가동시간 미입력 <small>미가동 체크는 입력한 것으로 셈</small></div><div class="todo-b">' + b('hvac', t.hvac) + b('curtain', t.curtain) + '</div></div>';
+}
+
 function withBack(html) { return html.replace(/<div class="(nwbar|csbar-in)"( id="\w+")?>/, m => m + '<button class="btn back-in" onclick="back()">' + ICON.back + '뒤로</button>'); }
 
 /* ── 앱 안 PDF 보기: [PDF 열기]가 휴대폰의 드라이브·PDF 앱으로 넘어가면 구글 계정을 물음 → 앱 안에서 pdf.js 로 그림 (Supabase 판만) ──
@@ -3393,6 +3906,10 @@ function render() {
   else if (S.view === 'nw') html = renderNw();
   else if (S.view === 'log') html = renderLog();
   else if (S.view === 'ahu') html = renderAhu();
+  else if (S.view === 'clim') html = renderClim();
+  else if (S.view === 'use') html = renderUse();
+  else if (S.view === 'rep' && S.rep) html = renderRep();
+  else if (S.view === 'kw' && isBoss()) html = renderKw();
   else if (S.view === 'map') html = renderMap();
   else if (S.view === 'spec') html = S.sp ? renderSpec() : renderMain();
   else if (S.view === 'att') html = renderAtt();
