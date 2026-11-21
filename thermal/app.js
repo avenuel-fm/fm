@@ -71,6 +71,7 @@
         btnMenuMaxSpot: document.getElementById('btnMenuMaxSpot'),
         btnMenuAlignHorizontal: document.getElementById('btnMenuAlignHorizontal'),
         imgVisual: document.getElementById('imgVisual'),
+        visualFallbackBadge: document.getElementById('visualFallbackBadge'),
         imgThermal: document.getElementById('imgThermal'),
         thermalFrame: document.getElementById('thermalFrame'),
         guidelineNotice: document.getElementById('guidelineNotice'),
@@ -510,10 +511,10 @@
             return alert('열화상 JPEG 사진 파일(.jpg, .jpeg)만 지원합니다.');
         }
 
-        if (state.pages.length + validFiles.length > 8) {
-            alert('열화상 리포트는 한 번에 최대 8장까지만 작성할 수 있습니다. 8장까지만 추가됩니다.');
+        if (state.pages.length + validFiles.length > 99) {
+            alert('열화상 리포트는 한 번에 최대 99장까지만 작성할 수 있습니다. 99장까지만 추가됩니다.');
         }
-        const availableSlots = 8 - state.pages.length;
+        const availableSlots = 99 - state.pages.length;
         const toProcess = validFiles.slice(0, availableSlots);
 
         DOM.dropZone.style.display = 'none';
@@ -564,6 +565,9 @@
 
         DOM.inpCircuitName.value = page.circuit_name;
         DOM.imgVisual.src = page.visualUrl || page.thermalUrl;
+        if (DOM.visualFallbackBadge) {
+            DOM.visualFallbackBadge.style.display = page.hasVisual ? 'none' : 'inline';
+        }
         DOM.imgThermal.src = page.thermalUrl;
 
         // 적용 환경값 안내 배너 갱신
@@ -589,7 +593,7 @@
      */
     function renderSidebar() {
         DOM.sidebarList.innerHTML = '';
-        DOM.pageCountBadge.textContent = `${state.pages.length} / 8`;
+        DOM.pageCountBadge.textContent = `${state.pages.length} / 99`;
 
         state.pages.forEach((page, idx) => {
             const item = document.createElement('div');
@@ -949,7 +953,7 @@
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
                         <div>
-                            <div style="font-size: 12px; font-weight: 600; color: #5F6B7A; margin-bottom: 4px;">측정 부위 사진 (실화상)</div>
+                            <div style="font-size: 12px; font-weight: 600; color: #5F6B7A; margin-bottom: 4px;">측정 부위 사진 (실화상)${p.hasVisual ? '' : ' <span style="font-size: 11px; font-weight: 400; color: #5F6B7A;">(실화상 없음)</span>'}</div>
                             <div style="border: 1px solid #D8DDE5; border-radius: 2px; overflow: hidden; height: 240px; background: #F8FAFC; display: flex; align-items: center; justify-content: center;">
                                 <img src="${p.visualUrl || p.thermalUrl}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
                             </div>
@@ -1177,7 +1181,12 @@
                 ? `스팟 위치 기록: 모든 사진(총 ${totalSpots}개 스팟)의 위치가 사진 바이너리에 성공적으로 새로 기록되었습니다.`
                 : `스팟 위치 기록: 총 ${totalSpots}개 중 ${totalPatched}개 스팟 위치 갱신 완료.`;
 
-            alert(`리포트(${result.fileName})가 성공적으로 생성되어 내려받았습니다! (${result.pages}쪽)\n\n${patchMsg}`);
+            let atrPageNotice = '';
+            if (state.pages.length > 8) {
+                atrPageNotice = `\n\n※ FLIR Thermal Studio(.atr) 양식 규격에 맞춰 1~8쪽이 저장되었습니다. 전체 ${state.pages.length}쪽 전체 리포트는 [PDF 저장] 버튼을 통해 99쪽까지 모두 저장·출력하실 수 있습니다.`;
+            }
+
+            alert(`리포트(${result.fileName})가 성공적으로 생성되어 내려받았습니다! (${result.pages}쪽)\n\n${patchMsg}${atrPageNotice}`);
         } catch (err) {
             console.error('Report build error:', err);
             alert(`리포트 내려받기 중 오류: ${err.message}`);
