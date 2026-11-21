@@ -10,9 +10,9 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.23.4"></script>
-<script>window.WS_VERSION = '0.23.4';</script>
-<script src="ws-api.js?v=0.23.4"></script>
+<script src="config.js?v=0.24.0"></script>
+<script>window.WS_VERSION = '0.24.0';</script>
+<script src="ws-api.js?v=0.24.0"></script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -206,6 +206,7 @@ body:has(.csbar) #app{padding-bottom:calc(120px + env(safe-area-inset-bottom))}
 .tile.soon .ico{background:var(--tint);color:var(--muted)}
 .tile.soon b{color:var(--sub)}
 .seg.menuseg{width:150px;flex:none}.seg.menuseg button{flex:1}
+.menuacc{display:flex;align-items:center;gap:var(--sp-2);flex:1;min-width:0;background:none;border:0;padding:0;text-align:left;color:inherit;font:inherit;cursor:pointer}.menuacc .chev{display:inline-flex;width:18px;transition:transform .15s}.menuacc .chev.open{transform:rotate(90deg)}.menuacc .chev svg{width:18px;height:18px}.strow.menusub{padding-left:var(--sp-8);background:var(--tint)}
 .ico{width:36px;height:36px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center}
 .row{display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3) var(--sp-4);background:var(--white);border:1px solid var(--line2);border-radius:var(--radius);cursor:pointer;width:100%;text-align:left}
 .list{display:flex;flex-direction:column;gap:var(--sp-2)}
@@ -737,7 +738,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.23.4' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.24.0' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -1014,7 +1015,7 @@ function renderMain() {
     t('spec', '시방서 검색', '도면협의 지침 찾기', ICON.search) +
     soon('자재현황', '준비중', ICON.box) +   // 자재현황 자리 (결정 168, WS_자재현황.md)
     t('map', '지도', '에비뉴엘 도면', ICON.map) +
-    t0('cad', 'CAD', '도면 보기 · 올리기', ICON.cad) +   // CAD (WS_CAD.md): 전 직원 열람·업로드. 환경설정 끄기 목록에는 아직 없음
+    t('cad', 'CAD', '도면 보기 · 올리기', ICON.cad) +   // CAD (WS_CAD.md): 전 직원 열람·업로드. 환경설정에서 끄기 가능 (결정 210)
     '</div>' + mainTodo() +
     '<div class="mainfoot"><button class="btn theme-btn" onclick="toggleTheme()">' + themeLabel() + '</button>' +
     (isBoss() ? '<button class="btn" onclick="openSet()">환경설정</button>' : '') + '</div>' +
@@ -1253,13 +1254,37 @@ function spPvHtml(x, big) {
 // PC 마우스 오른쪽 버튼 막기 (휴대폰 길게 누르기는 그대로)
 if (window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches) document.addEventListener('contextmenu', e => e.preventDefault());
 /* ── 메인 메뉴 켜기·끄기 (결정 148): 설정 표 「메인메뉴끄기」, 소장·관리자·옵저버는 꺼진 칸도 엶 ── */
-const MENU = [['docs', '서류작업', 'TBM · 명일 작업 · 종합업무일지 …'], ['inspect', '점검', '소화기 · 전열필증 · 열화상 · 공사장 점검'], ['spec', '시방서 검색', '도면협의 지침 찾기'], ['map', '지도', '에비뉴엘 도면']];
+const MENU = [
+  ['docs', '서류작업', [['tbm', 'TBM'], ['nw', '명일 작업 예정'], ['att', '출근현황'], ['ahu', '온습도/공조기/에어커튼 입력'], ['log', '종합업무일지']]],
+  ['inspect', '점검', [['fire', '소화기 점검'], ['eh', '전열필증'], ['thermal', '열화상점검'], ['cs', '공사장 점검']]],
+  ['spec', '시방서 검색', null], ['mat', '자재현황', null], ['map', '지도', null], ['cad', 'CAD', null]];   // 자재현황은 준비중이라 켜고 끄기 없음
 const menuOff = k => (S.menuOff || []).indexOf(k) !== -1;
 const menuCanOpen = () => !!S.user && ['소장', '관리자', '옵저버'].indexOf(S.user.role) !== -1;
+/** 하위 메뉴 한 줄: 꺼졌거나(직원) 윗 메뉴가 꺼졌으면 이름만 흐리게 · 눌리지 않음 (결정 210). dis = 이 줄만 따로 막을 때 */
+function subRow(key, fn, bg, col, ico, name, sm, dis) {
+  const st = 'background:' + bg + ';color:' + col;
+  const off = dis || (!menuCanOpen() && (menuOff(key) || menuOff(key.split('.')[0])));
+  if (off) return '<button class="row" disabled style="opacity:.5;cursor:default"><span class="ico" style="' + st + '">' + ico + '</span><span class="fname"><b style="font-size:var(--size-m)">' + name + '</b></span></button>';
+  return '<button class="row" onclick="' + fn + '"><span class="ico" style="' + st + '">' + ico + '</span><span class="fname"><b style="font-size:var(--size-m)">' + name + '</b><small>' + sm + '</small></span>' + ICON.chev + '</button>';
+}
+const menuLabel = k => { for (const m of MENU) { if (m[0] === k) return m[1]; const x = (m[2] || []).find(y => m[0] + '.' + y[0] === k); if (x) return x[1]; } return k; };
 async function setMenu(k, on) {
   const r = await call('adminSetMenu', (S.menuOff || []).filter(x => x !== k).concat(on ? [] : [k]));
   if (!r.ok) return toast(r.error);
-  S.menuOff = r.off; render(); toast(MENU.find(m => m[0] === k)[1] + (on ? ' 켬' : ' 끔 (직원에게 안 열림)'));
+  S.menuOff = r.off; render(); toast(menuLabel(k) + (on ? ' 켬' : ' 끔 (직원에게 안 열림)'));
+}
+function menuAcc(k) { S.menuOpen = S.menuOpen || {}; S.menuOpen[k] = !S.menuOpen[k]; render(); }
+const menuSeg = (k, label, off) => '<div class="seg setseg menuseg" role="group" aria-label="' + label + ' 켜기·끄기">' +
+  '<button type="button" class="' + (off ? '' : 'on') + '" aria-pressed="' + !off + '" onclick="setMenu(\'' + k + '\',1)">켜짐</button><button type="button" class="' + (off ? 'on' : '') + '" aria-pressed="' + off + '" onclick="setMenu(\'' + k + '\',0)">꺼짐</button></div>';
+function menuSetHtml() {
+  return MENU.map(m => {
+    const k = m[0], subs = m[2], off = menuOff(k);
+    if (k === 'mat') return '<div class="strow"><span class="fname"><b>자재현황</b><small>준비중 · 항상 「작업중」 칸</small></span></div>';
+    if (!subs) return '<div class="strow"><span class="fname"><b>' + m[1] + '</b></span>' + menuSeg(k, m[1], off) + '</div>';
+    const open = !!(S.menuOpen && S.menuOpen[k]), on = subs.filter(x => !menuOff(k + '.' + x[0])).length;
+    return '<div class="strow"><button type="button" class="menuacc" aria-expanded="' + open + '" onclick="menuAcc(\'' + k + '\')"><span class="chev' + (open ? ' open' : '') + '">' + ICON.chev + '</span><span class="fname"><b>' + m[1] + '</b><small>하위 ' + subs.length + '개 중 ' + on + '개 켜짐</small></span></button>' + menuSeg(k, m[1], off) + '</div>' +
+      (open ? subs.map(x => '<div class="strow menusub"><span class="fname"><b>' + x[1] + '</b></span>' + menuSeg(k + '.' + x[0], x[1], menuOff(k + '.' + x[0])) + '</div>').join('') : '');
+  }).join('');
 }
 function tile(k) { if (k === 'inspect') go('inspect'); else if (k === 'docs') go('docs'); else if (k === 'spec') { if (window.WS_API) openSpec(); else toast('시방서 검색은 바로가기 앱(Supabase)에서만 열립니다'); } else if (k === 'cad') { if (window.WS_API) go('cad'); else toast('CAD는 바로가기 앱(Supabase)에서만 열립니다'); } else if (k === 'map') { if (window.WS_API) go('map'); else toast('지도는 바로가기 앱(Supabase)에서만 열립니다'); } }
 
@@ -1283,10 +1308,8 @@ function renderSet() {
     '<div class="seg setseg" role="group" aria-label="알림 표시 시간" style="margin-top:var(--sp-2)">' + secs.map(v => '<button type="button" class="' + (Number(r.toastSec) === v ? 'on' : '') + '" aria-pressed="' + (Number(r.toastSec) === v) + '" onclick="setToastSec(' + v + ')">' + v + '초</button>').join('') + '</div></div>' +
     (window.WS_API ? '<h3 class="sth" style="margin-top:var(--sp-2)">장비 전력 · 단가</h3><div class="card strow"><span class="fname"><b>공조기·에어커튼 kW · 전기 단가</b><small>가동시간 리포트의 전력량(kWh)·예상 요금에 씀 · 빈 칸은 환산에서 뺌</small></span><button class="btn sm pri" onclick="openKw()">고치기</button></div>' : '') +
     (window.WS_API ? '<h3 class="sth" style="margin-top:var(--sp-2)">TBM 위험성 목록</h3><div class="card strow"><span class="fname"><b>위험성 목록' + (r.riskN != null ? ' ' + r.riskN + '줄' : '') + '</b><small>TBM 작업 내용의 낱말로 위험요인·개선조치를 고르는 표</small></span><button class="btn sm pri" onclick="openRisk()">고치기</button></div>' : '') +
-    '<h3 class="sth" style="margin-top:var(--sp-2)">메인 메뉴</h3><div class="card">' + MENU.map(m => { const off = menuOff(m[0]);
-      return '<div class="strow"><span class="fname"><b>' + m[1] + '</b><small>' + m[2] + '</small></span><div class="seg setseg menuseg" role="group" aria-label="' + m[1] + ' 켜기·끄기">' +
-        '<button type="button" class="' + (off ? '' : 'on') + '" aria-pressed="' + !off + '" onclick="setMenu(\'' + m[0] + '\',1)">켜짐</button><button type="button" class="' + (off ? 'on' : '') + '" aria-pressed="' + off + '" onclick="setMenu(\'' + m[0] + '\',0)">꺼짐</button></div></div>'; }).join('') +
-    '</div><small style="color:var(--muted);line-height:1.6">꺼진 메뉴는 직원 화면에서 「작업중」 칸으로 보이고 눌리지 않습니다. <b>소장·관리자·옵저버</b>는 꺼진 메뉴도 열 수 있습니다.</small>' +
+    '<h3 class="sth" style="margin-top:var(--sp-2)">메인 메뉴</h3><div class="card">' + menuSetHtml() +
+    '</div><small style="color:var(--muted);line-height:1.6">메뉴 이름을 누르면 하위 메뉴가 펼쳐집니다. 꺼진 메뉴는 직원 화면에서 「작업중」 칸(하위 메뉴는 이름만)으로 보이고 눌리지 않으며, 윗 메뉴를 끄면 하위 메뉴도 모두 막힙니다. <b>소장·관리자·옵저버</b>는 꺼진 메뉴도 열 수 있습니다.</small>' +
     '<div style="display:flex;align-items:center;margin-top:var(--sp-2)"><h3 class="sth" style="flex:1">직원 ' + r.staff.length + '명</h3><button class="btn sm pri" onclick="staffDlg()">+ 직원 추가</button></div>' +
     '<div class="card">' + r.staff.map(x => '<div class="strow"><span class="fname"><b>' + h(x.name) + '</b><small>' + h(x.part) + ' · ' + h(x.role) + ' · ' + h(x.staff_id) + '</small></span>' +
       '<button class="btn sm" onclick="staffDlg(\'' + x.staff_id + '\')">편집</button><button class="btn sm" onclick="staffPinDlg(\'' + x.staff_id + '\')">PIN 변경</button>' +
@@ -1422,12 +1445,13 @@ async function staffDel(id) {
 /* ── 서류작업 (WS_서류작업.md) ── */
 function renderDocs() {
   const n = S.docs ? S.docs.signs : null;
+  const R = (k, fn, bg, col, ico, name, sm) => subRow('docs.' + k, fn, bg, col, ico, name, sm);
   return topbar('업무지원 ›', '서류작업') + '<div class="wrap list">' +
-    '<button class="row" onclick="openTbm()"><span class="ico" style="background:var(--green-bg);color:var(--green)">' + ICON.tbm + '</span><span class="fname"><b style="font-size:var(--size-m)">TBM</b><small>오늘 서명 ' + (n == null ? '…' : n + '명') + ' · 작업 표 · 사진 · PDF</small></span>' + ICON.chev + '</button>' +
-    '<button class="row" onclick="openNw()"><span class="ico" style="background:var(--blue-bg);color:var(--blue)">' + ICON.nw + '</span><span class="fname"><b style="font-size:var(--size-m)">명일 작업 예정</b><small>내일 작업 입력 · 그림으로 저장</small></span>' + ICON.chev + '</button>' +
-    '<button class="row" onclick="openAtt()"><span class="ico" style="background:var(--tint);color:var(--navy)">' + ICON.att + '</span><span class="fname"><b style="font-size:var(--size-m)">출근현황</b><small>근무 스케줄 엑셀 → 날짜별 조직도 · 그림으로 저장</small></span>' + ICON.chev + '</button>' +
-    '<button class="row" onclick="openAhu()"><span class="ico" style="background:var(--blue-bg);color:var(--blue)">' + ICON.ahu + '</span><span class="fname"><b style="font-size:var(--size-m)">온습도/공조기/에어커튼 입력</b><small>AHU 환기온도 11:00 · 16:00 · 매장 온습도 · 가동시간 · 리포트</small></span>' + ICON.chev + '</button>' +
-    '<button class="row" onclick="openLog()"><span class="ico" style="background:var(--tint);color:var(--sub)">' + ICON.log + '</span><span class="fname"><b style="font-size:var(--size-m)">종합업무일지</b><small>에너지 사용량 · 날씨 · 금일작업 · B4 인쇄 (PC)</small></span>' + ICON.chev + '</button>' +
+    R('tbm', 'openTbm()', 'var(--green-bg)', 'var(--green)', ICON.tbm, 'TBM', '오늘 서명 ' + (n == null ? '…' : n + '명') + ' · 작업 표 · 사진 · PDF') +
+    R('nw', 'openNw()', 'var(--blue-bg)', 'var(--blue)', ICON.nw, '명일 작업 예정', '내일 작업 입력 · 그림으로 저장') +
+    R('att', 'openAtt()', 'var(--tint)', 'var(--navy)', ICON.att, '출근현황', '근무 스케줄 엑셀 → 날짜별 조직도 · 그림으로 저장') +
+    R('ahu', 'openAhu()', 'var(--blue-bg)', 'var(--blue)', ICON.ahu, '온습도/공조기/에어커튼 입력', 'AHU 환기온도 11:00 · 16:00 · 매장 온습도 · 가동시간 · 리포트') +
+    R('log', 'openLog()', 'var(--tint)', 'var(--sub)', ICON.log, '종합업무일지', '에너지 사용량 · 날씨 · 금일작업 · B4 인쇄 (PC)') +
     '</div>';
 }
 /* 미리 받기 (결정 78): 메인이 뜬 뒤 자주 여는 화면 내용을 뒤에서 받아 두고, 열 때 바로 보여 준 뒤 새로 받음 */
@@ -2427,13 +2451,12 @@ async function atUpSave() {
 
 /* ── 점검 ── */
 function renderInspect() {
+  const R = (k, fn, bg, col, ico, name, sm) => subRow('inspect.' + k, fn, bg, col, ico, name, sm);
   return topbar('업무지원 ›', '점검') + '<div class="wrap list">' +
-    '<button class="row" onclick="go(\'fire\')"><span class="ico" style="background:var(--blue-bg);color:var(--blue)">' + ICON.fire + '</span><span class="fname"><b style="font-size:var(--size-m)">소화기 점검</b><small>QR 관리·인쇄 · 월별 점검 현황</small></span>' + ICON.chev + '</button>' +
-    '<button class="row" onclick="openEh()"><span class="ico" style="background:var(--orange-bg);color:var(--orange)">' + ICON.plug + '</span><span class="fname"><b style="font-size:var(--size-m)">전열필증</b><small>층·매장별 전열기기 관리 · 신고필증' + (CAN_PRINT ? ' 출력' : ' (출력은 PC에서)') + '</small></span>' + ICON.chev + '</button>' +
-    (thCanOpen()
-      ? '<button class="row" onclick="go(\'thermal\')"><span class="ico" style="background:var(--blue-bg);color:var(--blue)">' + ICON.therm + '</span><span class="fname"><b style="font-size:var(--size-m)">열화상점검</b><small>FLIR 열화상 사진 → 점검 보고서(.atr) · PC 전용</small></span>' + ICON.chev + '</button>'
-      : '<button class="row" disabled style="opacity:.5;cursor:default"><span class="ico" style="background:var(--blue-bg);color:var(--blue)">' + ICON.therm + '</span><span class="fname"><b style="font-size:var(--size-m)">열화상점검</b></span></button>') +
-    '<button class="row" onclick="openCs()"><span class="ico" style="background:var(--green-bg);color:var(--green)">' + ICON.hat + '</span><span class="fname"><b style="font-size:var(--size-m)">공사장 점검</b><small>공사 현장 안전 순찰 · 사진 · 날짜별 현장별 PDF</small></span>' + ICON.chev + '</button>' +
+    R('fire', "go('fire')", 'var(--blue-bg)', 'var(--blue)', ICON.fire, '소화기 점검', 'QR 관리·인쇄 · 월별 점검 현황') +
+    R('eh', 'openEh()', 'var(--orange-bg)', 'var(--orange)', ICON.plug, '전열필증', '층·매장별 전열기기 관리 · 신고필증' + (CAN_PRINT ? ' 출력' : ' (출력은 PC에서)')) +
+    R('thermal', "go('thermal')", 'var(--blue-bg)', 'var(--blue)', ICON.therm, '열화상점검', 'FLIR 열화상 사진 → 점검 보고서(.atr) · PC 전용', !thCanOpen()) +
+    R('cs', 'openCs()', 'var(--green-bg)', 'var(--green)', ICON.hat, '공사장 점검', '공사 현장 안전 순찰 · 사진 · 날짜별 현장별 PDF') +
     '</div>';
 }
 
