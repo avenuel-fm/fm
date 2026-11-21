@@ -2,10 +2,11 @@
  * atr_generator.js
  * 브라우저 순수 자바스크립트 FLIR Thermal Studio .atr 리포트 생성기
  * - JSZip 을 활용하여 master_template.atr 을 기반으로 N쪽 동적 슬라이싱 및 생성
- * - 회로명, 측정자, 점검일자 바이너리 치환
- * - 열화상 원본 사진 및 스팟 메타데이터 패키징
- * - PC 로컬 다운로드 및 WS_THERMAL 통로를 통한 보고서 기록 보관
- * - ArrayBuffer 직접 주입 지원 (file:// 환경 및 IndexedDB 캐시 대응)
+ * - 텍스트 치환 전 pristine 상태에서 슬라이싱을 수행하여 고정 오프셋 보존
+ * - 보고서 제목(04 LL LL 헤더 및 전체 파일 경로 04 LL LL 헤더), 측정자, 일자, 회로명 바이너리 길이 헤더 일치 동적 갱신
+ * - FLIR Thermal Studio 역직렬화 시 길이 헤더 불일치로 인한 패키지 로딩 크래시 방지
+ * - 생성된 바이너리에 대한 validateDocStringLengths 전수 검증 수행
+ * - PC 로컬 다운로드 및 WS_THERMAL 통로를 통한 보고서 기록 보관 지원
  */
 
 class AtrGenerator {
@@ -22,6 +23,161 @@ class AtrGenerator {
 
     static PAGE_OFFSETS = [58303, 535258, 985745, 1460417, 1933996, 2421127, 2885227, 3351111, 3825001];
     static PAGE_COUNT_POS = 55903;
+
+    /**
+     * 바이너리 내 문자열 길이 헤더 전수 검증 함수
+     * @returns {{ ok: boolean, errors: string[] }}
+     */
+    static validateDocStringLengths(docBytes, metaBytes, { reportTitle, inspectDate, inspectorName, circuitItems, pageCount }) {
+        const errors = [];
+        const enc = new TextEncoder();
+        const titleB = enc.encode((reportTitle || "2026년 4분기 EPS 1층").trim());
+
+        const findSub = (src, sub, fromIdx = 0) => {
+            for (let i = fromIdx; i <= src.length - sub.length; i++) {
+                let match = true;
+                for (let j = 0; j < sub.length; j++) {
+                    if (src[i + j] !== sub[j]) { match = false; break; }
+                }
+                if (match) return i;
+            }
+            return -1;
+        };
+
+        // 1. cactus-meta 내 제목 길이 헤더 검증 (0x04 [len 2B LE] [title])
+        if (metaBytes && metaBytes.length > 0) {
+            const idxM = findSub(metaBytes, titleB);
+            if (idxM === -1) {
+                errors.push("cactus-meta: report title not found");
+            } else {
+                const tag = metaBytes[idxM - 3];
+                const lenVal = metaBytes[idxM - 2] | (metaBytes[idxM - 1] << 8);
+                if (tag !== 0x04) {
+                    errors.push(`cactus-meta: expected tag 0x04 before title, got 0x${tag.toString(16)}`);
+                }
+                if (lenVal !== titleB.length) {
+                    errors.push(`cactus-meta: title length mismatch (header=${lenVal}, actual=${titleB.length})`);
+                }
+            }
+        }
+
+        // 2. docBytes 내 ReportName 제목 검증
+        const repKey = enc.encode('ReportName');
+        const repIdx = findSub(docBytes, repKey);
+        if (repIdx === -1) {
+            errors.push("doc: ReportName key not found");
+        } else {
+            const idxT = findSub(docBytes, titleB, repIdx);
+            if (idxT === -1 || idxT - repIdx > 40) {
+                errors.push("doc: title after ReportName not found");
+            } else {
+                const tag = docBytes[idxT - 3];
+                const lenVal = docBytes[idxT - 2] | (docBytes[idxT - 1] << 8);
+                if (tag !== 0x04) {
+                    errors.push(`doc ReportName: expected tag 0x04 before title, got 0x${tag.toString(16)}`);
+                }
+                if (lenVal !== titleB.length) {
+                    errors.push(`doc ReportName: title length mismatch (header=${lenVal}, actual=${titleB.length})`);
+                }
+            }
+        }
+
+        // 3. docBytes 내 전체 경로 길이 검증 (0x04 [pathLen 2B LE] [path])
+        const expectedPath = `C:\\Users\\user\\OneDrive\\Desktop\\열화상플리어 보고서\\${(reportTitle || "2026년 4분기 EPS 1층").trim()}.atr`;
+        const expectedPathB = enc.encode(expectedPath);
+        const idxP = findSub(docBytes, expectedPathB);
+        if (idxP === -1) {
+            errors.push("doc: full path with new title not found");
+        } else {
+            const tag = docBytes[idxP - 3];
+            const lenVal = docBytes[idxP - 2] | (docBytes[idxP - 1] << 8);
+            if (tag !== 0x04) {
+                errors.push(`doc path: expected tag 0x04 before path, got 0x${tag.toString(16)}`);
+            }
+            if (lenVal !== expectedPathB.length) {
+                errors.push(`doc path: path length mismatch (header=${lenVal}, actual=${expectedPathB.length})`);
+            }
+        }
+
+        // 4. docBytes 내 uint32 쪽 수 검증
+        if (repIdx !== -1) {
+            const titleEnd = repIdx + repKey.length + 3 + titleB.length;
+            const countPos = titleEnd + 14;
+            const view = new DataView(docBytes.buffer, docBytes.byteOffset, docBytes.byteLength);
+            const actualCount = view.getUint32(countPos, true);
+            if (actualCount !== pageCount) {
+                errors.push(`doc: page count mismatch at ${countPos} (expected ${pageCount}, got ${actualCount})`);
+            }
+        }
+
+        // 5. docBytes 내 일자 길이 검증
+        if (inspectDate && inspectDate.trim()) {
+            const raw = inspectDate.trim();
+            const parts = raw.split('-');
+            if (parts.length === 3) {
+                const y = parts[0];
+                const m = parts[1].padStart(2, '0');
+                const d = parts[2].padStart(2, '0');
+                const korDateB = enc.encode(`${y}년${m}월${d}일`);
+                let pos = 0;
+                while (true) {
+                    const idxD = findSub(docBytes, korDateB, pos);
+                    if (idxD === -1) break;
+                    const tag = docBytes[idxD - 3];
+                    const lenVal = docBytes[idxD - 2] | (docBytes[idxD - 1] << 8);
+                    if (tag !== 0x04 || lenVal !== korDateB.length) {
+                        errors.push(`doc date at ${idxD}: header mismatch tag=0x${tag.toString(16)}, len=${lenVal} vs expected ${korDateB.length}`);
+                    }
+                    pos = idxD + korDateB.length;
+                }
+            }
+        }
+
+        // 6. docBytes 내 측정자 길이 검증
+        if (inspectorName && inspectorName.trim()) {
+            const tagSig = [0xEC, 0xB8, 0xA1, 0xEC, 0xA0, 0x95, 0xEC, 0x9E, 0x90]; // 측정자
+            const signSig = [0x28, 0xEC, 0x84, 0x9C, 0xEB, 0xAA, 0x85, 0x29]; // (서명)
+            let pos = 0;
+            while (true) {
+                const idxI = findSub(docBytes, tagSig, pos);
+                if (idxI === -1) break;
+                const tag = docBytes[idxI - 3];
+                const lenVal = docBytes[idxI - 2] | (docBytes[idxI - 1] << 8);
+                const signIdx = findSub(docBytes, signSig, idxI);
+                if (signIdx !== -1 && signIdx < idxI + 140) {
+                    const actualStrLen = (signIdx + signSig.length) - idxI;
+                    if (tag !== 0x04 || lenVal !== actualStrLen) {
+                        errors.push(`doc inspector at ${idxI}: header mismatch: tag=0x${tag.toString(16)}, header=${lenVal}, actual=${actualStrLen}`);
+                    }
+                }
+                pos = idxI + tagSig.length;
+            }
+        }
+
+        // 7. docBytes 내 회로명 길이 검증 (04 LL LL [title] 및 LL LL [title].jpg)
+        if (circuitItems && circuitItems.length > 0) {
+            for (let i = 0; i < Math.min(pageCount, circuitItems.length); i++) {
+                const cItem = circuitItems[i];
+                const cName = (typeof cItem === 'string' ? cItem : (cItem.circuit_name || `회로_${i+1}`)).trim();
+                const cBytes = enc.encode(cName);
+                const patC = new Uint8Array([0x04, cBytes.length & 0xff, (cBytes.length >> 8) & 0xff, ...cBytes]);
+                if (findSub(docBytes, patC) === -1) {
+                    errors.push(`doc circuit [${i}] '${cName}' (04 LL LL header) not found`);
+                }
+
+                const fnBytes = enc.encode(`${cName}.jpg`);
+                const patFn = new Uint8Array([fnBytes.length & 0xff, (fnBytes.length >> 8) & 0xff, ...fnBytes]);
+                if (findSub(docBytes, patFn) === -1) {
+                    errors.push(`doc circuit [${i}] filename '${cName}.jpg' (LL LL header) not found`);
+                }
+            }
+        }
+
+        return {
+            ok: errors.length === 0,
+            errors
+        };
+    }
 
     static async build({ reportTitle, inspectorName, inspectDate, circuitItems, templateUrl = "./master_template.atr", templateBuffer = null }) {
         if (typeof JSZip === 'undefined') {
@@ -52,49 +208,7 @@ class AtrGenerator {
 
         const enc = new TextEncoder();
 
-        // 2. cactus-meta 업데이트
-        const metaEntry = zip.file('cactus-meta');
-        let metaBytes = metaEntry ? new Uint8Array(await metaEntry.async('arraybuffer')) : new Uint8Array();
-
-        const origRepName = '2026년 4분기 EPS 1층';
-        const newRepName = (reportTitle || origRepName).trim();
-        const origB = enc.encode(origRepName);
-        const newB = enc.encode(newRepName);
-
-        metaBytes = AtrGenerator.replaceBytes(metaBytes, origB, newB);
-        docBytes = AtrGenerator.replaceBytes(docBytes, origB, newB);
-
-        // 3. 점검 일자 업데이트
-        if (inspectDate && inspectDate.trim()) {
-            const rawDate = inspectDate.trim();
-            let koreanDate = rawDate;
-            try {
-                const parts = rawDate.split('-');
-                if (parts.length === 3) {
-                    koreanDate = `${parts[0]}년${parts[1]}월${parts[2]}일`;
-                }
-            } catch (e) {}
-
-            const origDatePat = new Uint8Array([4, 17, 0, ...enc.encode('2026년10월10일')]);
-            const newDateB = enc.encode(koreanDate);
-            const newDatePat = new Uint8Array([4, newDateB.length & 0xff, (newDateB.length >> 8) & 0xff, ...newDateB]);
-            docBytes = AtrGenerator.replaceBytes(docBytes, origDatePat, newDatePat);
-
-            docBytes = AtrGenerator.replaceBytes(docBytes, enc.encode('2026-10-10'), enc.encode(rawDate));
-            metaBytes = AtrGenerator.replaceBytes(metaBytes, enc.encode('2026-10-10'), enc.encode(rawDate));
-        }
-
-        // 4. 측정자 이름 업데이트
-        if (inspectorName && inspectorName.trim()) {
-            const cleanInsp = inspectorName.trim();
-            const newInspText = enc.encode(`측정자 :  ${cleanInsp}              (서명)`);
-            const newInspPat = new Uint8Array([4, newInspText.length & 0xff, (newInspText.length >> 8) & 0xff, ...newInspText]);
-            docBytes = AtrGenerator.replaceInspectorSignature(docBytes, newInspPat);
-        }
-
-        zip.file('cactus-meta', metaBytes);
-
-        // 5. 사진 수만큼 쪽 슬라이싱 (nPages < 8 인 경우)
+        // 2. 사진 수만큼 쪽 슬라이싱 (nPages < 8 인 경우) - pristine 상태에서 슬라이싱하여 고정 오프셋 정합성 보장
         if (nPages < 8) {
             const splitStart = AtrGenerator.PAGE_OFFSETS[nPages];
             const splitEnd = AtrGenerator.PAGE_OFFSETS[8];
@@ -108,6 +222,68 @@ class AtrGenerator {
 
             docBytes = slicedDoc;
         }
+
+        // 3. cactus-meta 및 Document text 업데이트 (보고서 제목 길이 헤더 동기화)
+        const metaEntry = zip.file('cactus-meta');
+        let metaBytes = metaEntry ? new Uint8Array(await metaEntry.async('arraybuffer')) : new Uint8Array();
+
+        const origRepName = '2026년 4분기 EPS 1층';
+        const newRepName = (reportTitle || origRepName).trim();
+        const origTitleB = enc.encode(origRepName);
+        const newTitleB = enc.encode(newRepName);
+
+        // (1) cactus-meta 제목 치환: [0x04, LL, LL, ...제목]
+        const patMetaOld = new Uint8Array([0x04, origTitleB.length & 0xff, (origTitleB.length >> 8) & 0xff, ...origTitleB]);
+        const patMetaNew = new Uint8Array([0x04, newTitleB.length & 0xff, (newTitleB.length >> 8) & 0xff, ...newTitleB]);
+        metaBytes = AtrGenerator.replaceBytes(metaBytes, patMetaOld, patMetaNew);
+
+        // (2) Document 전체 경로 치환: [0x04, LL, LL, ...경로]
+        const origPath = 'C:\\Users\\user\\OneDrive\\Desktop\\열화상플리어 보고서\\2026년 4분기 EPS 1층.atr';
+        const newPath = `C:\\Users\\user\\OneDrive\\Desktop\\열화상플리어 보고서\\${newRepName}.atr`;
+        const origPathB = enc.encode(origPath);
+        const newPathB = enc.encode(newPath);
+        const patPathOld = new Uint8Array([0x04, origPathB.length & 0xff, (origPathB.length >> 8) & 0xff, ...origPathB]);
+        const patPathNew = new Uint8Array([0x04, newPathB.length & 0xff, (newPathB.length >> 8) & 0xff, ...newPathB]);
+        docBytes = AtrGenerator.replaceBytes(docBytes, patPathOld, patPathNew);
+
+        // (3) Document ReportName 및 본문/하단 제목 치환: [0x04, LL, LL, ...제목]
+        docBytes = AtrGenerator.replaceBytes(docBytes, patMetaOld, patMetaNew);
+
+        // 4. 점검 일자 업데이트
+        let rawDate = "2026-10-10";
+        if (inspectDate && inspectDate.trim()) {
+            rawDate = inspectDate.trim();
+            let koreanDate = rawDate;
+            try {
+                const parts = rawDate.split('-');
+                if (parts.length === 3) {
+                    const y = parts[0];
+                    const m = parts[1].padStart(2, '0');
+                    const d = parts[2].padStart(2, '0');
+                    rawDate = `${y}-${m}-${d}`;
+                    koreanDate = `${y}년${m}월${d}일`;
+                }
+            } catch (e) {}
+
+            const origDatePat = new Uint8Array([4, 17, 0, ...enc.encode('2026년10월10일')]);
+            const newDateB = enc.encode(koreanDate);
+            const newDatePat = new Uint8Array([4, newDateB.length & 0xff, (newDateB.length >> 8) & 0xff, ...newDateB]);
+            docBytes = AtrGenerator.replaceBytes(docBytes, origDatePat, newDatePat);
+
+            docBytes = AtrGenerator.replaceBytes(docBytes, enc.encode('2026-10-10'), enc.encode(rawDate));
+            metaBytes = AtrGenerator.replaceBytes(metaBytes, enc.encode('2026-10-10'), enc.encode(rawDate));
+        }
+
+        // 5. 측정자 이름 업데이트
+        let cleanInsp = "지상현";
+        if (inspectorName && inspectorName.trim()) {
+            cleanInsp = inspectorName.trim();
+            const newInspText = enc.encode(`측정자 :  ${cleanInsp}              (서명)`);
+            const newInspPat = new Uint8Array([4, newInspText.length & 0xff, (newInspText.length >> 8) & 0xff, ...newInspText]);
+            docBytes = AtrGenerator.replaceInspectorSignature(docBytes, newInspPat);
+        }
+
+        zip.file('cactus-meta', metaBytes);
 
         // 6. 각 슬롯의 새 사진 및 회로 이름 반영
         for (let i = 0; i < nPages; i++) {
@@ -206,7 +382,20 @@ class AtrGenerator {
             } catch (e) {}
         }
 
-        // 9. 새로운 ATR 패키지 압축 생성
+        // 9. 바이너리 문자열 길이 헤더 전수 검증
+        const validation = AtrGenerator.validateDocStringLengths(docBytes, metaBytes, {
+            reportTitle: newRepName,
+            inspectDate: rawDate,
+            inspectorName: cleanInsp,
+            circuitItems: circuitItems.map(c => c.circuit_name),
+            pageCount: nPages
+        });
+        if (!validation.ok) {
+            console.error('ATR 검증 실패:', validation.errors);
+            throw new Error(`ATR 파일 무결성 검증 실패: ${validation.errors.join('; ')}`);
+        }
+
+        // 10. 새로운 ATR 패키지 압축 생성
         const finalBlob = await zip.generateAsync({
             type: 'blob',
             compression: 'DEFLATE',
