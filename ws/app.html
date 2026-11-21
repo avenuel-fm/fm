@@ -10,9 +10,9 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.24.0"></script>
-<script>window.WS_VERSION = '0.24.0';</script>
-<script src="ws-api.js?v=0.24.0"></script>
+<script src="config.js?v=0.24.1"></script>
+<script>window.WS_VERSION = '0.24.1';</script>
+<script src="ws-api.js?v=0.24.1"></script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -646,7 +646,7 @@ select.lgin{text-align:center;padding:0}
   .label img{flex:none;display:block;image-rendering:pixelated}
   .ehl{page-break-after:always;break-after:page}
 }
-/* 온습도/공조기/에어커튼 입력 (WS_온습도공조기, 결정 192·196) — 시안 docs/시안/WS-온습도공조기 */
+/* 온습도/공조기/에어커튼 입력 (WS_온습도공조기, 결정 212·196) — 시안 docs/시안/WS-온습도공조기 */
 .cltabs{margin-bottom:var(--sp-3)}.cltabs button{font-size:var(--size-s);line-height:1.3;padding:4px 2px}
 .flnav{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-1);margin-top:var(--sp-3)}
 .flnav button{min-height:44px;border:1px solid var(--line);background:var(--white);border-radius:var(--radius);font:inherit;font-size:var(--size-s);color:var(--sub);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;position:relative;padding:4px 0;cursor:pointer;overflow:hidden}
@@ -738,7 +738,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.24.0' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.24.1' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -2460,8 +2460,8 @@ function renderInspect() {
     '</div>';
 }
 
-/* ── 열화상점검 (결정 166): 직원은 이름만(눌리지 않음), 소장·부소장·관리자·옵저버만 엶. 앱은 PC 프로그램이라 안내만 ── */
-const thCanOpen = () => !!S.user && ['소장', '부소장', '관리자', '옵저버'].indexOf(S.user.role) !== -1;
+/* ── 열화상점검 (결정 166 → 212): 로그인한 모든 직원이 엶. 양식 파일 바꾸기만 소장·부소장·관리자·옵저버 (서버 16_thermal.sql 에서 막음) ── */
+const thCanOpen = () => !!S.user;
 const THERMAL_ON = true;   // 작성기 fm/thermal 이 바로가기 페이지에 올라간 뒤 (결정 168). 구글 웹앱(WS_API 없음)에서는 안내 화면
 function renderThermal() {
   if (!thCanOpen()) return renderInspect();
@@ -2836,7 +2836,7 @@ function ehPickStore(id) { const s = ehStore(id), all = s.items.length && s.item
 // 검색창은 두고 아래만 다시 그림 — 화면 전체를 다시 그리면 한글 조합(ㄱ+ㅏ→가)이 끊겨 자음·모음이 따로 들어감
 function ehSearch(el) { S.ehQ = el.value; const b = $('ehBody'); if (b) b.innerHTML = withBack(ehBody()); }
 /** 아래 저장 줄(.nwbar · 공사장 점검 .csbar-in) 맨 왼쪽에 「뒤로」를 넣음 — 없으면 그대로 돌려줌 (WS-25) */
-/* ── 온습도/공조기/에어커튼 입력 (WS_온습도공조기, 결정 192·194·196) — 옛 [구역별 온습도 확인] 앱 이관. 탭 4개, 자료는 19_climate.sql ── */
+/* ── 온습도/공조기/에어커튼 입력 (WS_온습도공조기, 결정 212·194·196) — 옛 [구역별 온습도 확인] 앱 이관. 탭 4개, 자료는 19_climate.sql ── */
 const CL_TITLE = '온습도/공조기/에어커튼 입력';
 const CL_TABS = [['ahu', 'AHU 환기온도 점검일지'], ['clim', '온습도'], ['hvac', '공조기 가동시간'], ['curtain', '에어커튼 가동시간']];
 // 예외 색 2가지 (사용자 11-21): 층 색 · 에어커튼 OUT 주황·IN 하늘·후방 연두 — 옛 앱 style.css .hv-name[data-tone] 값 그대로
