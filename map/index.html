@@ -70,6 +70,11 @@
                         <span class="symbol-badge-dot" style="background:#0284c7; color:#ffffff;">💨</span>
                         <span>제연구획</span>
                     </label>
+                    <label class="symbol-filter-item">
+                        <input type="checkbox" id="chk-zone-filter-floor" onchange="onZoneCheckboxChange('floor', this.checked)">
+                        <span class="symbol-badge-dot" style="background:#ffffff; color:#000000; border:1.5px dashed #000000;"></span>
+                        <span>바닥 (검은 점선)</span>
+                    </label>
                     <div style="font-size:12px; font-weight:700; color:var(--text-main); margin:6px 0 4px; border-top:1px solid var(--border-light); padding-top:6px;">도면 보조 레이어</div>
                     <label class="symbol-filter-item">
                         <input type="checkbox" id="chk-info-layer" checked onchange="onInfoLayerChange(this.checked)">
@@ -247,13 +252,15 @@
                         <button type="button" class="zone-toggle-btn active" id="btn-zone-cat-fire" onclick="setZoneCategory('fire')">🔥 방화구역</button>
                         <button type="button" class="zone-toggle-btn" id="btn-zone-cat-smoke" onclick="setZoneCategory('smoke')">💨 제연구획</button>
                         <button type="button" class="zone-toggle-btn" id="btn-zone-cat-wall" onclick="setZoneCategory('wall')">🧱 외벽</button>
+                        <button type="button" class="zone-toggle-btn" id="btn-zone-cat-floor" onclick="setZoneCategory('floor')" title="매장·기능실 아래에 깔리는 흰색 바닥 면 (면만)">⬜ 바닥</button>
                     </div>
                     <!-- 형태 구분: 선 / 면 -->
                     <div class="zone-toggle-group">
                         <button type="button" class="zone-toggle-btn" id="btn-zone-geom-line" onclick="setZoneGeometry('line')" disabled title="방화구역은 면(영역)으로만 지정 가능합니다">〰️ 선 (경계)</button>
                         <button type="button" class="zone-toggle-btn active" id="btn-zone-geom-polygon" onclick="setZoneGeometry('polygon')">⬡ 면 (영역)</button>
                     </div>
-                    <button type="button" class="zone-toggle-btn btn-toggle-ortho" onclick="toggleGlobalOrthoMode()" title="직각 스냅 (단축키: Shift)">📐 직각 (Shift)</button><span id="zone-points-indicator" class="zone-pts-badge">0점</span>
+                    <button type="button" class="zone-toggle-btn zone-eraser" id="btn-zone-eraser" onclick="toggleEraserMode()" title="그린 면 안의 도면 원본·구역·심벌·인포를 바닥색(흰색)으로 지움. 매장·바닥·배관은 그대로">🧽 지우개</button>
+                    <label class="zone-ortho-check" title="직각 스냅 (단축키: Shift)"><input type="checkbox" id="chk-zone-ortho" class="chk-ortho" onchange="toggleGlobalOrthoMode()"><span>직각 (Shift)</span></label><span id="zone-points-indicator" class="zone-pts-badge">0점</span>
                     <button class="btn-guide-finish" onclick="finishDrawingZone()">완료 (Enter)</button>
                     <button class="btn-guide-close" onclick="handleZoneCancelOrEsc()">취소 (ESC)</button>
                 </div>

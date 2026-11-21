@@ -128,6 +128,7 @@
             document.querySelectorAll('.btn-toggle-ortho').forEach(b => {
                 b.classList.toggle('active', isGlobalOrthoMode);
             });
+            document.querySelectorAll('.chk-ortho').forEach(c => { c.checked = isGlobalOrthoMode; });
             showToast(isGlobalOrthoMode ? '📐 직각(수평/수직) 스냅 활성화' : '📐 직각 스냅 해제', 1000);
         }
 

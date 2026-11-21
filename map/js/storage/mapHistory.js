@@ -1,5 +1,5 @@
 /* ==========================================================================
-   mapHistory.js - 지도 기록: 날짜별 모습 보기 · 소장 「이 날로 되돌리기」 (업무지원 결정 132)
+   mapHistory.js - 지도 기록: 날짜별 모습 보기 · 「이 날로 되돌리기」 (소장·부소장·파트장, 업무지원 결정 132·214)
    [기록] 버튼 → 달력(바뀐 날 점) → 고른 날 모습을 보기 전용으로. 소장·부소장·파트장 말고는 늘 보기 전용 (결정 134·136)
    시안: docs/시안/WS-지도기록/
    ========================================================================== */
@@ -69,7 +69,7 @@ body.map-ro #btn-edit-menu,body.map-ro #btn-undo,body.map-ro #btn-status-edit,bo
         const r = !isDay && H && H.restores.find(x => x.before === at);
         bar.innerHTML = '<b>' + (isDay ? md(at) + ' 기준' : md(r ? r.day : at.slice(0, 10)) + ' ' + (r ? r.time : '') + ' 되돌리기 전 모습') + '</b>' +
             '<span>· 보기 전용 (고칠 수 없음)</span><span class="sp"></span><button class="back" id="hist-back">오늘로 돌아가기</button>' +
-            (mapStore.isBoss && isDay && at < kst() ? '<button class="rest" id="hist-rest">이 날로 되돌리기</button>' : '');
+            (mapStore.canRestore && isDay && at < kst() ? '<button class="rest" id="hist-rest">이 날로 되돌리기</button>' : '');
         bar.querySelector('#hist-back').onclick = () => go('');
         const rb = bar.querySelector('#hist-rest'); if (rb) rb.onclick = () => askRestore(at);
     }
@@ -88,7 +88,7 @@ body.map-ro #btn-edit-menu,body.map-ro #btn-undo,body.map-ro #btn-status-edit,bo
     function askRestore(day) {
         const d = document.createElement('div'); d.className = 'hist-dlg';
         d.innerHTML = '<div role="dialog" aria-modal="true"><b style="font-size:17px">' + md(day) + ' 모습으로 되돌릴까요?</b>' +
-            '<p>지금 도면(매장·구역·심벌·연결선·축척)이 <b>' + md(day) + ' 모습으로 바뀝니다.</b><br>지금 모습도 기록에 남아 「되돌리기 전 보기」로 다시 볼 수 있습니다.<br><small style="color:#94a3b8">소장만 할 수 있습니다</small></p>' +
+            '<p>지금 도면(매장·구역·심벌·연결선·축척)이 <b>' + md(day) + ' 모습으로 바뀝니다.</b><br>지금 모습도 기록에 남아 「되돌리기 전 보기」로 다시 볼 수 있습니다.<br><small style="color:#94a3b8">소장·부소장·파트장만 할 수 있습니다</small></p>' +
             '<div class="row"><button class="no">취소</button><button class="yes">되돌리기</button></div></div>';
         document.body.appendChild(d);
         d.querySelector('.no').onclick = () => d.remove();

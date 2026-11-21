@@ -12,11 +12,16 @@ var activeSelectedZone = null;
 var zoneFilterState = {
     fire: true,
     smoke: true,
-    wall: true
+    wall: true,
+    floor: false   // 바닥은 평소 흰색이라 안 보임. 켜면 검은 점선 (결정 216)
 };
 
 function onZoneCheckboxChange(category, isChecked) {
     zoneFilterState[category] = isChecked;
+    if (category === 'floor') {   // 바닥: 도형은 늘 그려져 있고, 켜면 검은 점선 테두리만 보임
+        if (typeof mapContainer !== 'undefined' && mapContainer) mapContainer.classList.toggle('show-floor-outline', isChecked);
+        return;
+    }
     const svgEl = (typeof mapContainer !== 'undefined' && mapContainer) ? mapContainer.querySelector('svg') : document.querySelector('#map-container svg');
     if (!svgEl) return;
     const items = svgEl.querySelectorAll(`.safety-zone-item[data-zone-category="${category}"]`);
@@ -25,80 +30,110 @@ function onZoneCheckboxChange(category, isChecked) {
     });
 }
 
+var NS_SVG = 'http://www.w3.org/2000/svg';
+function ensureSvgLayer(svgEl, id) {
+    let g = svgEl.querySelector('#' + id);
+    if (!g) { g = document.createElementNS(NS_SVG, 'g'); g.setAttribute('id', id); svgEl.appendChild(g); }
+    return g;
+}
+/** 바닥 층: 삭제한 매장 자리의 흰 바닥(#floor-vacant) + 직접 그린 바닥(#floor-user). 매장·기능실보다 늘 아래 (결정 216) */
+function ensureFloorLayer(svgEl) {
+    const layer = ensureSvgLayer(svgEl, 'floor-layer');
+    ['floor-vacant', 'floor-user'].forEach(id => {
+        if (!layer.querySelector('#' + id)) { const g = document.createElementNS(NS_SVG, 'g'); g.setAttribute('id', id); layer.appendChild(g); }
+    });
+    return layer;
+}
+/** 업체 도면의 매장(g.store-group)을 바닥 위 층으로 옮김 — 바닥을 겹쳐 그려도 매장이 위 */
+function liftVendorStores(svgEl) {
+    const layer = ensureSvgLayer(svgEl, 'vendor-stores-layer');
+    Array.from(svgEl.querySelectorAll('g.store-group'))
+        .filter(g => !g.closest('#custom-stores-top-layer') && !g.closest('#vendor-stores-layer'))
+        .forEach(g => layer.appendChild(g));
+}
+
+/** 지우개: 매장·바닥·배관만 구멍을 뚫은 마스크로 맨 위에서 흰색으로 칠함 (인포·심벌·구역·도면 원본이 지워짐) */
+function rebuildEraserMask(svgEl) {
+    svgEl = svgEl || ((typeof mapContainer !== 'undefined' && mapContainer) ? mapContainer.querySelector('svg') : null);
+    if (!svgEl) return;
+    const layer = svgEl.querySelector('#eraser-layer');
+    if (!layer) return;
+    let defs = svgEl.querySelector('#eraser-defs');
+    if (!layer.querySelector('polygon')) { layer.removeAttribute('mask'); if (defs) defs.remove(); return; }
+    if (!defs) { defs = document.createElementNS(NS_SVG, 'defs'); defs.setAttribute('id', 'eraser-defs'); svgEl.insertBefore(defs, svgEl.firstChild); }
+    defs.textContent = '';
+    const mask = document.createElementNS(NS_SVG, 'mask');
+    mask.setAttribute('id', 'eraser-mask');
+    mask.setAttribute('maskUnits', 'userSpaceOnUse');
+    mask.setAttribute('x', '-100000'); mask.setAttribute('y', '-100000'); mask.setAttribute('width', '300000'); mask.setAttribute('height', '300000');
+    const add = (tag, attrs) => { const e = document.createElementNS(NS_SVG, tag); Object.keys(attrs).forEach(k => e.setAttribute(k, attrs[k])); mask.appendChild(e); };
+    add('rect', { x: -100000, y: -100000, width: 300000, height: 300000, fill: '#fff' });
+    const holes = svgEl.querySelectorAll('#vendor-stores-layer path.store-polygon, #custom-stores-top-layer path.store-polygon, #floor-layer path, #floor-layer polygon');
+    holes.forEach(src => {
+        const a = { fill: '#000', stroke: '#000', 'stroke-width': '2' };
+        ['d', 'points', 'transform'].forEach(k => { if (src.hasAttribute(k)) a[k] = src.getAttribute(k); });
+        add(src.tagName.toLowerCase(), a);
+    });
+    svgEl.querySelectorAll('#utility-lines-layer polyline.util-feeder-line').forEach(src => {
+        add('polyline', { points: src.getAttribute('points') || '', fill: 'none', stroke: '#000', 'stroke-width': '12', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+    });
+    defs.appendChild(mask);
+    layer.setAttribute('mask', 'url(#eraser-mask)');
+}
+
 function bringZoneLayersToFront() {
     const svgEl = (typeof mapContainer !== 'undefined' && mapContainer) ? mapContainer.querySelector('svg') : document.querySelector('#map-container svg');
     if (!svgEl) return;
-    // 1. 방화구역/제연구획 레이어를 최상단으로 이동 (매장, 바닥, 벽체보다 위)
-    const zonesLayer = svgEl.querySelector('#safety-zones-layer');
-    if (zonesLayer && zonesLayer.parentElement === svgEl) {
-        svgEl.appendChild(zonesLayer);
-    }
-    // 1-1. 인포 레이어 (엘리베이터·화장실 등 업체 도면 그림): 직접 그린 매장보다 위 (결정 160)
+    ensureFloorLayer(svgEl);
+    liftVendorStores(svgEl);
+    ensureSvgLayer(svgEl, 'eraser-layer');
+    // 인포 레이어 (엘리베이터·화장실 등 업체 도면 그림): 직접 그린 매장보다 위 (결정 160)
     const infoLayer = typeof collectInfoLayer === 'function' ? collectInfoLayer(svgEl) : null;
-    if (infoLayer) svgEl.appendChild(infoLayer);
-    // 2. 심벌 레이어 (소화기 등 아이콘)
-    const symbolsLayer = svgEl.querySelector('#map-symbols-layer');
-    if (symbolsLayer && symbolsLayer.parentElement === svgEl) {
-        svgEl.appendChild(symbolsLayer);
-    }
-    // 3. 작업 중인 임시 드로잉 레이어 (최상단)
-    const tempZoneLayer = svgEl.querySelector('#temp-zone-drawing-layer');
-    if (tempZoneLayer && tempZoneLayer.parentElement === svgEl) {
-        svgEl.appendChild(tempZoneLayer);
-    }
-    const tempStoreLayer = svgEl.querySelector('#temp-drawing-layer');
-    if (tempStoreLayer && tempStoreLayer.parentElement === svgEl) {
-        svgEl.appendChild(tempStoreLayer);
-    }
+    // 아래 → 위. 바닥 < 매장·기능실 < 격자 < 배관 < 구역 < 인포 < 심벌 < 지우개 < 그리는 중 (결정 216)
+    [svgEl.querySelector('#floor-layer'), svgEl.querySelector('#vendor-stores-layer'), svgEl.querySelector('#custom-stores-top-layer'),
+        svgEl.querySelector('#cad-floor-grid-rect'), svgEl.querySelector('#utility-lines-layer'), svgEl.querySelector('#safety-zones-layer'),
+        infoLayer, svgEl.querySelector('#map-symbols-layer'), svgEl.querySelector('#eraser-layer'),
+        svgEl.querySelector('#temp-zone-drawing-layer'), svgEl.querySelector('#temp-drawing-layer')
+    ].forEach(el => { if (el && (el.parentElement === svgEl || el === infoLayer)) svgEl.appendChild(el); });   // 인포는 처음 만들 때 아직 도면에 안 붙어 있음
+    rebuildEraserMask(svgEl);
 }
 
         // ================= 구역(방화구역/제연구획/외벽) CAD 엔진 =================
+        var zoneCatBeforeEraser = 'fire';
         function setZoneCategory(cat) {
-            currentZoneCategory = cat;
-            document.getElementById('btn-zone-cat-fire')?.classList.toggle('active', cat === 'fire');
-            document.getElementById('btn-zone-cat-smoke')?.classList.toggle('active', cat === 'smoke');
-            document.getElementById('btn-zone-cat-wall')?.classList.toggle('active', cat === 'wall');
+            currentZoneCategory = cat;   // 'fire' | 'smoke' | 'wall' | 'floor' | 'erase'
+            const isErase = cat === 'erase';
+            ['fire', 'smoke', 'wall', 'floor'].forEach(c => {
+                const b = document.getElementById('btn-zone-cat-' + c);
+                if (!b) return;
+                b.classList.toggle('active', cat === c);
+                b.disabled = isErase;   // 지우개를 켜면 구역 종류는 잠김
+            });
+            document.getElementById('btn-zone-eraser')?.classList.toggle('on', isErase);
 
+            // 방화구역·바닥·지우개는 면(영역)만, 제연구획·외벽은 선(경계)만
+            const polyOnly = cat === 'fire' || cat === 'floor' || cat === 'erase';
             const btnLine = document.getElementById('btn-zone-geom-line');
             const btnPoly = document.getElementById('btn-zone-geom-polygon');
-
-            if (cat === 'fire') {
-                // 방화구역: '선(경계)' 비활성화, '면(영역)' 활성화 및 고정
-                if (btnLine) {
-                    btnLine.disabled = true;
-                    btnLine.classList.remove('active');
-                }
-                if (btnPoly) {
-                    btnPoly.disabled = false;
-                    btnPoly.classList.add('active');
-                }
-                currentZoneGeometry = 'polygon';
-            } else if (cat === 'smoke') {
-                // 제연구획: '면(영역)' 비활성화, '선(경계)' 활성화 및 고정
-                if (btnPoly) {
-                    btnPoly.disabled = true;
-                    btnPoly.classList.remove('active');
-                }
-                if (btnLine) {
-                    btnLine.disabled = false;
-                    btnLine.classList.add('active');
-                }
-                currentZoneGeometry = 'line';
-            } else if (cat === 'wall') {
-                // 외벽: '면(영역)' 비활성화, '선(경계)' 활성화 및 고정
-                if (btnPoly) {
-                    btnPoly.disabled = true;
-                    btnPoly.classList.remove('active');
-                }
-                if (btnLine) {
-                    btnLine.disabled = false;
-                    btnLine.classList.add('active');
-                }
-                currentZoneGeometry = 'line';
-            }
+            if (btnLine) { btnLine.disabled = polyOnly; btnLine.classList.toggle('active', !polyOnly); }
+            if (btnPoly) { btnPoly.disabled = !polyOnly; btnPoly.classList.toggle('active', polyOnly); }
+            currentZoneGeometry = polyOnly ? 'polygon' : 'line';
 
             updateZoneGuideUI();
             updateZoneDrawingPreview();
+        }
+
+        // 지우개 켜기/끄기 (결정 216): 켜면 구역 종류는 잠기고 면으로 그려 바닥색으로 칠함
+        function toggleEraserMode() {
+            if (!isZoneDrawingMode) return;
+            if (currentZoneCategory === 'erase') {
+                setZoneCategory(zoneCatBeforeEraser || 'fire');
+            } else {
+                if (typeof deselectWallZone === 'function') deselectWallZone();
+                zoneCatBeforeEraser = currentZoneCategory || 'fire';
+                drawingZonePoints = [];
+                setZoneCategory('erase');
+            }
         }
 
         function setZoneGeometry(geom) {
@@ -140,6 +175,8 @@ function bringZoneLayersToFront() {
                 drawingZonePoints = [];
                 createTempZoneDrawingGroup();
                 setZoneCategory(currentZoneCategory || 'fire');
+                const orthoChk = document.getElementById('chk-zone-ortho');
+                if (orthoChk) orthoChk.checked = !!isGlobalOrthoMode;
                 showFloorGrid();
                 updateZoneGuideUI();
                 showToast('도면을 클릭하여 선/면 구역의 꼭짓점들을 연결하세요.', 1500);
@@ -150,6 +187,7 @@ function bringZoneLayersToFront() {
 
         function exitAddZoneMode() {
             isZoneDrawingMode = false;
+            if (currentZoneCategory === 'erase') currentZoneCategory = zoneCatBeforeEraser || 'fire';   // 지우개는 한 번 쓰면 꺼짐
             deselectWallZone();
             document.body.classList.remove('drawing-locked');
             document.body.classList.remove('zone-drawing-mode');
@@ -332,10 +370,12 @@ function bringZoneLayersToFront() {
             const isWall = currentZoneCategory === 'wall';
             const isSmoke = currentZoneCategory === 'smoke';
 
-            const strokeColor = isWall ? '#334155' : (isSmoke ? '#0284c7' : '#dc2626');
+            const isFloorCat = currentZoneCategory === 'floor';
+            const isEraseCat = currentZoneCategory === 'erase';
+            const strokeColor = isEraseCat ? '#2563eb' : (isFloorCat ? '#000000' : (isWall ? '#334155' : (isSmoke ? '#0284c7' : '#dc2626')));
             const strokeDash = isWall ? '' : '8 5';
             const strokeWidth = isWall ? '4' : (isPoly ? '3' : '3.5');
-            const fillColor = isWall ? (isPoly ? 'rgba(51, 65, 85, 0.12)' : 'none') : (isPoly ? 'rgba(220, 38, 38, 0.18)' : 'none');
+            const fillColor = isEraseCat ? 'rgba(37, 99, 235, 0.12)' : (isFloorCat ? 'rgba(0, 0, 0, 0.06)' : (isWall ? (isPoly ? 'rgba(51, 65, 85, 0.12)' : 'none') : (isPoly ? 'rgba(220, 38, 38, 0.18)' : 'none')));
 
             // 1. 고정된 점들을 연결하는 선/면
             if (drawingZonePoints.length > 0) {
@@ -383,6 +423,13 @@ function bringZoneLayersToFront() {
                         targetX = gSnap.x;
                         targetY = gSnap.y;
                     }
+                }
+
+                // 직각 체크(또는 Shift): 미리보기도 수평·수직으로
+                if (drawingZonePoints.length > 0 && typeof snapToOrtho === 'function') {
+                    const o = snapToOrtho({ x: targetX, y: targetY }, drawingZonePoints[drawingZonePoints.length - 1]);
+                    targetX = o.x;
+                    targetY = o.y;
                 }
 
                 // 2. 마우스 커서로 이어지는 실시간 러버밴드 가이드 선
@@ -658,7 +705,7 @@ function bringZoneLayersToFront() {
                 // 외벽은 외벽1 외벽2 같은 번호 이름을 붙이지 않고 '외벽'으로 통일
                 zoneName = '외벽';
             } else {
-                const categoryName = currentZoneCategory === 'fire' ? '방화구역' : '제연구획';
+                const categoryName = { fire: '방화구역', smoke: '제연구획', floor: '바닥', erase: '지우개' }[currentZoneCategory] || '구역';
                 const countOfCat = zones.filter(z => z.category === currentZoneCategory).length + 1;
                 zoneName = `${categoryName} ${countOfCat}`;
             }
@@ -698,7 +745,15 @@ function bringZoneLayersToFront() {
             }
 
             const zones = getFloorZones(floorCode);
+            const floorUser = ensureFloorLayer(svgEl).querySelector('#floor-user');
+            floorUser.textContent = '';
+            const eraserLayer = ensureSvgLayer(svgEl, 'eraser-layer');
+            Array.from(eraserLayer.querySelectorAll('polygon')).forEach(e => e.remove());
             zones.forEach(zone => {
+                if (zone.category === 'floor' || zone.category === 'erase') {   // 바닥·지우개는 자기 층에 (결정 216)
+                    renderPaintZone(zone, floorUser, eraserLayer);
+                    return;
+                }
                 const zoneGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                 zoneGroup.setAttribute('class', 'safety-zone-item');
                 zoneGroup.setAttribute('data-zone-id', zone.id);
@@ -886,6 +941,22 @@ function bringZoneLayersToFront() {
             bringZoneLayersToFront();
         }
 
+        // 바닥(흰 면, 매장 아래) · 지우개(흰 칠, 맨 위지만 매장·바닥·배관은 비켜 감). 보통은 눌리지 않고, 구역 그리기 중이거나 바닥 레이어를 켰을 때 점선을 눌러 열기
+        function renderPaintZone(zone, floorUser, eraserLayer) {
+            const isFloor = zone.category === 'floor';
+            const poly = document.createElementNS(NS_SVG, 'polygon');
+            poly.setAttribute('points', (zone.points || []).map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' '));
+            poly.setAttribute('fill', '#ffffff');
+            poly.setAttribute('class', isFloor ? 'user-floor' : 'user-eraser');
+            poly.setAttribute('data-zone-id', zone.id);
+            poly.onclick = (e) => {
+                if (!isZoneDrawingMode || drawingZonePoints.length > 0 || isDrawingMode) return;
+                e.stopPropagation();
+                openZoneModal(zone);
+            };
+            (isFloor ? floorUser : eraserLayer).appendChild(poly);
+        }
+
         function openZoneModal(zone) {
             closeAllPopovers();
             activeSelectedZone = zone;
@@ -902,7 +973,17 @@ function bringZoneLayersToFront() {
             const isSmoke = zone.category === 'smoke';
             const badge = document.getElementById('zone-modal-badge');
             if (badge) {
-                if (isWall) {
+                if (zone.category === 'floor') {
+                    badge.textContent = '⬜ 바닥';
+                    badge.style.color = '#000000';
+                    badge.style.background = '#f1f5f9';
+                    badge.style.borderColor = '#cbd5e1';
+                } else if (zone.category === 'erase') {
+                    badge.textContent = '🧽 지우개';
+                    badge.style.color = '#2563eb';
+                    badge.style.background = '#eff6ff';
+                    badge.style.borderColor = '#bfdbfe';
+                } else if (isWall) {
                     badge.textContent = '🧱 건물 외벽';
                     badge.style.color = '#334155';
                     badge.style.background = '#f1f5f9';
@@ -928,7 +1009,7 @@ function bringZoneLayersToFront() {
 
             const catEl = document.getElementById('zone-info-category');
             if (catEl) {
-                catEl.textContent = isWall ? '건물 외벽 (영구 보존 외벽)' : (isSmoke ? '제연구획 (연기 제어 구획)' : '방화구역 (방화 구획)');
+                catEl.textContent = zone.category === 'floor' ? '바닥 (매장·기능실 아래 흰색 면)' : zone.category === 'erase' ? '지우개 (바닥색으로 칠해 지움)' : isWall ? '건물 외벽 (영구 보존 외벽)' : (isSmoke ? '제연구획 (연기 제어 구획)' : '방화구역 (방화 구획)');
             }
 
             const geomEl = document.getElementById('zone-info-geometry');
@@ -993,11 +1074,12 @@ function bringZoneLayersToFront() {
             const floor = FLOORS[currentFloorIdx];
             const svgEl = mapContainer.querySelector('svg');
             if (svgEl) {
+                if (typeof rebuildEraserMask === 'function') rebuildEraserMask(svgEl);   // 매장이 바뀌면 지우개 구멍도 새로
                 // 임시 요소(드로잉 레이어, 스냅 링, 핸들 등)를 배제한 순수 도면만 복제하여 저장
                 const clone = svgEl.cloneNode(true);
                 clone.querySelectorAll('#temp-zone-drawing-layer, #temp-drawing-layer, #wall-vertex-handles-layer, #cad-floor-grid-rect').forEach(el => el.remove());
                 clone.querySelectorAll('circle[stroke="#0ea5e9"], circle[fill="rgba(14, 165, 233, 0.25)"]').forEach(el => el.remove());
-                clone.querySelectorAll('#safety-zones-layer, #map-symbols-layer').forEach(el => el.remove());
+                clone.querySelectorAll('#safety-zones-layer, #map-symbols-layer, #floor-layer, #eraser-layer, #eraser-defs').forEach(el => el.remove());
                 clone.querySelectorAll('.selected, .selected-zone').forEach(el => {
                     el.classList.remove('selected');
                     el.classList.remove('selected-zone');

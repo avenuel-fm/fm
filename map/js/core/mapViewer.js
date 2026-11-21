@@ -515,6 +515,10 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
             });
 
             // 삭제된 커스텀 도형들(바닥 색상 흰색 #ffffff 처리, 경계선 없음) 렌더링
+            // 흰 바닥은 매장·기능실 아래 「바닥」 층에 (결정 216). 예전에 도면 맨 끝에 붙어 저장된 것은 지움
+            const floorVacant = ensureFloorLayer(svgEl).querySelector('#floor-vacant');
+            floorVacant.textContent = '';
+            Array.from(svgEl.children).filter(c => c.classList && c.classList.contains('vacant-floor-polygon')).forEach(c => c.remove());
             const vacantPolygons = getVacantPolygons(floor.code);
             vacantPolygons.forEach(vp => {
                 if (!vp.pathData) return;
@@ -525,7 +529,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                 vPath.setAttribute('stroke-width', '0');
                 vPath.setAttribute('pointer-events', 'none');
                 vPath.classList.add('vacant-floor-polygon');
-                svgEl.appendChild(vPath);
+                floorVacant.appendChild(vPath);
             });
 
             // 삭제된 매장/바닥 영역의 모든 잔여 경계선 일괄 제거

@@ -10,7 +10,7 @@ var mapStore = (function () {
     let cache = {}, live = {};
     const vers = {}, bases = {};
     const queue = {};   // 칸마다 저장을 차례로 (나중 값이 마지막에 도착하게, 판도 이어서)
-    let failCount = 0, warned = false, canEdit = false, isBoss = false, viewAt = '';
+    let failCount = 0, warned = false, canEdit = false, isBoss = false, canRestore = false, viewAt = '';
     const api = (window.parent !== window && window.parent.WS_MAP) || null;
 
     function warnOnce(msg) {
@@ -33,6 +33,7 @@ var mapStore = (function () {
         live = Object.assign({}, r.kv || {}); cache = Object.assign({}, live);
         Object.assign(vers, r.vers || {}); Object.assign(bases, r.bases || {});
         canEdit = !!r.canEdit; isBoss = !!r.isBoss;
+        canRestore = r.canRestore === undefined ? isBoss : !!r.canRestore;   // 서버가 아직 옛 판이면 소장만 (결정 214)
         Object.keys(BUILDINGS).forEach(b => BUILDINGS[b].floors.forEach(f => { f.svgUrl = (r.urls[b] || {})[f.code] || ''; }));
     }) : Promise.reject(new Error('업무지원 앱에서 [지도]를 눌러 열어 주세요.'));
 
@@ -56,6 +57,7 @@ var mapStore = (function () {
         },
         get canEdit() { return canEdit; },
         get isBoss() { return isBoss; },
+        get canRestore() { return canRestore; },
         get viewAt() { return viewAt; },
         readOnly,
         /** 보낸 저장이 모두 끝날 때까지 기다림. 돌려주는 값 = 실패한 수 */
