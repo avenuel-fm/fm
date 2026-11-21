@@ -8,14 +8,36 @@
  */
 
 class FlirParser {
+    /** JPEG 세그먼트에서 SOF 마커를 찾아 가로/세로 해상도 반환 */
+    static getJpegDimensions(data, start) {
+        let i = start + 2;
+        while (i + 8 < data.length) {
+            if (data[i] !== 0xFF) break;
+            const m = data[i + 1];
+            if (m === 0xD9) break; // EOI
+            if (m === 0xC0 || m === 0xC1 || m === 0xC2) { // SOF0, SOF1, SOF2
+                const h = (data[i + 5] << 8) | data[i + 6];
+                const w = (data[i + 7] << 8) | data[i + 8];
+                return { width: w, height: h };
+            }
+            if (m === 0x01 || (m >= 0xD0 && m <= 0xD7)) { i += 2; continue; }
+            if (i + 3 >= data.length) break;
+            const segLen = (data[i + 2] << 8) | data[i + 3];
+            i += 2 + segLen;
+            if (m === 0xDA) break; // SOS
+        }
+        return null;
+    }
+
     /** JPEG 한 장의 진짜 끝(EOI) 위치: 칸(세그먼트) 길이를 따라가고 압축 자료 안에서만 FFD9 를 찾음. 못 찾으면 -1 */
     static jpegEnd(data, start) {
         let i = start + 2;
-        while (i + 3 < data.length) {
+        while (i + 1 < data.length) {
             if (data[i] !== 0xFF) return -1;
             const m = data[i + 1];
             if (m === 0xD9) return i + 2;
             if (m === 0x01 || (m >= 0xD0 && m <= 0xD7)) { i += 2; continue; }
+            if (i + 3 >= data.length) return -1;
             i += 2 + ((data[i + 2] << 8) | data[i + 3]);
             if (m === 0xDA) {   // 압축 자료: FF00(글자)·RST 는 건너뛰고 다른 표시가 나올 때까지
                 while (i + 1 < data.length) {
@@ -46,23 +68,31 @@ class FlirParser {
         let thermalUrl = null;
 
         // 열화상 그림 = 파일 전체 (FLIR 사진은 파일 전체가 한 장의 JPEG, 뒤쪽 FLIR 자료 칸은 브라우저가 건너뜀).
-        // 예전엔 두 번째 JPEG 시작 앞까지만 잘라 쓰는 바람에 그림이 깨져 화면·PDF에 열화상이 안 나왔음
         thermalBlob = new Blob([data], { type: 'image/jpeg' });
         thermalUrl = URL.createObjectURL(thermalBlob);
 
-        // 실화상 = 안에 든 JPEG 중 가장 큰 것 (작은 것은 Exif 썸네일이라 제외). 없으면 null → 화면은 열화상 그림으로 대신
-        let bestStart = -1, bestEnd = -1;
+        // 실화상 = 0번(열화상)을 제외한 내부 JPEG 중 해상도가 가장 큰 이미지 (최소 160x120 이상인 실화상 사진)
+        let bestStart = -1;
+        let bestArea = 0;
         for (const start of soiOffsets) {
             if (start === 0) continue;
-            const end = FlirParser.jpegEnd(data, start);
-            if (end > 0 && end - start > bestEnd - bestStart) { bestStart = start; bestEnd = end; }
+            const dims = FlirParser.getJpegDimensions(data, start);
+            if (dims && dims.width >= 160 && dims.height >= 120) {
+                const area = dims.width * dims.height;
+                if (area > bestArea) {
+                    bestArea = area;
+                    bestStart = start;
+                }
+            }
         }
-        if (bestStart >= 0 && bestEnd - bestStart >= 30000) {
-            const cand = new Blob([data.slice(bestStart, bestEnd)], { type: 'image/jpeg' });
-            const url = URL.createObjectURL(cand);
-            // 그림으로 열리는지 확인 (아니면 실화상 없음 처리). createImageBitmap 은 이 JPEG 를 못 열어서 img 로 확인
-            const opens = await new Promise(ok => { const im = new Image(); im.onload = () => ok(im.naturalWidth > 0); im.onerror = () => ok(false); im.src = url; });
-            if (opens) { visualBlob = cand; visualUrl = url; } else URL.revokeObjectURL(url);
+
+        if (bestStart > 0) {
+            let end = FlirParser.jpegEnd(data, bestStart);
+            if (end <= bestStart) {
+                end = data.length;
+            }
+            visualBlob = new Blob([data.slice(bestStart, end)], { type: 'image/jpeg' });
+            visualUrl = URL.createObjectURL(visualBlob);
         }
 
         // 2. FFF APP1 세그먼트 청크 수집 및 결합
@@ -98,6 +128,23 @@ class FlirParser {
         for (const k of sortedKeys) {
             fffBytes.set(chunks[k], currOffset);
             currOffset += chunks[k].length;
+        }
+
+        // 실화상은 이어 붙인 FLIR 자료 안에서 찾음. 파일 그대로 잘라 쓰면 65KB 마다 끼어든 FLIR 머리글(APP1) 때문에
+        // 그림이 중간에서 끊겨 위쪽만 보이고 아래는 회색이 됨 (11-21 사용자 확인). 못 찾을 때만 위의 파일 그대로 자른 것을 씀
+        let fvStart = -1, fvArea = 0;
+        for (let i = 0; i < fffBytes.length - 3; i++) {
+            if (fffBytes[i] === 0xFF && fffBytes[i + 1] === 0xD8 && fffBytes[i + 2] === 0xFF) {
+                const dm = FlirParser.getJpegDimensions(fffBytes, i);
+                if (dm && dm.width >= 160 && dm.height >= 120 && dm.width * dm.height > fvArea) { fvArea = dm.width * dm.height; fvStart = i; }
+            }
+        }
+        if (fvStart >= 0) {
+            let fvEnd = FlirParser.jpegEnd(fffBytes, fvStart);
+            if (fvEnd <= fvStart) fvEnd = fffBytes.length;
+            if (visualUrl) URL.revokeObjectURL(visualUrl);
+            visualBlob = new Blob([fffBytes.slice(fvStart, fvEnd)], { type: 'image/jpeg' });
+            visualUrl = URL.createObjectURL(visualBlob);
         }
 
         const fffView = new DataView(fffBytes.buffer, fffBytes.byteOffset, fffBytes.byteLength);
@@ -270,6 +317,7 @@ class FlirParser {
             height,
             visualUrl,
             visualBlob,
+            hasVisual: !!visualBlob,
             thermalUrl,
             thermalBlob,
             spots,
