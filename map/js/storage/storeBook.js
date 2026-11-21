@@ -6,7 +6,7 @@
 
 var StoreBook = (function () {
     const DEFAULT_ITEMS = [
-        { g: '차단기', l: '일반' }, { g: '차단기', l: '비상' }, { g: '차단기', l: 'from' },
+        { g: '차단기', l: '일반' }, { g: '차단기', l: '일반 from' }, { g: '차단기', l: '비상' }, { g: '차단기', l: '비상 from' },
         { g: '', l: '급수' }, { g: '', l: '배수' }, { g: '', l: '가스' }
     ];
     const PREFIX = { avenuel: 'AV', dept: 'DP', castle: 'CS' };
@@ -23,9 +23,32 @@ var StoreBook = (function () {
     function parseBook(raw) {
         try {
             const b = raw ? JSON.parse(raw) : null;
-            if (b && b.items) return { next: b.next || 1, items: b.items, deleted: b.deleted || [] };
+            if (b && b.items) {
+                // 예전 「차단기 from」 한 칸 → 「일반 from」으로 옮김 (결정 172)
+                Object.values(b.items).forEach(it => {
+                    const d = it.details;
+                    if (!d || d['차단기|from'] === undefined) return;
+                    if (d['차단기|from'] && !d['차단기|일반 from']) d['차단기|일반 from'] = d['차단기|from'];
+                    delete d['차단기|from'];
+                });
+                return { next: b.next || 1, items: b.items, deleted: b.deleted || [] };
+            }
         } catch (e) { /* 망가진 칸은 빈 대장으로 */ }
         return emptyBook();
+    }
+
+    /** 저장돼 있던 예전 항목 목록의 「차단기 from」을 「일반 from」·「비상 from」으로 바꿔 줌 */
+    function fixItems(items) {
+        const i = items.findIndex(d => d.g === '차단기' && d.l === 'from');
+        if (i < 0) return items;
+        const out = items.filter((_, k) => k !== i);
+        const put = (base, l) => {
+            if (out.some(d => d.g === '차단기' && d.l === l)) return;
+            const k = out.findIndex(d => d.g === '차단기' && d.l === base);
+            out.splice(k < 0 ? out.length : k + 1, 0, { g: '차단기', l });
+        };
+        put('일반', '일반 from'); put('비상', '비상 from');
+        return out;
     }
 
     /** 예전 상세 창에 적어 둔 값을 새 항목으로 옮김 */
@@ -142,7 +165,12 @@ var StoreBook = (function () {
         const width = Math.max(top.length, twoRows ? sub.length : 0);
         for (let c = 0; c < width; c++) {
             if (c === nameCol || top[c] === '순번') continue;
-            const g = groupAt(c), l = twoRows ? sub[c] : '';
+            const g = groupAt(c);
+            let l = twoRows ? sub[c] : '';
+            if (g && /^from$/i.test(l)) {   // 아래 칸의 「from」은 바로 왼쪽 칸(일반·비상)에 붙여 구분
+                const prev = columns.slice().reverse().find(x => x.g === g && !/ from$/.test(x.l));
+                if (prev) l = prev.l + ' from';
+            }
             if (l) columns.push({ c, g, l });
             else if (g) columns.push({ c, g: '', l: g });
         }
@@ -216,7 +244,7 @@ var StoreBook = (function () {
             const c = i + 2;
             if (!d.g) { top.push(d.l); sub.push(''); merges.push({ s: { r: 0, c }, e: { r: 1, c } }); return; }
             const same = i > 0 && items[i - 1].g === d.g;
-            top.push(same ? '' : d.g); sub.push(d.l);
+            top.push(same ? '' : d.g); sub.push(/ from$/.test(d.l) ? 'from' : d.l);
             if (same) {
                 const m = merges.find(x => x.s.r === 0 && x.e.r === 0 && x.e.c === c - 1);
                 if (m) m.e.c = c; else merges.push({ s: { r: 0, c: c - 1 }, e: { r: 0, c } });
@@ -227,7 +255,7 @@ var StoreBook = (function () {
         return { aoa: [top, sub].concat(rows), merges };
     }
 
-    return { DEFAULT_ITEMS, keyOf, labelOf, baseOf, show, clean, parseBook, emptyBook, reconcile, removeShape, addItems, itemsWith, fields, groups, floorWord, sheetName, parseSheet, planUpload, buildSheet };
+    return { DEFAULT_ITEMS, keyOf, labelOf, baseOf, show, clean, parseBook, fixItems, emptyBook, reconcile, removeShape, addItems, itemsWith, fields, groups, floorWord, sheetName, parseSheet, planUpload, buildSheet };
 })();
 
 if (typeof module !== 'undefined') module.exports = StoreBook;

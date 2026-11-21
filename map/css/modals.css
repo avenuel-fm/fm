@@ -448,6 +448,7 @@
 .store-form-note { margin-top: var(--sp-2); font-size: var(--size-s); color: var(--text-sub); line-height: 1.5; }
 .store-form-title { margin: var(--sp-3) 0 var(--sp-2); font-size: var(--size-s); font-weight: 700; color: var(--navy); }
 .store-form-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-2); }
+.store-form-grid.cols2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }   /* 차단기 4칸: 일반 · 일반 from / 비상 · 비상 from */
 .facility-group { font-size: var(--size-s); font-weight: 700; color: var(--navy); padding-top: var(--sp-1); }
 .facility-info-table { max-height: min(420px, 60dvh); }
 @media (max-width: 560px) { .store-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

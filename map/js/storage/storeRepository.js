@@ -100,7 +100,7 @@
         function getStoreItems() {
             try {
                 const raw = mapStore.getItem(`lotte_store_items${getBuildingStorageSuffix()}`);
-                return raw ? JSON.parse(raw) : StoreBook.DEFAULT_ITEMS.slice();
+                return raw ? StoreBook.fixItems(JSON.parse(raw)) : StoreBook.DEFAULT_ITEMS.slice();
             } catch (e) {
                 return StoreBook.DEFAULT_ITEMS.slice();
             }

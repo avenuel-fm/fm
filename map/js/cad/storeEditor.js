@@ -85,7 +85,7 @@ var lastCreatedStoreId = null;
             const it = book.items[store.bookId] || { details: {} };
             box.innerHTML = StoreBook.groups(StoreBook.itemsWith(getStoreItems(), book), it).map(g => `
                 <div class="store-form-title">${escapeHtml(g.title)}</div>
-                <div class="store-form-grid">${g.rows.map(r => `
+                <div class="store-form-grid${g.rows.length === 4 ? ' cols2' : ''}">${g.rows.map(r => `
                     <div class="form-group"><label>${escapeHtml(r.label)}</label><input type="text" data-detail-key="${escapeHtml(r.key)}" value="${escapeHtml(r.value)}"></div>`).join('')}
                 </div>`).join('');
         }
