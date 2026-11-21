@@ -76,7 +76,7 @@
   // 바꿔 탄 뒤 (config.js LIVE): 앱·소화기 QR·전열필증 QR 모두 Supabase 화면으로 (받은 ?값 그대로)
   if ((window.WS_CONFIG || {}).LIVE === true) {
     var q = location.search || '';
-    location.replace((/[?&]fe=/.test(q) ? 'check-sb.html' : /[?&]eh=/.test(q) ? 'eh-sb.html' : 'app.html') + q);
+    location.replace((/[?&]fe=/.test(q) ? 'check-sb.html' : /[?&]eq=/.test(q) ? 'eq.html' : /[?&]eh=/.test(q) ? 'eh-sb.html' : 'app.html') + q);
     return;
   }
   // 소화기 QR(?fe=…)은 구글 웹앱 대신 GitHub의 점검 화면을 바로 엶 — 실시간 카메라가 되도록 (결정 42)

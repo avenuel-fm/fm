@@ -203,7 +203,7 @@ b,strong,h1,h2,h3{font-weight:600}
   window.FM_CHECK = {
     init: function (q) { return rpc('ws_check_init', { p_qr: q }); },
     submit: function (q, d) {
-      // 사진·손글씨 올릴 경로는 입력할 때 한 번만 정함 → 끊겨도 같은 경로로 이어 올림 (결정 222)
+      // 사진·손글씨 올릴 경로는 입력할 때 한 번만 정함 → 끊겨도 같은 경로로 이어 올림 (결정 220)
       var OFF = window.WS_OFFLINE, ym = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 7), files = [];
       [['photo', d.photo, 'jpg'], ['memo', d.signA, 'png'], ['name', d.signB, 'png']].forEach(function (x) {
         var b = blob(x[1]); if (b) files.push({ key: x[0], blob: b, path: 'fire/' + q + '/' + ym + '/' + rid() + '.' + x[2] });

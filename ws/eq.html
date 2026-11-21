@@ -1,0 +1,454 @@
+<!-- 자동 생성: tools/build_fm.py (src/Equip.html). 직접 고치지 마세요. -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFFFFF">
+<title>소화전·공기호흡기 점검 · 에비뉴엘 시설팀</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+/* 공통 틀 v0.1 — 도면협의 Styles.html 기준 이름 (통합 설계정의서 12장) */
+/* DESIGN-TOKENS:START */
+/* 디자인 값은 이 파일에만 적습니다. 고친 뒤 python apps/design/sync.py 를 돌리면 모든 앱에 들어갑니다. */
+:root{
+  /* 기본 색 6가지 */
+  --navy:#1E3A5F;     /* 주 색상: 머리줄, 주요 버튼, 강조 숫자, 그래프 */
+  --white:#FFFFFF;    /* 바탕 */
+  --text-sub:#5F6B7A; /* 보조 글자 */
+  --line:#D8DDE5;     /* 구역을 나누는 선, 입력칸 테두리 */
+  --tint:#F1F4F8;     /* 고른 줄, 표 머리 */
+  --error:#B42318;    /* 오류 문구 전용 */
+
+  /* 글자 크기 */
+  --size-s:13px; --size-m:15px; --size-l:18px; --size-xl:24px; --size-xxl:32px;
+  --size-input-touch:16px; /* 휴대폰 입력칸 전용: 16px보다 작으면 아이폰이 화면을 저절로 확대함 */
+
+  /* 간격 (4의 배수) */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-6:24px; --sp-8:32px; --sp-12:48px;
+
+  /* 모양 */
+  --radius:2px;          /* 모든 모서리 */
+  --control-h:40px;      /* 버튼, 입력칸 높이 */
+  --control-h-touch:44px;/* 휴대폰의 버튼, 입력칸 높이 */
+
+  /* 팝업 뒤를 어둡게 하는 막 (남색 45%) */
+  --overlay:rgba(30,58,95,.45);
+  --font:'Noto Sans KR','Malgun Gothic',system-ui,-apple-system,sans-serif;
+}
+@media (pointer:coarse){
+  :root{--control-h:var(--control-h-touch)}
+  input:not([type=checkbox]):not([type=radio]):not(.lgin),textarea:not(.lgin),select:not(.lgin){font-size:var(--size-input-touch)!important}
+}
+
+/* 인쇄·PDF·라벨 양식은 종이 기준이라 원래 색을 그대로 씁니다 (화면 디자인 규칙에서 제외) */
+#print,.tbp,.cspdf,.label,.ehl,.ehlt,.ehg,.hvs,.lgs,.page,.ag-paper,.ag-page{
+  color:#18202B;
+  --ink:#18202B; --ink2:#2A3340; --sub:#3F4855; --muted:#5B6573; --faint:#7A8494;
+  --line:#CBD2DB; --line2:#DCE1E7; --line3:#EDF0F3; --ground:#F4F6F8; --card:#FFFFFF;
+  --blue:#1F5FA8; --blue-d:#174A84; --blue-bg:#E8F0FA;
+  --green:#1F7A4D; --green-d:#155C39; --green-bg:#EAF5EF;
+  --orange:#B4410F; --orange-bg:#FDF0E8; --red:#C0261A; --red-bg:#FBE9E7;
+}
+/* DESIGN-TOKENS:END */
+:root{ /* 예전 이름 → 기본 색 6가지 */
+  --ink:var(--navy); --ink2:var(--navy); --sub:var(--text-sub); --muted:var(--text-sub); --faint:var(--text-sub);
+  --line2:var(--line); --line3:var(--line); --ground:var(--white); --card:var(--white);
+  --blue:var(--navy); --blue-d:var(--navy); --blue-bg:var(--tint);
+  --green:var(--navy); --green-d:var(--navy); --green-bg:var(--tint);
+  --orange:var(--navy); --orange-bg:var(--tint); --red:var(--error); --red-bg:var(--tint);
+}
+*{box-sizing:border-box}
+/* WS-25 화면 다듬기: 단어 중간 줄바꿈 막기, 제목·강조 600 (인쇄·라벨·PDF 양식은 700 그대로) */
+body{word-break:keep-all;overflow-wrap:anywhere}
+h1,h2,h3,b,strong{font-weight:600}
+.tbp b,.tbp strong,.tbp h1,.cspdf b,.cspdf strong,.label b,.ehlt b{font-weight:700}
+.tbp,.cspdf,.label,.ehlt,.ehg{word-break:normal;overflow-wrap:normal}
+.ui-ico{display:inline-block;flex:none;vertical-align:-3px}
+html,body{margin:0;background:var(--ground);color:var(--ink);font-family:'Noto Sans KR',system-ui,-apple-system,sans-serif;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--blue)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-1);min-height:var(--control-h);padding:0 var(--sp-4);border-radius:var(--radius);border:1px solid var(--line);background:var(--card);font-size:var(--size-m);font-weight:500;color:var(--ink);cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+@media (prefers-reduced-motion:no-preference){.btn{transition:scale .15s ease-out}.btn:not(:disabled):active{scale:.96}}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:var(--white);font-weight:500}
+.btn.warn{border-color:var(--line);color:var(--red)}
+.btn.sm{min-height:var(--control-h);padding:0 var(--sp-3);font-size:var(--size-s)}
+.btn.big{min-height:var(--control-h);font-size:var(--size-m)}
+.inp{width:100%;min-height:var(--control-h);padding:0 var(--sp-3);border:1px solid var(--line);border-radius:var(--radius);font-size:var(--size-m);background:var(--white)}
+.card{background:var(--card);border:1px solid var(--line2);border-radius:var(--radius)}
+.chip{display:inline-flex;align-items:center;gap:var(--sp-1);height:26px;padding:0 var(--sp-2);border-radius:var(--radius);font-size:var(--size-s);font-weight:500;white-space:nowrap}
+.c-ok{background:var(--green-bg);color:var(--green)}
+.c-bad{background:var(--orange-bg);color:var(--orange)}
+.c-wait{background:var(--tint);color:var(--muted)}
+.c-miss{background:var(--red-bg);color:var(--red)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--white);padding:var(--sp-3) var(--sp-4);border-radius:var(--radius);font-size:var(--size-m);z-index:100;max-width:calc(100% - 32px);box-shadow:none}
+.dialog-back{position:fixed;inset:0;background:var(--overlay);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.dialog{width:100%;max-width:520px;background:var(--white);border-radius:var(--radius) var(--radius) 0 0;padding:var(--sp-4) var(--sp-4) calc(var(--sp-4) + env(safe-area-inset-bottom));max-height:92vh;overflow:auto;overscroll-behavior:contain}
+@media (min-width:700px){.dialog-back{align-items:center}.dialog{border-radius:var(--radius)}}
+.spin{width:18px;height:18px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .8s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+.hide{display:none!important}
+
+/* 상태는 색이 아니라 모양과 글자로 구분: 문제 = 채움, 정상 = 남색 테두리, 대기 = 회색 테두리 */
+.chip{border:1px solid transparent}
+.c-bad,.c-miss,.chip.orange{background:var(--navy);color:var(--white);border-color:var(--navy)}
+.c-ok,.chip.green{background:var(--white);color:var(--navy);border-color:var(--navy)}
+.c-wait{background:var(--white);color:var(--text-sub);border-color:var(--line)}
+.chip.blue{background:var(--tint);color:var(--navy);border-color:var(--line)}
+.btn.warn{background:var(--white);color:var(--navy);border-color:var(--navy)}
+</style>
+<style>
+/* 어두운 화면 (결정 98): 화면만 색을 뒤집고 사진·서명·QR은 되돌림. 인쇄·저장 이미지는 그대로 흰 바탕 */
+@media screen{
+html[data-theme=dark]{filter:invert(1) hue-rotate(180deg) contrast(.78)}   /* 검정 대신 진한 회색 (사용자 11-11) */
+html[data-theme=dark] :is(img,video,canvas,.keep-color):not(.keep-color *){filter:invert(1) hue-rotate(180deg)}
+html[data-theme=dark] :is(.dialog-back,.overlay,.pinpop,.gprev.modal,.spsheet){background:rgba(255,255,255,.5)}
+}
+</style>
+<script>
+/* 기기에 고른 값 → 없으면 휴대폰 설정. 화면 그리기 전에 정해서 번쩍임 없음 */
+(function () { var t = null; try { t = localStorage.getItem('fm_theme'); } catch (e) {} if (!t && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark'; if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); })();
+function themeDark() { return document.documentElement.getAttribute('data-theme') === 'dark'; }
+function toggleTheme() { var t = themeDark() ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', t); try { localStorage.setItem('fm_theme', t); } catch (e) {} document.querySelectorAll('.theme-btn').forEach(function (b) { b.textContent = themeLabel(); }); }
+function themeLabel() { return themeDark() ? '밝게' : '어둡게'; }
+</script>
+
+<style>
+body{min-height:100vh;word-break:keep-all;overflow-wrap:anywhere}
+b,strong,h1,h2,h3{font-weight:600}
+/* 틀 이름에 page를 쓰면 공통 디자인의 「인쇄 양식 제외」에 걸려 옛 색으로 나옴 */
+.fp{max-width:520px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--white)}
+.bar{background:var(--navy);color:var(--white);min-height:48px;padding:0 var(--sp-4);display:flex;align-items:center;font-size:var(--size-m);font-weight:600}
+.hd{padding:var(--sp-6) var(--sp-4) var(--sp-4);border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:var(--sp-1)}
+.hd h1{margin:0;font-size:var(--size-xl);line-height:1.3}
+.hd span{font-size:var(--size-s);color:var(--text-sub)}
+.main{flex:1;padding:0 var(--sp-4);display:flex;flex-direction:column}
+.main section{padding:var(--sp-6) 0;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:var(--sp-3)}
+.main section:last-child{border-bottom:none}
+.note{margin-top:var(--sp-4);background:var(--tint);border:1px solid var(--line);border-radius:var(--radius);padding:var(--sp-3);font-size:var(--size-s);line-height:1.6}
+.lbl{font-size:var(--size-l);font-weight:600;display:flex;align-items:baseline;gap:var(--sp-2)}
+.lbl small{font-size:var(--size-s);font-weight:400;color:var(--text-sub)}
+.shot{width:100%;aspect-ratio:4/3;border-radius:var(--radius);border:1px solid var(--line);background:var(--tint);color:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sp-1);font-size:var(--size-m);font-weight:600;cursor:pointer;padding:0}
+.shot-done{position:relative;width:100%;aspect-ratio:4/3;border-radius:var(--radius);border:1px solid var(--line);background:var(--tint);overflow:hidden}
+.shot-done img{width:100%;height:100%;object-fit:contain;display:block}
+.shot-done .btn{position:absolute;right:8px;bottom:8px}
+.shot-done svg{position:absolute;left:50%;top:50%;width:62%;height:auto;transform:translate(-50%,-50%);opacity:.35;pointer-events:none}
+.seg{display:flex}
+.seg button{flex:1;min-height:var(--control-h);border-radius:var(--radius);border:1px solid var(--navy);background:var(--white);font-size:var(--size-m);font-weight:500;color:var(--navy);cursor:pointer}
+.seg button+button{margin-left:-1px}
+.seg button.on{background:var(--navy);color:var(--white);font-weight:600}
+.minp{width:100%;min-height:var(--control-h);border:1px solid var(--line);border-radius:var(--radius);padding:0 var(--sp-3);font-size:var(--size-m);background:var(--white);color:var(--ink)}
+.foot{background:var(--white);border-top:1px solid var(--line);padding:var(--sp-2) var(--sp-4) calc(var(--sp-4) + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:var(--sp-2);position:sticky;bottom:0}
+.miss{font-size:var(--size-s);color:var(--error);min-height:20px}
+.send{width:100%;min-height:var(--control-h);border-radius:var(--radius);border:1px solid var(--navy);background:var(--navy);color:var(--white);font-size:var(--size-m);font-weight:600;cursor:pointer}
+.send:disabled{background:var(--tint);border-color:var(--line);color:var(--text-sub);cursor:default}
+.mark{width:64px;height:64px;border-radius:var(--radius);border:2px solid var(--navy);color:var(--navy);display:flex;align-items:center;justify-content:center}
+.mark.bad{background:var(--navy);color:var(--white)}
+.t{width:100%;border-collapse:collapse;font-size:var(--size-s)}
+.t th{background:var(--tint);color:var(--text-sub);font-weight:600;text-align:center;padding:var(--sp-2) 4px;border:1px solid var(--line)}
+.t td{padding:var(--sp-2) 4px;border:1px solid var(--line);text-align:center;vertical-align:middle}
+.t td.m{text-align:left;padding-left:var(--sp-2)}
+.t td.m b{display:block;font-size:var(--size-m)}
+.t td.m small{color:var(--text-sub)}
+.t td.memo{text-align:left;background:var(--tint);color:var(--ink);padding:var(--sp-1) var(--sp-2);border-top:none}
+.cv{display:inline-block;min-width:36px;padding:2px 4px;border-radius:2px;border:1px solid var(--navy);color:var(--navy);background:var(--white);font-weight:600}
+.cv.bad{background:var(--navy);color:var(--white)}
+.cv.no{border-color:var(--line);color:var(--text-sub);font-weight:400}
+.cam{position:fixed;inset:0;z-index:60;background:#0E131A;color:#fff;display:flex;flex-direction:column}
+.cam-top{display:flex;align-items:center;padding:12px;gap:8px}
+.cam-top button{width:44px;height:44px;border:none;background:none;color:#fff;font-size:22px;cursor:pointer}
+.cam-msg{margin:0 auto;background:rgba(14,19,26,.75);border-radius:999px;padding:10px 18px;font-size:16px;font-weight:500}
+.view{position:relative;width:100%;aspect-ratio:4/3;background:var(--navy);overflow:hidden}
+.view video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.view svg{position:absolute;left:50%;top:50%;width:62%;height:auto;transform:translate(-50%,-50%);pointer-events:none}
+.shutter{width:76px;height:76px;border-radius:38px;border:4px solid #fff;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.shutter span{width:60px;height:60px;border-radius:30px;background:#fff}
+.torch{width:44px;height:44px;border-radius:var(--radius);border:1px solid var(--white);background:none;color:var(--white);font-size:var(--size-l);cursor:pointer}
+.torch.on{background:var(--navy);border-color:var(--line);color:var(--navy)}
+.view img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.view.check svg{opacity:.45}
+.cam-btns{display:flex;gap:10px;padding:20px 16px calc(32px + env(safe-area-inset-bottom))}
+.cam-btns button{flex:1;min-height:56px;border-radius:12px;font-size:17px;font-weight:500;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="fp" id="page">
+  <div class="main" style="align-items:center;justify-content:center"><span class="spin" style="color:var(--blue);width:32px;height:32px"></span></div>
+</div>
+<input id="file" type="file" accept="image/*" capture="environment" class="hide">
+<div id="layer"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+(function () {
+  var C = window.WS_CONFIG || {}, BUCKET = C.SUPABASE_BUCKET_NAME || 'ws-files';
+  var sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, storageKey: 'ws_sb_auth' } });   // 앱과 같은 기기 등록을 이어받음
+  function rpc(fn, a) { return sb.rpc(fn, a).then(function (r) { if (r.error) throw new Error(r.error.message); return r.data; }); }
+  function blob(d) {
+    var x = /^data:([^;,]+)[^,]*;base64,(.*)$/.exec(String(d || '')); if (!x) return null;
+    var b = atob(x[2]), a = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) a[i] = b.charCodeAt(i);
+    return new Blob([a], { type: x[1] });
+  }
+  function rid() { return (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2)).replace(/-/g, ''); }
+  function up(qr, d, ym) {   // 사진은 화면이 이미 설정 크기(사진긴변px·사진품질)로 줄여 옴 → 그대로 올림
+    var b = blob(d); if (!b) return Promise.reject(new Error('사진 내용이 올바르지 않습니다'));
+    var path = 'equip/' + qr + '/' + ym + '/' + rid() + '.jpg';
+    return sb.storage.from(BUCKET).upload(path, b, { contentType: 'image/jpeg', upsert: false }).then(function (r) {
+      if (r.error) throw new Error('사진을 올리지 못했습니다: ' + r.error.message);
+      return { path: path, url: sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl };
+    });
+  }
+  window.EQ = {
+    rpc: rpc,
+    save: function (qr, token, d, photos, ym) {
+      var keys = Object.keys(photos);
+      // 이미 있는데 덮어쓰기를 안 골랐으면 사진을 올리기 전에 알림 (버킷에 쓸모없는 파일이 남지 않게)
+      var first = d.overwrite ? Promise.resolve(null) : rpc('ws_eq_open', { p_token: token, p_qr: qr });
+      return first.then(function (i) {
+        if (i && i.ok && i.exists) return { ok: false, exists: true, error: '이번 달 입력이 이미 있습니다.' };
+        return Promise.all(keys.map(function (k) { return up(qr, photos[k], ym); })).then(function (f) {
+          var files = {}; keys.forEach(function (k, n) { files[k] = f[n]; });
+          return rpc('ws_eq_submit', { p_token: token, p_qr: qr, p_d: d, p_files: files });
+        });
+      });
+    }
+  };
+})();
+</script>
+
+<script>
+/* 소화전·공기호흡기 QR 화면 (결정 224) — QR 주소 …/fm/ws/?eq=고유번호 가 이 페이지로 옴
+   · 앱에 로그인한 상태(같은 사이트 저장소의 ws_token + 기기 등록)면 바로 점검 입력 — PIN 다시 안 물음, 점검자 = 내 이름
+   · 로그인 안 한 상태면 입력 칸 없이 「지난 점검 내용」 표 + [앱에 로그인하기] (사진 없음, 점검자 이름은 가림)
+   서버 함수: supabase/23_fire_equip.sql (ws_eq_open · ws_eq_submit · ws_eq_pub) */
+const P = new URLSearchParams(location.search);
+const QR = (m => /^[2-9a-km-np-z]{12}$/.test(m) ? m : '')(P.get('eq') || '');
+const S = { init: null, token: '', bad: {}, memo: {}, photo: {}, cur: '', pending: '', sending: false, done: false };
+const GUIDE = '<svg viewBox="0 0 230 230" fill="none" aria-hidden="true"><circle cx="115" cy="115" r="105" stroke="#fff" stroke-width="4"/><circle cx="115" cy="115" r="90" stroke="#fff" stroke-width="1.5" stroke-dasharray="6 6" opacity=".8"/><path d="M52 150 A70 70 0 1 1 178 150" stroke="#fff" stroke-width="3" opacity=".9"/><g stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".9"><path d="M60 145l9-5"/><path d="M55 108h10"/><path d="M70 72l8 7"/><path d="M115 50v10"/><path d="M160 72l-8 7"/><path d="M175 108h-10"/><path d="M170 145l-9-5"/></g><path d="M115 115l38-30" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="4 5"/><circle cx="115" cy="115" r="7" fill="#fff"/></svg>';
+const GAUGE_ICON = '<svg width="104" height="104" viewBox="0 0 230 230" fill="none" aria-hidden="true"><circle cx="115" cy="115" r="105" fill="#fff" stroke="currentColor" stroke-width="6"/><path d="M52 150 A70 70 0 1 1 178 150" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><g stroke="currentColor" stroke-width="6" stroke-linecap="round"><path d="M60 145l9-5"/><path d="M55 108h10"/><path d="M70 72l8 7"/><path d="M115 50v10"/><path d="M160 72l-8 7"/><path d="M175 108h-10"/><path d="M170 145l-9-5"/></g><path d="M115 115l38-30" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><circle cx="115" cy="115" r="11" fill="currentColor"/><text x="115" y="178" text-anchor="middle" font-size="26" font-weight="700" fill="currentColor" font-family="sans-serif">MPa</text></svg>';
+const CAM_ICON = '<svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></svg>';
+function $(id) { return document.getElementById(id); }
+function h(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function rpc(fn, a) { return window.EQ.rpc(fn, a); }
+function barText(kindName) { return '잠실점 에비뉴엘 · ' + kindName + ' 월 점검'; }
+
+/* ── 시작: 로그인 상태를 보고 입력 / 지난 점검 표로 갈림 ── */
+function savedToken() {
+  try { const t = localStorage.getItem('ws_token') || '', p = t.split('.'); return p.length === 3 && Number(p[1]) > Date.now() ? t : ''; } catch (e) { return ''; }
+}
+async function start() {
+  if (!QR) return showError('QR 주소가 올바르지 않습니다.');
+  const t = savedToken();
+  if (t) {
+    try {
+      const r = await rpc('ws_eq_open', { p_token: t, p_qr: QR });
+      if (r && r.ok) { S.token = t; S.init = r; return renderForm(); }
+      if (r && r.error) return showError(r.error);
+    } catch (e) { /* 로그인이 풀렸거나 기기 등록이 없음 → 아래에서 로그인 안 한 화면 */ }
+  }
+  try {
+    const g = await rpc('ws_eq_pub', { p_qr: QR });
+    if (!g || !g.ok) return showError((g && g.error) || '열 수 없습니다.');
+    S.pub = g; renderGuest();
+  } catch (e) { showError('연결 오류: ' + (e.message || e) + '\n신호를 확인하고 다시 열어 주세요.'); }
+}
+function showError(msg) {
+  $('page').innerHTML = '<div class="bar">잠실점 에비뉴엘 · 점검</div><div class="hd"><h1>열 수 없습니다</h1></div><div class="main"><div class="note" style="font-size:var(--size-m)">' + h(msg) + '</div></div>';
+}
+
+/* ── 로그인 안 한 화면: 지난 점검 표 ── */
+function renderGuest() {
+  const g = S.pub, spec = g.spec;
+  const head = '<tr><th style="width:84px">점검월</th>' + spec.map(s => '<th>' + h(s.label) + '</th>').join('') + '<th style="width:58px">점검자</th></tr>';
+  const rows = g.rows.map(r => {
+    const done = r.state === 'ok' || r.state === 'bad';
+    const sub = done ? h(r.day) + ' 입력' + (r.late ? ' · 기한 후' : '') : (r.state === 'wait' ? '점검 전' : '미입력');
+    const cells = spec.map(s => {
+      const it = (r.items || []).find(x => x.k === s.k);
+      return '<td>' + (!done || !it ? '<span class="cv no">—</span>' : it.bad ? '<span class="cv bad">' + h(s.bad) + '</span>' : '<span class="cv">' + h(s.ok) + '</span>') + '</td>';
+    }).join('');
+    const memos = (r.items || []).filter(i => i.bad && i.memo).map(i => '↳ ' + h((spec.find(s => s.k === i.k) || {}).label) + ': ' + h(i.memo));
+    return '<tr><td class="m"><b>' + h(r.ym) + '</b><small>' + sub + '</small></td>' + cells + '<td>' + h(r.by) + '</td></tr>' +
+      (memos.length ? '<tr><td class="memo" colspan="' + (spec.length + 2) + '">' + memos.join('<br>') + '</td></tr>' : '');
+  }).join('');
+  $('page').innerHTML = '<div class="bar">' + h(barText(g.eq.kindName)) + '</div><div class="hd"><h1>' + h(g.eq.name) + '</h1><span>' + h(g.eq.floor) + ' · ' + h(g.eq.kindName) + '</span></div>' +
+    '<div class="main"><div class="note" style="display:flex;flex-direction:column;gap:var(--sp-2)"><span>점검 입력은 앱에 <b>로그인한 직원</b>만 할 수 있습니다.</span>' +
+    '<button class="send" id="login" onclick="goLogin()">앱에 로그인하기</button><span style="color:var(--text-sub)">로그인하면 이 화면으로 돌아와 바로 입력합니다.</span></div>' +
+    '<section><span class="lbl">지난 점검 내용 <small>최근 12개월</small></span><table class="t">' + head + rows + '</table>' +
+    '<small style="font-size:var(--size-s);color:var(--text-sub)">사진은 로그인 후 앱의 점검 현황에서만 볼 수 있습니다. 점검자 이름은 가려서 보여 줍니다.</small></section></div>';
+}
+function goLogin() {
+  try { sessionStorage.setItem('ws_after', location.href); } catch (e) {}   // 앱이 로그인을 마치면 이 주소로 돌아옴
+  location.href = 'app.html';
+}
+
+/* ── 로그인한 화면: 점검 입력 ── */
+function renderForm() {
+  const r = S.init, m = Number(r.ym.slice(5, 7));
+  r.spec.forEach(s => { S.bad[s.k] = false; S.memo[s.k] = ''; });
+  $('page').innerHTML =
+    '<div class="bar">' + h(barText(r.eq.kindName)) + '</div><div class="hd"><h1>' + h(r.eq.name) + '</h1>' +
+    '<span>' + h(r.eq.floor) + ' · ' + h(r.monthLabel) + ' · 입력 기간 <b>' + m + '월 ' + r.window.start + '일 ~ ' + r.window.end + '일</b></span>' +
+    '<span>점검자 <b>' + h(r.me) + '</b> · 로그인 이름 자동</span></div>' +
+    '<div class="main"><div class="note">로그인한 직원 <b>' + h(r.me) + '</b> 님으로 열렸습니다.' + (r.late ? ' 입력 기간이 지났지만 지금 입력할 수 있고, 「기한 후 입력」으로 표시됩니다.' : '') + '</div>' +
+    (r.exists ? '<div class="note">이번 달 입력이 이미 있습니다. 다시 보내면 새 내용으로 바뀝니다.</div>' : '') +
+    r.spec.map((s, i) => '<section><span class="lbl">' + (i + 1) + '. ' + h(s.label) + (s.gauge ? ' <small>압력계 사진</small>' : '') + '</span>' +
+      '<div class="seg"><button id="ok_' + s.k + '" class="on" aria-pressed="true" onclick="setBad(\'' + s.k + '\',false)">' + h(s.ok) + '</button><button id="bad_' + s.k + '" aria-pressed="false" onclick="setBad(\'' + s.k + '\',true)">' + h(s.bad) + '</button></div>' +
+      '<div id="memoBox_' + s.k + '" class="hide"><input class="minp" id="memo_' + s.k + '" maxlength="60" placeholder="이상 내용 한 줄 (적지 않아도 됩니다)" aria-label="' + h(s.label) + ' 이상 내용" oninput="S.memo[\'' + s.k + '\']=this.value"></div>' +
+      '<div id="shot_' + s.k + '"></div></section>').join('') +
+    '</div><div class="foot"><div class="miss" id="miss" role="alert"></div><button class="send" id="send" onclick="submit()" disabled>저장하기</button></div>';
+  r.spec.forEach(s => renderShot(s.k));
+  update();
+}
+function spec(k) { return S.init.spec.find(s => s.k === k); }
+function renderShot(k) {
+  const s = spec(k), ph = S.photo[k];
+  $('shot_' + k).innerHTML = ph
+    ? '<div class="shot-done"><img src="' + ph + '" alt="찍은 ' + h(s.label) + ' 사진">' + (s.gauge ? GUIDE : '') + '<button class="btn sm" onclick="openCamera(\'' + k + '\')">다시 찍기</button></div>'
+    : '<button class="shot" onclick="openCamera(\'' + k + '\')" aria-label="' + h(s.label) + ' 사진 찍기">' + (s.gauge ? GAUGE_ICON : CAM_ICON) + '<span style="font-size:var(--size-l)">사진 찍기</span>' +
+      '<span style="font-size:var(--size-s);font-weight:400;color:var(--text-sub)">' + (s.gauge ? '압력계 정면이 보이게' : h(s.hint)) + '</span></button>';
+}
+function setBad(k, b) {
+  if (S.bad[k] === b) return;
+  S.bad[k] = b;
+  $('ok_' + k).className = b ? '' : 'on'; $('ok_' + k).setAttribute('aria-pressed', String(!b));
+  $('bad_' + k).className = b ? 'on' : ''; $('bad_' + k).setAttribute('aria-pressed', String(b));
+  $('memoBox_' + k).classList.toggle('hide', !b);
+  if (!b) { S.memo[k] = ''; $('memo_' + k).value = ''; }
+  update();
+}
+function update() {
+  if (!S.init || S.done) return;
+  const miss = S.init.spec.filter(s => !S.photo[s.k]).map(s => s.label);
+  $('miss').textContent = miss.length ? miss.join(', ') + ' 사진을 찍어 주세요' : '';
+  $('send').disabled = miss.length > 0 || S.sending;
+}
+
+/* ── 촬영 (소화기 점검 화면과 같은 카메라: 실시간 + 손전등 + 확인 화면). 압력계 항목만 동그라미 안내선 ── */
+let stream = null, torchOn = false;
+async function openCamera(k) {
+  if (k) S.cur = k;
+  const s = spec(S.cur);
+  $('layer').innerHTML = '<div class="cam keep-color" role="dialog" aria-modal="true" aria-label="' + h(s.label) + ' 촬영">' +
+    '<div class="cam-top"><button onclick="closeCamera()" aria-label="닫기">✕</button><b style="flex:1;text-align:center">' + h(S.init.eq.name) + ' · ' + h(s.label) + '</b><button class="torch hide" id="torch" onclick="toggleTorch()" aria-label="손전등 켜기" aria-pressed="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:middle"><path d="M8 2h8v4l-2 4v12h-4V10L8 6z"/><path d="M8 6h8M12 14v2"/></svg></button><span id="torchGap" style="width:44px"></span></div>' +
+    '<div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:var(--sp-4)">' +
+    '<div class="cam-msg" id="camMsg">' + (s.gauge ? '동그라미에 압력계를 맞춰 주세요' : h(s.label) + ' 사진을 찍어 주세요') + '</div>' +
+    '<div class="view" id="view"><video id="vid" playsinline muted autoplay></video>' + (s.gauge ? GUIDE : '') + '</div>' +
+    '<div id="camNote" style="text-align:center;font-size:var(--size-s);color:var(--text-sub);line-height:1.6;padding:0 var(--sp-6)">' + (s.gauge ? '바늘과 숫자가 보이도록 정면에서 찍어 주세요.' : '대상이 잘 보이도록 찍어 주세요.') + '</div></div>' +
+    '<div id="camFoot" style="display:flex;align-items:center;justify-content:center;padding:var(--sp-4) var(--sp-6) calc(var(--sp-8) + env(safe-area-inset-bottom))"><button class="shutter" id="shutter" onclick="snap()" aria-label="찍기"><span></span></button></div></div>';
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return useFileFallback();
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false });
+    $('vid').srcObject = stream;
+    setupTorch();
+  } catch (e) { useFileFallback(); }
+}
+function setupTorch() {
+  const track = stream && stream.getVideoTracks()[0];
+  let caps = {};
+  try { caps = (track && track.getCapabilities) ? track.getCapabilities() : {}; } catch (e) { caps = {}; }
+  if (caps.torch) { $('torch').classList.remove('hide'); $('torchGap').classList.add('hide'); }
+}
+async function toggleTorch() {
+  const track = stream && stream.getVideoTracks()[0];
+  if (!track) return;
+  try {
+    await track.applyConstraints({ advanced: [{ torch: !torchOn }] });
+    torchOn = !torchOn;
+    const b = $('torch'); b.classList.toggle('on', torchOn); b.setAttribute('aria-pressed', String(torchOn)); b.setAttribute('aria-label', torchOn ? '손전등 끄기' : '손전등 켜기');
+  } catch (e) { $('torch').classList.add('hide'); $('torchGap').classList.remove('hide'); }
+}
+function useFileFallback() {
+  const v = $('vid'); if (v) v.remove();
+  $('camNote').innerHTML = '이 화면에서는 카메라를 바로 열 수 없어 휴대폰 카메라를 엽니다.';
+  $('shutter').onclick = () => $('file').click();
+}
+function stopStream() { if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } torchOn = false; }
+function closeCamera() { stopStream(); $('layer').innerHTML = ''; }
+function snap() {
+  const v = $('vid');
+  if (!v || !v.videoWidth) return;
+  confirmShot(toJpeg(v, v.videoWidth, v.videoHeight));
+}
+function confirmShot(jpeg) {
+  stopStream();
+  S.pending = jpeg;
+  if (!$('view')) { openCamera().then(() => { stopStream(); confirmShot(jpeg); }); return; }
+  const s = spec(S.cur);
+  const tb = $('torch'); if (tb) { tb.classList.add('hide'); $('torchGap').classList.remove('hide'); }
+  $('camMsg').textContent = s.gauge ? '압력계가 동그라미 안에 들어왔나요?' : '사진이 잘 찍혔나요?';
+  $('view').className = 'view check';
+  $('view').innerHTML = '<img src="' + jpeg + '" alt="찍은 ' + h(s.label) + ' 사진">' + (s.gauge ? GUIDE : '');
+  $('camNote').textContent = s.gauge ? '바늘과 숫자가 잘 보이면 「이 사진 쓰기」를 눌러 주세요.' : '잘 보이면 「이 사진 쓰기」를 눌러 주세요.';
+  $('camFoot').outerHTML = '<div class="cam-btns" id="camFoot"><button style="background:none;border:1px solid rgba(255,255,255,.5);color:#fff" onclick="openCamera()">다시 찍기</button><button style="background:#fff;border:none;color:#18202B" onclick="useShot()">이 사진 쓰기</button></div>';
+}
+function useShot() {
+  const k = S.cur;
+  S.photo[k] = S.pending; S.pending = '';
+  closeCamera(); renderShot(k); update();
+}
+$('file').addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  const img = new Image(), url = URL.createObjectURL(f);
+  img.onload = () => { const j = toJpeg(img, img.naturalWidth, img.naturalHeight); URL.revokeObjectURL(url); confirmShot(j); };
+  img.onerror = () => { URL.revokeObjectURL(url); alertBox('사진을 읽지 못했습니다. 다시 찍어 주세요.'); };
+  img.src = url;
+});
+/** 가운데를 4:3으로 맞춰 640×480 JPEG(품질 0.6)으로 줄임 (소화기 점검과 같은 크기) */
+function toJpeg(src, sw, sh) {
+  const W = (S.init.photo && S.init.photo.w) || 640, H = Math.round(W * 3 / 4), q = (S.init.photo && S.init.photo.q) || 0.6;
+  let cw = sw, ch = sw * 3 / 4;
+  if (ch > sh) { ch = sh; cw = sh * 4 / 3; }
+  const cx = (sw - cw) / 2, cy = (sh - ch) / 2;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d'); x.imageSmoothingQuality = 'high';
+  x.drawImage(src, cx, cy, cw, ch, 0, 0, W, H);
+  return c.toDataURL('image/jpeg', q);
+}
+
+/* ── 저장 ── */
+function submit(overwrite) {
+  update();
+  if ($('send').disabled) return;
+  if (S.init.exists && !overwrite) {
+    $('layer').innerHTML = '<div class="dialog-back"><div class="dialog" role="dialog" aria-modal="true"><h2 style="margin:0 0 var(--sp-2);font-size:var(--size-l)">이번 달 입력이 이미 있습니다</h2><p style="margin:0 0 var(--sp-3);font-size:var(--size-m);color:var(--sub);line-height:1.6">새로 보낸 내용으로 바꿀까요?</p><div style="display:flex;gap:var(--sp-2)"><button class="btn big" style="flex:1" onclick="$(\'layer\').innerHTML=\'\'">취소</button><button class="btn big pri" style="flex:2" onclick="$(\'layer\').innerHTML=\'\';submit(true)">바꾸기</button></div></div></div>';
+    return;
+  }
+  S.sending = true; update();
+  $('send').innerHTML = '<span class="spin"></span>';
+  const items = {};
+  S.init.spec.forEach(s => { items[s.k] = { bad: !!S.bad[s.k], memo: S.bad[s.k] ? String(S.memo[s.k] || '').trim() : '' }; });
+  window.EQ.save(QR, S.token, { items, overwrite: !!overwrite }, S.photo, S.init.ym).then(r => {
+    S.sending = false; $('send').textContent = '저장하기';
+    if (r.ok) return done(r);
+    if (r.exists) { S.init.exists = true; return submit(false); }
+    alertBox(r.error || '저장하지 못했습니다.'); update();
+  }).catch(e => {
+    S.sending = false; $('send').textContent = '저장하기';
+    const msg = String(e && e.message || e);
+    alertBox(/LOGIN/.test(msg) ? '로그인이 풀렸습니다. 앱에서 다시 로그인한 뒤 QR을 찍어 주세요.' : '저장하지 못했습니다. 신호를 확인하고 다시 눌러 주세요. (' + msg + ')'); update();
+  });
+}
+function done(r) {
+  S.done = true;
+  const bad = r.state === '이상있음';
+  $('page').innerHTML = '<div class="bar">' + h(barText(S.init.eq.kindName)) + '</div><div class="hd"><h1>' + h(S.init.eq.name) + '</h1></div>' +
+    '<div class="main" style="align-items:center;text-align:center;padding-top:var(--sp-12);gap:var(--sp-3)">' +
+    '<div class="mark' + (bad ? ' bad' : '') + '"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (bad ? '<path d="M12 5v9"/><path d="M12 19h.01"/>' : '<path d="M20 6L9 17l-5-5"/>') + '</svg></div>' +
+    '<b style="font-size:var(--size-l)">저장했습니다.</b>' +
+    '<span style="font-size:var(--size-m);color:var(--sub);line-height:1.6">' + h(S.init.monthLabel) + ' 점검이 ' + (bad ? '<b>이상 있음</b>으로' : '<b>점검완료</b>로') + ' 기록되었습니다.<br>점검자 ' + h(r.by) + (r.late ? ' · 기한 후 입력' : '') + '</span>' +
+    (r.checkId ? '<span style="font-size:var(--size-s);color:var(--muted);background:var(--tint);border-radius:var(--radius);padding:var(--sp-1) var(--sp-2)">저장 번호 ' + h(r.checkId) + (r.at ? ' · ' + h(r.at) : '') + '</span>' : '') +
+    '<a class="btn big" style="margin-top:var(--sp-4)" href="app.html">업무지원 앱으로</a></div>';
+}
+function alertBox(msg) {
+  $('layer').innerHTML = '<div class="dialog-back"><div class="dialog" role="alertdialog" aria-modal="true"><p style="margin:0 0 var(--sp-3);font-size:var(--size-m);line-height:1.6">' + h(msg) + '</p><button class="btn big pri" style="width:100%" onclick="$(\'layer\').innerHTML=\'\'">확인</button></div></div>';
+}
+start();
+</script>
+</body>
+</html>

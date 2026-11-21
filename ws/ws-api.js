@@ -165,6 +165,13 @@
     feStatus: (token, ym) => rpc('ws_fe_status', { p_token: token, p_ym: ym || '' }),
     feDetail: (token, id) => rpc('ws_fe_detail', { p_token: token, p_check_id: String(id || '') }),
 
+    /* ── 소화전·공기호흡기 (supabase/23_fire_equip.sql, 결정 224). 점검 입력·QR 표는 eq.html 이 따로 부름 ── */
+    eqList: async (token, kind) => eqPage(await rpc('ws_eq_list', { p_token: token, p_kind: kind || 'hyd' })),
+    eqAdd: async (token, d) => eqPage(await rpc('ws_eq_add', { p_token: token, p_d: d || {} })),
+    eqDelete: async (token, ids, kind) => eqPage(await rpc('ws_eq_delete', { p_token: token, p_ids: ids || [], p_kind: kind || 'hyd' })),
+    eqStatus: (token, ym) => rpc('ws_eq_status', { p_token: token, p_ym: ym || '' }),
+    eqDetail: (token, id) => rpc('ws_eq_detail', { p_token: token, p_check_id: String(id || '') }),
+
     /* ── 3-5 전열필증 (supabase/06_eh.sql). 필증 QR 보기는 eh-sb.html 이 따로 부름 ── */
     ehList: async (token, floor) => fePage(await rpc('ws_eh_list', { p_token: token, p_floor: floor || '' })),
     ehStoreSave: async (token, d) => fePage(await rpc('ws_eh_store_save', { p_token: token, p_d: d || {} })),
@@ -354,6 +361,8 @@
   }
   /** QR 주소 앞부분: 설정 「바로가기주소」, 없으면 지금 앱이 있는 폴더 (…/fm/ws/) — QR은 거기에 ?fe= 를 붙임 */
   function fePage(r) { if (r && r.ok && !r.execUrl) r.execUrl = new URL('./', location.href).href; return r; }
+  /** 소화전·공기호흡기 목록: QR 라벨 글자는 이름 통째로 (화면 labelHtml 이 label 을 씀) */
+  function eqPage(r) { fePage(r); if (r && r.ok && r.items) r.items = r.items.map(i => Object.assign({ label: i.name }, i)); return r; }
 
   /** 화면이 만든 PDF(data:) → Blob. 틀리면 { ok:false, error } (Code.gs와 같은 안내) */
   function pdfBlob(uri) {

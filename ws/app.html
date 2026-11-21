@@ -10,10 +10,10 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.24.3"></script>
-<script>window.WS_VERSION = '0.24.3';</script>
-<script src="offline.js?v=0.24.3"></script>
-<script src="ws-api.js?v=0.24.3"></script>
+<script src="config.js?v=0.25.0"></script>
+<script>window.WS_VERSION = '0.25.0';</script>
+<script src="offline.js?v=0.25.0"></script>
+<script src="ws-api.js?v=0.25.0"></script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -674,6 +674,7 @@ select.lgin{text-align:center;padding:0}
 .uc .r{display:grid;grid-template-columns:36px 1fr 1fr 1fr;gap:var(--sp-1);align-items:center;margin-top:var(--sp-1);font-size:var(--size-s);color:var(--sub)}
 .uc select{min-height:var(--control-h);min-width:0;border:1px solid var(--line);border-radius:var(--radius);background:var(--white);font:inherit;font-size:16px;padding:0 4px;color:var(--ink)}
 .uc .f{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-2);font-size:var(--size-s);color:var(--sub);margin-top:var(--sp-2)}.uc .f b{color:var(--ink);font-weight:600}
+.uc.saved select,.uc.saved .ap{background:var(--line2);color:var(--muted)}.hvin .inp.saved{background:var(--line2);color:var(--muted)}   /* 저장된 값 = 회색 (결정 226) */
 .uc.isoff .r{opacity:.45}.uc.isoff{background:var(--tint)}.uc.bad{outline:2px solid var(--red);outline-offset:-2px}
 .ucg{display:flex;flex-direction:column;gap:var(--sp-2)}.ucg .uc{border:1px solid var(--line2);border-radius:var(--radius)}
 .cltbl{width:100%;border-collapse:collapse;background:var(--white);border:1px solid var(--line2);margin-top:var(--sp-3);font-size:var(--size-s)}
@@ -746,7 +747,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.24.3' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.25.0' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -814,6 +815,7 @@ const ICON = {
   qr: _pi('<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v.01M14 21h3M21 17v4h-1.5"/>', 24),
   stat: _pi('<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 13l2 2 4-4"/>', 24),
   hyd: _pi('<path d="M8 21V11a4 4 0 018 0v10M5.5 21h13M4 13.5h4M16 13.5h4M10 8h4M12 7V3.5"/>', 24),
+  air: _pi('<rect x="8" y="4" width="8" height="17" rx="4"/><path d="M10.5 4V2.5h3V4M8 9h8M12 12v3"/>', 24),
   box: _pi('<path d="M3 7.5L12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5l9 4.5 9-4.5M12 12v9"/>'),
   docs: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>',
   inspect: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>',
@@ -847,11 +849,14 @@ function go(view, push) {
   if (push !== false) { try { google.script.history.push({ v: view }, { }); } catch (e) {} }
   render();
   window.scrollTo(0, 0);
-  if (view === 'fire' && !(S.fireAt && Date.now() - S.fireAt < 60000)) refreshFire();   // 1분 안에 받은 숫자면 그대로 (결정 78)
+  if (view === 'fire' && !(S.fireAt && Date.now() - S.fireAt < 60000)) refreshFire();
+  if (view === 'fire' && !(S.eqAt && Date.now() - S.eqAt < 60000)) refreshEq();   // 1분 안에 받은 숫자면 그대로 (결정 78)
 }
 async function refreshFire() { try { const r = await call('bootstrap'); S.fire = r.fire; S.user = r.user; S.fireAt = Date.now(); if (S.view === 'fire') render(); } catch (e) {} }
+// 소화전·공기호흡기 이번 달 숫자 (실패해도 메뉴는 그대로)
+async function refreshEq() { try { const e = await run('eqStatus', S.token, ''); if (e && e.ok) { S.eqc = e; S.eqAt = Date.now(); if (S.view === 'fire') render(); } } catch (e) {} }
 try { google.script.history.setChangeHandler(e => { const v = e.state && e.state.v; if (v && S.token) { S.view = v; render(); } }); } catch (e) {}
-const PARENT = { inspect: 'main', fire: 'inspect', eh: 'inspect', thermal: 'inspect', cs: 'inspect', csck: 'cs', qr: 'fire', hyd: 'fire', status: 'fire', floor: 'status', docs: 'main', set: 'main', risk: 'set', map: 'main', cad: 'main', spec: 'main', tbm: 'docs', nw: 'docs', log: 'docs', ahu: 'docs', clim: 'docs', use: 'docs', rep: 'docs', kw: 'set', uhr: 'use', att: 'docs', attup: 'att' };
+const PARENT = { inspect: 'main', fire: 'inspect', eh: 'inspect', thermal: 'inspect', cs: 'inspect', csck: 'cs', qr: 'fire', hyd: 'fire', hydfl: 'hyd', eqpick: 'fire', status: 'fire', floor: 'status', docs: 'main', set: 'main', risk: 'set', map: 'main', cad: 'main', spec: 'main', tbm: 'docs', nw: 'docs', log: 'docs', ahu: 'docs', clim: 'docs', use: 'docs', rep: 'docs', kw: 'set', uhr: 'use', att: 'docs', attup: 'att' };
 function back() { if (S.view === 'pdf') return go((S.pdf && S.pdf.from) || 'main'); if (S.view === 'csck') return csLeave(); if (S.view === 'risk' && S.rk && S.rk.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; if (S.view === 'nw' && !nwLeaveOk()) return; if (S.view === 'log' && !lgLeaveOk()) return; if (S.view === 'ahu' && !ahuLeaveOk()) return; if ((S.view === 'clim' || S.view === 'use') && !clLeaveOk()) return; if (S.view === 'rep') return repBack(); if (S.view === 'uhr') return uhBack(); if (S.view === 'tbm' && S.tbm && S.tbm.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; go(PARENT[S.view] || 'main'); }
 
 function topbar(sub, title) {
@@ -892,6 +897,13 @@ async function doLogin() {
     loggedIn(r);
     await boot();
   } catch (e) { S.busy = false; S.pin = ''; render(); $('pinMsg').textContent = '연결 오류: ' + (e.message || e); }
+}
+/** QR 화면(eq.html)에서 「앱에 로그인하기」로 왔으면 로그인 뒤 그 QR 화면으로 돌려보냄 (같은 사이트 eq.html?eq=고유번호 만) */
+function afterLogin() {
+  let a = '';
+  try { a = sessionStorage.getItem('ws_after') || ''; sessionStorage.removeItem('ws_after'); } catch (e) {}
+  try { const u = new URL(a, location.href); if (u.origin === location.origin && /\/eq\.html$/.test(u.pathname) && /^[2-9a-km-np-z]{12}$/.test(u.searchParams.get('eq') || '')) { location.href = u.href; return true; } } catch (e) {}
+  return false;
 }
 function loggedIn(r) { S.token = r.token; store('ws_token', r.token); SHELL.set(r.token); S.user = r.user; S.pin = ''; S.sign = null; }
 const OFFMSG = '이 기기에 저장했습니다. 신호가 잡히면 자동으로 보냅니다';   // 서버에 들어가기 전에는 「저장되었습니다」라고 하지 않음 (결정 222)
@@ -999,6 +1011,7 @@ async function boot(fromStart) {
   if (!r.needSign) setTimeout(prefetch, 0);   // 메인이 뜬 뒤 TBM·명일 작업을 뒤에서 미리 받음
   if (!r.needSign) store('ws_main', JSON.stringify({ sid: r.user.staff_id, user: r.user, fire: r.fire, docs: r.docs, menuOff: S.menuOff }));   // 다음 접속 때 먼저 보여 줄 메인 화면
   if (r.needSign) { S.sign = { mode: 'token', name: r.user.name, part: r.user.part, busy: false, msg: '' }; S.view = 'sign'; render(); return; }   // 표는 있는데 오늘 서명이 없음
+  if (afterLogin()) return;
   if (['login', 'loading', 'retry', 'sign'].indexOf(S.view) !== -1) go('main');
   else if (S.view === 'main') render();   // 먼저 보여 준 지난번 화면을 새 숫자로
 }
@@ -2542,17 +2555,18 @@ window.WS_CAD = {
 };
 
 /* ── 개선 A: 입력 기간 안내 ── */
-function periodBanner(st, counts) {
+function periodBanner(st, counts, u) {   // u = 세는 단위 (소화기 「대」, 소화전·공기호흡기 「곳」)
+  u = u || '대';
   if (!st) return '';
   const w = st.window, d = st.day, m = Number(st.ym.slice(5, 7));
   if (!st.isCurrent) return st.ym < st.curYm ? '<div class="banner b-gray">' + ymLabel(st.ym) + ' · 입력 기간 ' + m + '/' + w.start + '~' + m + '/' + w.end + ' · 마감됨</div>' : '';
   if (d < w.start) return '<div class="banner b-gray">이번 달 입력은 ' + m + '월 ' + w.start + '일부터 받습니다.</div>';
   if (d <= w.end) {
     const left = w.end - d;
-    if (counts.wait > 0 && left <= 1) return '<div class="banner b-warn"><b>마감 임박</b> · ' + m + '월 ' + w.end + '일까지 · 점검 전 <b>' + counts.wait + '대</b></div>';
-    return '<div class="banner b-info">이번 달 입력 기간 ' + m + '월 ' + w.start + '일 ~ ' + w.end + '일 · ' + (left === 0 ? '오늘 마감' : left + '일 남음') + ' · 점검 전 ' + counts.wait + '대</div>';
+    if (counts.wait > 0 && left <= 1) return '<div class="banner b-warn"><b>마감 임박</b> · ' + m + '월 ' + w.end + '일까지 · 점검 전 <b>' + counts.wait + u + '</b></div>';
+    return '<div class="banner b-info">이번 달 입력 기간 ' + m + '월 ' + w.start + '일 ~ ' + w.end + '일 · ' + (left === 0 ? '오늘 마감' : left + '일 남음') + ' · 점검 전 ' + counts.wait + u + '</div>';
   }
-  if (counts.miss > 0) return '<div class="banner b-red"><b>기한 지남</b> · 미입력 ' + counts.miss + '대 · 지금 입력해도 받고 「기한 후」로 표시합니다</div>';
+  if (counts.miss > 0) return '<div class="banner b-red"><b>기한 지남</b> · 미입력 ' + counts.miss + u + ' · 지금 입력해도 받고 「기한 후」로 표시합니다</div>';
   return '<div class="banner b-gray">이번 달 입력 기간이 끝났습니다.</div>';
 }
 
@@ -2566,52 +2580,166 @@ function renderFire() {
   return topbar('점검 ›', '소화기 점검') + '<div class="wrap list">' +
     '<div class="card" style="padding:var(--sp-3) var(--sp-4);display:flex;flex-direction:column;gap:var(--sp-2)"><div style="display:flex;justify-content:space-between;font-size:var(--size-m)"><span style="color:var(--muted)">이번 달 점검</span><span><b style="color:var(--green)">' + done + '</b> / ' + c.total + '대</span></div>' +
     '<div class="bar" style="height:8px"><span style="width:' + pct + '%;background:var(--green)"></span></div></div>' +
-    periodBanner(st, c) +
-    '<button class="row" onclick="openQr()"><span class="ico" style="background:var(--blue-bg);color:var(--blue);width:48px;height:48px">' + ICON.qr + '</span><span class="fname"><b style="font-size:var(--size-l)">① 소화기, 소화전, 공기호흡기 QR 관리 · 인쇄</b><small>매장별 소화기 등록 · 삭제 · QR' + (CAN_PRINT ? ' · 출력' : ' (출력은 PC에서)') + '</small></span>' + ICON.chev + '</button>' +
+    periodBanner(st, c) + eqNotice() +
+    '<button class="row" onclick="openQr()"><span class="ico" style="background:var(--blue-bg);color:var(--blue);width:48px;height:48px">' + ICON.qr + '</span><span class="fname"><b style="font-size:var(--size-l)">① 소화기, 소화전, 공기호흡기 QR 관리 · 인쇄</b><small>소화기 · 소화전 · 공기호흡기 등록 · 삭제 · QR' + (CAN_PRINT ? ' · 출력' : ' (출력은 PC에서)') + '</small></span>' + ICON.chev + '</button>' +
     '<button class="row" onclick="openStatus()"><span class="ico" style="background:var(--green-bg);color:var(--green);width:48px;height:48px">' + ICON.stat + '</span><span class="fname"><b style="font-size:var(--size-l)">② 매장별 소화기 점검 현황</b><small>월별 · 층별(B1~6F) · 매장별</small></span>' + ICON.chev + '</button>' +
-    '<button class="row" onclick="go(\'hyd\')"><span class="ico" style="background:var(--blue-bg);color:var(--blue);width:48px;height:48px">' + ICON.hyd + '</span><span class="fname"><b style="font-size:var(--size-l)">③ 층별 소화전, 공기호흡기 점검 현황</b><small>수정중</small></span>' + ICON.chev + '</button>' +
+    '<button class="row" onclick="openHyd()"><span class="ico" style="background:var(--green-bg);color:var(--green);width:48px;height:48px">' + ICON.stat + '</span><span class="fname"><b style="font-size:var(--size-l)">③ 층별 소화전, 공기호흡기 점검 현황</b><small>월별 · 층별(B1~6F) · 소화전 · 공기호흡기</small></span>' + ICON.chev + '</button>' +
+    '<button class="row" onclick="openEqPick(\'hyd\')"><span class="ico" style="background:var(--blue-bg);color:var(--blue);width:48px;height:48px">' + ICON.hyd + '</span><span class="fname"><b style="font-size:var(--size-l)">④ 소화전 점검 입력</b><small>층·위치를 고르고 사진 찍기 · 점검자는 내 이름</small></span>' + ICON.chev + '</button>' +
+    '<button class="row" onclick="openEqPick(\'air\')"><span class="ico" style="background:var(--blue-bg);color:var(--blue);width:48px;height:48px">' + ICON.air + '</span><span class="fname"><b style="font-size:var(--size-l)">⑤ 공기호흡기 점검 입력</b><small>충전량 · 압력조절기 · 외관 사진</small></span>' + ICON.chev + '</button>' +
     '</div>';
 }
-/* ③ 소화전·공기호흡기: 점검 양식은 추후 올림 → 그때까지 「수정중」 (결정 170) */
+/* ── ③ 층별 소화전·공기호흡기 점검 현황 · ④⑤ 점검 입력 고르기 (결정 224, supabase/23_fire_equip.sql) ──
+   점검 입력 화면은 별도 페이지 eq.html (QR을 찍은 화면과 같음). 여기서는 고르기·현황만 */
+const EQ_KIND = { hyd: '소화전', air: '공기호흡기' };
+async function openHyd(ym) { go('hyd'); await loadHyd(ym || ''); }
+async function loadHyd(ym) { S.hq = null; render(); S.hq = await call('eqStatus', ym); S.hym = S.hq.ym; render(); }
 function renderHyd() {
-  return topbar('소화기 점검 ›', '층별 소화전, 공기호흡기 점검 현황') + '<div class="wrap list"><div class="banner b-gray">수정중입니다. 소화전·공기호흡기 점검 양식이 올라오면 이 화면을 만듭니다.</div></div>';
+  const st = S.hq, T = topbar('소화기 점검 ›', '층별 소화전, 공기호흡기 점검 현황');
+  if (!st) return T + '<div class="wrap"><div class="banner b-gray">불러오는 중…</div></div>';
+  const c = st.counts, idx = st.months.indexOf(st.ym);
+  const prev = idx > 0 ? st.months[idx - 1] : '';
+  const next = idx >= 0 && idx < st.months.length - 1 ? st.months[idx + 1] : '';
+  const nk = (it, k) => it.filter(i => i.kind === k).length;
+  const floors = FLOORS.map(fl => {
+    const it = st.items.filter(i => i.floor === fl);
+    if (!it.length) return '';
+    const fc = counts(it);
+    const p = n => Math.round(n / fc.total * 100) + '%';
+    return '<button class="floor" onclick="openHydFloor(\'' + fl + '\')"><span class="elbow"></span><b style="width:34px;font-size:var(--size-m)">' + fl + '</b>' +
+      '<span class="fname" style="gap:var(--sp-1)"><span class="bar"><span style="width:' + p(fc.ok) + ';background:var(--green)"></span><span style="width:' + p(fc.bad) + ';background:var(--orange)"></span><span style="width:' + p(fc.miss) + ';background:var(--navy)"></span></span><small>소화전 ' + nk(it, 'hyd') + ' · 공기호흡기 ' + nk(it, 'air') + '</small></span>' +
+      (fc.miss ? '<span class="chip c-miss">미입력 ' + fc.miss + '</span>' : '') + (fc.bad ? '<span class="chip c-bad">이상 ' + fc.bad + '</span>' : '') +
+      '<b style="font-size:var(--size-s);color:var(--green)">' + (fc.ok + fc.bad) + '/' + fc.total + '</b>' + ICON.chev + '</button>';
+  }).join('');
+  const m = Number(st.ym.slice(5, 7));
+  return T + '<div class="wrap list">' +
+    '<div class="mnav"><button class="btn" aria-label="이전 달" ' + (prev ? 'onclick="loadHyd(\'' + prev + '\')"' : 'disabled') + '>‹</button><div><b style="font-size:var(--size-l)">' + ymLabel(st.ym) + '</b><small style="color:var(--muted)">입력 기간 ' + m + '/' + st.window.start + ' ~ ' + m + '/' + st.window.end + '</small></div><button class="btn" aria-label="다음 달" ' + (next ? 'onclick="loadHyd(\'' + next + '\')"' : 'disabled') + '>›</button></div>' +
+    periodBanner(st, c, '곳') +
+    '<div class="card legend"><span><span class="dot" style="background:var(--green)"></span>점검완료 <b>' + c.ok + '</b></span><span><span class="dot" style="background:var(--orange)"></span>이상 있음 <b>' + c.bad + '</b></span><span><span class="dot" style="background:var(--line)"></span>점검 전 <b>' + c.wait + '</b></span><span><span class="dot" style="background:var(--navy)"></span>미입력 <b>' + c.miss + '</b></span></div>' +
+    '<div class="card tree"><div class="tree-root">' + ymLabel(st.ym) + ' · 전체 ' + c.total + '곳 (소화전 ' + nk(st.items, 'hyd') + ' · 공기호흡기 ' + nk(st.items, 'air') + ')</div>' +
+    (floors || '<div style="padding:var(--sp-3) 0;color:var(--muted);font-size:var(--size-m)">이 달에 등록된 소화전·공기호흡기가 없습니다. ① QR 관리에서 등록해 주세요.</div>') + '</div>' +
+    '<button class="btn" onclick="loadHyd(\'' + st.ym + '\')">새로고침</button></div>';
+}
+function openHydFloor(fl) { S.hfloor = fl; go('hydfl'); }
+function renderHydFloor() {
+  const st = S.hq, it = st.items.filter(i => i.floor === S.hfloor), m = Number(st.ym.slice(5, 7));
+  const chips = FLOORS.map(f => '<button class="fl' + (f === S.hfloor ? ' on' : '') + '" aria-pressed="' + (f === S.hfloor) + '" onclick="S.hfloor=\'' + f + '\';render()">' + f + '</button>').join('');
+  const sect = k => {
+    const list = it.filter(i => i.kind === k);
+    if (!list.length) return '';
+    const done = list.filter(i => i.state === 'ok' || i.state === 'bad').length;
+    return '<div class="store"><div class="store-h"><b>' + EQ_KIND[k] + '</b><small style="color:var(--muted)">' + done + ' / ' + list.length + '</small></div>' +
+      list.map(i => {
+        const has = i.state === 'ok' || i.state === 'bad';
+        const sub = has ? h(i.by) + ' · ' + h(String(i.at).slice(5, 16)) + ' 입력' + (i.late ? ' · 기한 후' : '') : (i.state === 'miss' ? m + '월 ' + st.window.end + '일까지 입력 없음' : m + '월 ' + st.window.end + '일까지 입력 받는 중');
+        return '<button class="feb" ' + (has ? 'onclick="hydDetail(\'' + i.checkId + '\')"' : 'disabled') + '><span class="fname"><b>' + h(i.place) + '</b><small>' + sub + '</small></span>' +
+          (i.late ? '<span class="chip c-wait">기한 후</span>' : '') + '<span class="chip ' + STATE[i.state][1] + '">' + STATE[i.state][0] + '</span></button>';
+      }).join('') + '</div>';
+  };
+  return topbar('층별 점검 현황 › ' + ymLabel(st.ym) + ' ›', S.hfloor + ' · 소화전 ' + it.filter(i => i.kind === 'hyd').length + ' · 공기호흡기 ' + it.filter(i => i.kind === 'air').length) + '<div class="wrap list">' +
+    '<div style="display:flex;gap:var(--sp-1);overflow-x:auto;padding-bottom:var(--sp-1)">' + chips + '</div>' +
+    (it.length ? sect('hyd') + sect('air') : '<div class="banner b-gray">' + S.hfloor + '에 등록된 소화전·공기호흡기가 없습니다.</div>') +
+    '<small style="text-align:center;color:var(--muted)">점검완료 · 이상 있음을 누르면 입력한 사진과 내용을 봅니다</small></div>';
+}
+async function hydDetail(id) {
+  dialog('<div style="display:flex;justify-content:center;padding:var(--sp-8)"><span class="spin" style="color:var(--blue);width:28px;height:28px"></span></div>');
+  try {
+    const r = await call('eqDetail', id);
+    if (!r.ok) { closeDialog(); toast(r.error); return; }
+    dialog('<div style="display:flex;align-items:center;margin-bottom:var(--sp-2)"><div class="fname"><b style="font-size:var(--size-l)">' + h(r.name) + '</b><small>점검자 ' + h(r.by) + ' · ' + h(r.at) + ' 입력' + (r.late ? ' · 기한 후' : '') + '</small></div><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
+      r.items.map(i => '<div style="display:flex;flex-direction:column;gap:var(--sp-2);padding:var(--sp-3) 0;border-top:1px solid var(--line)"><div style="display:flex;align-items:center;justify-content:space-between"><b style="font-size:var(--size-m)">' + h(i.label) + '</b><span class="chip ' + (i.bad ? 'c-bad' : 'c-ok') + '">' + h(i.text) + '</span></div>' +
+        (i.memo ? '<div style="font-size:var(--size-m)">' + h(i.memo) + '</div>' : '') +
+        '<div class="ph43">' + (i.photo ? '<img src="' + h(i.photo) + '" alt="' + h(i.label) + ' 사진">' : '<small>사진 없음</small>') + '</div></div>').join(''));
+  } catch (e) { closeDialog(); }
+}
+/* ④⑤ 점검 입력: 이번 달 장비 목록에서 고르면 eq.html (QR을 찍은 것과 같은 입력 화면)이 열림 */
+async function openEqPick(kind) { S.eqKind = kind; S.ep = null; go('eqpick'); await loadEqPick(); }
+async function loadEqPick() { const r = await call('eqStatus', ''); S.ep = r; if (S.view === 'eqpick') render(); }
+function eqGo(token) { location.href = 'eq.html?eq=' + token + '&from=app'; }
+function renderEqPick() {
+  const k = S.eqKind, T = topbar('소화기 점검 ›', EQ_KIND[k] + ' 점검 입력');
+  if (!S.ep) return T + '<div class="wrap"><div class="banner b-gray">불러오는 중…</div></div>';
+  const it = S.ep.items.filter(i => i.kind === k), m = Number(S.ep.ym.slice(5, 7));
+  const body = FLOORS.map(fl => {
+    const list = it.filter(i => i.floor === fl);
+    if (!list.length) return '';
+    return '<div class="floorh">' + fl + '</div><div class="store">' + list.map(i => {
+      const has = i.state === 'ok' || i.state === 'bad';
+      return '<button class="feb" onclick="eqGo(\'' + i.token + '\')"><span class="fname"><b>' + h(i.place) + '</b><small>' + (has ? h(i.by) + ' · ' + h(String(i.at).slice(5, 16)) + ' 입력' + (i.late ? ' · 기한 후' : '') : m + '월 점검 전') + '</small></span>' +
+        '<span class="chip ' + STATE[i.state][1] + '">' + STATE[i.state][0] + '</span>' + ICON.chev + '</button>';
+    }).join('') + '</div>';
+  }).join('');
+  return T + '<div class="wrap list">' + periodBanner(S.ep, counts(it), '곳') +
+    (it.length ? '<small style="color:var(--muted)">점검할 ' + EQ_KIND[k] + '을(를) 누르면 사진을 찍는 입력 화면이 열립니다. 점검자는 로그인한 내 이름으로 저장됩니다.</small>' + body
+      : '<div class="banner b-gray">등록된 ' + EQ_KIND[k] + '이(가) 없습니다. ① QR 관리에서 먼저 등록해 주세요.</div>') + '</div>';
+}
+/* 현황·고르기 화면을 열어 두면 1분마다, 입력 화면에서 돌아오면 바로 다시 읽음 */
+let eqBusy = false;
+async function quietEq() {
+  if (eqBusy || document.hidden || ['hyd', 'hydfl', 'eqpick'].indexOf(S.view) === -1 || document.querySelector('.dialog-back')) return;
+  eqBusy = true;
+  try {
+    const v = S.view, ym = v === 'eqpick' ? '' : (S.hq ? S.hq.ym : '');
+    const r = await run('eqStatus', S.token, ym);
+    if (r && r.ok && S.view === v) { if (v === 'eqpick') S.ep = r; else if (S.hq && r.ym === S.hq.ym) S.hq = r; render(); }
+  } catch (e) { /* 다음 번에 다시 */ } finally { eqBusy = false; }
+}
+setInterval(quietEq, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) quietEq(); });
+window.addEventListener('pageshow', e => { if (e.persisted) quietEq(); });
+
+/** 소화기 점검 메뉴 맨 위: 소화전·공기호흡기 이번 달 진행 + 기한 지남·마감 임박 알림 (결정 224) */
+function eqNotice() {
+  const e = S.eqc;
+  if (!e || !e.counts || !e.counts.total) return '';
+  const c = e.counts, d = e.day, w = e.window, done = c.ok + c.bad, m = Number(e.ym.slice(5, 7));
+  let msg = '';
+  if (c.miss > 0) msg = '<div class="banner b-red"><b>소화전·공기호흡기 기한 지남</b> · 미입력 <b>' + c.miss + '곳</b> · 지금 입력해도 받고 「기한 후」로 표시합니다</div>';
+  else if (c.wait > 0 && d <= w.end && w.end - d <= 1) msg = '<div class="banner b-warn"><b>소화전·공기호흡기 마감 임박</b> · ' + m + '월 ' + w.end + '일까지 · 점검 전 <b>' + c.wait + '곳</b></div>';
+  return '<div class="card" style="padding:var(--sp-3) var(--sp-4);display:flex;justify-content:space-between;font-size:var(--size-m)"><span style="color:var(--muted)">이번 달 소화전·공기호흡기</span><span><b style="color:var(--green)">' + done + '</b> / ' + c.total + '곳</span></div>' + msg;
 }
 
 /* ── ① QR 관리 ── */
-async function openQr() { go('qr'); await loadQr(); }
+const QR_KIND = { fe: '소화기', hyd: '소화전', air: '공기호흡기' };
+async function openQr() { S.qrKind = 'fe'; S.qr = null; go('qr'); await loadQr(); }
 async function loadQr() {
-  const r = await call('feList');
+  const k = S.qrKind || 'fe';
+  const r = k === 'fe' ? await call('feList') : await call('eqList', k);
+  if ((S.qrKind || 'fe') !== k) return;   // 그 사이 다른 탭을 눌렀으면 이 답은 버림
   S.qr = r; S.sel = {};
   render();
 }
-function qrUrl(token) { return (S.qr && S.qr.execUrl ? S.qr.execUrl : EXEC_URL) + '?fe=' + token; }
+function qrTab(k) { if ((S.qrKind || 'fe') === k) return; S.qrKind = k; S.qr = null; S.sel = {}; S.q = ''; render(); loadQr(); }
+// 소화기 QR은 ?fe=, 소화전·공기호흡기 QR은 ?eq= (바로가기 index.html 이 eq.html 로 보냄)
+function qrUrl(token) { return (S.qr && S.qr.execUrl ? S.qr.execUrl : EXEC_URL) + ((S.qrKind || 'fe') === 'fe' ? '?fe=' : '?eq=') + token; }
 function renderQr() {
-  const r = S.qr;
+  const r = S.qr, kind = S.qrKind || 'fe', kn = QR_KIND[kind];
   const selN = Object.keys(S.sel).filter(k => S.sel[k]).length;
   let body = '<div class="banner b-gray">불러오는 중…</div>';
+  const row = i => '<div class="fe"><input type="checkbox" aria-label="' + h(i.name) + ' 고르기" ' + (S.sel[i.id] ? 'checked' : '') + ' onchange="S.sel[\'' + i.id + '\']=this.checked;render()">' +
+    '<button class="qrmini" data-qr="' + h(i.token) + '" onclick="bigQr(\'' + i.id + '\')" aria-label="' + h(i.name) + ' QR 크게 보기"></button>' +
+    '<span class="fname"><b>' + h(i.name) + '</b><small>' + h(i.id) + '</small></span></div>';
   if (r) {
     const q = S.q.trim().toLowerCase().replace(/\s+/g, '');
-    const items = r.items.filter(i => !q || (i.store + i.name + i.floor).toLowerCase().replace(/\s+/g, '').indexOf(q) !== -1);
-    if (!items.length) body = '<div class="banner b-gray">' + (r.items.length ? '검색 결과가 없습니다.' : '등록된 소화기가 없습니다. [+ 등록]으로 추가하세요.') + '</div>';
+    const items = r.items.filter(i => !q || ((kind === 'fe' ? i.store : '') + i.name + i.floor).toLowerCase().replace(/\s+/g, '').indexOf(q) !== -1);
+    if (!items.length) body = '<div class="banner b-gray">' + (r.items.length ? '검색 결과가 없습니다.' : '등록된 ' + kn + '이(가) 없습니다. [+ 등록]으로 추가하세요.') + '</div>';
     else {
       body = '';
       FLOORS.forEach(fl => {
         const fItems = items.filter(i => i.floor === fl);
         if (!fItems.length) return;
         body += '<div class="floorh">' + fl + '</div>';
+        if (kind !== 'fe') { body += '<div class="store">' + fItems.map(row).join('') + '</div>'; return; }   // 소화전·공기호흡기는 층 아래에 바로 (매장 묶음 없음)
         const stores = [...new Set(fItems.map(i => i.store))];
         stores.forEach(s => {
           const list = fItems.filter(i => i.store === s);
-          body += '<div class="store"><div class="store-h"><b>' + h(s) + '</b><small style="color:var(--muted)">' + list.length + '대</small></div>' +
-            list.map(i => '<div class="fe"><input type="checkbox" aria-label="' + h(i.name) + ' 고르기" ' + (S.sel[i.id] ? 'checked' : '') + ' onchange="S.sel[\'' + i.id + '\']=this.checked;render()">' +
-              '<button class="qrmini" data-qr="' + h(i.token) + '" onclick="bigQr(\'' + i.id + '\')" aria-label="' + h(i.name) + ' QR 크게 보기"></button>' +
-              '<span class="fname"><b>' + h(i.name) + '</b><small>' + h(i.id) + '</small></span></div>').join('') + '</div>';
+          body += '<div class="store"><div class="store-h"><b>' + h(s) + '</b><small style="color:var(--muted)">' + list.length + '대</small></div>' + list.map(row).join('') + '</div>';
         });
       });
     }
   }
-  return topbar('소화기 점검 ›', '소화기 QR 관리') + '<div class="wrap list">' +
-    '<div class="tools"><input class="inp" type="search" placeholder="매장명 · 소화기 이름 · 층 검색" aria-label="검색" value="' + h(S.q) + '" oninput="S.q=this.value;renderKeepFocus(this)">' +
+  const tabs = '<div class="seg" role="group" aria-label="종류">' + ['fe', 'hyd', 'air'].map(k => '<button class="' + (k === kind ? 'on' : '') + '" aria-pressed="' + (k === kind) + '" onclick="qrTab(\'' + k + '\')">' + QR_KIND[k] + '</button>').join('') + '</div>';
+  return topbar('소화기 점검 ›', '소화기, 소화전, 공기호흡기 QR 관리') + '<div class="wrap list">' + tabs +
+    '<div class="tools"><input class="inp" type="search" placeholder="' + (kind === 'fe' ? '매장명 · 소화기 이름 · 층 검색' : '위치 · 층 검색') + '" aria-label="검색" value="' + h(S.q) + '" oninput="S.q=this.value;renderKeepFocus(this)">' +
     '<button class="btn pri" onclick="addDialog()">+ 등록</button>' +
     (CAN_PRINT ? '<button class="btn" onclick="printLabels()" ' + (selN ? '' : 'disabled') + '>' + ICON.print + ' 출력 (' + selN + ')</button>' : '') +
     '<button class="btn warn" onclick="delDialog()" ' + (selN ? '' : 'disabled') + '>삭제 (' + selN + ')</button></div>' +
@@ -2637,6 +2765,16 @@ function bigQr(id) {
   new QRCode($('bigqr'), { text: qrUrl(i.token), width: 240, height: 240, correctLevel: QRCode.CorrectLevel.M });
 }
 function addDialog() {
+  const kind = S.qrKind || 'fe', kn = QR_KIND[kind];
+  if (kind !== 'fe') {
+    dialog('<h2 style="margin:0 0 var(--sp-3);font-size:var(--size-l)">' + kn + ' 등록</h2>' +
+      '<label style="display:flex;flex-direction:column;gap:var(--sp-1);font-size:var(--size-s);color:var(--sub);margin-bottom:var(--sp-3)">층<select id="aFloor" class="inp">' + FLOORS.map(f => '<option' + (f === S.floor ? ' selected' : '') + '>' + f + '</option>').join('') + '</select></label>' +
+      '<label style="display:flex;flex-direction:column;gap:var(--sp-1);font-size:var(--size-s);color:var(--sub);margin-bottom:var(--sp-2)">위치 (직접 적기)<input id="aPlace" class="inp" maxlength="30" placeholder="예: 동측 계단 앞" onkeydown="if(event.key===\'Enter\')doAdd()"></label>' +
+      '<small style="color:var(--muted)">이름은 「3F 동측 계단 앞 ' + kn + '」처럼 층과 위치를 이어서 만들어집니다.</small>' +
+      '<div id="aMsg" role="alert" style="color:var(--red);font-size:var(--size-s);min-height:18px;margin-top:var(--sp-1)"></div>' +
+      '<div style="display:flex;gap:var(--sp-2);margin-top:var(--sp-2)"><button class="btn big" style="flex:1" onclick="closeDialog()">취소</button><button id="aBtn" class="btn big pri" style="flex:2" onclick="doAdd()">등록하고 QR 만들기</button></div>');
+    return;
+  }
   const stores = S.qr ? [...new Set(S.qr.items.map(i => i.store))] : [];
   dialog('<h2 style="margin:0 0 var(--sp-3);font-size:var(--size-l)">소화기 등록</h2>' +
     '<label style="display:flex;flex-direction:column;gap:var(--sp-1);font-size:var(--size-s);color:var(--sub);margin-bottom:var(--sp-3)">층<select id="aFloor" class="inp">' + FLOORS.map(f => '<option' + (f === S.floor ? ' selected' : '') + '>' + f + '</option>').join('') + '</select></label>' +
@@ -2647,25 +2785,26 @@ function addDialog() {
     '<div style="display:flex;gap:var(--sp-2);margin-top:var(--sp-2)"><button class="btn big" style="flex:1" onclick="closeDialog()">취소</button><button id="aBtn" class="btn big pri" style="flex:2" onclick="doAdd()">등록하고 QR 만들기</button></div>');
 }
 async function doAdd() {
-  const d = { floor: $('aFloor').value, store: $('aStore').value, count: $('aCount').value };
+  const kind = S.qrKind || 'fe';
+  const d = kind === 'fe' ? { floor: $('aFloor').value, store: $('aStore').value, count: $('aCount').value } : { kind, floor: $('aFloor').value, place: $('aPlace').value };
   $('aBtn').disabled = true; $('aBtn').innerHTML = '<span class="spin"></span>';
   try {
-    const r = await call('feAdd', d);
+    const r = await call(kind === 'fe' ? 'feAdd' : 'eqAdd', d);
     if (!r.ok) { $('aMsg').textContent = r.error; $('aBtn').disabled = false; $('aBtn').textContent = '등록하고 QR 만들기'; return; }
-    S.floor = d.floor; closeDialog(); toast(r.added.join(', ') + ' 등록'); S.qr = r; S.sel = {}; render();
+    S.floor = d.floor; closeDialog(); toast((kind === 'fe' ? r.added.join(', ') : r.added) + ' 등록'); if ((S.qrKind || 'fe') === kind) { S.qr = r; S.sel = {}; render(); }
   } catch (e) { $('aBtn').disabled = false; $('aBtn').textContent = '등록하고 QR 만들기'; }
 }
 function delDialog() {
-  const ids = Object.keys(S.sel).filter(k => S.sel[k]);
+  const kind = S.qrKind || 'fe', kn = QR_KIND[kind], ids = Object.keys(S.sel).filter(k => S.sel[k]);
   const names = S.qr.items.filter(i => ids.indexOf(i.id) !== -1).map(i => i.name);
-  dialog('<h2 style="margin:0 0 var(--sp-2);font-size:var(--size-l)">소화기 ' + ids.length + '대 삭제</h2><p style="margin:0 0 var(--sp-2);font-size:var(--size-m);line-height:1.6">' + names.map(h).join('<br>') + '</p>' +
+  dialog('<h2 style="margin:0 0 var(--sp-2);font-size:var(--size-l)">' + kn + ' ' + ids.length + (kind === 'fe' ? '대' : '곳') + ' 삭제</h2><p style="margin:0 0 var(--sp-2);font-size:var(--size-m);line-height:1.6">' + names.map(h).join('<br>') + '</p>' +
     '<p style="margin:0 0 var(--sp-3);font-size:var(--size-s);color:var(--muted)">목록과 현황에서 빠지고, 붙어 있는 QR을 찍으면 「삭제된 QR」로 나옵니다. 지난달까지의 점검 기록은 남습니다.</p>' +
     '<div style="display:flex;gap:var(--sp-2)"><button class="btn big" style="flex:1" onclick="closeDialog()">취소</button><button id="dBtn" class="btn big warn" style="flex:2" onclick="doDel()">삭제</button></div>');
 }
 async function doDel() {
-  const ids = Object.keys(S.sel).filter(k => S.sel[k]);
+  const kind = S.qrKind || 'fe', ids = Object.keys(S.sel).filter(k => S.sel[k]);
   $('dBtn').disabled = true;
-  try { const r = await call('feDelete', ids); closeDialog(); toast(r.count + '대 삭제'); S.qr = r; S.sel = {}; render(); } catch (e) { $('dBtn').disabled = false; }
+  try { const r = kind === 'fe' ? await call('feDelete', ids) : await call('eqDelete', ids, kind); closeDialog(); toast(r.count + (kind === 'fe' ? '대' : '곳') + ' 삭제'); S.qr = r; S.sel = {}; render(); } catch (e) { $('dBtn').disabled = false; }
 }
 const LABEL_PRESETS = [[50, 50], [40, 40], [30, 34], [50, 30]];
 // 라벨 프린터: BIXOLON SLP-TX400 (203dpi = 8점/mm). QR 한 칸이 프린터 점(dot) 정수 배가 되게 그려 흐림 없이 찍히게 함
@@ -2698,7 +2837,7 @@ function labelHtml(i, L) {
   const pad = 1.5, gap = 0.8, textMm = 2.8;
   const maxMm = Math.max(10, Math.min(L.w - pad * 2, L.h - pad * 2 - gap - textMm));
   const q = qrImage(i.token, maxMm);
-  const name = i.store + ' 소화기' + i.no;
+  const name = i.label || (i.store + ' 소화기' + i.no);   // 소화전·공기호흡기는 「3F 동측 계단 앞 소화전」 통째로
   // 글자 수에 맞춰 크기 자동 (최대 7pt, 최소 4.5pt) — 1pt ≈ 0.353mm, 한글 1자 ≈ 1em
   const units = Array.from(name).reduce((n, c) => n + (/[\x00-\x7F]/.test(c) ? 0.55 : 1), 0);
   const pt = Math.max(4.5, Math.min(7, (L.w - pad * 2) / Math.max(units, 1) / 0.353));
@@ -2921,13 +3060,15 @@ function climFloors() {
   return fl;
 }
 function climLast(f, z) { const a = S.clim.srv.recs.filter(r => r.floor === f && r.zone === z); return a[a.length - 1]; }
-function climDirty() { return Object.keys(S.clim.v).some(k => S.clim.v[k].t !== '' || S.clim.v[k].h !== ''); }
+function climBase(k) { const p = k.split('|'), l = climLast(p[0], p[1]); return l ? { t: String(l.t), h: String(l.h) } : { t: '', h: '' }; }   // 오늘 마지막 저장값 (결정 226)
+function climNew(k) { const v = S.clim.v[k], b = climBase(k); return !!v && (v.t !== '' || v.h !== '') && (v.t !== b.t || v.h !== b.h); }   // 고쳐서 새로 저장할 구역
+function climDirty() { return Object.keys(S.clim.v).some(climNew); }
 function climLeaveOk() { return !(S.clim && S.clim.srv && climDirty()) || confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?'); }
 function climGo(i) { const fl = climFloors(); S.clim.fi = S.climFi = Math.max(0, Math.min(fl.length - 1, i)); render(); window.scrollTo(0, 0); }
-function climVal(k) { return S.clim.v[k] || { t: '', h: '' }; }
+function climVal(k) { return S.clim.v[k] || climBase(k); }
 function climIn(el) {
   const g = S.clim, k = el.dataset.z, f = el.dataset.f, val = clNum(el.value); g.err = '';
-  if (k) { (g.v[k] = g.v[k] || { t: '', h: '' })[f] = val; }
+  if (k) { (g.v[k] = g.v[k] || climBase(k))[f] = val; el.classList.remove('saved'); }
   else { g.out[f] = val; g.out.auto = false; }
   el.classList.toggle('bad', f === 't' ? clBad(val, k ? -10 : -30, 50) : clBad(val, 0, 100));
   el.classList.toggle('empty', !val);
@@ -2950,10 +3091,10 @@ function renderClim() {
   if (!g || !g.srv) return clTop() + '<div class="wrap list">' + clTabs('clim') + '<div class="banner b-gray">불러오는 중…</div></div>';
   const fl = climFloors(), pc = lgPc(), done = f => f.zs.filter(z => climLast(f.f, z)).length + '/' + f.zs.length;
   const zoneRow = (f, z) => {
-    const k = f.f + '|' + z, v = climVal(k), last = climLast(f.f, z);
-    return '<div class="zr"><b>' + z + '</b>' + climBox('data-z="' + k + '" data-f="t" aria-label="' + CL_FL[f.f][0] + ' ' + z + ' 실내온도"', v.t, '℃', clBad(v.t, -10, 50) ? ' bad' : '') +
-      climBox('data-z="' + k + '" data-f="h" aria-label="' + CL_FL[f.f][0] + ' ' + z + ' 실내습도"', v.h, '%', clBad(v.h, 0, 100) ? ' bad' : '') +
-      '<div class="sub"><span>' + (last ? '오늘 ' + last.at + ' · ' + last.t + '℃ ' + last.h + '%' : '오늘 기록 없음') + '</span><span id="di-' + k.replace('|', '-') + '">' + clDiTag(v.t, v.h) + '</span></div></div>';
+    const k = f.f + '|' + z, v = climVal(k), sv = !g.v[k] && climLast(f.f, z) ? ' saved' : '';   // 저장값 그대로면 회색 (결정 226)
+    return '<div class="zr"><b>' + z + '</b>' + climBox('data-z="' + k + '" data-f="t" aria-label="' + CL_FL[f.f][0] + ' ' + z + ' 실내온도"', v.t, '℃', (clBad(v.t, -10, 50) ? ' bad' : '') + sv) +
+      climBox('data-z="' + k + '" data-f="h" aria-label="' + CL_FL[f.f][0] + ' ' + z + ' 실내습도"', v.h, '%', (clBad(v.h, 0, 100) ? ' bad' : '') + sv) +
+      '<div class="sub"><span></span><span id="di-' + k.replace('|', '-') + '">' + clDiTag(v.t, v.h) + '</span></div></div>';
   };
   const head = '<div class="card" style="padding:var(--sp-4)"><div class="hvhd"><b>매장 온도 · 습도</b>' + clRepBtn('climate') + '</div>' +
     '<div class="hvmeta">측정 시각은 저장한 때 (지금 ' + clKst() + ') · 하루 여러 번 넣어도 모두 남음</div>' +
@@ -2977,7 +3118,7 @@ async function climSave() {
   const rows = [], fl = climFloors();
   let bad = '';
   fl.forEach(f => f.zs.forEach(z => {
-    const v = climVal(f.f + '|' + z); if (v.t === '' && v.h === '') return;
+    const v = climVal(f.f + '|' + z); if (!climNew(f.f + '|' + z)) return;   // 고친 구역만 (저장값 그대로는 다시 안 보냄)
     const nm = CL_FL[f.f][0] + ' ' + z;
     if (!bad && (v.t === '' || v.h === '')) bad = nm + ': 온도와 습도를 둘 다 넣어 주세요';
     if (!bad && clBad(v.t, -10, 50)) bad = nm + ' 온도는 -10 ~ 50 숫자로 넣어 주세요';
@@ -3044,7 +3185,7 @@ function useCard(u) {
   // 공조기는 가동시간 글자 없음(리포트에서 봄) · 「기본 시각」 글자 없음 (결정 206)
   const foot = p.err ? '<span class="hverr">' + p.err + '</span>' : g.kind === 'hvac' ? '' : p.off ? '미가동 · <b>0시간</b>' : p.empty ? '입력 없음' : '가동 <b>' + useDur(p.e - p.s) + '</b>';
   const st = g.ch[u.u] ? '<span class="nwstate dirty"><i class="dot"></i>저장 안 함</span>' : v.saved ? '<span class="nwstate">' + ICON.ok + '저장됨</span>' : '';
-  return '<div class="uc' + (u.name.length > 6 ? ' long' : '') + (v.off ? ' isoff' : '') + (p.err ? ' bad' : '') + '" data-card="' + h(u.u) + '"><div class="h">' + clName(u.name, u.tone, u.sub) +
+  return '<div class="uc' + (u.name.length > 6 ? ' long' : '') + (v.saved && !g.ch[u.u] && !v.off ? ' saved' : '') + (v.off ? ' isoff' : '') + (p.err ? ' bad' : '') + '" data-card="' + h(u.u) + '"><div class="h">' + clName(u.name, u.tone, u.sub) +
     '<label class="off"><input type="checkbox" data-u="' + h(u.u) + '" data-f="off"' + (v.off ? ' checked' : '') + ' onchange="useIn(this)" aria-label="' + h(nm) + ' 미가동">미가동</label></div>' +
     '<div class="r"><span>시작</span>' + useSel(u, 's', v.s, nm + ' 시작', v.sp) + '</div><div class="r"><span>종료</span>' + useSel(u, 'e', v.e, nm + ' 종료', v.ep) + '</div>' +
     '<div class="f"><span>' + foot + '</span>' + st + '</div></div>';
@@ -4051,6 +4192,8 @@ function render() {
   else if (S.view === 'fire') html = renderFire();
   else if (S.view === 'qr') html = renderQr();
   else if (S.view === 'hyd') html = renderHyd();
+  else if (S.view === 'hydfl') html = S.hq ? renderHydFloor() : renderHyd();
+  else if (S.view === 'eqpick') html = renderEqPick();
   else if (S.view === 'eh') html = renderEh();
   else if (S.view === 'cs') html = renderCs();
   else if (S.view === 'csck') html = renderCsCk();
