@@ -10,9 +10,9 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.24.2"></script>
-<script>window.WS_VERSION = '0.24.2';</script>
-<script src="ws-api.js?v=0.24.2"></script>
+<script src="config.js?v=0.24.3"></script>
+<script>window.WS_VERSION = '0.24.3';</script>
+<script src="ws-api.js?v=0.24.3"></script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -698,7 +698,7 @@ select.lgin{text-align:center;padding:0}
 .ucpc .ucg{gap:3px}
 .ucpc .uc{display:flex;align-items:center;gap:4px;padding:2px 4px;border:1px solid var(--line2);border-radius:var(--radius)}
 .ucpc .uc .h,.ucpc .uc .r{display:contents}
-.ucpc .uc .flname{width:80px;flex:none;font-size:13px;padding:2px 4px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ucpc .uc .flname small{display:none}
+.ucpc .uc .flname{width:80px;flex:none;font-size:13px;padding:2px 3px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ucpc .uc .flname small{display:none}
 .ucpc .uc .r>span:first-child{display:none}
 .ucpc .uc .r:nth-child(3)>span:first-child{display:inline;font-size:0;order:3}.ucpc .uc .r:nth-child(3)>span:first-child::before{content:'~';font-size:14px;color:var(--sub)}
 .ucpc .uc .ap{order:2;flex:none;font-size:13px}.ucpc .uc .r:nth-child(3)>.ap{order:4}
@@ -706,7 +706,13 @@ select.lgin{text-align:center;padding:0}
 .ucpc .uc .off{order:5;min-height:28px;font-size:12px;gap:3px;white-space:nowrap}.ucpc .uc .off input{width:16px;height:16px}
 .ucpc .uc .f{order:6;margin:0;flex:none;width:86px;overflow:hidden;flex-direction:column;align-items:flex-end;gap:0;font-size:12px;line-height:1.25;white-space:nowrap}
 .ucpc.zoned .uc .f{width:64px}.ucpc .uc .f .nwstate,.ucpc .uc .f .clmuted{font-size:11px}.ucpc .uc .f svg{width:11px;height:11px}
-.ucpc .ucg3{gap:4px}
+.ucpc .ucg3{gap:4px}.ucpc.zoned .uc .flname{width:58px;padding:2px}.ucpc.zoned .uc.long .flname{font-size:11px;letter-spacing:-.4px}
+/* 칸 폭이 모자라면(태블릿 가로·좁은 창·큰 글꼴) 장비 칸 두 줄 — 1줄 이름·미가동·상태, 2줄 시작 ~ 종료. 화면 폭이 아니라 칸 폭으로 정해서 옆 칸을 넘지 않음 (결정 218) */
+.ucpc .ucg:not(.ucg3){container:uccell/inline-size}.ucpc .ucg3{container:uc3/inline-size}
+@container uccell (max-width:519px){.ucpc .ucg .uc{flex-wrap:wrap;row-gap:3px;padding:3px 4px}.ucpc .ucg .uc::after{content:'';order:1;flex-basis:100%}.ucpc .ucg .uc .off,.ucpc .ucg .uc .f{order:1}.ucpc .ucg .uc .f{width:auto;flex-direction:row;gap:6px;margin-left:auto}.ucpc .ucg .uc select{min-width:46px;height:30px;min-height:30px}}
+@container uc3 (max-width:1627px){.ucpc .ucg .uc{flex-wrap:wrap;row-gap:3px;padding:3px 4px}.ucpc .ucg .uc::after{content:'';order:1;flex-basis:100%}.ucpc .ucg .uc .off,.ucpc .ucg .uc .f{order:1}.ucpc .ucg .uc .f{width:auto;flex-direction:row;gap:6px;margin-left:auto}.ucpc .ucg .uc select{min-width:46px;height:30px;min-height:30px}}
+/* 태블릿 세로 (600~1023): 장비 카드 두 칸씩 */
+@media (min-width:600px) and (max-width:1023px){.flsec .hvlist{display:grid;grid-template-columns:1fr 1fr}.flsec .hvlist .uc{border-top:1px solid var(--line3)}.flsec .hvlist .uc:nth-child(-n+2){border-top:none}.flsec .hvlist .uc:nth-child(odd){border-right:1px solid var(--line3)}}
 .uc .ap{text-align:center;font-size:var(--size-s);color:var(--ink)}
 .ucz{font-size:var(--size-s);color:var(--sub);font-weight:600;margin:var(--sp-3) 0 var(--sp-1)}
 .flsec{scroll-margin-top:70px}
@@ -738,7 +744,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.24.2' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.24.3' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -3032,7 +3038,7 @@ function useCard(u) {
   // 공조기는 가동시간 글자 없음(리포트에서 봄) · 「기본 시각」 글자 없음 (결정 206)
   const foot = p.err ? '<span class="hverr">' + p.err + '</span>' : g.kind === 'hvac' ? '' : p.off ? '미가동 · <b>0시간</b>' : p.empty ? '입력 없음' : '가동 <b>' + useDur(p.e - p.s) + '</b>';
   const st = g.ch[u.u] ? '<span class="nwstate dirty"><i class="dot"></i>저장 안 함</span>' : v.saved ? '<span class="nwstate">' + ICON.ok + '저장됨</span>' : '';
-  return '<div class="uc' + (v.off ? ' isoff' : '') + (p.err ? ' bad' : '') + '" data-card="' + h(u.u) + '"><div class="h">' + clName(u.name, u.tone, u.sub) +
+  return '<div class="uc' + (u.name.length > 6 ? ' long' : '') + (v.off ? ' isoff' : '') + (p.err ? ' bad' : '') + '" data-card="' + h(u.u) + '"><div class="h">' + clName(u.name, u.tone, u.sub) +
     '<label class="off"><input type="checkbox" data-u="' + h(u.u) + '" data-f="off"' + (v.off ? ' checked' : '') + ' onchange="useIn(this)" aria-label="' + h(nm) + ' 미가동">미가동</label></div>' +
     '<div class="r"><span>시작</span>' + useSel(u, 's', v.s, nm + ' 시작', v.sp) + '</div><div class="r"><span>종료</span>' + useSel(u, 'e', v.e, nm + ' 종료', v.ep) + '</div>' +
     '<div class="f"><span>' + foot + '</span>' + st + '</div></div>';
@@ -3068,7 +3074,7 @@ function renderUse() {
   const past = g.day < r.workDay ? '<br>지난 날짜입니다 · 31일 안은 고칠 수 있습니다' : '';
   const meta = useMiss() + ' · 기본 ' + d0 + (ex ? ' · ' + ex : '') + past;
   const date = '<button class="nwdate" data-date="' + h(g.day) + '" onclick="useCal()" aria-label="일자 바꾸기">' + ICON.cal + clMd(g.day) + '</button>';
-  const btns = '<div class="hdbtns">' + (isBoss() ? '<button class="btn sm" id="uhrBtn" onclick="openUhr(\'' + g.kind + '\')">' + ICON.clock + '가동시간 설정</button>' : '') + clRepBtn(g.kind) + '</div>';
+  const btns = '<div class="hdbtns"><button class="btn sm" id="uhrBtn" onclick="openUhr(\'' + g.kind + '\')">' + ICON.clock + '가동시간 설정</button>' + clRepBtn(g.kind) + '</div>';
   const bar = '<div class="nwbar"><span id="useState">' + useState() + '</span><div class="dslot"><button class="btn pri" id="useSave" onclick="useSave()"' + (g.busy ? ' disabled' : '') + '>' + (g.busy ? '<span class="spin"></span> 저장 중…' : '저장') + '</button></div></div>';
   const note = '<p class="clnote">시각은 오전/오후 · 시 · 10분 단위. 미가동 체크 = 0시간, 빈 칸 = 통계에서 뺌. [저장]은 고친 장비와 화면의 아직 저장 안 한 장비(기본 시각)를 함께 저장합니다.</p>';
   if (pc) {
@@ -3277,7 +3283,7 @@ function repPrint() {
 }
 
 /* ── 환경설정 › 장비 전력(kW)·단가 (소장만, 결정 194). 빈 칸 = 모름 → 리포트 환산에서 뺌 ── */
-/* ── 가동시간 설정: 층(묶음) × 요일 기본 시작·종료 (21_equip_hours.sql, 결정 200). 소장만 ── */
+/* ── 가동시간 설정: 층(묶음) × 요일 기본 시작·종료 (21_equip_hours.sql, 결정 200). 전 직원 (결정 218) ── */
 const UH_DOW = ['월', '화', '수', '목', '금', '토', '일'];
 function uhHm(m) { return String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
 function uhMin(t, end) { const x = /^(\d\d):(\d\d)/.exec(t || ''); if (!x) return null; const m = Number(x[1]) * 60 + Number(x[2]); return end && m === 0 ? 1440 : m; }
@@ -4028,7 +4034,7 @@ function render() {
   else if (S.view === 'use') html = renderUse();
   else if (S.view === 'rep' && S.rep) html = renderRep();
   else if (S.view === 'kw' && isBoss()) html = renderKw();
-  else if (S.view === 'uhr' && isBoss()) html = renderUhr();
+  else if (S.view === 'uhr') html = renderUhr();   // 전 직원 (결정 218)
   else if (S.view === 'map') html = renderMap();
   else if (S.view === 'spec') html = S.sp ? renderSpec() : renderMain();
   else if (S.view === 'att') html = renderAtt();
