@@ -9,7 +9,7 @@
 <title>시방서 검색 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.23.0"></script>
+<script src="config.js?v=0.23.2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
@@ -688,18 +688,20 @@ select.lgin{text-align:center;padding:0}
 .uchd{display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap}.uchd b{font-size:var(--size-l)}.uchd .hvmeta{margin:0;flex:1 1 300px}
 .hdbtns{display:flex;gap:var(--sp-1);flex-wrap:wrap;justify-content:flex-end}
 /* PC 가동시간: 장비 한 줄 (1920x1080 한 화면, 결정 200) */
-.ucpc{margin-top:var(--sp-2);table-layout:fixed}.ucpc th{padding:4px}.ucpc td{padding:2px 3px}.lgwrap .ucpc+.clnote{margin-top:4px}
+.ucpc{margin-top:var(--sp-2);table-layout:fixed}.ucpc.zoned td.ctr .flname{width:44px;height:44px;padding:0;display:inline-flex;align-items:center;justify-content:center;font-size:14px}.ucpc th{padding:4px}.ucpc td{padding:2px 3px}.lgwrap .ucpc+.clnote{margin-top:4px}
 .ucpc .ucg{gap:3px}
 .ucpc .uc{display:flex;align-items:center;gap:4px;padding:2px 4px;border:1px solid var(--line2);border-radius:var(--radius)}
 .ucpc .uc .h,.ucpc .uc .r{display:contents}
 .ucpc .uc .flname{width:80px;flex:none;font-size:13px;padding:2px 4px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ucpc .uc .flname small{display:none}
-.ucpc .uc .r>span{display:none}
-.ucpc .uc .r:nth-child(3)>span{display:inline;font-size:0;order:3}.ucpc .uc .r:nth-child(3)>span::before{content:'~';font-size:13px;color:var(--sub)}
-.ucpc .uc select{order:2;font-size:13px;min-height:28px;height:28px;flex:1 1 0;min-width:0;width:auto;padding:0 1px}.ucpc .uc .r:nth-child(3)>select{order:4}
+.ucpc .uc .r>span:first-child{display:none}
+.ucpc .uc .r:nth-child(3)>span:first-child{display:inline;font-size:0;order:3}.ucpc .uc .r:nth-child(3)>span:first-child::before{content:'~';font-size:14px;color:var(--sub)}
+.ucpc .uc .ap{order:2;flex:none;font-size:13px}.ucpc .uc .r:nth-child(3)>.ap{order:4}
+.ucpc .uc select{order:2;font-size:14px;min-height:28px;height:28px;flex:1 1 0;min-width:52px;width:auto;padding:0 2px}.ucpc .uc .r:nth-child(3)>select{order:4}
 .ucpc .uc .off{order:5;min-height:28px;font-size:12px;gap:3px;white-space:nowrap}.ucpc .uc .off input{width:16px;height:16px}
 .ucpc .uc .f{order:6;margin:0;flex:none;width:86px;overflow:hidden;flex-direction:column;align-items:flex-end;gap:0;font-size:12px;line-height:1.25;white-space:nowrap}
 .ucpc .uc .f .nwstate,.ucpc .uc .f .clmuted{font-size:11px}.ucpc .uc .f svg{width:11px;height:11px}
 .ucpc .ucg3{gap:4px}
+.uc .ap{text-align:center;font-size:var(--size-s);color:var(--ink)}
 .ucz{font-size:var(--size-s);color:var(--sub);font-weight:600;margin:var(--sp-3) 0 var(--sp-1)}
 .flsec{scroll-margin-top:70px}
 /* 가동시간 설정 (요일별 기본 시각) */

@@ -10,9 +10,9 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.23.0"></script>
-<script>window.WS_VERSION = '0.23.0';</script>
-<script src="ws-api.js?v=0.23.0"></script>
+<script src="config.js?v=0.23.2"></script>
+<script>window.WS_VERSION = '0.23.2';</script>
+<script src="ws-api.js?v=0.23.2"></script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -693,18 +693,20 @@ select.lgin{text-align:center;padding:0}
 .uchd{display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap}.uchd b{font-size:var(--size-l)}.uchd .hvmeta{margin:0;flex:1 1 300px}
 .hdbtns{display:flex;gap:var(--sp-1);flex-wrap:wrap;justify-content:flex-end}
 /* PC 가동시간: 장비 한 줄 (1920x1080 한 화면, 결정 200) */
-.ucpc{margin-top:var(--sp-2);table-layout:fixed}.ucpc th{padding:4px}.ucpc td{padding:2px 3px}.lgwrap .ucpc+.clnote{margin-top:4px}
+.ucpc{margin-top:var(--sp-2);table-layout:fixed}.ucpc.zoned td.ctr .flname{width:44px;height:44px;padding:0;display:inline-flex;align-items:center;justify-content:center;font-size:14px}.ucpc th{padding:4px}.ucpc td{padding:2px 3px}.lgwrap .ucpc+.clnote{margin-top:4px}
 .ucpc .ucg{gap:3px}
 .ucpc .uc{display:flex;align-items:center;gap:4px;padding:2px 4px;border:1px solid var(--line2);border-radius:var(--radius)}
 .ucpc .uc .h,.ucpc .uc .r{display:contents}
 .ucpc .uc .flname{width:80px;flex:none;font-size:13px;padding:2px 4px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ucpc .uc .flname small{display:none}
-.ucpc .uc .r>span{display:none}
-.ucpc .uc .r:nth-child(3)>span{display:inline;font-size:0;order:3}.ucpc .uc .r:nth-child(3)>span::before{content:'~';font-size:13px;color:var(--sub)}
-.ucpc .uc select{order:2;font-size:13px;min-height:28px;height:28px;flex:1 1 0;min-width:0;width:auto;padding:0 1px}.ucpc .uc .r:nth-child(3)>select{order:4}
+.ucpc .uc .r>span:first-child{display:none}
+.ucpc .uc .r:nth-child(3)>span:first-child{display:inline;font-size:0;order:3}.ucpc .uc .r:nth-child(3)>span:first-child::before{content:'~';font-size:14px;color:var(--sub)}
+.ucpc .uc .ap{order:2;flex:none;font-size:13px}.ucpc .uc .r:nth-child(3)>.ap{order:4}
+.ucpc .uc select{order:2;font-size:14px;min-height:28px;height:28px;flex:1 1 0;min-width:52px;width:auto;padding:0 2px}.ucpc .uc .r:nth-child(3)>select{order:4}
 .ucpc .uc .off{order:5;min-height:28px;font-size:12px;gap:3px;white-space:nowrap}.ucpc .uc .off input{width:16px;height:16px}
 .ucpc .uc .f{order:6;margin:0;flex:none;width:86px;overflow:hidden;flex-direction:column;align-items:flex-end;gap:0;font-size:12px;line-height:1.25;white-space:nowrap}
 .ucpc .uc .f .nwstate,.ucpc .uc .f .clmuted{font-size:11px}.ucpc .uc .f svg{width:11px;height:11px}
 .ucpc .ucg3{gap:4px}
+.uc .ap{text-align:center;font-size:var(--size-s);color:var(--ink)}
 .ucz{font-size:var(--size-s);color:var(--sub);font-weight:600;margin:var(--sp-3) 0 var(--sp-1)}
 .flsec{scroll-margin-top:70px}
 /* 가동시간 설정 (요일별 기본 시각) */
@@ -735,7 +737,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.23.0' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.23.2' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -2962,7 +2964,7 @@ async function climSave() {
 
 /* ── 탭 ③④ 공조기·에어커튼 가동시간: 시각 = 오전/오후·시·10분. 미가동 = 0시간, 빈 칸 = 통계 제외 (옛 앱 규칙) ── */
 function useParts(m) { if (m == null || m === '') return ['', '', '']; if (m >= 1440) return ['am', '12', '0']; const h24 = Math.floor(m / 60); return [h24 < 12 ? 'am' : 'pm', String(h24 % 12 || 12), String(m % 60)]; }
-function useMin(ap, hh, mm) { if (!ap || !hh || mm === '') return null; return (Number(hh) % 12 + (ap === 'pm' ? 12 : 0)) * 60 + Number(mm); }
+function useMin(ap, hh, mm) { if (!ap || !hh || mm === '') return null; if (hh === '24') return 1440 + Number(mm); return (Number(hh) % 12 + (ap === 'pm' ? 12 : 0)) * 60 + Number(mm); }
 function useDur(m) { return Math.floor(m / 60) + '시간' + (m % 60 ? ' ' + String(m % 60).padStart(2, '0') + '분' : ''); }
 function useHm(m) { const p = useParts(m); return (p[0] === 'am' ? '오전 ' : '오후 ') + p[1] + ':' + String(p[2]).padStart(2, '0'); }
 async function openUse(kind, day) {
@@ -2992,14 +2994,15 @@ function useCal() {
 function useParse(v) {
   if (v.off) return { s: null, e: null, off: true };
   if (v.s == null && v.e == null) return { s: null, e: null, off: false, empty: true };
-  if (v.s == null || v.e == null) return { err: '시작과 종료의 오전/오후·시·분을 모두 고르세요' };
+  if (v.s == null || v.e == null) return { err: '시작과 종료의 시·분을 모두 고르세요' };
   let e = v.e; if (e <= v.s) { if (e === 0) e = 1440; else return { err: '종료가 시작보다 빠릅니다' }; }
   return { s: v.s, e, off: false };
 }
-function useSel(u, f, val, nm) {
-  const p = useParts(val), o = (k, opts) => '<select data-u="' + h(u.u) + '" data-f="' + f + k + '" aria-label="' + h(nm) + '" onchange="useIn(this)">' + opts.map(x => '<option value="' + x[0] + '"' + (String(x[0]) === String(p[k === 'a' ? 0 : k === 'h' ? 1 : 2]) ? ' selected' : '') + '>' + x[1] + '</option>').join('') + '</select>';
-  const hrs = [['', '시']].concat(Array.from({ length: 12 }, (_, i) => [String(i + 1), (i + 1) + '시'])), mins = [['', '분']].concat([0, 10, 20, 30, 40, 50].map(m => [String(m), String(m).padStart(2, '0') + '분']));
-  return o('a', [['', '구분'], ['am', '오전'], ['pm', '오후']]) + o('h', hrs) + o('m', mins);
+function useSel(u, f, val, nm, part) {
+  const p = val == null && part ? ['', part[0], part[1]] : f === 'e' && val >= 1440 ? ['pm', '24', String(val - 1440)] : useParts(val), ap = p[0] || (f === 's' ? 'am' : 'pm');
+  const o = (k, opts) => '<select data-u="' + h(u.u) + '" data-f="' + f + k + '" aria-label="' + h(nm) + (k === 'h' ? ' 시' : ' 분') + '" onchange="useIn(this)">' + opts.map(x => '<option value="' + x[0] + '"' + (String(x[0]) === String(p[k === 'h' ? 1 : 2]) ? ' selected' : '') + '>' + x[1] + '</option>').join('') + '</select>';
+  const hrs = [['', '시']].concat(Array.from({ length: 12 }, (_, i) => [String(i + 1), (i + 1) + '시']), f === 'e' ? [['24', '12시(자정)']] : []), mins = [['', '분']].concat([0, 10, 20, 30, 40, 50].map(m => [String(m), String(m).padStart(2, '0') + '분']));
+  return '<span class="ap" data-f="' + f + 'a" data-ap="' + ap + '">' + (ap === 'am' ? '오전' : '오후') + '</span>' + o('h', hrs) + o('m', mins);   // 시작 오전 · 종료 오후 고정 (결정 204)
 }
 function useCard(u) {
   const g = S.use, v = g.v[u.u], p = useParse(v), nm = (u.sub ? u.sub + ' ' : '') + u.name;
@@ -3007,7 +3010,7 @@ function useCard(u) {
   const st = g.ch[u.u] ? '<span class="nwstate dirty"><i class="dot"></i>저장 안 함</span>' : v.saved ? '<span class="nwstate">' + ICON.ok + '저장됨</span>' : '<span class="clmuted">기본 시각</span>';
   return '<div class="uc' + (v.off ? ' isoff' : '') + (p.err ? ' bad' : '') + '" data-card="' + h(u.u) + '"><div class="h">' + clName(u.name, u.tone, u.sub) +
     '<label class="off"><input type="checkbox" data-u="' + h(u.u) + '" data-f="off"' + (v.off ? ' checked' : '') + ' onchange="useIn(this)" aria-label="' + h(nm) + ' 미가동">미가동</label></div>' +
-    '<div class="r"><span>시작</span>' + useSel(u, 's', v.s, nm + ' 시작') + '</div><div class="r"><span>종료</span>' + useSel(u, 'e', v.e, nm + ' 종료') + '</div>' +
+    '<div class="r"><span>시작</span>' + useSel(u, 's', v.s, nm + ' 시작', v.sp) + '</div><div class="r"><span>종료</span>' + useSel(u, 'e', v.e, nm + ' 종료', v.ep) + '</div>' +
     '<div class="f"><span>' + foot + '</span>' + st + '</div></div>';
 }
 function useIn(el) {
@@ -3015,7 +3018,8 @@ function useIn(el) {
   if (f === 'off') v.off = el.checked;
   else {
     const c = el.closest('.uc'), q = k => c.querySelector('[data-f="' + f[0] + k + '"]').value;
-    v[f[0]] = useMin(q('a'), q('h'), q('m'));
+    v[f[0] + 'p'] = [q('h'), q('m')];
+    v[f[0]] = useMin(c.querySelector('[data-f="' + f[0] + 'a"]').dataset.ap, q('h'), q('m'));
   }
   g.ch[u] = 1; g.err = '';
   const unit = g.srv.units.find(x => x.u === u), c = document.querySelector('[data-card="' + CSS.escape(u) + '"]');
@@ -3051,7 +3055,7 @@ function renderUse() {
       const noz = x.us.every(u => !u.zone);   // 구역 없는 B3층: 구역 칸에 차례로 (다른 층 칸과 같은 크기)
       return '<tr>' + nm + Z.map((z, i) => '<td><div class="ucg">' + x.us.filter((u, j) => noz ? j % 3 === i : u.zone === z).map(useCard).join('') + '</div></td>').join('') + '</tr>';
     }).join('');
-    return clTop() + '<div class="lgwrap">' + clTabs(g.kind) + head + '<table class="cltbl ucpc"><thead><tr><th style="width:72px">' + (zoned ? '층' : '묶음') + '</th>' + (zoned ? Z.map(z => '<th>' + z + '</th>').join('') : '<th>' + kn + '</th>') + '</tr></thead><tbody>' + rows + '</tbody></table>' + note + bar + '</div>';
+    return clTop() + '<div class="lgwrap">' + clTabs(g.kind) + head + '<table class="cltbl ucpc' + (zoned ? ' zoned' : '') + '"><thead><tr><th style="width:' + (zoned ? 58 : 72) + 'px">' + (zoned ? '층' : '묶음') + '</th>' + (zoned ? Z.map(z => '<th>' + z + '</th>').join('') : '<th>' + kn + '</th>') + '</tr></thead><tbody>' + rows + '</tbody></table>' + note + bar + '</div>';
   }
   const head = '<div class="card" style="padding:var(--sp-4)"><div class="hvhd"><b>' + kn + ' 가동시간</b>' + date + '</div>' +
     '<div class="hdrow"><span class="hvmeta" style="margin:0">' + meta + '</span>' + btns + '</div>' + clNav(gs.map(x => [x.g, x.tone, cnt(x)]), g.pg, 'useJump') + '</div>';
