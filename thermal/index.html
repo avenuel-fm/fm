@@ -59,7 +59,7 @@
   <section id="dropZone" class="dropzone">
     <div class="dropzone-title">열화상 사진들을 여기에 끌어다 놓거나 클릭하여 선택</div>
     <div class="dropzone-sub">
-      최대 8장까지 일괄 인식 (사진별 측정 위치 및 회로명은 업로드 후 개별 입력/수정 가능)
+      최대 99장까지 일괄 인식 (사진별 측정 위치 및 회로명은 업로드 후 개별 입력/수정 가능)
     </div>
     <input type="file" id="fileInput" multiple accept=".jpg,.jpeg" style="display: none;">
   </section>
@@ -70,7 +70,7 @@
     <aside class="page-list-sidebar">
       <div class="sidebar-title">
         <span>페이지 목록</span>
-        <span id="pageCountBadge">0 / 8</span>
+        <span id="pageCountBadge">0 / 99</span>
       </div>
       <div id="sidebarList" style="display: flex; flex-direction: column; gap: var(--sp-2);">
         <!-- JavaScript로 동적 렌더링 -->
@@ -114,7 +114,10 @@
       <div class="images-grid">
         <!-- 실화상 사진 -->
         <div class="image-panel">
-          <div class="image-panel-title">측정 부위 사진 (실화상)</div>
+          <div class="image-panel-title">
+            <span>측정 부위 사진 (실화상)</span>
+            <span id="visualFallbackBadge" style="display: none; font-size: var(--size-s); color: var(--text-sub); font-weight: 400; margin-left: var(--sp-2);">(실화상 없음)</span>
+          </div>
           <div class="image-frame">
             <img id="imgVisual" src="" alt="실화상 사진">
           </div>
