@@ -12,7 +12,9 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
 <script src="config.js?v=0.24.3"></script>
 <script>window.WS_VERSION = '0.24.3';</script>
+<script src="offline.js?v=0.24.3"></script>
 <script src="ws-api.js?v=0.24.3"></script>
+<script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -857,7 +859,8 @@ function topbar(sub, title) {
   return '<header class="top"><div class="top-in">' +
     '<div class="ttl"><small>' + h(sub) + '</small><b>' + h(title) + '</b></div>' +
     '<span class="me">' + h(u.name) + ' · ' + h(u.part) + '</span>' +
-    '<button class="btn sm" onclick="logout()">로그아웃</button>' +
+    (window.WS_OFFLINE ? WS_OFFLINE.chip() : '') +   // 「저장 대기 n건」 (오프라인 임시 저장, 결정 222) — 없으면 숨김
+    '<button class="btn sm" onclick="logoutAsk()">로그아웃</button>' +
     '</div></header>';
 }
 
@@ -891,6 +894,9 @@ async function doLogin() {
   } catch (e) { S.busy = false; S.pin = ''; render(); $('pinMsg').textContent = '연결 오류: ' + (e.message || e); }
 }
 function loggedIn(r) { S.token = r.token; store('ws_token', r.token); SHELL.set(r.token); S.user = r.user; S.pin = ''; S.sign = null; }
+const OFFMSG = '이 기기에 저장했습니다. 신호가 잡히면 자동으로 보냅니다';   // 서버에 들어가기 전에는 「저장되었습니다」라고 하지 않음 (결정 222)
+function logoutAsk() { if (window.WS_OFFLINE && WS_OFFLINE.count() && !confirm('아직 전송되지 않은 저장 대기 ' + WS_OFFLINE.count() + '건이 있습니다. 로그아웃해도 이 기기에 남아 있다가, 본인이 다시 로그인하면 보냅니다. 로그아웃할까요?')) return; logout(); }
+if (window.WS_OFFLINE) { WS_OFFLINE.tokenFn = () => S.token; WS_OFFLINE.onSent = n => toast('저장 대기 ' + n + '건을 전송했습니다'); }
 function logout(expired) { store('ws_token', null); store('ws_main', null); SHELL.set(''); bootSeq++; S.token = ''; S.user = null; S.sign = null; S.pin = ''; S.view = 'login'; render(); if (expired === true) toast('다시 로그인해 주세요.'); }
 
 /* ── 근무일 첫 서명 (결정 56·60) — 서명하지 않으면 로그인되지 않음 ── */
@@ -2258,7 +2264,7 @@ async function ahuSave(quiet) {
     const r = await call('ahuSave', g.day, g.ch);
     if (!r.ok) { g.busy = false; g.err = r.error; render(); toast(r.error); return false; }
     const late = g.ch;   // 저장하는 사이에 더 넣은 값은 지우지 않고 「저장 안 함」으로 남김
-    ahuSet(r); ahuLate(late, sent); if (!quiet) toast('저장했습니다'); return true;
+    ahuSet(r); ahuLate(late, sent); if (!quiet) toast(r.queued ? OFFMSG : '저장했습니다'); return true;
   } catch (e) { g.busy = false; g.err = '서버에 닿지 않았습니다. 다시 눌러 주세요'; render(); return false; }
 }
 function ahuLate(late, sent) {
@@ -2987,7 +2993,7 @@ async function climSave() {
     const r = await call('climateAdd', rows, { t: g.out.t, h: g.out.h });
     g.busy = false;
     if (!r.ok) { g.err = r.error; render(); toast(r.error); return; }
-    g.srv = r; g.v = {}; g.err = ''; render(); toast(rows.length + '곳 저장했습니다');
+    g.srv = r; g.v = {}; g.err = ''; render(); toast(r.queued ? OFFMSG : rows.length + '곳 저장했습니다');
   } catch (e) { g.busy = false; g.err = '서버에 닿지 않았습니다. 다시 눌러 주세요'; render(); }
 }
 
@@ -3115,7 +3121,7 @@ async function useSave() {
     const r = await call('usageSave', g.kind, g.day, rows);
     g.busy = false;
     if (!r.ok) { g.err = r.error; render(); toast(r.error); return; }
-    useSet(r); toast(rows.length + '대 저장했습니다 (' + clMd(g.day) + ')');
+    useSet(r); toast(r.queued ? OFFMSG : rows.length + '대 저장했습니다 (' + clMd(g.day) + ')');
   } catch (e) { g.busy = false; g.err = '서버에 닿지 않았습니다. 다시 눌러 주세요'; render(); }
 }
 

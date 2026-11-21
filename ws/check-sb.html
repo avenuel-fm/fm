@@ -173,6 +173,8 @@ b,strong,h1,h2,h3{font-weight:600}
 <div id="layer"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="offline.js"></script>
+<script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
 <script>
 /* QR 점검 입력 — Supabase (supabase/05_fire.sql ws_check_init · ws_check_submit, 비로그인도 됨). 파일은 버킷 fire/{QR}/ 아래 */
 (function () {
@@ -197,16 +199,22 @@ b,strong,h1,h2,h3{font-weight:600}
       return { path: path, url: sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl };
     });
   }
+  var chip = document.createElement('button'); chip.className = 'btn sm offchip'; chip.style.cssText = 'display:none;position:fixed;top:6px;right:8px;z-index:5;background:transparent;color:#fff;border-color:#fff'; chip.onclick = function () { WS_OFFLINE.open(); }; document.addEventListener('DOMContentLoaded', function () { document.body.appendChild(chip); WS_OFFLINE.ready.then(function () { chip.textContent = '저장 대기 ' + WS_OFFLINE.count() + '건'; chip.style.display = WS_OFFLINE.count() ? '' : 'none'; }); });
   window.FM_CHECK = {
     init: function (q) { return rpc('ws_check_init', { p_qr: q }); },
     submit: function (q, d) {
-      // 이미 있는데 덮어쓰기를 안 골랐으면 사진을 올리기 전에 알림 (버킷에 쓸모없는 파일이 남지 않게)
-      var first = d.overwrite ? Promise.resolve(null) : rpc('ws_check_init', { p_qr: q });
+      // 사진·손글씨 올릴 경로는 입력할 때 한 번만 정함 → 끊겨도 같은 경로로 이어 올림 (결정 222)
+      var OFF = window.WS_OFFLINE, ym = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 7), files = [];
+      [['photo', d.photo, 'jpg'], ['memo', d.signA, 'png'], ['name', d.signB, 'png']].forEach(function (x) {
+        var b = blob(x[1]); if (b) files.push({ key: x[0], blob: b, path: 'fire/' + q + '/' + ym + '/' + rid() + '.' + x[2] });
+      });
+      // 이미 있는데 덮어쓰기를 안 골랐으면 사진을 올리기 전에 알림 (신호가 없어 확인 못 하면 그냥 저장 대기로)
+      var first = d.overwrite ? Promise.resolve(null) : rpc('ws_check_init', { p_qr: q }).catch(function (e) { if (OFF.isNet(e)) return null; throw e; });
       return first.then(function (i) {
         if (i && i.ok && i.exists) return { ok: false, exists: true, error: '이번 달 입력이 이미 있습니다.' };
-        return Promise.all([up(q, d.photo, 'jpg'), up(q, d.signA, 'png'), up(q, d.signB, 'png')]).then(function (f) {
-          var files = {}; ['photo', 'memo', 'name'].forEach(function (k, n) { if (f[n]) files[k] = f[n]; });
-          return rpc('ws_check_submit', { p_qr: q, p_d: { state: d.state, overwrite: !!d.overwrite }, p_files: files });
+        return OFF.send({ kind: 'fire_check', label: '소화기 점검', args: { qr: q, state: d.state, overwrite: !!d.overwrite }, files: files }).then(function (res) {
+          if (res.status === 'queued') return { ok: true, queued: true, state: d.state };
+          return res.r;
         });
       });
     }
@@ -443,10 +451,18 @@ function done(r) {
   $('page').innerHTML = '<div class="bar">잠실점 에비뉴엘 · 소화기 월 점검</div><div class="hd"><h1>' + h(S.init.fe.name) + '</h1></div>' +
     '<div class="main" style="align-items:center;text-align:center;padding-top:var(--sp-12);gap:var(--sp-3)">' +
     '<div class="mark' + (bad ? ' bad' : '') + '"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (bad ? '<path d="M12 5v9"/><path d="M12 19h.01"/>' : '<path d="M20 6L9 17l-5-5"/>') + '</svg></div>' +
-    '<b style="font-size:var(--size-l)">보냈습니다. 감사합니다.</b>' +
-    '<span style="font-size:var(--size-m);color:var(--sub);line-height:1.6">' + h(S.init.monthLabel) + ' 점검이 ' + (bad ? '<b>이상 있음</b>으로' : '<b>점검완료</b>로') + ' 기록되었습니다.' + (r.late ? '<br>(기한 후 입력)' : '') + '</span>' +
+    (r.queued   // 신호가 약해 기기에만 저장 (오프라인 임시 저장, 결정 220) — 서버에 들어가기 전에는 「보냈습니다」라고 하지 않음
+      ? '<b style="font-size:var(--size-l)">이 기기에 저장했습니다</b>' +
+        '<span style="font-size:var(--size-m);line-height:1.6">' + h(S.init.monthLabel) + ' 점검 입력은 아직 <b>전송되지 않았습니다.</b></span>' +
+        '<div style="background:var(--tint);border-left:3px solid var(--navy);padding:var(--sp-3);font-size:var(--size-s);line-height:1.6;text-align:left">신호가 잡히는 곳에서 이 화면을 다시 열면 자동으로 보냅니다.<br>그 전에는 <b>이 페이지를 지우거나 시크릿 모드로 열지 마세요.</b></div>' +
+        '<button class="btn big pri" style="width:100%" onclick="resend()">지금 다시 보내기</button>'
+      : '<b style="font-size:var(--size-l)">보냈습니다. 감사합니다.</b>' +
+        '<span style="font-size:var(--size-m);color:var(--sub);line-height:1.6">' + h(S.init.monthLabel) + ' 점검이 ' + (bad ? '<b>이상 있음</b>으로' : '<b>점검완료</b>로') + ' 기록되었습니다.' + (r.late ? '<br>(기한 후 입력)' : '') + '</span>') +
     (r.checkId ? '<span style="font-size:var(--size-s);color:var(--muted);background:var(--tint);border-radius:var(--radius);padding:var(--sp-1) var(--sp-2)">저장 번호 ' + h(r.checkId) + (r.at ? ' · ' + h(r.at) : '') + '</span>' : '') +
-    '<span style="font-size:var(--size-s);color:var(--muted)">이 창은 닫으셔도 됩니다.</span></div>';
+    (r.queued ? '' : '<span style="font-size:var(--size-s);color:var(--muted)">이 창은 닫으셔도 됩니다.</span>') + '</div>';
+}
+function resend() {   // 저장 대기 중인 점검을 지금 다시 보냄 (오프라인 임시 저장, 결정 222)
+  WS_OFFLINE.flush(true).then(() => { if (!WS_OFFLINE.count()) location.reload(); else alertBox('아직 신호가 약해 보내지 못했습니다.'); });
 }
 function alertBox(msg) {
   $('layer').innerHTML = '<div class="dialog-back"><div class="dialog" role="alertdialog" aria-modal="true"><p style="margin:0 0 var(--sp-3);font-size:var(--size-m);line-height:1.6">' + h(msg) + '</p><button class="btn big pri" style="width:100%" onclick="$(\'layer\').innerHTML=\'\'">확인</button></div></div>';
