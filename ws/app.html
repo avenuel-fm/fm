@@ -10,10 +10,10 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.25.0"></script>
-<script>window.WS_VERSION = '0.25.0';</script>
-<script src="offline.js?v=0.25.0"></script>
-<script src="ws-api.js?v=0.25.0"></script>
+<script src="config.js?v=0.25.1"></script>
+<script>window.WS_VERSION = '0.25.1';</script>
+<script src="offline.js?v=0.25.1"></script>
+<script src="ws-api.js?v=0.25.1"></script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -230,6 +230,28 @@ body:has(.csbar) #app{padding-bottom:calc(120px + env(safe-area-inset-bottom))}
 .fname b{font-size:var(--size-m)}
 .fname small{font-size:var(--size-s);color:var(--muted)}
 .floorh{font-size:var(--size-s);font-weight:600;color:var(--muted);margin:var(--sp-1) var(--sp-1) 0}
+/* QR 관리: 층 → 위치 아코디언 · 등록 창 종류 체크 (결정 228) */
+.ac{background:var(--white);border:1px solid var(--line2);border-radius:var(--radius);overflow:hidden}
+.ac+.ac{margin-top:var(--sp-2)}
+.ac-h{display:flex;align-items:center;gap:var(--sp-2);min-height:52px;padding:0 var(--sp-3);background:var(--white)}
+.ac-h>input{width:20px;height:20px;accent-color:var(--blue);flex:none}
+.ac-t{flex:1;min-width:0;display:flex;align-items:center;gap:var(--sp-2);min-height:52px;border:0;background:none;padding:0;text-align:left;color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
+.ac-t .ac-n{font-size:var(--size-m)}.ac-t.big .ac-n{font-size:var(--size-l)}
+.ac-t .cv{width:16px;height:16px;flex:none;transition:transform .15s}
+.ac-h.open .cv{transform:rotate(90deg)}
+.ac-t .cnt{margin-left:auto;font-size:var(--size-s);font-weight:400;color:var(--muted);text-align:right}
+.ac-t .cnt .unp{color:var(--ink);font-weight:600}
+.ac-b{border-top:1px solid var(--line3);padding:var(--sp-2);background:var(--tint);display:flex;flex-direction:column;gap:var(--sp-2)}
+.ac-b .ac{border-color:var(--line3)}
+.ac-b .ac-h,.ac-b .ac-t{min-height:48px}
+.ac-b .ac-t{font-weight:500}
+.ac-b .ac-b{background:var(--white);padding:0;gap:0}
+.ac-act{display:flex;gap:var(--sp-2);padding:var(--sp-2) var(--sp-3);border-bottom:1px solid var(--line3);background:var(--white)}
+.ck{display:flex;gap:var(--sp-2);flex-wrap:wrap}
+.ckl{display:flex;align-items:center;gap:var(--sp-2);min-height:44px;padding:0 var(--sp-3);border:1px solid var(--line);border-radius:var(--radius);font-size:var(--size-m);background:var(--white);cursor:pointer}
+.ckl.on{border-color:var(--blue);background:var(--blue-bg);font-weight:500}
+.ckl input{width:20px;height:20px;accent-color:var(--blue)}
+.pre{background:var(--tint);border:1px solid var(--line);border-radius:var(--radius);padding:var(--sp-2) var(--sp-3);font-size:var(--size-s);line-height:1.7;color:var(--ink)}
 .mnav{display:flex;align-items:center;gap:var(--sp-2)}
 .mnav .btn{width:44px;padding:0;font-size:var(--size-l)}
 .mnav div{flex:1;text-align:center;display:flex;flex-direction:column}
@@ -745,9 +767,9 @@ select.lgin{text-align:center;padding:0}
 <div id="layer"></div>
 <script>
 const EXEC_URL = '';
-const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
+const FLOORS = ['B3','B2','B1','1F','2F','3F','4F','5F','6F','7F','8F','9F','10F'];   // 소화기·소화전·공기호흡기 층 B3~10F (결정 228)
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.25.0' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.25.1' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -2631,7 +2653,7 @@ function renderHydFloor() {
       list.map(i => {
         const has = i.state === 'ok' || i.state === 'bad';
         const sub = has ? h(i.by) + ' · ' + h(String(i.at).slice(5, 16)) + ' 입력' + (i.late ? ' · 기한 후' : '') : (i.state === 'miss' ? m + '월 ' + st.window.end + '일까지 입력 없음' : m + '월 ' + st.window.end + '일까지 입력 받는 중');
-        return '<button class="feb" ' + (has ? 'onclick="hydDetail(\'' + i.checkId + '\')"' : 'disabled') + '><span class="fname"><b>' + h(i.place) + '</b><small>' + sub + '</small></span>' +
+        return '<button class="feb" ' + (has ? 'onclick="hydDetail(\'' + i.checkId + '\')"' : 'disabled') + '><span class="fname"><b>' + h(i.name) + '</b><small>' + sub + '</small></span>' +
           (i.late ? '<span class="chip c-wait">기한 후</span>' : '') + '<span class="chip ' + STATE[i.state][1] + '">' + STATE[i.state][0] + '</span></button>';
       }).join('') + '</div>';
   };
@@ -2645,7 +2667,7 @@ async function hydDetail(id) {
   try {
     const r = await call('eqDetail', id);
     if (!r.ok) { closeDialog(); toast(r.error); return; }
-    dialog('<div style="display:flex;align-items:center;margin-bottom:var(--sp-2)"><div class="fname"><b style="font-size:var(--size-l)">' + h(r.name) + '</b><small>점검자 ' + h(r.by) + ' · ' + h(r.at) + ' 입력' + (r.late ? ' · 기한 후' : '') + '</small></div><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
+    dialog('<div style="display:flex;align-items:center;margin-bottom:var(--sp-2)"><div class="fname"><b style="font-size:var(--size-l)">' + h(r.name) + '</b><small>' + h(r.floor) + ' · 점검자 ' + h(r.by) + ' · ' + h(r.at) + ' 입력' + (r.late ? ' · 기한 후' : '') + '</small></div><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
       r.items.map(i => '<div style="display:flex;flex-direction:column;gap:var(--sp-2);padding:var(--sp-3) 0;border-top:1px solid var(--line)"><div style="display:flex;align-items:center;justify-content:space-between"><b style="font-size:var(--size-m)">' + h(i.label) + '</b><span class="chip ' + (i.bad ? 'c-bad' : 'c-ok') + '">' + h(i.text) + '</span></div>' +
         (i.memo ? '<div style="font-size:var(--size-m)">' + h(i.memo) + '</div>' : '') +
         '<div class="ph43">' + (i.photo ? '<img src="' + h(i.photo) + '" alt="' + h(i.label) + ' 사진">' : '<small>사진 없음</small>') + '</div></div>').join(''));
@@ -2664,7 +2686,7 @@ function renderEqPick() {
     if (!list.length) return '';
     return '<div class="floorh">' + fl + '</div><div class="store">' + list.map(i => {
       const has = i.state === 'ok' || i.state === 'bad';
-      return '<button class="feb" onclick="eqGo(\'' + i.token + '\')"><span class="fname"><b>' + h(i.place) + '</b><small>' + (has ? h(i.by) + ' · ' + h(String(i.at).slice(5, 16)) + ' 입력' + (i.late ? ' · 기한 후' : '') : m + '월 점검 전') + '</small></span>' +
+      return '<button class="feb" onclick="eqGo(\'' + i.token + '\')"><span class="fname"><b>' + h(i.name) + '</b><small>' + (has ? h(i.by) + ' · ' + h(String(i.at).slice(5, 16)) + ' 입력' + (i.late ? ' · 기한 후' : '') : m + '월 점검 전') + '</small></span>' +
         '<span class="chip ' + STATE[i.state][1] + '">' + STATE[i.state][0] + '</span>' + ICON.chev + '</button>';
     }).join('') + '</div>';
   }).join('');
@@ -2700,51 +2722,82 @@ function eqNotice() {
 
 /* ── ① QR 관리 ── */
 const QR_KIND = { fe: '소화기', hyd: '소화전', air: '공기호흡기' };
-async function openQr() { S.qrKind = 'fe'; S.qr = null; go('qr'); await loadQr(); }
+const KSEP = '<';   // 열림·선택 키 구분 글자 (위치 이름에는 < > 가 못 들어감)
+async function openQr() { S.qrKind = 'fe'; S.qr = null; S.qrOpen = {}; S.qrSc = {}; S.q = ''; go('qr'); await loadQr(); }
 async function loadQr() {
   const k = S.qrKind || 'fe';
   const r = k === 'fe' ? await call('feList') : await call('eqList', k);
   if ((S.qrKind || 'fe') !== k) return;   // 그 사이 다른 탭을 눌렀으면 이 답은 버림
   S.qr = r; S.sel = {};
+  // 방금 등록한 것: 층·위치를 펼치고 미리 골라 둠 (바로 [출력])
+  const nw = S.qrNew; S.qrNew = null;
+  if (nw && nw.length) r.items.forEach(i => { if (nw.indexOf(i.name) !== -1) { S.sel[i.id] = true; S.qrOpen[[k, i.floor].join(KSEP)] = true; S.qrOpen[[k, i.floor, i.store].join(KSEP)] = true; } });
   render();
 }
-function qrTab(k) { if ((S.qrKind || 'fe') === k) return; S.qrKind = k; S.qr = null; S.sel = {}; S.q = ''; render(); loadQr(); }
+function qrTab(k) { if ((S.qrKind || 'fe') === k) return; S.qrKind = k; S.qr = null; S.sel = {}; S.q = ''; S.qrSc = {}; render(); loadQr(); }
 // 소화기 QR은 ?fe=, 소화전·공기호흡기 QR은 ?eq= (바로가기 index.html 이 eq.html 로 보냄)
 function qrUrl(token) { return (S.qr && S.qr.execUrl ? S.qr.execUrl : EXEC_URL) + ((S.qrKind || 'fe') === 'fe' ? '?fe=' : '?eq=') + token; }
+/** 층 → 위치 묶음 (결정 228, 서버가 층·위치·번호 순으로 줌). 소화전·공기호흡기는 위치가 place, 소화기는 store_name — 화면에서는 둘 다 i.store */
+function qrGroups(items) {
+  const out = [];
+  FLOORS.forEach(fl => {
+    const fi = items.filter(i => i.floor === fl);
+    if (!fi.length) return;
+    const locs = [];
+    fi.forEach(i => { let l = locs.find(x => x.place === i.store); if (!l) locs.push(l = { place: i.store, items: [] }); l.items.push(i); });
+    out.push({ fl, locs, items: fi });
+  });
+  return out;
+}
+// 열림: 검색 중이면 맞는 것은 자동으로 펼침(눌러서 접으면 그대로), 아니면 눌러 둔 대로 (처음은 모두 접힘)
+function qrIsOpen(key) { return S.q.trim() ? !S.qrSc[key] : !!S.qrOpen[key]; }
+function qrTog(key) { if (S.q.trim()) S.qrSc[key] = qrIsOpen(key); else S.qrOpen[key] = !S.qrOpen[key]; render(); }
+function qrOpenAll(on) {
+  const k = S.qrKind || 'fe', searching = !!S.q.trim();
+  qrGroups(S.qr.items).forEach(g => [[k, g.fl]].concat(g.locs.map(l => [k, g.fl, l.place])).forEach(a => { const key = a.join(KSEP); if (searching) S.qrSc[key] = !on; else S.qrOpen[key] = on; }));
+  render();
+}
+function qrIdsOf(key) { const p = key.split(KSEP); return S.qr.items.filter(i => i.floor === p[1] && (p[2] === undefined || i.store === p[2])).map(i => i.id); }
+function qrSelKey(key, on) { qrIdsOf(key).forEach(id => { S.sel[id] = on; }); render(); }
+function qrMarkPartial() { document.querySelectorAll('.ac-h > input[data-part]').forEach(e => { e.indeterminate = true; }); }
 function renderQr() {
-  const r = S.qr, kind = S.qrKind || 'fe', kn = QR_KIND[kind];
+  const r = S.qr, kind = S.qrKind || 'fe', kn = QR_KIND[kind], unit = kind === 'fe' ? '대' : '개';
   const selN = Object.keys(S.sel).filter(k => S.sel[k]).length;
-  let body = '<div class="banner b-gray">불러오는 중…</div>';
+  const chev = '<svg class="cv" viewBox="0 0 24 24" fill="none" stroke="#5B6573" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>';
+  let body = '<div class="banner b-gray">불러오는 중…</div>', expandBar = '';
   const row = i => '<div class="fe"><input type="checkbox" aria-label="' + h(i.name) + ' 고르기" ' + (S.sel[i.id] ? 'checked' : '') + ' onchange="S.sel[\'' + i.id + '\']=this.checked;render()">' +
     '<button class="qrmini" data-qr="' + h(i.token) + '" onclick="bigQr(\'' + i.id + '\')" aria-label="' + h(i.name) + ' QR 크게 보기"></button>' +
-    '<span class="fname"><b>' + h(i.name) + '</b><small>' + h(i.id) + '</small></span></div>';
+    '<span class="fname"><b>' + h(i.name) + '</b><small>' + h(i.id) + '</small></span>' + (i.printed === false ? '<span class="chip c-miss">미인쇄</span>' : '') + '</div>';
+  const head = (key, label, cnt, items, big) => {
+    const ids = items.map(i => i.id), n = ids.filter(id => S.sel[id]).length, open = qrIsOpen(key), unp = items.filter(i => i.printed === false).length;
+    return '<div class="ac-h' + (open ? ' open' : '') + '"><input type="checkbox" data-k="' + h(key) + '" ' + (n === ids.length ? 'checked' : '') + (n && n < ids.length ? ' data-part="1"' : '') + ' onchange="qrSelKey(this.dataset.k,this.checked)" aria-label="' + h(label) + ' 전체 고르기">' +
+      '<button class="ac-t' + (big ? ' big' : '') + '" data-k="' + h(key) + '" aria-expanded="' + open + '" onclick="qrTog(this.dataset.k)">' + chev + '<span class="ac-n">' + h(label) + '</span><span class="cnt">' + cnt + (unp ? ' · <span class="unp">미인쇄 ' + unp + '</span>' : '') + '</span></button></div>';
+  };
   if (r) {
     const q = S.q.trim().toLowerCase().replace(/\s+/g, '');
-    const items = r.items.filter(i => !q || ((kind === 'fe' ? i.store : '') + i.name + i.floor).toLowerCase().replace(/\s+/g, '').indexOf(q) !== -1);
+    const items = r.items.filter(i => !q || (i.store + i.name + i.floor).toLowerCase().replace(/\s+/g, '').indexOf(q) !== -1);
     if (!items.length) body = '<div class="banner b-gray">' + (r.items.length ? '검색 결과가 없습니다.' : '등록된 ' + kn + '이(가) 없습니다. [+ 등록]으로 추가하세요.') + '</div>';
     else {
-      body = '';
-      FLOORS.forEach(fl => {
-        const fItems = items.filter(i => i.floor === fl);
-        if (!fItems.length) return;
-        body += '<div class="floorh">' + fl + '</div>';
-        if (kind !== 'fe') { body += '<div class="store">' + fItems.map(row).join('') + '</div>'; return; }   // 소화전·공기호흡기는 층 아래에 바로 (매장 묶음 없음)
-        const stores = [...new Set(fItems.map(i => i.store))];
-        stores.forEach(s => {
-          const list = fItems.filter(i => i.store === s);
-          body += '<div class="store"><div class="store-h"><b>' + h(s) + '</b><small style="color:var(--muted)">' + list.length + '대</small></div>' + list.map(row).join('') + '</div>';
-        });
-      });
+      expandBar = '<div style="display:flex;gap:var(--sp-2);justify-content:flex-end"><button class="btn sm" onclick="qrOpenAll(true)">모두 펼치기</button><button class="btn sm" onclick="qrOpenAll(false)">모두 접기</button></div>';
+      body = qrGroups(items).map(g => {
+        const fk = [kind, g.fl].join(KSEP), fo = qrIsOpen(fk);
+        return '<div class="ac">' + head(fk, g.fl, '위치 ' + g.locs.length + '곳 · ' + kn + ' ' + g.items.length + unit, g.items, true) +
+          (fo ? '<div class="ac-b">' + g.locs.map(l => {
+            const lk = [kind, g.fl, l.place].join(KSEP), lo = qrIsOpen(lk);
+            return '<div class="ac">' + head(lk, l.place, kn + ' ' + l.items.length + unit, l.items, false) +
+              (lo ? '<div class="ac-b"><div class="ac-act"><button class="btn sm" data-k="' + h(lk) + '" onclick="qrMore(this.dataset.k)">+ 1' + unit + ' 추가</button><button class="btn sm" data-k="' + h(lk) + '" onclick="qrRenameDlg(this.dataset.k)">이름 고치기</button></div>' + l.items.map(row).join('') + '</div>' : '') + '</div>';
+          }).join('') + '</div>' : '') + '</div>';
+      }).join('');
     }
   }
   const tabs = '<div class="seg" role="group" aria-label="종류">' + ['fe', 'hyd', 'air'].map(k => '<button class="' + (k === kind ? 'on' : '') + '" aria-pressed="' + (k === kind) + '" onclick="qrTab(\'' + k + '\')">' + QR_KIND[k] + '</button>').join('') + '</div>';
   return topbar('소화기 점검 ›', '소화기, 소화전, 공기호흡기 QR 관리') + '<div class="wrap list">' + tabs +
-    '<div class="tools"><input class="inp" type="search" placeholder="' + (kind === 'fe' ? '매장명 · 소화기 이름 · 층 검색' : '위치 · 층 검색') + '" aria-label="검색" value="' + h(S.q) + '" oninput="S.q=this.value;renderKeepFocus(this)">' +
+    '<div class="tools"><input class="inp" type="search" placeholder="위치 · 이름 · 층 검색" aria-label="검색" value="' + h(S.q) + '" oninput="S.q=this.value;S.qrSc={};renderKeepFocus(this)">' +
     '<button class="btn pri" onclick="addDialog()">+ 등록</button>' +
     (CAN_PRINT ? '<button class="btn" onclick="printLabels()" ' + (selN ? '' : 'disabled') + '>' + ICON.print + ' 출력 (' + selN + ')</button>' : '') +
     '<button class="btn warn" onclick="delDialog()" ' + (selN ? '' : 'disabled') + '>삭제 (' + selN + ')</button></div>' +
     (CAN_PRINT ? '' : '<div class="banner b-gray">QR 출력은 PC 화면에서 합니다. 휴대폰에서는 등록과 삭제만 됩니다.</div>') +
-    body + '</div>';
+    expandBar + body + '</div>';
 }
 function renderKeepFocus(el) { const pos = el.selectionStart; render(); const n = document.querySelector('.tools .inp'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
 function drawQrs() {
@@ -2765,46 +2818,101 @@ function bigQr(id) {
   new QRCode($('bigqr'), { text: qrUrl(i.token), width: 240, height: 240, correctLevel: QRCode.CorrectLevel.M });
 }
 function addDialog() {
-  const kind = S.qrKind || 'fe', kn = QR_KIND[kind];
-  if (kind !== 'fe') {
-    dialog('<h2 style="margin:0 0 var(--sp-3);font-size:var(--size-l)">' + kn + ' 등록</h2>' +
-      '<label style="display:flex;flex-direction:column;gap:var(--sp-1);font-size:var(--size-s);color:var(--sub);margin-bottom:var(--sp-3)">층<select id="aFloor" class="inp">' + FLOORS.map(f => '<option' + (f === S.floor ? ' selected' : '') + '>' + f + '</option>').join('') + '</select></label>' +
-      '<label style="display:flex;flex-direction:column;gap:var(--sp-1);font-size:var(--size-s);color:var(--sub);margin-bottom:var(--sp-2)">위치 (직접 적기)<input id="aPlace" class="inp" maxlength="30" placeholder="예: 동측 계단 앞" onkeydown="if(event.key===\'Enter\')doAdd()"></label>' +
-      '<small style="color:var(--muted)">이름은 「3F 동측 계단 앞 ' + kn + '」처럼 층과 위치를 이어서 만들어집니다.</small>' +
-      '<div id="aMsg" role="alert" style="color:var(--red);font-size:var(--size-s);min-height:18px;margin-top:var(--sp-1)"></div>' +
-      '<div style="display:flex;gap:var(--sp-2);margin-top:var(--sp-2)"><button class="btn big" style="flex:1" onclick="closeDialog()">취소</button><button id="aBtn" class="btn big pri" style="flex:2" onclick="doAdd()">등록하고 QR 만들기</button></div>');
-    return;
-  }
-  const stores = S.qr ? [...new Set(S.qr.items.map(i => i.store))] : [];
-  dialog('<h2 style="margin:0 0 var(--sp-3);font-size:var(--size-l)">소화기 등록</h2>' +
-    '<label style="display:flex;flex-direction:column;gap:var(--sp-1);font-size:var(--size-s);color:var(--sub);margin-bottom:var(--sp-3)">층<select id="aFloor" class="inp">' + FLOORS.map(f => '<option' + (f === S.floor ? ' selected' : '') + '>' + f + '</option>').join('') + '</select></label>' +
-    '<label style="display:flex;flex-direction:column;gap:var(--sp-1);font-size:var(--size-s);color:var(--sub);margin-bottom:var(--sp-3)">매장명<input id="aStore" class="inp" list="storeList" maxlength="30" placeholder="예: 샤넬뷰티"><datalist id="storeList">' + stores.map(s => '<option value="' + h(s) + '">').join('') + '</datalist></label>' +
-    '<label style="display:flex;flex-direction:column;gap:var(--sp-1);font-size:var(--size-s);color:var(--sub);margin-bottom:var(--sp-2)">몇 대를 추가할까요?<input id="aCount" class="inp" type="number" min="1" max="20" value="1" inputmode="numeric"></label>' +
-    '<small style="color:var(--muted)">이름은 「매장명-소화기1」처럼 이어서 붙습니다.</small>' +
+  const cur = S.qrKind || 'fe';
+  const lab = 'display:flex;flex-direction:column;gap:var(--sp-1);font-size:var(--size-s);color:var(--sub);margin-bottom:var(--sp-3)';
+  dialog('<h2 style="margin:0 0 var(--sp-3);font-size:var(--size-l)">등록</h2>' +
+    '<div style="font-size:var(--size-s);color:var(--sub);margin-bottom:var(--sp-1)">종류 (여러 개 골라도 됩니다)</div>' +
+    '<div class="ck" style="margin-bottom:var(--sp-3)">' + ['fe', 'hyd', 'air'].map(k => '<label class="ckl' + (k === cur ? ' on' : '') + '"><input type="checkbox" id="ak_' + k + '"' + (k === cur ? ' checked' : '') + ' onchange="addPre()">' + QR_KIND[k] + '</label>').join('') + '</div>' +
+    '<label style="' + lab + '">층<select id="aFloor" class="inp">' + FLOORS.map(f => '<option' + (f === S.floor ? ' selected' : '') + '>' + f + '</option>').join('') + '</select></label>' +
+    '<label style="' + lab + '">위치<input id="aStore" class="inp" maxlength="30" placeholder="예: 동측 계단 앞" oninput="addPre()"></label>' +
+    '<label style="' + lab + ';margin-bottom:var(--sp-2)">몇 대를 추가할까요? (종류마다 같은 대수)<input id="aCount" class="inp" type="number" min="1" max="20" value="1" inputmode="numeric" oninput="addPre()"></label>' +
+    '<small style="color:var(--muted)">이름은 「위치-소화기1」처럼 이어서 붙습니다. 같은 위치에 이미 있으면 번호가 이어집니다.</small>' +
+    '<div id="aPre" class="pre" style="margin-top:var(--sp-2)"></div>' +
     '<div id="aMsg" role="alert" style="color:var(--red);font-size:var(--size-s);min-height:18px;margin-top:var(--sp-1)"></div>' +
     '<div style="display:flex;gap:var(--sp-2);margin-top:var(--sp-2)"><button class="btn big" style="flex:1" onclick="closeDialog()">취소</button><button id="aBtn" class="btn big pri" style="flex:2" onclick="doAdd()">등록하고 QR 만들기</button></div>');
+  addPre();
+}
+function addPre() {
+  const ks = ['fe', 'hyd', 'air'];
+  ks.forEach(k => { const c = $('ak_' + k); if (c && c.parentNode) c.parentNode.classList.toggle('on', c.checked); });
+  const place = ($('aStore').value || '').trim().replace(/\s+/g, ' ') || '위치', n = Math.max(1, Math.min(20, Math.floor(Number($('aCount').value)) || 1));
+  const lines = ks.filter(k => $('ak_' + k).checked).map(k => place + '-' + QR_KIND[k] + '1' + (n > 1 ? ' ~ ' + place + '-' + QR_KIND[k] + n : ''));
+  $('aPre').innerHTML = lines.length ? '<b>만들어지는 이름</b><br>' + lines.map(h).join('<br>') : '<span style="color:var(--muted)">종류를 하나 이상 골라 주세요.</span>';
 }
 async function doAdd() {
-  const kind = S.qrKind || 'fe';
-  const d = kind === 'fe' ? { floor: $('aFloor').value, store: $('aStore').value, count: $('aCount').value } : { kind, floor: $('aFloor').value, place: $('aPlace').value };
+  const kinds = ['fe', 'hyd', 'air'].filter(k => $('ak_' + k).checked), msg = $('aMsg');
+  if (!kinds.length) { msg.textContent = '종류를 하나 이상 골라 주세요.'; return; }
+  const floor = $('aFloor').value, place = $('aStore').value, count = $('aCount').value;
   $('aBtn').disabled = true; $('aBtn').innerHTML = '<span class="spin"></span>';
+  const done = {};
+  let err = '';
+  for (const k of kinds) {   // 종류마다 차례로 (소화기는 fire_ext, 소화전·공기호흡기는 fire_equip)
+    try {
+      const r = k === 'fe' ? await call('feAdd', { floor, store: place, count }) : await call('eqAdd', { kind: k, floor, place, count });
+      if (!r.ok) { err = QR_KIND[k] + ': ' + r.error; break; }
+      done[k] = r.added;
+    } catch (e) { err = QR_KIND[k] + ': 서버에 연결하지 못했습니다.'; break; }
+  }
+  const ok = Object.keys(done);
+  if (err) {   // 일부만 됐으면 된 종류는 체크를 풀어 다시 만들지 않게
+    ok.forEach(k => { const c = $('ak_' + k); if (c) c.checked = false; });
+    addPre();
+    msg.textContent = (ok.length ? ok.map(k => QR_KIND[k]).join('·') + '은(는) 등록했습니다. ' : '') + err;
+    $('aBtn').disabled = false; $('aBtn').textContent = '등록하고 QR 만들기';
+  } else closeDialog();
+  if (ok.length) afterAdd(done, floor);
+}
+function afterAdd(done, floor) {
+  const cur = S.qrKind || 'fe', ks = Object.keys(done), target = ks.indexOf(cur) !== -1 ? cur : ks[0];
+  S.floor = floor;
+  // 한 종류만이고 3개 이하면 이름을 그대로, 아니면 종류별 개수
+  toast((ks.length === 1 && done[ks[0]].length <= 3 ? done[ks[0]].join(', ') : ks.map(k => QR_KIND[k] + ' ' + done[k].length + (k === 'fe' ? '대' : '개')).join(' · ')) + ' 등록');
+  if (target !== cur) { S.qrKind = target; S.qr = null; S.q = ''; S.qrSc = {}; }
+  S.qrNew = done[target]; S.sel = {};
+  render(); loadQr();
+}
+/** 위치 아코디언의 [+ 1대 추가]: 같은 층·위치에 한 대 더 (이름 번호는 이어서) */
+async function qrMore(key) {
+  const p = key.split(KSEP), k = p[0], floor = p[1], place = p[2];
   try {
-    const r = await call(kind === 'fe' ? 'feAdd' : 'eqAdd', d);
-    if (!r.ok) { $('aMsg').textContent = r.error; $('aBtn').disabled = false; $('aBtn').textContent = '등록하고 QR 만들기'; return; }
-    S.floor = d.floor; closeDialog(); toast((kind === 'fe' ? r.added.join(', ') : r.added) + ' 등록'); if ((S.qrKind || 'fe') === kind) { S.qr = r; S.sel = {}; render(); }
-  } catch (e) { $('aBtn').disabled = false; $('aBtn').textContent = '등록하고 QR 만들기'; }
+    const r = k === 'fe' ? await call('feAdd', { floor, store: place, count: 1 }) : await call('eqAdd', { kind: k, floor, place, count: 1 });
+    if (!r.ok) { toast(r.error); return; }
+    toast(r.added.join(', ') + ' 등록'); S.qrNew = r.added; loadQr();
+  } catch (e) { /* call()이 알림을 띄움 */ }
+}
+function qrRenameDlg(key) {
+  const p = key.split(KSEP);
+  S.rn = { key, k: p[0], fl: p[1], place: p[2] };
+  dialog('<h2 style="margin:0 0 var(--sp-2);font-size:var(--size-l)">위치 이름 고치기</h2><p style="margin:0 0 var(--sp-3);font-size:var(--size-m)">' + h(p[1]) + ' · ' + h(p[2]) + ' <span style="color:var(--muted)">(' + QR_KIND[p[0]] + ')</span></p>' +
+    '<label style="display:flex;flex-direction:column;gap:var(--sp-1);font-size:var(--size-s);color:var(--sub);margin-bottom:var(--sp-2)">새 위치 이름<input id="rnNew" class="inp" maxlength="30" value="' + h(p[2]) + '" onkeydown="if(event.key===\'Enter\')doRename()"></label>' +
+    '<small style="color:var(--muted)">이 위치 것의 이름이 「새이름-' + QR_KIND[p[0]] + '1」처럼 한꺼번에 바뀝니다. 붙여 둔 QR은 그대로 쓸 수 있습니다.</small>' +
+    '<div id="rnMsg" role="alert" style="color:var(--red);font-size:var(--size-s);min-height:18px;margin-top:var(--sp-1)"></div>' +
+    '<div style="display:flex;gap:var(--sp-2);margin-top:var(--sp-2)"><button class="btn big" style="flex:1" onclick="closeDialog()">취소</button><button id="rnBtn" class="btn big pri" style="flex:2" onclick="doRename()">이름 고치기</button></div>');
+  setTimeout(() => { const e = $('rnNew'); if (e) { e.focus(); e.select(); } }, 50);
+}
+async function doRename() {
+  const R = S.rn, nv = $('rnNew').value;
+  $('rnBtn').disabled = true;
+  try {
+    const r = await call('qrRename', R.k, R.fl, R.place, nv);
+    if (!r.ok) { $('rnMsg').textContent = r.error; $('rnBtn').disabled = false; return; }
+    const nk = [R.k, R.fl, nv.trim().replace(/\s+/g, ' ')].join(KSEP);
+    if (S.qrOpen[R.key] !== undefined) { S.qrOpen[nk] = S.qrOpen[R.key]; delete S.qrOpen[R.key]; }   // 열어 둔 상태를 새 이름으로 옮김
+    closeDialog(); toast(r.count + (R.k === 'fe' ? '대' : '개') + ' 이름을 고쳤습니다');
+    if ((S.qrKind || 'fe') === R.k) { S.qr = r; S.sel = {}; render(); }
+  } catch (e) { $('rnBtn').disabled = false; }
 }
 function delDialog() {
   const kind = S.qrKind || 'fe', kn = QR_KIND[kind], ids = Object.keys(S.sel).filter(k => S.sel[k]);
   const names = S.qr.items.filter(i => ids.indexOf(i.id) !== -1).map(i => i.name);
-  dialog('<h2 style="margin:0 0 var(--sp-2);font-size:var(--size-l)">' + kn + ' ' + ids.length + (kind === 'fe' ? '대' : '곳') + ' 삭제</h2><p style="margin:0 0 var(--sp-2);font-size:var(--size-m);line-height:1.6">' + names.map(h).join('<br>') + '</p>' +
+  dialog('<h2 style="margin:0 0 var(--sp-2);font-size:var(--size-l)">' + kn + ' ' + ids.length + (kind === 'fe' ? '대' : '개') + ' 삭제</h2><p style="margin:0 0 var(--sp-2);font-size:var(--size-m);line-height:1.6">' + names.map(h).join('<br>') + '</p>' +
     '<p style="margin:0 0 var(--sp-3);font-size:var(--size-s);color:var(--muted)">목록과 현황에서 빠지고, 붙어 있는 QR을 찍으면 「삭제된 QR」로 나옵니다. 지난달까지의 점검 기록은 남습니다.</p>' +
     '<div style="display:flex;gap:var(--sp-2)"><button class="btn big" style="flex:1" onclick="closeDialog()">취소</button><button id="dBtn" class="btn big warn" style="flex:2" onclick="doDel()">삭제</button></div>');
 }
 async function doDel() {
   const kind = S.qrKind || 'fe', ids = Object.keys(S.sel).filter(k => S.sel[k]);
   $('dBtn').disabled = true;
-  try { const r = kind === 'fe' ? await call('feDelete', ids) : await call('eqDelete', ids, kind); closeDialog(); toast(r.count + (kind === 'fe' ? '대' : '곳') + ' 삭제'); S.qr = r; S.sel = {}; render(); } catch (e) { $('dBtn').disabled = false; }
+  try { const r = kind === 'fe' ? await call('feDelete', ids) : await call('eqDelete', ids, kind); closeDialog(); toast(r.count + (kind === 'fe' ? '대' : '개') + ' 삭제'); S.qr = r; S.sel = {}; render(); } catch (e) { $('dBtn').disabled = false; }
 }
 const LABEL_PRESETS = [[50, 50], [40, 40], [30, 34], [50, 30]];
 // 라벨 프린터: BIXOLON SLP-TX400 (203dpi = 8점/mm). QR 한 칸이 프린터 점(dot) 정수 배가 되게 그려 흐림 없이 찍히게 함
@@ -2878,7 +2986,15 @@ function doPrint(one) {
     run('labelSave', S.token, L.w, L.h).then(r => { if (r && !r.ok) toast(r.error); }, () => toast('라벨 크기를 저장하지 못했습니다. 인쇄는 그대로 됩니다.'));   // run = 구글·Supabase 둘 다
   }
   closeDialog();
+  if (!one) qrMarkPrinted(list.map(i => i.id));
   setTimeout(() => window.print(), 300);
+}
+/** 인쇄한 라벨은 「미인쇄」 딱지를 뗌 (서버에도 기록, 시험 인쇄 1장은 제외, 실패해도 인쇄는 그대로) */
+function qrMarkPrinted(ids) {
+  const k = S.qrKind || 'fe';
+  S.qr.items.forEach(i => { if (ids.indexOf(i.id) !== -1 && i.printed === false) i.printed = true; });
+  run('qrPrinted', S.token, k, ids).catch(() => {});
+  render();
 }
 
 /* ── ② 점검 현황 ── */
@@ -4209,7 +4325,7 @@ function render() {
   }
   $('app').innerHTML = html;
   if (S.view === 'spec' && S.sp && S.sp.boot) spDraw();
-  if (S.view === 'qr') drawQrs();
+  if (S.view === 'qr') { drawQrs(); qrMarkPartial(); }
   if (S.view === 'sign') mountSign();
   if (S.view === 'pdf') pvDraw();
 }

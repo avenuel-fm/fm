@@ -171,6 +171,9 @@
     eqDelete: async (token, ids, kind) => eqPage(await rpc('ws_eq_delete', { p_token: token, p_ids: ids || [], p_kind: kind || 'hyd' })),
     eqStatus: (token, ym) => rpc('ws_eq_status', { p_token: token, p_ym: ym || '' }),
     eqDetail: (token, id) => rpc('ws_eq_detail', { p_token: token, p_check_id: String(id || '') }),
+    /** QR 관리 v2 (결정 228): 위치 이름 고치기(QR 그대로) · 인쇄함 표시 — kind: fe 소화기 · hyd 소화전 · air 공기호흡기 */
+    qrRename: async (token, kind, floor, oldP, newP) => (kind === 'fe' ? fePage : eqPage)(await rpc('ws_qr_rename', { p_token: token, p_kind: kind, p_floor: floor, p_old: oldP, p_new: newP })),
+    qrPrinted: async (token, kind, ids) => (kind === 'fe' ? fePage : eqPage)(await rpc('ws_qr_printed', { p_token: token, p_kind: kind, p_ids: ids || [] })),
 
     /* ── 3-5 전열필증 (supabase/06_eh.sql). 필증 QR 보기는 eh-sb.html 이 따로 부름 ── */
     ehList: async (token, floor) => fePage(await rpc('ws_eh_list', { p_token: token, p_floor: floor || '' })),
@@ -362,7 +365,7 @@
   /** QR 주소 앞부분: 설정 「바로가기주소」, 없으면 지금 앱이 있는 폴더 (…/fm/ws/) — QR은 거기에 ?fe= 를 붙임 */
   function fePage(r) { if (r && r.ok && !r.execUrl) r.execUrl = new URL('./', location.href).href; return r; }
   /** 소화전·공기호흡기 목록: QR 라벨 글자는 이름 통째로 (화면 labelHtml 이 label 을 씀) */
-  function eqPage(r) { fePage(r); if (r && r.ok && r.items) r.items = r.items.map(i => Object.assign({ label: i.name }, i)); return r; }
+  function eqPage(r) { fePage(r); if (r && r.ok && r.items) r.items = r.items.map(i => Object.assign({ label: i.name, store: i.place }, i)); return r; }   // store = 화면이 층 아래 위치로 묶을 때 쓰는 이름 (소화기 store_name 과 같은 자리)
 
   /** 화면이 만든 PDF(data:) → Blob. 틀리면 { ok:false, error } (Code.gs와 같은 안내) */
   function pdfBlob(uri) {

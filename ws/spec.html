@@ -9,7 +9,7 @@
 <title>시방서 검색 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.25.0"></script>
+<script src="config.js?v=0.25.1"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
@@ -223,6 +223,28 @@ body:has(.csbar) #app{padding-bottom:calc(120px + env(safe-area-inset-bottom))}
 .fname b{font-size:var(--size-m)}
 .fname small{font-size:var(--size-s);color:var(--muted)}
 .floorh{font-size:var(--size-s);font-weight:600;color:var(--muted);margin:var(--sp-1) var(--sp-1) 0}
+/* QR 관리: 층 → 위치 아코디언 · 등록 창 종류 체크 (결정 228) */
+.ac{background:var(--white);border:1px solid var(--line2);border-radius:var(--radius);overflow:hidden}
+.ac+.ac{margin-top:var(--sp-2)}
+.ac-h{display:flex;align-items:center;gap:var(--sp-2);min-height:52px;padding:0 var(--sp-3);background:var(--white)}
+.ac-h>input{width:20px;height:20px;accent-color:var(--blue);flex:none}
+.ac-t{flex:1;min-width:0;display:flex;align-items:center;gap:var(--sp-2);min-height:52px;border:0;background:none;padding:0;text-align:left;color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
+.ac-t .ac-n{font-size:var(--size-m)}.ac-t.big .ac-n{font-size:var(--size-l)}
+.ac-t .cv{width:16px;height:16px;flex:none;transition:transform .15s}
+.ac-h.open .cv{transform:rotate(90deg)}
+.ac-t .cnt{margin-left:auto;font-size:var(--size-s);font-weight:400;color:var(--muted);text-align:right}
+.ac-t .cnt .unp{color:var(--ink);font-weight:600}
+.ac-b{border-top:1px solid var(--line3);padding:var(--sp-2);background:var(--tint);display:flex;flex-direction:column;gap:var(--sp-2)}
+.ac-b .ac{border-color:var(--line3)}
+.ac-b .ac-h,.ac-b .ac-t{min-height:48px}
+.ac-b .ac-t{font-weight:500}
+.ac-b .ac-b{background:var(--white);padding:0;gap:0}
+.ac-act{display:flex;gap:var(--sp-2);padding:var(--sp-2) var(--sp-3);border-bottom:1px solid var(--line3);background:var(--white)}
+.ck{display:flex;gap:var(--sp-2);flex-wrap:wrap}
+.ckl{display:flex;align-items:center;gap:var(--sp-2);min-height:44px;padding:0 var(--sp-3);border:1px solid var(--line);border-radius:var(--radius);font-size:var(--size-m);background:var(--white);cursor:pointer}
+.ckl.on{border-color:var(--blue);background:var(--blue-bg);font-weight:500}
+.ckl input{width:20px;height:20px;accent-color:var(--blue)}
+.pre{background:var(--tint);border:1px solid var(--line);border-radius:var(--radius);padding:var(--sp-2) var(--sp-3);font-size:var(--size-s);line-height:1.7;color:var(--ink)}
 .mnav{display:flex;align-items:center;gap:var(--sp-2)}
 .mnav .btn{width:44px;padding:0;font-size:var(--size-l)}
 .mnav div{flex:1;text-align:center;display:flex;flex-direction:column}
