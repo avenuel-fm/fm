@@ -10,9 +10,9 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.22.0"></script>
-<script>window.WS_VERSION = '0.22.0';</script>
-<script src="ws-api.js?v=0.22.0"></script>
+<script src="config.js?v=0.22.1"></script>
+<script>window.WS_VERSION = '0.22.1';</script>
+<script src="ws-api.js?v=0.22.1"></script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -648,12 +648,11 @@ select.lgin{text-align:center;padding:0}
 /* 온습도/공조기/에어커튼 입력 (WS_온습도공조기, 결정 192·196) — 시안 docs/시안/WS-온습도공조기 */
 .cltabs{margin-bottom:var(--sp-3)}.cltabs button{font-size:var(--size-s);line-height:1.3;padding:4px 2px}
 .flnav{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-1);margin-top:var(--sp-3)}
-.flnav button{min-height:44px;border:1px solid var(--line);background:var(--white);border-radius:var(--radius);font:inherit;font-size:var(--size-s);color:var(--sub);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;position:relative;padding:4px 0 4px 6px;cursor:pointer;overflow:hidden}
+.flnav button{min-height:44px;border:1px solid var(--line);background:var(--white);border-radius:var(--radius);font:inherit;font-size:var(--size-s);color:var(--sub);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;position:relative;padding:4px 0;cursor:pointer;overflow:hidden}
 .flnav button b{font-size:var(--size-s);color:var(--ink);font-weight:600;text-align:center;line-height:1.25}
-.flnav button i{position:absolute;left:0;top:0;bottom:0;width:6px}
 .flnav button.on{border:2px solid var(--navy)}
-.flname{display:inline-block;padding:2px 8px;border-radius:var(--radius);font-weight:600;color:#18202B}
-.flname small{display:block;font-size:12px;font-weight:400;color:#3F4855}
+.flname{display:inline-block;padding:2px 8px;border-radius:var(--radius);font-weight:600;color:var(--ink);background:var(--tint)}
+.flname small{display:block;font-size:12px;font-weight:400;color:var(--sub)}
 .flhd{display:flex;align-items:center;justify-content:space-between;margin:var(--sp-4) 0 var(--sp-2)}.flhd .flname{font-size:var(--size-l)}.flhd small{font-size:var(--size-s);color:var(--muted)}
 .zr{display:grid;grid-template-columns:56px 1fr 1fr;gap:var(--sp-2);align-items:center;padding:var(--sp-2) var(--sp-3);border-top:1px solid var(--line3)}
 .zr:first-child,.secl+.zr{border-top:none}.zr>b{font-size:var(--size-m);font-weight:600}
@@ -677,7 +676,7 @@ select.lgin{text-align:center;padding:0}
 .cltbl{width:100%;border-collapse:collapse;background:var(--white);border:1px solid var(--line2);margin-top:var(--sp-3);font-size:var(--size-s)}
 .cltbl th{background:var(--tint);color:var(--sub);font-weight:500;padding:var(--sp-2);border:1px solid var(--line3);text-align:center}
 .cltbl td{border:1px solid var(--line3);padding:var(--sp-2);vertical-align:top}.cltbl td.ctr{text-align:center;vertical-align:middle}.cltbl td.na{color:var(--muted)}
-.cltbl .zr{border:0;padding:0;grid-template-columns:0 1fr 1fr}.cltbl .zr>b{display:none}
+.cltbl .zr{border:0;padding:0;grid-template-columns:1fr 1fr}.cltbl .zr>b{display:none}.cltbl .zr .sub{grid-column:1 / 3}
 .cltbl.rep td{text-align:right;font-variant-numeric:tabular-nums;vertical-align:middle;white-space:nowrap}.cltbl.rep .l{text-align:left}.cltbl.rep tr.dim td{color:var(--muted)}.cltbl.rep tr.tot td{font-weight:600;background:var(--tint)}
 .clrep h3{font-size:var(--size-m);margin:var(--sp-4) 0 var(--sp-2)}.clrep h3 small{font-size:var(--size-s);color:var(--muted);font-weight:400;margin-left:var(--sp-1)}
 .kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:var(--sp-2)}
@@ -686,7 +685,10 @@ select.lgin{text-align:center;padding:0}
 .up{color:var(--red)}.down{color:var(--blue)}
 .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}.scroll .cltbl{margin-top:0}
 .repchart{position:relative;height:300px;background:var(--white);border:1px solid var(--line2);border-radius:var(--radius);padding:var(--sp-2)}
-.cladv{margin:0;padding-left:var(--sp-4);font-size:var(--size-s);color:var(--sub);line-height:1.7}
+.cladv{display:flex;flex-direction:column;gap:var(--sp-1)}.cladv details{background:var(--white);border:1px solid var(--line2);border-radius:var(--radius)}
+.cladv summary{display:flex;align-items:center;gap:var(--sp-2);min-height:44px;padding:0 var(--sp-3);cursor:pointer;font-size:var(--size-m)}.cladv summary small{color:var(--muted);font-size:var(--size-s)}
+.cladv ul{margin:0;padding:0 var(--sp-3) var(--sp-3) calc(var(--sp-3) + 18px);font-size:var(--size-s);color:var(--sub);line-height:1.7}
+.ucg3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-2)}
 .kwin{width:120px;flex:none}
 .todo{border:1px solid var(--line);border-left:4px solid var(--navy);background:var(--white);padding:var(--sp-3);border-radius:var(--radius)}
 .todo-h{font-size:var(--size-m);font-weight:600;color:var(--ink);display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-2);flex-wrap:wrap}
@@ -706,7 +708,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.22.0' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.22.1' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -2799,9 +2801,9 @@ function clTabs(on) {
 function clCur() { return S.view === 'use' ? S.use && S.use.kind : S.view; }
 function clLeaveOk() { return S.view === 'ahu' ? ahuLeaveOk() : S.view === 'clim' ? climLeaveOk() : S.view === 'use' ? useLeaveOk() : true; }
 function clTab(k) { if (k === clCur() || !clLeaveOk()) return; if (k === 'ahu') openAhu(); else if (k === 'clim') openClim(); else openUse(k); }
-function clName(txt, tone, sub) { return '<span class="flname" style="background:' + (CL_TONE[tone] || 'transparent') + '">' + h(txt) + (sub ? '<small>' + h(sub) + '</small>' : '') + '</span>'; }
+function clName(txt, tone, sub) { return '<span class="flname">' + h(txt) + (sub ? '<small>' + h(sub) + '</small>' : '') + '</span>'; }   // 층·묶음 색은 뺌 (사용자 11-21) — tone 은 안 씀
 function clNav(items, on, fn) {   // items = [[이름, 색, 입력 수 글]]
-  return '<div class="flnav">' + items.map((f, i) => '<button type="button" class="' + (i === on ? 'on' : '') + '" aria-pressed="' + (i === on) + '" onclick="' + fn + '(' + i + ')"><i style="background:' + (CL_TONE[f[1]] || 'var(--line)') + '"></i><b>' + h(f[0]) + '</b><small>' + f[2] + '</small></button>').join('') + '</div>';
+  return '<div class="flnav">' + items.map((f, i) => '<button type="button" class="' + (i === on ? 'on' : '') + '" aria-pressed="' + (i === on) + '" onclick="' + fn + '(' + i + ')"><b>' + h(f[0]) + '</b><small>' + f[2] + '</small></button>').join('') + '</div>';
 }
 function clPager(i, items, fn, word) {
   return '<div class="nextfl"><button class="btn" onclick="' + fn + '(' + (i - 1) + ')"' + (i ? '' : ' disabled') + '>' + ICON.back + '이전 ' + word + '</button>' +
@@ -2897,12 +2899,12 @@ function renderClim() {
   if (pc) return clTop() + '<div class="lgwrap">' + clTabs('clim') + head +
     '<table class="cltbl"><thead><tr><th style="width:80px">층</th><th>1구역 · 온도 / 습도</th><th>2구역 · 온도 / 습도</th><th>3구역 · 온도 / 습도</th></tr></thead><tbody>' +
     fl.map(f => '<tr><td class="ctr">' + clName(CL_FL[f.f][0], CL_FL[f.f][1]) + '</td>' + ['1구역', '2구역', '3구역'].map(z => f.zs.indexOf(z) === -1 ? '<td class="ctr na">—</td>' : '<td>' + zoneRow(f, z) + '</td>').join('') + '</tr>').join('') +
-    '</tbody></table>' + clLegend() + withBack(bar) + '</div>';
+    '</tbody></table>' + clLegend() + bar + '</div>';
   const f = fl[g.fi];
   return clTop() + '<div class="wrap list">' + clTabs('clim') + head +
     '<div class="flhd">' + clName(CL_FL[f.f][0], CL_FL[f.f][1]) + '<small>층 ' + (g.fi + 1) + '/' + fl.length + '</small></div>' +
     '<div class="hvlist"><div class="secl"><span>실내 (지금)</span><span>온도 ℃ · 습도 %</span></div>' + f.zs.map(z => zoneRow(f, z)).join('') + climAdvBox() + '</div>' +
-    clPager(g.fi, fl.map(x => [CL_FL[x.f][0]]), 'climGo', '층') + clLegend() + withBack(bar) + '</div>';
+    clPager(g.fi, fl.map(x => [CL_FL[x.f][0]]), 'climGo', '층') + clLegend() + bar + '</div>';
 }
 function clLegend() { return '<p class="clnote">불쾌지수 = 0.81T + 0.01H(0.99T−14.3) + 46.3 · 쾌적 74 미만 · 주의 78 미만 · 불쾌 78 이상 · 쾌적 범위 23~26℃, 40~60%</p>'; }
 async function climSave() {
@@ -3012,15 +3014,16 @@ function renderUse() {
   if (pc) {
     const Z = ['1구역', '2구역', '3구역'], zoned = g.kind === 'hvac';
     const rows = gs.map(x => {
-      if (!zoned || x.us.every(u => !u.zone)) return '<tr><td class="ctr">' + clName(x.g, x.tone) + '</td><td colspan="' + (zoned ? 3 : 1) + '"><div class="ucg">' + x.us.map(useCard).join('') + '</div></td></tr>';
+      if (!zoned) return '<tr><td class="ctr">' + clName(x.g, x.tone) + '</td><td><div class="ucg ucg3">' + x.us.map(useCard).join('') + '</div></td></tr>';
+      if (x.us.every(u => !u.zone)) return '<tr><td class="ctr">' + clName(x.g, x.tone) + '</td>' + Z.map((z, i) => '<td><div class="ucg">' + x.us.filter((u, j) => j % 3 === i).map(useCard).join('') + '</div></td>').join('') + '</tr>';   // 구역 없는 B3층: 구역 칸에 차례로 (다른 층 칸과 같은 크기)
       return '<tr><td class="ctr">' + clName(x.g, x.tone) + '</td>' + Z.map(z => '<td><div class="ucg">' + x.us.filter(u => u.zone === z).map(useCard).join('') + '</div></td>').join('') + '</tr>';
     }).join('');
-    return clTop() + '<div class="lgwrap">' + clTabs(g.kind) + head + '<table class="cltbl ucpc"><thead><tr><th style="width:80px">' + (zoned ? '층' : '묶음') + '</th>' + (zoned ? Z.map(z => '<th>' + z + '</th>').join('') : '<th>' + kn + '</th>') + '</tr></thead><tbody>' + rows + '</tbody></table>' + note + withBack(bar) + '</div>';
+    return clTop() + '<div class="lgwrap">' + clTabs(g.kind) + head + '<table class="cltbl ucpc"><thead><tr><th style="width:80px">' + (zoned ? '층' : '묶음') + '</th>' + (zoned ? Z.map(z => '<th>' + z + '</th>').join('') : '<th>' + kn + '</th>') + '</tr></thead><tbody>' + rows + '</tbody></table>' + note + bar + '</div>';
   }
   const x = gs[g.pg] || gs[0];
   return clTop() + '<div class="wrap list">' + clTabs(g.kind) + head +
     '<div class="flhd">' + clName(x.g, x.tone) + '<small>' + x.us.length + '대 · ' + (g.kind === 'hvac' ? '층' : '묶음') + ' ' + (g.pg + 1) + '/' + gs.length + '</small></div>' +
-    '<div class="hvlist">' + x.us.map(useCard).join('') + '</div>' + clPager(g.pg, gs.map(y => [y.g]), 'useGo', g.kind === 'hvac' ? '층' : '묶음') + note + withBack(bar) + '</div>';
+    '<div class="hvlist">' + x.us.map(useCard).join('') + '</div>' + clPager(g.pg, gs.map(y => [y.g]), 'useGo', g.kind === 'hvac' ? '층' : '묶음') + note + bar + '</div>';
 }
 async function useSave() {
   const g = S.use; if (g.busy) return;
@@ -3145,10 +3148,11 @@ function repClimHtml() {
       if (f.zs.indexOf(z) === -1) return '<td class="clmuted">해당 없음</td>';
       const g = rows.filter(x => x[1] === f.f && x[2] === z); if (!g.length) return '<td>—</td>';
       const t = avg(g.map(x => Number(x[3]))), hm = avg(g.map(x => Number(x[4]))), d = avg(g.map(x => Number(x[5]))), l = clLv(d)[1];
-      clAdvice(t, hm).forEach(a => adv.push(CL_FL[f.f][0] + ' ' + z + ' (평균 ' + t.toFixed(1) + '℃, ' + hm.toFixed(0) + '%): ' + a));
+      clAdvice(t, hm).forEach(a => adv.push([CL_FL[f.f][0], z + ' (평균 ' + t.toFixed(1) + '℃, ' + hm.toFixed(0) + '%): ' + a]));
       return '<td><b class="ditag' + (l === '주의' ? ' c' : l === '불쾌' ? ' d' : '') + '">' + d.toFixed(1) + ' ' + l + '</b><br><small>' + t.toFixed(1) + '℃ · ' + hm.toFixed(0) + '% · ' + g.length + '건</small></td>';
     }).join('') + '</tr>').join('') + '</tbody></table></div>';
-  html += '<h3>조치 권고</h3>' + (adv.length ? '<ul class="cladv">' + adv.slice(0, 14).map(a => '<li>' + h(a) + '</li>').join('') + '</ul>' : '<p class="clnote">평균 기준으로 조정이 필요한 구역이 없습니다.</p>');
+  html += '<h3>조치 권고</h3>' + (adv.length ? '<div class="cladv">' + [...new Set(adv.map(a => a[0]))].map((fn, i) => { const a = adv.filter(x => x[0] === fn);
+    return '<details' + (i ? '' : ' open') + '><summary><b>' + fn + '</b><small>' + a.length + '건</small></summary><ul>' + a.map(x => '<li>' + h(x[1]) + '</li>').join('') + '</ul></details>'; }).join('') + '</div>' : '<p class="clnote">평균 기준으로 조정이 필요한 구역이 없습니다.</p>');
   html += '<h3>추이 그래프 <small>일별 평균 온도·습도</small></h3><div class="repchart"><canvas id="repCv" height="300"></canvas></div>';
   html += '<h3>상세 기록 <small>최근 ' + Math.min(200, rows.length) + '건</small></h3><div class="scroll"><table class="cltbl rep"><thead><tr><th class="l">시각</th><th>층</th><th>구역</th><th>온도</th><th>습도</th><th>불쾌지수</th><th>실외 온도</th><th>실외 습도</th></tr></thead><tbody>' +
     rows.slice(-200).reverse().map(x => '<tr><td class="l">' + h(x[0]) + '</td><td>' + h(CL_FL[x[1]] ? CL_FL[x[1]][0] : x[1]) + '</td><td>' + h(x[2]) + '</td><td>' + x[3] + '</td><td>' + x[4] + '</td><td>' + x[5] + ' ' + clLv(Number(x[5]))[1] + '</td><td>' + (x[6] == null ? '—' : x[6]) + '</td><td>' + (x[7] == null ? '—' : x[7]) + '</td></tr>').join('') + '</tbody></table></div>' +
@@ -3159,15 +3163,17 @@ async function repChart() {
   const cv = $('repCv'); if (!cv) return;
   try { await loadChart(); } catch (e) { cv.outerHTML = '<p class="clnote">그래프 도구를 불러오지 못했습니다 (인터넷 연결 확인).</p>'; return; }
   const p = S.rep, el = $('repCv'); if (!el || !window.Chart) return;
-  const navy = '#1E3A5F', sub = '#5F6B7A';
+  const navy = '#1E3A5F', sub = '#5F6B7A', ORANGE = '#E87722';   // 쾌적 범위 강조만 주황 (사용자 11-21)
   let cfg;
   if (p.kind === 'climate') {
     const by = {}; p.srv.rows.filter(x => x[0].slice(0, 10) >= p.from0).forEach(x => { const d = x[0].slice(0, 10), a = by[d] = by[d] || { t: 0, h: 0, n: 0 }; a.t += Number(x[3]); a.h += Number(x[4]); a.n++; });
     const ds = Object.keys(by).sort();
     cfg = { type: 'line', data: { labels: ds.map(d => Number(d.slice(5, 7)) + '/' + Number(d.slice(8))), datasets: [
       { label: '평균 온도(℃)', data: ds.map(d => +(by[d].t / by[d].n).toFixed(1)), borderColor: navy, backgroundColor: navy, yAxisID: 'y', tension: .2 },
+      { label: '쾌적 온도 ' + CL_RG.t[0] + '~' + CL_RG.t[1] + '℃', data: ds.map(() => CL_RG.t[1]), borderColor: ORANGE, borderWidth: 1, borderDash: [2, 2], pointRadius: 0, backgroundColor: 'rgba(232,119,34,.16)', fill: '+1', yAxisID: 'y' },
+      { label: '', data: ds.map(() => CL_RG.t[0]), borderColor: ORANGE, borderWidth: 1, borderDash: [2, 2], pointRadius: 0, fill: false, yAxisID: 'y' },
       { label: '평균 습도(%)', data: ds.map(d => +(by[d].h / by[d].n).toFixed(0)), borderColor: sub, backgroundColor: sub, borderDash: [4, 3], yAxisID: 'y2', tension: .2 }] },
-      options: { animation: false, maintainAspectRatio: false, scales: { y: { title: { display: true, text: '℃' } }, y2: { position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: '%' } } } } };
+      options: { animation: false, maintainAspectRatio: false, plugins: { legend: { labels: { filter: x => !!x.text } } }, scales: { y: { suggestedMin: CL_RG.t[0] - 1, suggestedMax: CL_RG.t[1] + 1, title: { display: true, text: '℃' } }, y2: { position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: '%' } } } } };
   } else {
     const st = repStats(), to = p.day, n = Math.round((Date.parse(to) - Date.parse(p.from0)) / 864e5) + 1, monthly = p.per === 'all' || n > 120;
     let lab = [], tot = [], av = [];
