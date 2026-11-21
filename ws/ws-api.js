@@ -128,6 +128,8 @@
     climateReport: (token, from, to) => rpc('ws_climate_report', { p_token: token, p_from: from || '', p_to: to || '' }),
     equipKwGet: (token) => rpc('ws_equip_kw_get', { p_token: token }),
     equipKwSave: (token, d) => rpc('ws_equip_kw_save', { p_token: token, p_d: d || {} }),
+    equipHoursGet: (token, kind) => rpc('ws_equip_hours_get', { p_token: token, p_kind: kind }),
+    equipHoursSave: (token, kind, rows) => rpc('ws_equip_hours_save', { p_token: token, p_kind: kind, p_rows: rows || [] }),
     // 오늘 날씨가 비었으면 구글 웹앱이 네이버에서 읽어 일지에 넣게 한 뒤 다시 받음 (실패해도 화면은 그대로)
     async ahuGet(token, day) {
       const g = () => rpc('ws_ahu_get', { p_token: token, p_day: day || '' });

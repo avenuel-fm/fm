@@ -10,9 +10,9 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.22.1"></script>
-<script>window.WS_VERSION = '0.22.1';</script>
-<script src="ws-api.js?v=0.22.1"></script>
+<script src="config.js?v=0.23.0"></script>
+<script>window.WS_VERSION = '0.23.0';</script>
+<script src="ws-api.js?v=0.23.0"></script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -689,6 +689,33 @@ select.lgin{text-align:center;padding:0}
 .cladv summary{display:flex;align-items:center;gap:var(--sp-2);min-height:44px;padding:0 var(--sp-3);cursor:pointer;font-size:var(--size-m)}.cladv summary small{color:var(--muted);font-size:var(--size-s)}
 .cladv ul{margin:0;padding:0 var(--sp-3) var(--sp-3) calc(var(--sp-3) + 18px);font-size:var(--size-s);color:var(--sub);line-height:1.7}
 .ucg3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-2)}
+.lgwrap:has(.ucpc),.lgwrap:has(.uhg){max-width:none}
+.uchd{display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap}.uchd b{font-size:var(--size-l)}.uchd .hvmeta{margin:0;flex:1 1 300px}
+.hdbtns{display:flex;gap:var(--sp-1);flex-wrap:wrap;justify-content:flex-end}
+/* PC 가동시간: 장비 한 줄 (1920x1080 한 화면, 결정 200) */
+.ucpc{margin-top:var(--sp-2);table-layout:fixed}.ucpc th{padding:4px}.ucpc td{padding:2px 3px}.lgwrap .ucpc+.clnote{margin-top:4px}
+.ucpc .ucg{gap:3px}
+.ucpc .uc{display:flex;align-items:center;gap:4px;padding:2px 4px;border:1px solid var(--line2);border-radius:var(--radius)}
+.ucpc .uc .h,.ucpc .uc .r{display:contents}
+.ucpc .uc .flname{width:80px;flex:none;font-size:13px;padding:2px 4px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ucpc .uc .flname small{display:none}
+.ucpc .uc .r>span{display:none}
+.ucpc .uc .r:nth-child(3)>span{display:inline;font-size:0;order:3}.ucpc .uc .r:nth-child(3)>span::before{content:'~';font-size:13px;color:var(--sub)}
+.ucpc .uc select{order:2;font-size:13px;min-height:28px;height:28px;flex:1 1 0;min-width:0;width:auto;padding:0 1px}.ucpc .uc .r:nth-child(3)>select{order:4}
+.ucpc .uc .off{order:5;min-height:28px;font-size:12px;gap:3px;white-space:nowrap}.ucpc .uc .off input{width:16px;height:16px}
+.ucpc .uc .f{order:6;margin:0;flex:none;width:86px;overflow:hidden;flex-direction:column;align-items:flex-end;gap:0;font-size:12px;line-height:1.25;white-space:nowrap}
+.ucpc .uc .f .nwstate,.ucpc .uc .f .clmuted{font-size:11px}.ucpc .uc .f svg{width:11px;height:11px}
+.ucpc .ucg3{gap:4px}
+.ucz{font-size:var(--size-s);color:var(--sub);font-weight:600;margin:var(--sp-3) 0 var(--sp-1)}
+.flsec{scroll-margin-top:70px}
+/* 가동시간 설정 (요일별 기본 시각) */
+.uhg{display:flex;gap:var(--sp-2);align-items:center;padding:var(--sp-2) var(--sp-3);border-top:1px solid var(--line3)}.uhg:first-child{border-top:none}
+.uhg>.flname{width:96px;flex:none;text-align:center}
+.uhd{flex:1;display:grid;grid-template-columns:repeat(7,1fr);gap:var(--sp-1)}
+.uhc{display:flex;align-items:center;gap:3px;font-size:var(--size-s);color:var(--sub)}.uhc b{width:18px;flex:none;color:var(--ink);font-weight:600;text-align:center}.uhc.we b{color:var(--red)}
+.uhc input{flex:1 1 0;min-width:0;min-height:36px;border:1px solid var(--line);border-radius:var(--radius);font:inherit;font-size:15px;padding:0 4px;color:var(--ink);background:var(--white)}
+.uhc input.ch{border-color:var(--navy)}.uhc input.bad{border-color:var(--red)}
+@media (min-width:1024px){.uhc input{font-size:14px;padding:0 2px}.uhc input::-webkit-calendar-picker-indicator{display:none}}
+@media (max-width:1023px){.uhg{flex-direction:column;align-items:stretch}.uhg>.flname{width:auto;align-self:flex-start}.uhd{grid-template-columns:1fr}.uhc input{font-size:16px;min-height:var(--control-h)}}
 .kwin{width:120px;flex:none}
 .todo{border:1px solid var(--line);border-left:4px solid var(--navy);background:var(--white);padding:var(--sp-3);border-radius:var(--radius)}
 .todo-h{font-size:var(--size-m);font-weight:600;color:var(--ink);display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-2);flex-wrap:wrap}
@@ -708,7 +735,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.22.1' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.23.0' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -795,6 +822,7 @@ const ICON = {
   warn: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></svg>',
   back: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>',
   chev: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B6573" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>',
+  clock: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
   chart: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
   next: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>',
   print: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/></svg>'
@@ -812,8 +840,8 @@ function go(view, push) {
 }
 async function refreshFire() { try { const r = await call('bootstrap'); S.fire = r.fire; S.user = r.user; S.fireAt = Date.now(); if (S.view === 'fire') render(); } catch (e) {} }
 try { google.script.history.setChangeHandler(e => { const v = e.state && e.state.v; if (v && S.token) { S.view = v; render(); } }); } catch (e) {}
-const PARENT = { inspect: 'main', fire: 'inspect', eh: 'inspect', thermal: 'inspect', cs: 'inspect', csck: 'cs', qr: 'fire', hyd: 'fire', status: 'fire', floor: 'status', docs: 'main', set: 'main', risk: 'set', map: 'main', cad: 'main', spec: 'main', tbm: 'docs', nw: 'docs', log: 'docs', ahu: 'docs', clim: 'docs', use: 'docs', rep: 'docs', kw: 'set', att: 'docs', attup: 'att' };
-function back() { if (S.view === 'pdf') return go((S.pdf && S.pdf.from) || 'main'); if (S.view === 'csck') return csLeave(); if (S.view === 'risk' && S.rk && S.rk.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; if (S.view === 'nw' && !nwLeaveOk()) return; if (S.view === 'log' && !lgLeaveOk()) return; if (S.view === 'ahu' && !ahuLeaveOk()) return; if ((S.view === 'clim' || S.view === 'use') && !clLeaveOk()) return; if (S.view === 'rep') return repBack(); if (S.view === 'tbm' && S.tbm && S.tbm.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; go(PARENT[S.view] || 'main'); }
+const PARENT = { inspect: 'main', fire: 'inspect', eh: 'inspect', thermal: 'inspect', cs: 'inspect', csck: 'cs', qr: 'fire', hyd: 'fire', status: 'fire', floor: 'status', docs: 'main', set: 'main', risk: 'set', map: 'main', cad: 'main', spec: 'main', tbm: 'docs', nw: 'docs', log: 'docs', ahu: 'docs', clim: 'docs', use: 'docs', rep: 'docs', kw: 'set', uhr: 'use', att: 'docs', attup: 'att' };
+function back() { if (S.view === 'pdf') return go((S.pdf && S.pdf.from) || 'main'); if (S.view === 'csck') return csLeave(); if (S.view === 'risk' && S.rk && S.rk.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; if (S.view === 'nw' && !nwLeaveOk()) return; if (S.view === 'log' && !lgLeaveOk()) return; if (S.view === 'ahu' && !ahuLeaveOk()) return; if ((S.view === 'clim' || S.view === 'use') && !clLeaveOk()) return; if (S.view === 'rep') return repBack(); if (S.view === 'uhr') return uhBack(); if (S.view === 'tbm' && S.tbm && S.tbm.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; go(PARENT[S.view] || 'main'); }
 
 function topbar(sub, title) {
   const u = S.user || {};
@@ -2938,7 +2966,7 @@ function useMin(ap, hh, mm) { if (!ap || !hh || mm === '') return null; return (
 function useDur(m) { return Math.floor(m / 60) + '시간' + (m % 60 ? ' ' + String(m % 60).padStart(2, '0') + '분' : ''); }
 function useHm(m) { const p = useParts(m); return (p[0] === 'am' ? '오전 ' : '오후 ') + p[1] + ':' + String(p[2]).padStart(2, '0'); }
 async function openUse(kind, day) {
-  S.use = { kind, srv: null, v: {}, ch: {}, pg: S.usePg && S.usePg[kind] || 0, busy: false, err: '' };
+  S.use = { kind, srv: null, v: {}, ch: {}, pg: 0, busy: false, err: '' };
   go('use');
   await loadUse(day || '');
 }
@@ -2954,7 +2982,8 @@ function useSet(r) {
 function useGroups() { const out = []; S.use.srv.units.forEach(u => { let x = out.find(a => a.g === u.grp); if (!x) out.push(x = { g: u.grp, tone: u.tone, us: [] }); x.us.push(u); }); return out; }
 function useDirty() { return Object.keys(S.use.ch).length > 0; }
 function useLeaveOk() { return !(S.use && S.use.srv && useDirty()) || confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?'); }
-function useGo(i) { const n = useGroups().length; S.use.pg = Math.max(0, Math.min(n - 1, i)); (S.usePg = S.usePg || {})[S.use.kind] = S.use.pg; render(); window.scrollTo(0, 0); }
+// 휴대폰 층(묶음) 버튼 = 그 칸으로 이동 (한 화면에 차례로, 결정 200)
+function useJump(i) { S.use.pg = i; const e = $('ug-' + i); if (e) e.scrollIntoView({ behavior: 'smooth' }); document.querySelectorAll('.flnav button').forEach((b, j) => { b.classList.toggle('on', j === i); b.setAttribute('aria-pressed', j === i); }); }
 function useCal() {
   const g = S.use, t = g.srv.workDay;
   pickDate({ cur: g.day, home: t, max: t, homeLbl: '오늘로 (' + Number(t.slice(5, 7)) + '월 ' + Number(t.slice(8, 10)) + '일)', fn: ds => { if (ds !== g.day && useLeaveOk()) loadUse(ds); } });
@@ -3002,41 +3031,50 @@ function useMiss() { const g = S.use, n = g.srv.units.filter(u => !(g.srv.recs[u
 function renderUse() {
   const g = S.use, kn = CL_KIND[g && g.kind] || '';
   if (!g || !g.srv) return clTop() + '<div class="wrap list">' + clTabs(g ? g.kind : 'hvac') + '<div class="banner b-gray">불러오는 중…</div></div>';
-  const gs = useGroups(), pc = lgPc(), r = g.srv, u0 = r.units[0] || {};
-  const dflt = useHm(u0.s) + ' ~ ' + useHm(r.wkend ? u0.ew : u0.e) + (r.wkend ? ' (금토일)' : '');
+  const gs = useGroups(), pc = lgPc(), r = g.srv, zoned = g.kind === 'hvac', Z = ['1구역', '2구역', '3구역'];
+  const hm = u => useHm(u.s) + ' ~ ' + useHm(r.wkend ? u.ew : u.e), n0 = {};
+  gs.forEach(x => { const k = hm(x.us[0]); n0[k] = (n0[k] || 0) + 1; });
+  const d0 = Object.keys(n0).sort((a, b) => n0[b] - n0[a])[0] || '';   // 가장 많은 층·묶음의 기본 시각
+  const ex = gs.filter(x => hm(x.us[0]) !== d0).map(x => x.g + ' ' + hm(x.us[0])).join(' · ');   // 기본과 다른 층·묶음
   const cnt = x => x.us.filter(u => r.recs[u.u] && (r.recs[u.u].off || r.recs[u.u].s != null)).length + '/' + x.us.length;
   const past = g.day < r.workDay ? '<br>지난 날짜입니다 · 31일 안은 고칠 수 있습니다' : '';
-  const head = '<div class="card" style="padding:var(--sp-4)"><div class="hvhd"><b>' + kn + ' 가동시간</b><button class="nwdate" data-date="' + h(g.day) + '" onclick="useCal()" aria-label="일자 바꾸기">' + ICON.cal + clMd(g.day) + '</button></div>' +
-    '<div class="hdrow"><span class="hvmeta" style="margin:0">' + useMiss() + ' · 기본 ' + dflt + (g.kind === 'hvac' ? ' · 6층 21:50 · B3층 08:30~18:40' : '') + past + '</span>' + clRepBtn(g.kind) + '</div>' +
-    (pc ? '' : clNav(gs.map(x => [x.g, x.tone, cnt(x)]), g.pg, 'useGo')) + '</div>';
+  const meta = useMiss() + ' · 기본 ' + d0 + (ex ? ' · ' + ex : '') + past;
+  const date = '<button class="nwdate" data-date="' + h(g.day) + '" onclick="useCal()" aria-label="일자 바꾸기">' + ICON.cal + clMd(g.day) + '</button>';
+  const btns = '<div class="hdbtns">' + (isBoss() ? '<button class="btn sm" id="uhrBtn" onclick="openUhr(\'' + g.kind + '\')">' + ICON.clock + '가동시간 설정</button>' : '') + clRepBtn(g.kind) + '</div>';
   const bar = '<div class="nwbar"><span id="useState">' + useState() + '</span><div class="dslot"><button class="btn pri" id="useSave" onclick="useSave()"' + (g.busy ? ' disabled' : '') + '>' + (g.busy ? '<span class="spin"></span> 저장 중…' : '저장') + '</button></div></div>';
-  const note = '<p class="clnote">시각은 오전/오후 · 시 · 10분 단위. 미가동 체크 = 0시간, 빈 칸 = 통계에서 뺌. [저장]은 고친 장비와 ' + (pc ? '화면의' : '이 쪽의') + ' 아직 저장 안 한 장비(기본 시각)를 함께 저장합니다.</p>';
+  const note = '<p class="clnote">시각은 오전/오후 · 시 · 10분 단위. 미가동 체크 = 0시간, 빈 칸 = 통계에서 뺌. [저장]은 고친 장비와 화면의 아직 저장 안 한 장비(기본 시각)를 함께 저장합니다.</p>';
   if (pc) {
-    const Z = ['1구역', '2구역', '3구역'], zoned = g.kind === 'hvac';
+    const head = '<div class="card" style="padding:var(--sp-2) var(--sp-4)"><div class="uchd"><b>' + kn + ' 가동시간</b><span class="hvmeta">' + meta + '</span>' + date + btns + '</div></div>';
     const rows = gs.map(x => {
-      if (!zoned) return '<tr><td class="ctr">' + clName(x.g, x.tone) + '</td><td><div class="ucg ucg3">' + x.us.map(useCard).join('') + '</div></td></tr>';
-      if (x.us.every(u => !u.zone)) return '<tr><td class="ctr">' + clName(x.g, x.tone) + '</td>' + Z.map((z, i) => '<td><div class="ucg">' + x.us.filter((u, j) => j % 3 === i).map(useCard).join('') + '</div></td>').join('') + '</tr>';   // 구역 없는 B3층: 구역 칸에 차례로 (다른 층 칸과 같은 크기)
-      return '<tr><td class="ctr">' + clName(x.g, x.tone) + '</td>' + Z.map(z => '<td><div class="ucg">' + x.us.filter(u => u.zone === z).map(useCard).join('') + '</div></td>').join('') + '</tr>';
+      const nm = '<td class="ctr">' + clName(x.g) + '</td>';
+      if (!zoned) return '<tr>' + nm + '<td><div class="ucg ucg3">' + x.us.map(useCard).join('') + '</div></td></tr>';
+      const noz = x.us.every(u => !u.zone);   // 구역 없는 B3층: 구역 칸에 차례로 (다른 층 칸과 같은 크기)
+      return '<tr>' + nm + Z.map((z, i) => '<td><div class="ucg">' + x.us.filter((u, j) => noz ? j % 3 === i : u.zone === z).map(useCard).join('') + '</div></td>').join('') + '</tr>';
     }).join('');
-    return clTop() + '<div class="lgwrap">' + clTabs(g.kind) + head + '<table class="cltbl ucpc"><thead><tr><th style="width:80px">' + (zoned ? '층' : '묶음') + '</th>' + (zoned ? Z.map(z => '<th>' + z + '</th>').join('') : '<th>' + kn + '</th>') + '</tr></thead><tbody>' + rows + '</tbody></table>' + note + bar + '</div>';
+    return clTop() + '<div class="lgwrap">' + clTabs(g.kind) + head + '<table class="cltbl ucpc"><thead><tr><th style="width:72px">' + (zoned ? '층' : '묶음') + '</th>' + (zoned ? Z.map(z => '<th>' + z + '</th>').join('') : '<th>' + kn + '</th>') + '</tr></thead><tbody>' + rows + '</tbody></table>' + note + bar + '</div>';
   }
-  const x = gs[g.pg] || gs[0];
-  return clTop() + '<div class="wrap list">' + clTabs(g.kind) + head +
-    '<div class="flhd">' + clName(x.g, x.tone) + '<small>' + x.us.length + '대 · ' + (g.kind === 'hvac' ? '층' : '묶음') + ' ' + (g.pg + 1) + '/' + gs.length + '</small></div>' +
-    '<div class="hvlist">' + x.us.map(useCard).join('') + '</div>' + clPager(g.pg, gs.map(y => [y.g]), 'useGo', g.kind === 'hvac' ? '층' : '묶음') + note + bar + '</div>';
+  const head = '<div class="card" style="padding:var(--sp-4)"><div class="hvhd"><b>' + kn + ' 가동시간</b>' + date + '</div>' +
+    '<div class="hdrow"><span class="hvmeta" style="margin:0">' + meta + '</span>' + btns + '</div>' + clNav(gs.map(x => [x.g, x.tone, cnt(x)]), g.pg, 'useJump') + '</div>';
+  // 휴대폰: 층 → 1·2·3구역 차례로 한 화면에 (결정 200)
+  const secs = gs.map((x, i) => {
+    const parts = !zoned || x.us.every(u => !u.zone) ? [['', x.us]] : Z.map(z => [z, x.us.filter(u => u.zone === z)]).filter(a => a[1].length);
+    return '<div class="flsec" id="ug-' + i + '"><div class="flhd">' + clName(x.g) + '<small>' + x.us.length + '대</small></div>' +
+      parts.map(p => (p[0] ? '<div class="ucz">' + p[0] + '</div>' : '') + '<div class="hvlist">' + p[1].map(useCard).join('') + '</div>').join('') + '</div>';
+  }).join('');
+  return clTop() + '<div class="wrap list">' + clTabs(g.kind) + head + secs + note + bar + '</div>';
 }
 async function useSave() {
   const g = S.use; if (g.busy) return;
-  const gs = useGroups(), vis = lgPc() ? g.srv.units : (gs[g.pg] || gs[0]).us, rows = [];
+  const rows = [];
   let bad = null;
   g.srv.units.forEach(u => {
-    const v = g.v[u.u]; if (!g.ch[u.u] && !(vis.indexOf(u) !== -1 && !v.saved)) return;
+    const v = g.v[u.u]; if (!g.ch[u.u] && v.saved) return;
     const p = useParse(v);
     if (p.err) { if (!bad) bad = { u, msg: (u.sub ? u.sub + ' ' : '') + u.name + ': ' + p.err }; return; }
     if (p.empty && !v.saved) return;
     rows.push({ u: u.u, s: p.s, e: p.e, off: p.off });
   });
-  if (bad) { g.err = bad.msg; if (!lgPc()) g.pg = gs.findIndex(x => x.us.indexOf(bad.u) !== -1); render(); toast(bad.msg); return; }
+  if (bad) { g.err = bad.msg; render(); toast(bad.msg); const c = document.querySelector('[data-card="' + CSS.escape(bad.u.u) + '"]'); if (c) c.scrollIntoView({ block: 'center' }); return; }
   if (!rows.length) { toast('저장할 변경 내용이 없습니다'); return; }
   g.busy = true; render();
   try {
@@ -3211,6 +3249,52 @@ function repPrint() {
 }
 
 /* ── 환경설정 › 장비 전력(kW)·단가 (소장만, 결정 194). 빈 칸 = 모름 → 리포트 환산에서 뺌 ── */
+/* ── 가동시간 설정: 층(묶음) × 요일 기본 시작·종료 (21_equip_hours.sql, 결정 200). 소장만 ── */
+const UH_DOW = ['월', '화', '수', '목', '금', '토', '일'];
+function uhHm(m) { return String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
+function uhMin(t, end) { const x = /^(\d\d):(\d\d)/.exec(t || ''); if (!x) return null; const m = Number(x[1]) * 60 + Number(x[2]); return end && m === 0 ? 1440 : m; }
+function uhBad(d) { return d[0] == null || d[1] == null || d[0] % 10 > 0 || d[1] % 10 > 0 || d[1] <= d[0]; }
+async function openUhr(kind) {
+  if (!useLeaveOk()) return;
+  S.uh = null; go('uhr');
+  const r = await call('equipHoursGet', kind); if (!r.ok) { toast(r.error); return go('use'); }
+  uhSet(kind, r); if (S.view === 'uhr') render();
+}
+function uhSet(kind, r) { S.uh = { kind, srv: r, v: r.groups.map(x => x.days.map(d => [d[0], d[1]])), ch: {}, busy: false }; }
+function uhIn(el) {
+  const k = S.uh, gi = +el.dataset.gi, w = +el.dataset.w, i = +el.dataset.i, d = k.v[gi][w];
+  d[i] = uhMin(el.value, i === 1); k.ch[gi + '|' + w] = 1;
+  el.closest('.uhc').querySelectorAll('input').forEach(x => { x.classList.add('ch'); x.classList.toggle('bad', uhBad(d)); });
+  const e = $('uhSt'); if (e) e.innerHTML = uhState();
+}
+function uhState() { const n = Object.keys(S.uh.ch).length; return n ? '<span class="nwstate dirty"><i class="dot"></i>' + n + '칸 저장 안 함</span>' : ''; }
+function uhBack() { if (S.uh && Object.keys(S.uh.ch).length && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; go('use'); if (S.use) loadUse(S.use.day); }
+function renderUhr() {
+  const k = S.uh, kn = CL_KIND[k ? k.kind : S.use && S.use.kind] || '', top = topbar('서류작업 ›', kn + ' 가동시간 설정');
+  if (!k) return top + '<div class="wrap" style="text-align:center;padding:var(--sp-8)"><span class="spin" style="color:var(--blue)"></span></div>';
+  const inp = (gi, w, i, m, nm, cls) => '<input type="time" step="600" class="' + cls + '" data-gi="' + gi + '" data-w="' + w + '" data-i="' + i + '" value="' + (m == null ? '' : uhHm(m)) + '" onchange="uhIn(this)" aria-label="' + h(nm) + '">';
+  const rows = k.srv.groups.map((x, gi) => '<div class="uhg">' + clName(x.g) + '<div class="uhd">' + UH_DOW.map((dn, w) => {
+    const d = k.v[gi][w], cls = (k.ch[gi + '|' + w] ? 'ch' : '') + (uhBad(d) ? ' bad' : '');
+    return '<div class="uhc' + (w > 3 ? ' we' : '') + '"><b>' + dn + '</b>' + inp(gi, w, 0, d[0], x.g + ' ' + dn + '요일 시작', cls) + '<span>~</span>' + inp(gi, w, 1, d[1], x.g + ' ' + dn + '요일 종료', cls) + '</div>';
+  }).join('') + '</div></div>').join('');
+  return top + '<div class="' + (lgPc() ? 'lgwrap' : 'wrap list') + '"><div class="banner b-gray" style="line-height:1.6">' + (k.kind === 'hvac' ? '층' : '묶음') + '마다 요일별 기본 시작 · 종료 시각입니다. [' + kn + ' 가동시간] 입력 화면의 처음 값(기본 시각)으로 쓰이고, 이미 저장한 기록은 바뀌지 않습니다. 10분 단위 · 종료 00:00 = 자정.</div>' +
+    '<div class="card" style="padding:0;margin-top:var(--sp-3)">' + rows + '</div>' +
+    '<div class="nwbar"><span id="uhSt">' + uhState() + '</span><div class="dslot"><button class="btn pri" id="uhSave" onclick="uhSave()"' + (k.busy ? ' disabled' : '') + '>' + (k.busy ? '<span class="spin"></span> 저장 중…' : '저장') + '</button></div></div></div>';
+}
+async function uhSave() {
+  const k = S.uh; if (k.busy) return;
+  const keys = Object.keys(k.ch); if (!keys.length) { toast('바뀐 것이 없습니다'); return; }
+  const rows = keys.map(x => { const [gi, w] = x.split('|').map(Number), d = k.v[gi][w]; return { g: k.srv.groups[gi].g, w: w + 1, s: d[0], e: d[1], bad: uhBad(d) }; });
+  const bad = rows.find(x => x.bad);
+  if (bad) { toast(bad.g + ' ' + UH_DOW[bad.w - 1] + '요일: 시작·종료를 10분 단위로, 종료가 시작보다 늦게 넣어 주세요'); return; }
+  k.busy = true; render();
+  try {
+    const r = await call('equipHoursSave', k.kind, rows.map(x => ({ g: x.g, w: x.w, s: x.s, e: x.e })));
+    k.busy = false; if (!r.ok) { render(); toast(r.error); return; }
+    uhSet(k.kind, r); render(); toast(rows.length + '칸 저장했습니다 · 입력 화면 기본 시각에 반영');
+  } catch (e) { k.busy = false; render(); toast('서버에 닿지 않았습니다. 다시 눌러 주세요'); }
+}
+
 async function openKw() {
   S.kw = null; go('kw');
   const r = await call('equipKwGet'); if (!r.ok) { toast(r.error); return back(); }
@@ -3916,6 +4000,7 @@ function render() {
   else if (S.view === 'use') html = renderUse();
   else if (S.view === 'rep' && S.rep) html = renderRep();
   else if (S.view === 'kw' && isBoss()) html = renderKw();
+  else if (S.view === 'uhr' && isBoss()) html = renderUhr();
   else if (S.view === 'map') html = renderMap();
   else if (S.view === 'spec') html = S.sp ? renderSpec() : renderMain();
   else if (S.view === 'att') html = renderAtt();
