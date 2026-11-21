@@ -10,9 +10,9 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.23.2"></script>
-<script>window.WS_VERSION = '0.23.2';</script>
-<script src="ws-api.js?v=0.23.2"></script>
+<script src="config.js?v=0.23.3"></script>
+<script>window.WS_VERSION = '0.23.3';</script>
+<script src="ws-api.js?v=0.23.3"></script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -704,7 +704,7 @@ select.lgin{text-align:center;padding:0}
 .ucpc .uc select{order:2;font-size:14px;min-height:28px;height:28px;flex:1 1 0;min-width:52px;width:auto;padding:0 2px}.ucpc .uc .r:nth-child(3)>select{order:4}
 .ucpc .uc .off{order:5;min-height:28px;font-size:12px;gap:3px;white-space:nowrap}.ucpc .uc .off input{width:16px;height:16px}
 .ucpc .uc .f{order:6;margin:0;flex:none;width:86px;overflow:hidden;flex-direction:column;align-items:flex-end;gap:0;font-size:12px;line-height:1.25;white-space:nowrap}
-.ucpc .uc .f .nwstate,.ucpc .uc .f .clmuted{font-size:11px}.ucpc .uc .f svg{width:11px;height:11px}
+.ucpc.zoned .uc .f{width:64px}.ucpc .uc .f .nwstate,.ucpc .uc .f .clmuted{font-size:11px}.ucpc .uc .f svg{width:11px;height:11px}
 .ucpc .ucg3{gap:4px}
 .uc .ap{text-align:center;font-size:var(--size-s);color:var(--ink)}
 .ucz{font-size:var(--size-s);color:var(--sub);font-weight:600;margin:var(--sp-3) 0 var(--sp-1)}
@@ -737,7 +737,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B1','1F','2F','3F','4F','5F','6F'];
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.23.2' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.23.3' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -3006,8 +3006,9 @@ function useSel(u, f, val, nm, part) {
 }
 function useCard(u) {
   const g = S.use, v = g.v[u.u], p = useParse(v), nm = (u.sub ? u.sub + ' ' : '') + u.name;
-  const foot = p.err ? '<span class="hverr">' + p.err + '</span>' : p.off ? '미가동 · <b>0시간</b>' : p.empty ? '입력 없음' : '가동 <b>' + useDur(p.e - p.s) + '</b>';
-  const st = g.ch[u.u] ? '<span class="nwstate dirty"><i class="dot"></i>저장 안 함</span>' : v.saved ? '<span class="nwstate">' + ICON.ok + '저장됨</span>' : '<span class="clmuted">기본 시각</span>';
+  // 공조기는 가동시간 글자 없음(리포트에서 봄) · 「기본 시각」 글자 없음 (결정 206)
+  const foot = p.err ? '<span class="hverr">' + p.err + '</span>' : g.kind === 'hvac' ? '' : p.off ? '미가동 · <b>0시간</b>' : p.empty ? '입력 없음' : '가동 <b>' + useDur(p.e - p.s) + '</b>';
+  const st = g.ch[u.u] ? '<span class="nwstate dirty"><i class="dot"></i>저장 안 함</span>' : v.saved ? '<span class="nwstate">' + ICON.ok + '저장됨</span>' : '';
   return '<div class="uc' + (v.off ? ' isoff' : '') + (p.err ? ' bad' : '') + '" data-card="' + h(u.u) + '"><div class="h">' + clName(u.name, u.tone, u.sub) +
     '<label class="off"><input type="checkbox" data-u="' + h(u.u) + '" data-f="off"' + (v.off ? ' checked' : '') + ' onchange="useIn(this)" aria-label="' + h(nm) + ' 미가동">미가동</label></div>' +
     '<div class="r"><span>시작</span>' + useSel(u, 's', v.s, nm + ' 시작', v.sp) + '</div><div class="r"><span>종료</span>' + useSel(u, 'e', v.e, nm + ' 종료', v.ep) + '</div>' +
