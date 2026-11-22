@@ -1,0 +1,6 @@
+# 환경변수·비밀 키는 올리지 않음
+.env
+.env.*
+!.env.example
+*.pem
+*.key
