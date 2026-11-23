@@ -228,6 +228,32 @@ class AtrGenerator {
     }
 
     /**
+     * 열화상 카메라 사진을 순수한 320x240 Baseline JPEG(JFIF 1.1, no FLIR APP1)로 깨끗하게 재인코딩
+     */
+    static async makeCleanThermalJpeg(thermalBufferOrBlob, targetW = 320, targetH = 240) {
+        if (typeof document === 'undefined') return new Uint8Array();
+
+        let blob = thermalBufferOrBlob;
+        if (thermalBufferOrBlob instanceof ArrayBuffer || thermalBufferOrBlob instanceof Uint8Array) {
+            blob = new Blob([thermalBufferOrBlob], { type: 'image/jpeg' });
+        }
+        if (!blob) return new Uint8Array();
+
+        const url = URL.createObjectURL(blob);
+        try {
+            const img = await AtrGenerator.loadImage(url);
+            const canvas = document.createElement('canvas');
+            canvas.width = targetW;
+            canvas.height = targetH;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, targetW, targetH);
+            return AtrGenerator.canvasToJpegBytes(canvas, 0.85);
+        } finally {
+            URL.revokeObjectURL(url);
+        }
+    }
+
+    /**
      * 대형 실화상을 중앙 4:3으로 맞추어 320x240으로 리사이즈/크롭
      */
     static async makeCroppedVisual(visualBufferOrBlob, targetW = 320, targetH = 240) {
@@ -291,7 +317,7 @@ class AtrGenerator {
         // (1) Overlay PNG
         const overlayPng = AtrGenerator.makeOverlayPng(spots, temps, 690, 517);
 
-        // (2) Thermal JPEG (첫 번째 JPEG: 320x240)
+        // (2) Thermal JPEG (순수 320x240 Baseline JPEG로 재인코딩)
         let thermalBytes = null;
         const pb = item.patchedBlob ? (item.patchedBlob.blob || item.patchedBlob) : null;
         if (pb && pb.arrayBuffer) {
@@ -302,13 +328,11 @@ class AtrGenerator {
             thermalBytes = new Uint8Array(item.rawBuffer);
         }
 
-        // JPEG EOI 찾기: 전체 파일 중 첫 번째 JPEG 추출
-        let thJpegOnly = thermalBytes;
-        if (thermalBytes) {
-            const thEnd = FlirParser.jpegEnd ? FlirParser.jpegEnd(thermalBytes, 0) : -1;
-            if (thEnd > 0) {
-                thJpegOnly = thermalBytes.subarray(0, thEnd);
-            }
+        let thJpegOnly = await AtrGenerator.makeCleanThermalJpeg(
+            pb || item.thermalBlob || thermalBytes, 320, 240
+        );
+        if (!thJpegOnly || thJpegOnly.length === 0) {
+            thJpegOnly = thermalBytes;
         }
 
         // (3) Visual JPEG (2048x1536 실화상)
