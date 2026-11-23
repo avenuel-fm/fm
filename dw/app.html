@@ -12,7 +12,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
   <script src="../apps.js"></script>
   <script src="config.js"></script>
-  <script>window.DW_VERSION = '1.9.5';</script>
+  <script>window.DW_VERSION = '1.9.6';</script>
   <script src="dw-api.js"></script>
   <title>잠실점 에비뉴엘 도면협의</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -341,11 +341,15 @@ canvas.pen-on{cursor:crosshair}
 @media (hover:hover){.fdbig:hover{background:var(--tint)}}
 .fdbig .ui-ico{width:24px;height:24px}
 .fdov{padding:var(--sp-3)}
-.fdview{background:var(--white);border-radius:var(--radius);display:flex;flex-direction:column;height:min(94vh,1180px);height:min(94dvh,1180px);width:min(calc(min(94vh,1180px) * 0.68),calc(100vw - 24px));overflow:hidden;box-shadow:none}
+.fdview{position:relative;background:var(--white);border-radius:var(--radius);display:flex;flex-direction:column;height:min(94vh,1180px);height:min(94dvh,1180px);width:min(calc(min(94vh,1180px) * 0.68),calc(100vw - 24px));overflow:hidden;box-shadow:none}
 .fdv-hd{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) var(--sp-3) var(--sp-2) var(--sp-4);border-bottom:1px solid var(--line3)}
 .fdv-hd b{flex:1;min-width:0;font-size:var(--size-m);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fdv-bd{position:relative;flex:1;min-height:0;background:var(--tint);display:flex;align-items:center;justify-content:center;overflow:hidden}
 .fdv-bd img{position:absolute;left:50%;top:50%;max-width:none;box-shadow:none;transition:transform .2s ease;background:var(--white)}
+.fdv-bd img.nt{transition:none}
+.fdv-zoom{position:absolute;right:var(--sp-3);top:64px;display:flex;flex-direction:column;gap:var(--sp-2);z-index:2}
+.fdv-zoom .btn{font-size:var(--size-xl);line-height:1;background:var(--white)}
+.fdv-pct{text-align:center;font-size:var(--size-s);background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:2px var(--sp-1);color:var(--navy)}
 .fdv-ft{display:flex;gap:var(--sp-2);justify-content:center;padding:var(--sp-2) var(--sp-3) calc(var(--sp-2) + env(safe-area-inset-bottom));border-top:1px solid var(--line3);flex-wrap:wrap}
 .fdv-ft .btn{flex:1 1 140px;max-width:220px}
 @media (prefers-reduced-motion:reduce){.fdv-bd img{transition:none}}
@@ -554,6 +558,23 @@ canvas.pen-on{cursor:crosshair}
 .pqr{display:flex;align-items:center;gap:6px;flex:none;font-size:8px;color:var(--muted);line-height:1.3}
 .pqr img{width:58px;height:58px;image-rendering:pixelated}
 .ios-tip{flex-basis:100%;color:var(--sub);background:var(--blue-bg);border-radius:var(--radius);padding:var(--sp-2) var(--sp-3)}
+/* 설정 슬라이드 (톱니바퀴) · 월별 아코디언 */
+.gear-ov{justify-content:flex-end;align-items:stretch;padding:0!important;opacity:0;transition:opacity .2s}
+.gear-ov.open{opacity:1}
+.gear-panel{width:min(300px,88vw);background:var(--white);border-left:1px solid var(--line);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .2s ease-out}
+.gear-ov.open .gear-panel{transform:none}
+.gear-hd{display:flex;justify-content:space-between;align-items:center;padding:var(--sp-3) var(--sp-4);border-bottom:1px solid var(--line);font-size:var(--size-l)}
+.gear-bd{padding:var(--sp-3);display:flex;flex-direction:column;gap:var(--sp-2)}
+.gear-item{justify-content:flex-start;gap:var(--sp-2);width:100%;min-height:var(--control-h)}
+.gear-item .gear-sub{margin-left:auto;color:var(--text-sub);font-size:var(--size-s)}
+.macc{border:1px solid var(--line);border-radius:var(--radius);margin-bottom:var(--sp-3);overflow:hidden}
+.macc-h{display:flex;align-items:center;gap:var(--sp-2);width:100%;min-height:var(--control-h);padding:var(--sp-2) var(--sp-3);border:0;background:var(--tint);color:var(--navy);font-size:var(--size-l);text-align:left;cursor:pointer}
+.macc-h .mc{margin-left:var(--sp-2);color:var(--text-sub);font-size:var(--size-s)}
+.macc-h .chev{margin-left:auto;display:inline-flex;transition:transform .15s}
+.macc.open .macc-h .chev{transform:rotate(180deg)}
+.macc-b{display:none;overflow-x:auto}
+.macc.open .macc-b{display:block}
+@media (prefers-reduced-motion:reduce){.gear-ov,.gear-panel{transition:none}}
 .overlay{position:fixed;inset:0;z-index:50;background:var(--overlay);display:flex;align-items:center;justify-content:center;padding:var(--sp-4)}
 .dialog{width:100%;max-width:440px;background:var(--white);border-radius:var(--radius);padding:var(--sp-6) var(--sp-6) var(--sp-6);box-shadow:none}
 .dialog h3{margin:0;font-size:var(--size-l)}
@@ -583,6 +604,7 @@ canvas.pen-on{cursor:crosshair}
 .agsig{min-width:160px;min-height:52px;border:1.5px dashed var(--blue);border-radius:8px;background:var(--card);color:var(--blue);font:inherit;font-weight:500;cursor:pointer;padding:2px 8px}
 .agsig.has{border-style:solid;border-color:var(--line)}
 .agsig img{display:block;max-width:180px;max-height:56px}
+.agsig .ag-hint{color:var(--text-sub);font-weight:400}
 .agsig:disabled{cursor:default;opacity:.8}
 .ag-page .agp{width:1000px;flex:none;transform-origin:0 0}
 .ag-page .ag-tbl{min-width:0}
@@ -995,6 +1017,8 @@ var GuideIndexer = (function () {
   ];
 
   var ICON = {
+    gear: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+    chev: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>',
     back: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>',
     check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>',
     checkW: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>',
@@ -1222,18 +1246,34 @@ var GuideIndexer = (function () {
     }).catch(function (e) { toast(errMsg(e), true); if (S.view === 'dash') renderDashboard(); });
   }
 
+  /* 설정 (톱니바퀴): 오른쪽에서 밀려 나오는 칸 — 동기화·지침 관리·화면 모드 */
+  function openGear() {
+    layer.innerHTML = '<div class="overlay no-print gear-ov"><aside class="gear-panel" role="dialog" aria-modal="true" aria-labelledby="gearT">' +
+      '<div class="gear-hd"><b id="gearT">설정</b><button type="button" class="btn icon-btn" id="gearX" aria-label="닫기">' + ICON.close + '</button></div>' +
+      '<div class="gear-bd">' +
+      '<button type="button" class="btn gear-item" data-act="gearSync">' + ICON.refresh + '<span>' + (S.boot.sb ? '다시 불러오기 (동기화)' : '구글시트 동기화') + '</span><span class="gear-sub">' + esc(S.syncedAt) + '</span></button>' +
+      '<button type="button" class="btn gear-item" data-act="gearGuide">' + ICON.doc + '<span>지침 관리</span></button>' +
+      '<button type="button" class="btn gear-item theme-btn" onclick="toggleTheme()">' + themeLabel() + '</button>' +
+      '</div></aside></div>';
+    var ov = $('.gear-ov', layer), close = function () { document.removeEventListener('keydown', onKey); closeModal(); };
+    var onKey = function (e) { if (e.key === 'Escape') close(); };
+    document.addEventListener('keydown', onKey);
+    ov.addEventListener('click', function (e) { if (e.target === ov) close(); });
+    $('#gearX').onclick = close;
+    $('[data-act="gearSync"]', layer).onclick = function () { close(); openDashboard().then(function () { toast('최신 내용으로 불러왔습니다'); }); };
+    $('[data-act="gearGuide"]', layer).onclick = function () { close(); openGuideAdmin(); };
+    requestAnimationFrame(function () { ov.classList.add('open'); });
+  }
+
   function renderDashboard() {
     window.scrollTo(0, 0);
     app.innerHTML =
       '<header class="topbar"><div class="topbar-in">' +
-      '<div class="tb-title" style="flex:1 1 260px"><div><div class="t1">' + esc(S.boot.storeLabel) + ' · 시설팀' + (S.boot.version ? ' · v' + esc(S.boot.version) : '') + '</div><div class="t2">도면협의 대시보드</div></div></div>' +
+      '<div class="tb-title" style="flex:1 1 260px"><div><div class="t1">' + esc(S.boot.storeLabel) + ' · 시설팀' + (S.boot.version ? ' · v' + esc(S.boot.version) : '') + '</div><div class="t2">도면협의 대시보드 - ' + esc(S.auth.role) + ' 접속 중</div></div></div>' +
       '<div class="tb-actions">' +
-      '<button type="button" class="btn sm" data-act="refresh" title="다시 불러오기">' + ICON.refresh + '<span>' + (S.boot.sb ? '동기화' : '구글시트 동기화') + ' · ' + esc(S.syncedAt) + '</span></button>' +
-      '<span class="whoami" title="다른 사람으로 바꾸려면 로그아웃 후 그 사람의 PIN을 넣습니다">' + ICON.check + esc(S.auth.role) + ' 접속 중</span>' +
-      '<button type="button" class="btn sm" data-act="gadmin">' + ICON.doc + '<span>지침 관리</span></button>' +
       '<button type="button" class="btn pri" data-act="new">+ 새 도면협의</button>' +
-      '<button type="button" class="btn sm theme-btn" onclick="toggleTheme()">' + themeLabel() + '</button>' +
       '<button type="button" class="btn sm" data-act="logout">로그아웃</button>' +
+      '<button type="button" class="btn sm icon-btn" data-act="gear" aria-label="설정" title="설정">' + ICON.gear + '</button>' +
       '</div></div></header>' +
       '<div class="wrap">' +
       '<div id="pendingBar"></div>' +
@@ -1388,9 +1428,8 @@ var GuideIndexer = (function () {
       $('#dashBody').innerHTML = '<div class="empty">' + (total ? '조건에 맞는 매장이 없습니다.' : S.stores.length ? '고른 연도에 등록된 매장이 없습니다. 위 <b>기준 연도</b>에서 다른 해를 골라 보세요.' : '아직 등록된 도면협의가 없습니다. 오른쪽 위 <b>+ 새 도면협의</b>로 시작하세요.') + '</div>';
       return;
     }
-    $('#dashBody').innerHTML =
-      '<table class="tbl"><thead><tr><th>매장</th><th>문서번호</th><th>공사위치</th><th>도면협의 차수 · 컨펌</th><th class="c-last">최근 검토일</th><th class="c-open">오픈 예정일</th><th style="text-align:right">검토서</th></tr></thead><tbody>' +
-      r.list.map(function (s) {
+    var tableHtml = function (list) { return '<table class="tbl"><thead><tr><th>매장</th><th>문서번호</th><th>공사위치</th><th>도면협의 차수 · 컨펌</th><th class="c-last">최근 검토일</th><th class="c-open">오픈 예정일</th><th style="text-align:right">검토서</th></tr></thead><tbody>' +
+      list.map(function (s) {
         var confirmed = s.status === '컨펌완료';
         return '<tr>' +
           '<td class="c-name"><button type="button" class="store-link" data-act="open" data-id="' + esc(s.id) + '">' + esc(s.tenant || '(테넌트명 없음)') + '</button><div>' + (s.contractor ? '<button type="button" class="vlink" data-act="vendor" data-name="' + esc(s.contractor) + '" title="' + esc(s.contractor) + ' 업체 이력">' + esc(s.contractor) + '</button>' : '') + '</div>' + specChip(s) +
@@ -1411,7 +1450,25 @@ var GuideIndexer = (function () {
           (confirmed ? '' : ' <button type="button" class="btn sm" data-act="nextFromDash" data-id="' + esc(s.id) + '">+ 다음 차수</button>') +
           ' <button type="button" class="btn sm del" data-act="delStore" data-id="' + esc(s.id) + '" aria-label="' + esc(s.tenant || '') + ' 검토서 삭제">' + ICON.trash + '삭제</button>' +
           '</td></tr>';
-      }).join('') + '</tbody></table>';
+      }).join('') + '</tbody></table>'; };
+
+    // 작성 월별 묶음: 문서번호 끝 날짜(YYMMDD)가 작성일. 가장 최근 달만 펼쳐 둠
+    var groups = {}, order = [];
+    r.list.forEach(function (s) {
+      var m = String(s.docNo || '').match(/_(\d{2})(\d{2})\d{2}$/), key = m ? '20' + m[1] + '-' + m[2] : '';
+      if (!groups[key]) { groups[key] = []; order.push(key); }
+      groups[key].push(s);
+    });
+    order.sort(function (a, b) { return a === b ? 0 : !a ? 1 : !b ? -1 : b.localeCompare(a); });
+    var om = S.dash.openMonths || (S.dash.openMonths = {});
+    if (!om._init) { om._init = 1; if (order.length) om[order[0]] = 1; }
+    if (S.dash.q || S.dash.todo) order.forEach(function (k) { om[k] = 1; });
+    $('#dashBody').innerHTML = order.map(function (k) {
+      var g = groups[k], open = !!om[k], done = g.filter(function (s) { return s.status === '컨펌완료'; }).length;
+      return '<div class="macc' + (open ? ' open' : '') + '"><button type="button" class="macc-h" data-act="mon" data-m="' + esc(k) + '" aria-expanded="' + open + '">' +
+        '<span>' + (k ? k.slice(0, 4) + '년 ' + Number(k.slice(5)) + '월' : '작성일 모름') + '</span><span class="mc">' + g.length + '곳 · 협의중 ' + (g.length - done) + ' · 컨펌완료 ' + done + '</span>' +
+        '<span class="chev">' + ICON.chev + '</span></button><div class="macc-b">' + (open ? tableHtml(g) : '') + '</div></div>';
+    }).join('');
   }
 
   /* ───────── 달력 탭 ───────── */
@@ -2097,7 +2154,7 @@ var GuideIndexer = (function () {
 
   function fInput(key, opts) {
     opts = opts || {};
-    var f = S.F[key], type = { date: 'date', tel: 'tel', email: 'email' }[f.type] || 'text';
+    var f = S.F[key] || { type: 'date', label: '퇴점일' }, type = { date: 'date', tel: 'tel', email: 'email' }[f.type] || 'text'; // 퇴점일: 서버 항목표(02_const.sql)가 옛 판이어도 화면은 열림
     var label = opts.label || f.label.replace(/_/g, ' ');
     var off = kitchenOff(key);
     var attrs = ' id="f-' + key + '" class="inp' + (off ? ' na-c' : '') + '" data-field="' + key + '" type="' + (off ? 'text' : type) + '" value="' + esc(off ? NA : S.review[key]) + '"' +
@@ -2208,6 +2265,7 @@ var GuideIndexer = (function () {
       '<div style="grid-column:1/-1"><span class="lbl">공사 기간</span><div style="display:flex;gap:var(--sp-2);align-items:center;flex-wrap:wrap">' +
       fInput('periodStart', { bare: true, aria: '공사 시작일', style: 'flex:1 1 180px' }) + '<span class="muted">~</span>' +
       fInput('periodEnd', { bare: true, aria: '공사 종료일', style: 'flex:1 1 180px' }) +
+      '<span class="lbl" style="margin:0 0 0 var(--sp-3)">퇴점일</span>' + fInput('exitDate', { bare: true, aria: '퇴점일 (선택)', style: 'flex:1 1 180px' }) +
       '</div><div class="small" id="inspect"></div></div>' +
       fInput('fireCheckDate', { label: '소방 점검 예정일', wrapStyle: 'grid-column:1/-1', side: '<div id="fdSlot" class="fdslot"></div>', after: '<div id="fdMeta" class="fdmeta"></div><div id="fireSug"></div>' }) +
       '</div><div id="specRec"></div></section>' +
@@ -2744,9 +2802,9 @@ var GuideIndexer = (function () {
     var lines = function (a) { return a.map(function (t) { return esc(t).replace(/^( +)/, function (s) { return s.replace(/ /g, '&nbsp;'); }); }).join('<br>'); };
     var sign = function (key, who) {
       var img = r[key] ? '<img alt="" src="' + esc(r[key]) + '">' : '';
-      if (print) return '<span class="agsig pr">' + img + '</span>';
+      if (print) return '<span class="agsig pr">' + (img || '<span class="ag-hint">(서명)</span>') + '</span>';
       return '<button type="button" class="agsig' + (r[key] ? ' has' : '') + '" data-agsig="' + key + '" data-who="' + esc(who) + '"' + off + ' aria-label="' + esc(who) + (r[key] ? ' 서명 완료, 다시 서명' : ' 서명하기') + '">' +
-        (img || '눌러서 서명') + '</button>';
+        (img || '<span class="ag-hint">(서명)</span>') + '</button>';
     };
     var rows = AGREE_ROWS.map(function (x, i) {
       var g = x[0] && x[1] ? '<td class="c" rowspan="3">' + x[0] + '</td><td class="c">' + x[1] + '</td>' : x[0] ? '<td class="c" colspan="2">' + x[0] + '</td>' : '<td class="c">' + x[1] + '</td>';
@@ -2762,8 +2820,8 @@ var GuideIndexer = (function () {
       '<p class="ag-pen">※ 패널티 적용 세부내용<br>&nbsp;&nbsp;旣 공사도급 계약서 명기</p>' +
       '<div class="ag-foot"><div class="ag-date">' + (d[1] || '') + ' 년 ' + (d[2] ? Number(d[2]) : '') + ' 월 ' + (d[3] ? Number(d[3]) : '') + ' 일</div>' +
       '<div class="ag-line">* 업체명 : <b>' + esc(r.tenant || '') + '</b></div>' +
-      '<div class="ag-line">* 책임자 : ' + sign('agreeRespSig', '안전관리 동의서 책임자') + ' (서명)</div>' +
-      '<div class="ag-line">* 롯데백화점 담당자 : 발주부서 담당자 ' + sign('agreeLotteSig', '안전관리 동의서 롯데백화점 담당자') + ' (서명)</div></div></div>';
+      '<div class="ag-line">* 책임자 : ' + sign('agreeRespSig', '안전관리 동의서 책임자') + '</div>' +
+      '<div class="ag-line">* 롯데백화점 담당자 : 발주부서 담당자 ' + sign('agreeLotteSig', '안전관리 동의서 롯데백화점 담당자') + '</div></div></div>';
   }
   /** 출력 맨 끝 쪽: 가로로 긴 양식을 1000px 폭으로 그린 뒤 A4 세로 폭에 맞춰 줄임 (높이도 넘으면 더 줄임) */
   function agreePageHtml() {
@@ -3700,33 +3758,91 @@ var GuideIndexer = (function () {
       '<div class="fdv-hd"><b id="fdvT">종합방재실 협의서 · ' + esc(S.store.tenant || S.review.tenant || '') + '</b>' +
       '<button type="button" class="btn icon-btn" id="fdvX" aria-label="닫기">' + ICON.close + '</button></div>' +
       '<div class="fdv-bd" id="fdvBd"><div class="muted small">협의서를 불러오는 중…</div></div>' +
-      '<div class="fdv-ft"><button type="button" class="btn" id="fdvL">↺ 왼쪽으로 돌리기</button><button type="button" class="btn" id="fdvR">↻ 오른쪽으로 돌리기</button></div></section></div>';
+      '<div class="fdv-zoom" aria-label="확대 축소"><button type="button" class="btn icon-btn" id="fdvP" aria-label="확대">+</button><button type="button" class="btn icon-btn" id="fdvM" aria-label="축소">−</button><div class="fdv-pct" id="fdvPct">100%</div></div>' +
+      '<div class="fdv-ft"><button type="button" class="btn" id="fdvL">↺ 왼쪽으로 돌리기</button><button type="button" class="btn" id="fdvR">↻ 오른쪽으로 돌리기</button><button type="button" class="btn" id="fdvF">맞춤</button></div></section></div>';
     var close = function () { window.removeEventListener('resize', fit); document.removeEventListener('keydown', onKey); closeModal(); };
     var onKey = function (e) { if (e.key === 'Escape') close(); };
     $('#fdvX').onclick = close;
     $('.fdov', layer).addEventListener('click', function (e) { if (e.target === this) close(); });
     document.addEventListener('keydown', onKey);
     var img = null, saveT = null;
+    var Z = 1, TX = 0, TY = 0, dispW = 0, dispH = 0, ZMAX = 4;
+    function clampPan() {
+      var bd = $('#fdvBd'); if (!bd) return;
+      var mx = Math.max(0, (dispW * Z - bd.clientWidth) / 2), my = Math.max(0, (dispH * Z - bd.clientHeight) / 2);
+      TX = Math.max(-mx, Math.min(mx, TX)); TY = Math.max(-my, Math.min(my, TY));
+    }
+    function paint() {
+      if (!img) return;
+      clampPan();
+      img.style.transform = 'translate(-50%,-50%) translate(' + Math.round(TX) + 'px,' + Math.round(TY) + 'px) scale(' + Z + ') rotate(' + rot + 'deg)';
+      var pc = $('#fdvPct'); if (pc) pc.textContent = Math.round(Z * 100) + '%';
+    }
     function fit() {
       var bd = $('#fdvBd'); if (!bd || !img || !img.naturalWidth) return;
       var cw = bd.clientWidth - 16, ch = bd.clientHeight - 16, w = img.naturalWidth, h = img.naturalHeight;
       var side = rot % 180 !== 0, rw = side ? h : w, rh = side ? w : h, k = Math.min(cw / rw, ch / rh);
       img.style.width = Math.round(w * k) + 'px'; img.style.height = Math.round(h * k) + 'px';
-      img.style.transform = 'translate(-50%,-50%) rotate(' + rot + 'deg)';
+      dispW = rw * k; dispH = rh * k;
+      paint();
+    }
+    function zoomTo(nz, cx, cy) {
+      nz = Math.max(1, Math.min(ZMAX, nz));
+      var bd = $('#fdvBd'); if (!bd || nz === Z) return;
+      var r = bd.getBoundingClientRect(), px = (cx == null ? r.left + r.width / 2 : cx) - (r.left + r.width / 2), py = (cy == null ? r.top + r.height / 2 : cy) - (r.top + r.height / 2);
+      var k = nz / Z; TX = px - (px - TX) * k; TY = py - (py - TY) * k; Z = nz;
+      if (Z === 1) { TX = 0; TY = 0; }
+      paint();
+    }
+    // 손가락 두 개로 벌리고 모으기 · 확대했을 때 한 손가락으로 끌기 · PC 마우스 휠
+    var ptrs = {}, pinch0 = null, drag0 = null;
+    function pts() { return Object.keys(ptrs).map(function (k) { return ptrs[k]; }); }
+    function bindGesture() {
+      var bd = $('#fdvBd'); if (!bd || bd.dataset.g) return; bd.dataset.g = '1';
+      bd.style.touchAction = 'none';
+      bd.addEventListener('pointerdown', function (e) {
+        ptrs[e.pointerId] = { x: e.clientX, y: e.clientY }; try { bd.setPointerCapture(e.pointerId); } catch (x) {}
+        if (img) img.classList.add('nt');
+        var p = pts();
+        if (p.length === 2) { pinch0 = { d: Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y), z: Z }; drag0 = null; }
+        else if (p.length === 1) drag0 = { x: e.clientX, y: e.clientY, tx: TX, ty: TY };
+      });
+      bd.addEventListener('pointermove', function (e) {
+        if (!ptrs[e.pointerId]) return;
+        ptrs[e.pointerId] = { x: e.clientX, y: e.clientY };
+        var p = pts();
+        if (p.length >= 2 && pinch0) {
+          var d = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+          if (pinch0.d > 0) zoomTo(pinch0.z * d / pinch0.d, (p[0].x + p[1].x) / 2, (p[0].y + p[1].y) / 2);
+        } else if (p.length === 1 && drag0 && Z > 1) {
+          TX = drag0.tx + (e.clientX - drag0.x); TY = drag0.ty + (e.clientY - drag0.y); paint();
+        }
+      });
+      var up = function (e) {
+        delete ptrs[e.pointerId]; var p = pts();
+        if (p.length < 2) pinch0 = null;
+        if (p.length === 1) drag0 = { x: p[0].x, y: p[0].y, tx: TX, ty: TY }; else drag0 = null;
+        if (!p.length && img) img.classList.remove('nt');
+      };
+      bd.addEventListener('pointerup', up); bd.addEventListener('pointercancel', up);
+      bd.addEventListener('wheel', function (e) { e.preventDefault(); zoomTo(Z * (e.deltaY < 0 ? 1.15 : 1 / 1.15), e.clientX, e.clientY); }, { passive: false });
     }
     function turn(dz) {
-      rot = (rot + dz + 360) % 360; fit();
+      rot = (rot + dz + 360) % 360; Z = 1; TX = 0; TY = 0; fit();
       var cur = fireDocOf(S.store); if (cur) { cur.r = rot; S.store.fireDoc = JSON.stringify(cur); setStoreFromServer(S.store); }
       clearTimeout(saveT);
       saveT = setTimeout(function () { api('apiFireDocRotate', S.auth, S.store.id, rot).catch(function (e) { toast('돌린 방향을 저장하지 못했습니다: ' + errMsg(e), true); }); }, 600);
     }
     $('#fdvL').onclick = function () { turn(-90); };
     $('#fdvR').onclick = function () { turn(90); };
+    $('#fdvP').onclick = function () { zoomTo(Z * 1.25); };
+    $('#fdvM').onclick = function () { zoomTo(Z / 1.25); };
+    $('#fdvF').onclick = function () { Z = 1; TX = 0; TY = 0; paint(); };
     window.addEventListener('resize', fit);
     var show = function (url) {
       var bd = $('#fdvBd'); if (!bd) return;
       bd.innerHTML = '<img id="fdvImg" alt="종합방재실 협의서 사진">';
-      img = $('#fdvImg'); img.onload = fit; img.src = url;
+      img = $('#fdvImg'); img.onload = fit; img.src = url; bindGesture();
     };
     if (S.fdImg && S.fdImg.f === d.f) show(S.fdImg.url);
     else api('apiFireDoc', S.auth, S.store.id).then(function (res) {
@@ -4370,8 +4486,9 @@ var GuideIndexer = (function () {
       '<tr><td class="h">검토 차수</td><td colspan="6" style="white-space:nowrap">' + roundsLine() + '</td></tr>' +
       '<tr><td class="h">테넌트명</td><td colspan="3">' + txt(r.tenant) + '</td><td class="h">공사위치</td><td colspan="2">' + txt(floorText(r.location)) + '</td></tr>' +
       '<tr><td class="h">매장형태</td><td colspan="3">' + choiceP('storeType') + '</td><td class="h">문서번호</td><td colspan="2">' + txt(docNo) + '</td></tr>' +
-      '<tr><td class="h">공사 기간</td><td colspan="3" class="c">' + (r.periodStart || r.periodEnd ? ymdP(r.periodStart) + ' ~ ' + ymdP(r.periodEnd) : DASH) + '</td><td class="h" rowspan="3">시공업체</td><td colspan="2" rowspan="3" style="line-height:1.6">' + party('contractor') + '</td></tr>' +
+      '<tr><td class="h">공사 기간</td><td colspan="3" class="c">' + (r.periodStart || r.periodEnd ? ymdP(r.periodStart) + ' ~ ' + ymdP(r.periodEnd) : DASH) + '</td><td class="h" rowspan="4">시공업체</td><td colspan="2" rowspan="4" style="line-height:1.6">' + party('contractor') + '</td></tr>' +
       '<tr><td class="h">오픈 예정일</td><td colspan="3" class="c">' + ymdP(r.openDate) + '</td></tr>' +
+      '<tr><td class="h">퇴점일</td><td colspan="3" class="c">' + ymdP(r.exitDate) + '</td></tr>' +
       '<tr><td class="h xs">소방 점검<br>예정일</td><td colspan="3" class="c">' + ymdP(r.fireCheckDate) + '</td></tr>' +
       '<tr><td class="h" rowspan="10">시설항목</td><td class="h">천장</td><td class="c">' + choiceP('ceiling') + '</td><td class="h">바닥</td><td class="c">' + choiceP('floor') + '</td><td class="h">벽면</td><td class="c">' + choiceP('wall') + '</td></tr>' +
       '<tr><td class="h">전기용량</td><td class="c">' + unitP('elecKw', 'kW') + '</td><td class="h">전원 방식</td><td class="c">' + choiceP('powerPhase') + '</td><td class="h xs">메인차단기<br>용량</td><td class="c">' + unitP('mainBreakerA', 'A') + '</td></tr>' +
@@ -4747,7 +4864,9 @@ var GuideIndexer = (function () {
           api('apiGuidePdfRemove', S.auth, el.dataset.file).then(function (st) { setGuideState(st); renderGuideAdmin(); toast('PDF를 지웠습니다'); }, function (er) { toast(errMsg(er), true); });
         });
         break;
+      case 'gear': openGear(); break;
       case 'refresh': openDashboard().then(function () { toast('최신 내용으로 불러왔습니다'); }); break;
+      case 'mon': S.dash.openMonths = S.dash.openMonths || {}; S.dash.openMonths[el.dataset.m] = !S.dash.openMonths[el.dataset.m]; renderDashBody(); break;
       case 'tab': S.dash.tab = el.dataset.tab; renderDashBody(); break;
       case 'calnav': S.dash.cal = el.dataset.m; renderDashBody(); break;
       case 'year': toggleYear(el.dataset.y); break;
