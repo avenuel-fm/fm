@@ -503,7 +503,7 @@ class AtrGenerator {
         const repKey = enc.encode('ReportName');
         const repIdx = AtrGenerator.findSub(docBytes, repKey);
         if (repIdx !== -1) {
-            const countPos = repIdx + repKey.length + 3 + newTitleB.length + 10;
+            const countPos = repIdx + repKey.length + 3 + newTitleB.length + 14;   // 1쪽 양식(temp.atr) 구조: 제목 뒤 14바이트에 쪽 수 (전에 +10 으로 써서 앞 칸 4바이트를 깨뜨림)
             const countView = new DataView(docBytes.buffer, docBytes.byteOffset, docBytes.byteLength);
             countView.setUint32(countPos, nPages, true);
         }
