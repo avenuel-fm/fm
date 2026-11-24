@@ -10,10 +10,10 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.25.4"></script>
-<script>window.WS_VERSION = '0.25.4';</script>
-<script src="offline.js?v=0.25.4"></script>
-<script src="ws-api.js?v=0.25.4"></script>
+<script src="config.js?v=0.25.6"></script>
+<script>window.WS_VERSION = '0.25.6';</script>
+<script src="offline.js?v=0.25.6"></script>
+<script src="ws-api.js?v=0.25.6"></script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -669,6 +669,18 @@ select.lgin{text-align:center;padding:0}
   .label img{flex:none;display:block;image-rendering:pixelated}
   .ehl{page-break-after:always;break-after:page}
 }
+/* 위험작업신청서 (결정 236) */
+.rwadd{padding:var(--sp-3)}.rwadd .tbpb .btn{min-height:var(--control-h)}.rwhint{display:block;margin-top:var(--sp-1);color:var(--muted);font-size:var(--size-s)}.rwhint input{min-height:32px;border:1px solid var(--line);border-radius:var(--radius);padding:0 var(--sp-1);font:inherit;background:var(--white);color:var(--ink)}
+.rwlb{display:block;margin:var(--sp-3) 0 var(--sp-1);font-size:var(--size-s);font-weight:600;color:var(--sub)}.rwfls{display:flex;flex-wrap:wrap;gap:var(--sp-1)}
+.rwfl{min-height:var(--control-h);min-width:44px;padding:0 var(--sp-2);border:1px solid var(--line);border-radius:var(--radius);background:var(--white);color:var(--ink);font:inherit;font-size:var(--size-s);cursor:pointer}.rwfl.on{background:var(--navy);border-color:var(--navy);color:var(--white)}
+.rwpend{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap}.rwpend .btn{margin-left:auto}
+.rwres{padding:0;overflow:hidden}.rwg{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-2);padding:var(--sp-2) var(--sp-3) var(--sp-3)}
+.rwt{position:relative;min-width:0}.rwim{display:flex;width:100%;border:1px solid var(--line2);padding:0;cursor:pointer}.rwim img{width:100%;height:100%}
+.rwcap{margin-top:2px;font-size:var(--size-xs,11px);line-height:1.3;color:var(--sub);overflow-wrap:anywhere}.rwno{color:var(--muted)}
+.rwx{position:absolute;top:2px;right:2px;width:28px;height:28px;border:0;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:13px;cursor:pointer}
+.rwv{position:fixed;inset:0;z-index:60;background:var(--white);display:flex;flex-direction:column}.rwvh{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) var(--sp-3);border-bottom:1px solid var(--line2);font-size:var(--size-s)}.rwvh span{flex:1;min-width:0}
+.rwvb{flex:1;overflow:auto;background:var(--tint)}.rwvb img{display:block;margin:0 auto}.rwvf{display:flex;align-items:center;justify-content:center;gap:var(--sp-3);padding:var(--sp-2) var(--sp-3) calc(var(--sp-2) + env(safe-area-inset-bottom));border-top:1px solid var(--line2)}
+@media (max-width:599px){.rwg{gap:var(--sp-1);padding:var(--sp-2)}}
 /* 온습도/공조기/에어커튼 입력 (WS_온습도공조기, 결정 212·196) — 시안 docs/시안/WS-온습도공조기 */
 .cltabs{margin-bottom:var(--sp-3)}.cltabs button{font-size:var(--size-s);line-height:1.3;padding:4px 2px}
 .flnav{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-1);margin-top:var(--sp-3)}
@@ -771,7 +783,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B3','B2','B1','1F','2F','3F','4F','5F','6F','7F','8F','9F','10F'];   // 소화기·소화전·공기호흡기 층 B3~10F (결정 228)
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.25.4' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.25.6' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -880,7 +892,7 @@ async function refreshFire() { try { const r = await call('bootstrap'); S.fire =
 // 소화전·공기호흡기 이번 달 숫자 (실패해도 메뉴는 그대로)
 async function refreshEq() { try { const e = await run('eqStatus', S.token, ''); if (e && e.ok) { S.eqc = e; S.eqAt = Date.now(); if (S.view === 'fire') render(); } } catch (e) {} }
 try { google.script.history.setChangeHandler(e => { const v = e.state && e.state.v; if (v && S.token) { S.view = v; render(); } }); } catch (e) {}
-const PARENT = { inspect: 'main', fire: 'inspect', eh: 'inspect', thermal: 'inspect', cs: 'inspect', csck: 'cs', qr: 'fire', hyd: 'fire', hydfl: 'hyd', status: 'fire', floor: 'status', docs: 'main', set: 'main', risk: 'set', map: 'main', cad: 'main', spec: 'main', tbm: 'docs', nw: 'docs', log: 'docs', ahu: 'docs', clim: 'docs', use: 'docs', rep: 'docs', kw: 'set', uhr: 'use', att: 'docs', attup: 'att' };
+const PARENT = { inspect: 'main', fire: 'inspect', eh: 'inspect', thermal: 'inspect', cs: 'inspect', csck: 'cs', qr: 'fire', hyd: 'fire', hydfl: 'hyd', status: 'fire', floor: 'status', docs: 'main', set: 'main', risk: 'set', map: 'main', cad: 'main', spec: 'main', tbm: 'docs', nw: 'docs', log: 'docs', rw: 'docs', ahu: 'docs', clim: 'docs', use: 'docs', rep: 'docs', kw: 'set', uhr: 'use', att: 'docs', attup: 'att' };
 function back() { if (S.view === 'pdf') return go((S.pdf && S.pdf.from) || 'main'); if (S.view === 'csck') return csLeave(); if (S.view === 'risk' && S.rk && S.rk.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; if (S.view === 'nw' && !nwLeaveOk()) return; if (S.view === 'log' && !lgLeaveOk()) return; if (S.view === 'ahu' && !ahuLeaveOk()) return; if ((S.view === 'clim' || S.view === 'use') && !clLeaveOk()) return; if (S.view === 'rep') return repBack(); if (S.view === 'uhr') return uhBack(); if (S.view === 'tbm' && S.tbm && S.tbm.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; go(PARENT[S.view] || 'main'); }
 
 function topbar(sub, title) {
@@ -1304,7 +1316,7 @@ function spPvHtml(x, big) {
 if (window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches) document.addEventListener('contextmenu', e => e.preventDefault());
 /* ── 메인 메뉴 켜기·끄기 (결정 148): 설정 표 「메인메뉴끄기」, 소장·관리자·옵저버는 꺼진 칸도 엶 ── */
 const MENU = [
-  ['docs', '서류작업', [['tbm', 'TBM'], ['nw', '명일 작업 예정'], ['att', '출근현황'], ['ahu', '온습도/공조기/에어커튼 입력'], ['log', '종합업무일지']]],
+  ['docs', '서류작업', [['tbm', 'TBM'], ['nw', '명일 작업 예정'], ['att', '출근현황'], ['ahu', '온습도/공조기/에어커튼 입력'], ['log', '종합업무일지'], ['risk', '위험작업신청서']]],
   ['inspect', '점검', [['fire', '소화기/소화전/공기호흡기 점검'], ['eh', '전열필증'], ['thermal', '열화상점검'], ['cs', '공사장 점검']]],
   ['spec', '시방서 검색', null], ['mat', '자재현황', null], ['map', '지도', null], ['cad', 'CAD', null]];   // 자재현황은 준비중이라 켜고 끄기 없음
 const menuOff = k => (S.menuOff || []).indexOf(k) !== -1;
@@ -1501,6 +1513,7 @@ function renderDocs() {
     R('att', 'openAtt()', 'var(--tint)', 'var(--navy)', ICON.att, '출근현황', '근무 스케줄 엑셀 → 날짜별 조직도 · 그림으로 저장') +
     R('ahu', 'openAhu()', 'var(--blue-bg)', 'var(--blue)', ICON.ahu, '온습도/공조기/에어커튼 입력', 'AHU 환기온도 11:00 · 16:00 · 매장 온습도 · 가동시간 · 리포트') +
     R('log', 'openLog()', 'var(--tint)', 'var(--sub)', ICON.log, '종합업무일지', '에너지 사용량 · 날씨 · 금일작업 · B4 인쇄 (PC)') +
+    R('risk', 'openRw()', 'var(--orange-bg)', 'var(--orange)', ICON.hat, '위험작업신청서', '신청서 사진 · 날짜 · 업체 · 위치 · 검색 · 인쇄 A4') +
     '</div>';
 }
 /* 미리 받기 (결정 78): 메인이 뜬 뒤 자주 여는 화면 내용을 뒤에서 받아 두고, 열 때 바로 보여 준 뒤 새로 받음 */
@@ -4273,6 +4286,116 @@ async function csMakePdf(k, secs) {
   } finally { wrap.remove(); }
 }
 
+/* ── 서류작업 › 위험작업신청서 (WS_위험작업신청서, 결정 236): 손으로 쓴 신청서를 찍는 대로 저장 · 일자별 4열 · 검색 · 확대 · 인쇄 A4 ── */
+const RW_FLOORS = ['B3', 'B2', 'B1', '1F', '2F', '3F', '4F', '5F', '6F', '10F', '외곽'];   // 서버 ws_rw_floors 와 같게
+function rwToday() { const d = new Date(), p = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()); }
+function rwCid() { return Array.from(crypto.getRandomValues(new Uint8Array(12)), b => b.toString(16).padStart(2, '0')).join(''); }   // 사진마다 고유 번호 — 다시 보내도 한 번만 저장
+async function openRw() {
+  S.rw = S.rw || { list: null, q: '', qv: '', day: rwToday(), co: '', floor: '', pend: [], open: {}, keys: [], admin: false };
+  go('rw'); await loadRw();
+}
+async function loadRw() {
+  const k = S.rw, r = await call('rwList', k.q, '', '');
+  if (!r.ok) return toast(r.error || '불러오지 못했습니다');
+  k.list = r.list; k.admin = r.admin; if (S.view === 'rw') render();
+  rwFlush();
+}
+function rwDays(list) { const g = []; list.forEach(x => { const l = g[g.length - 1]; if (l && l.day === x.day) l.list.push(x); else g.push({ day: x.day, list: [x] }); }); return g; }
+function rwDay(d) { return d.slice(0, 4) + '-' + d.slice(5, 7) + '-' + d.slice(8, 10); }
+function rwCap(x) { return '<div class="rwcap">' + (x.co ? h(x.co) : '<span class="rwno">(업체 미입력)</span>') + (x.floor ? ' · ' + h(x.floor) : '') + '<br>' + h(x.at) + '</div>'; }
+function rwTile(x) {
+  return '<div class="rwt"><button type="button" class="ph43 rwim" onclick="rwView(\'' + x.id + '\')" aria-label="사진 크게 보기"><img src="' + h(x.src) + '" loading="lazy" alt="위험작업신청서 ' + h(x.day) + '"></button>' +
+    (S.rw.admin ? '<button type="button" class="rwx" onclick="rwDel(\'' + x.id + '\')" aria-label="사진 지우기">✕</button>' : '') + rwCap(x) + '</div>';
+}
+function rwResHtml() {
+  const k = S.rw; if (!k.list) return '<div class="banner b-gray">불러오는 중…</div>';
+  if (!k.list.length) return '<div class="banner b-gray">' + (k.q ? '찾는 사진이 없습니다' : '저장된 사진이 없습니다. 위 버튼으로 신청서를 찍어 주세요') + '</div>';
+  return rwDays(k.list).map((d, i) => {
+    const open = d.day in k.open ? k.open[d.day] : i === 0;
+    return '<button class="csacc' + (open ? ' on' : '') + '" aria-expanded="' + open + '" onclick="rwAcc(\'' + d.day + '\')"><b>' + rwDay(d.day) + '</b><span class="csn">' + d.list.length + '장</span><span class="csar" aria-hidden="true"></span></button>' +
+      (open ? '<div class="rwg">' + d.list.map(rwTile).join('') + '</div>' : '');
+  }).join('');
+}
+function rwPendHtml() { const n = S.rw.pend.length; return n ? '<div class="banner b-warn rwpend">올리기 대기 중 ' + n + '장 — 연결되면 자동으로 올라갑니다 <button class="btn sm" onclick="rwFlush()">지금 올리기</button></div>' : ''; }
+function rwRedraw() { const k = S.rw, a = $('rwRes'), b = $('rwPend'); if (a) a.innerHTML = rwResHtml(); if (b) b.innerHTML = rwPendHtml(); const c = $('rwN'); if (c && k.list) c.textContent = k.list.length; }
+function rwAcc(d) { const k = S.rw, cur = d in k.open ? k.open[d] : (k.list[0] && k.list[0].day === d); k.open[d] = !cur; rwRedraw(); }
+function renderRw() {
+  const k = S.rw, fl = RW_FLOORS.map(f => '<button type="button" class="rwfl' + (k.floor === f ? ' on' : '') + '" aria-pressed="' + (k.floor === f) + '" onclick="rwFloor(\'' + f + '\')">' + f + '</button>').join('');
+  const pick = cam => '<label class="btn' + (cam ? ' pri' : '') + '">' + (cam ? ICON.cam + ' 사진찍기' : ICON.folder + ' 갤러리에서 선택') + '<input type="file" accept="image/*"' + (cam ? ' capture="environment"' : ' multiple') + ' hidden onchange="rwAdd(this)"></label>';
+  return topbar('서류작업 ›', '위험작업신청서') + '<div class="wrap list">' +
+    '<div class="cssec"><label class="cssrch"><input id="rwQ" type="search" enterkeyhint="search" placeholder="날짜 · 업체명 · 위치 검색" aria-label="날짜 업체명 위치 검색" value="' + h(k.qv) + '" oninput="S.rw.qv=this.value" onkeydown="if(event.key===\'Enter\')rwSearch()"></label><button class="btn pri" onclick="rwSearch()">검색하기</button></div>' +
+    '<div class="card rwadd"><div class="tbpb">' + pick(true) + pick(false) + '</div><small class="rwhint">찍거나 고르면 바로 저장됩니다. 날짜 태그 <input id="rwDay" type="date" value="' + h(k.day) + '" onchange="S.rw.day=this.value||rwToday()" aria-label="날짜 태그"> (기본: 오늘)</small>' +
+    '<label class="rwlb">업체명 · 매장명 (직접 입력, 선택)</label><input id="rwCo" class="inp" maxlength="30" placeholder="예: OO인테리어" value="' + h(k.co) + '" oninput="S.rw.co=this.value">' +
+    '<label class="rwlb">위치 (선택)</label><div class="rwfls">' + fl + '</div><small class="rwhint">비워 둬도 저장됩니다. 이후 저장하는 사진에 같은 값이 붙습니다.</small></div>' +
+    '<div id="rwPend">' + rwPendHtml() + '</div>' +
+    '<div class="cssec">' + (k.q ? '「' + h(k.q) + '」 검색 결과' : '최근 60일') + ' · <span id="rwN">' + (k.list ? k.list.length : '…') + '</span>장</div>' +
+    '<div id="rwRes" class="card rwres">' + rwResHtml() + '</div>' +
+    '<div class="nwbar"><button class="btn" onclick="rwPrint()">' + ICON.print + '인쇄 A4</button></div></div>';
+}
+function rwFloor(f) { const k = S.rw; k.floor = k.floor === f ? '' : f; render(); }
+function rwSearch() { const k = S.rw; k.q = k.qv.trim(); k.open = {}; loadRw(); }
+/* 사진 넣기: 글자가 읽히게 2400px·85%로 줄임(일반 현장 사진 1600px·70%보다 덜 줄임). 같은 사진을 연달아 고르면 건너뜀 */
+async function rwAdd(el) {
+  const fs = Array.from(el.files || []); el.value = ''; if (!fs.length) return;
+  const k = S.rw; let dup = 0;
+  for (const f of fs) {
+    const key = f.name + '|' + f.size + '|' + f.lastModified;
+    if (k.keys.indexOf(key) !== -1) { dup++; continue; }
+    try { k.pend.push({ cid: rwCid(), data: await shrinkJpeg(f, 2400, 0.85), day: k.day || rwToday(), co: k.co.trim(), floor: k.floor }); k.keys.push(key); if (k.keys.length > 60) k.keys.shift(); } catch (e) { toast(e.message); }
+  }
+  if (dup) toast(dup + '장은 이미 저장한 사진이라 건너뜁니다');
+  rwRedraw(); rwFlush();
+}
+const RW_NET = /fetch|network|load failed|연결|timeout|offline/i;
+let RW_T = 0;
+async function rwFlush() {
+  const k = S.rw; if (!k || k.sending || !S.token) return;
+  k.sending = true;
+  try {
+    while (k.pend.length) {
+      const p = k.pend[0]; let r;
+      try { r = await run('rwAdd', S.token, p.day, p.co, p.floor, p.data, p.cid); }
+      catch (e) {
+        const m = String(e && e.message);
+        if (m.indexOf('LOGIN') !== -1) { logout(true); return; }
+        if (RW_NET.test(m)) break;   // 통신 불량: 기기에 두고 나중에 다시 (shortcut: 앱을 닫으면 대기분은 사라짐 — 필요하면 IndexedDB 보관으로)
+        k.pend.shift(); toast(m || '저장하지 못했습니다'); continue;
+      }
+      k.pend.shift();
+      if (!r || !r.ok) { toast((r && r.error) || '저장하지 못했습니다'); continue; }
+      if (k.list && !k.list.some(x => x.id === r.item.id)) { k.list.push(r.item); k.list.sort((a, b) => a.day < b.day ? 1 : a.day > b.day ? -1 : 0); }
+    }
+  } finally { k.sending = false; }
+  if (S.view === 'rw') rwRedraw();
+  clearTimeout(RW_T); if (k.pend.length) RW_T = setTimeout(rwFlush, 20000);
+}
+window.addEventListener('online', () => { if (S.rw && S.rw.pend.length) rwFlush(); });
+async function rwDel(id) {
+  if (!confirm('이 사진을 지울까요?')) return;
+  const r = await call('rwDelete', id); if (!r.ok) return toast(r.error);
+  const k = S.rw; k.list = k.list.filter(x => x.id !== id); rwRedraw(); toast('지웠습니다');
+}
+/* 사진 크게 보기: 이전·다음 · 확대 100~400% (스크롤로 이동) */
+function rwView(id) { const k = S.rw, i = k.list.findIndex(x => x.id === id); if (i < 0) return; k.v = { i, z: 1 }; rwViewDraw(); }
+function rwViewDraw() {
+  const k = S.rw, v = k.v, x = k.list[v.i];
+  $('layer').innerHTML = '<div class="rwv" role="dialog" aria-modal="true"><div class="rwvh"><span>' + h(rwDay(x.day)) + ' · ' + h(x.co || '(업체 미입력)') + (x.floor ? ' · ' + h(x.floor) : '') + ' · ' + h(x.at) + '</span><button class="btn sm" onclick="rwClose()">닫기</button></div>' +
+    '<div class="rwvb"><img src="' + h(x.src) + '" style="width:' + v.z * 100 + '%" alt="신청서 사진"></div>' +
+    '<div class="rwvf"><button class="btn sm" onclick="rwNav(-1)"' + (v.i ? '' : ' disabled') + '>이전</button><button class="btn sm" onclick="rwZoom(-0.5)" aria-label="작게">−</button><b>' + Math.round(v.z * 100) + '%</b><button class="btn sm" onclick="rwZoom(0.5)" aria-label="크게">＋</button><button class="btn sm" onclick="rwNav(1)"' + (v.i < k.list.length - 1 ? '' : ' disabled') + '>다음</button></div></div>';
+}
+function rwClose() { S.rw.v = null; closeDialog(); }
+function rwNav(d) { const v = S.rw.v; v.i = Math.max(0, Math.min(S.rw.list.length - 1, v.i + d)); v.z = 1; rwViewDraw(); }
+function rwZoom(d) { const v = S.rw.v; v.z = Math.max(1, Math.min(4, v.z + d)); rwViewDraw(); }
+/* 인쇄 = A4 세로. 지금 화면에 보이는 사진(검색 결과)을 일자별로, 한 줄 4장 */
+function rwPrint() {
+  const k = S.rw; if (!k.list || !k.list.length) return toast('인쇄할 사진이 없습니다');
+  $('print').innerHTML = '<style>@page{size:A4;margin:10mm}.rwpr{font-family:"Noto Sans KR",sans-serif;color:#000}.rwpr h1{font-size:15pt;margin:0 0 1mm}.rwpr h2{font-size:11pt;margin:4mm 0 2mm;border-bottom:.3mm solid #000}' +
+    '.rwpr .g{display:grid;grid-template-columns:repeat(4,1fr);gap:2mm}.rwpr .t{break-inside:avoid;font-size:7pt;line-height:1.3}.rwpr .b{aspect-ratio:4/3;background:#eceff3;display:flex;align-items:center;justify-content:center}.rwpr img{max-width:100%;max-height:100%;display:block}</style>' +
+    '<div class="rwpr"><h1>위험작업신청서</h1><div style="font-size:8pt">에비뉴엘 잠실점 시설팀 · ' + (k.q ? '검색: ' + h(k.q) + ' · ' : '') + '출력 ' + rwToday() + ' · ' + k.list.length + '장</div>' +
+    rwDays(k.list).map(d => '<h2>' + rwDay(d.day) + ' (' + d.list.length + '장)</h2><div class="g">' + d.list.map(x => '<div class="t"><div class="b"><img src="' + h(x.src) + '" alt=""></div>' + (x.co ? h(x.co) : '(업체 미입력)') + (x.floor ? ' · ' + h(x.floor) : '') + ' ' + h(x.at.slice(6)) + '</div>').join('') + '</div>').join('') + '</div>';
+  const im = [...$('print').querySelectorAll('img')];
+  Promise.all(im.map(i => i.decode ? i.decode().catch(() => {}) : null)).then(() => setTimeout(() => window.print(), 100));
+}
 /* ── 그리기 ── */
 function render() {
   let html;
@@ -4306,6 +4429,7 @@ function render() {
   else if (S.view === 'eh') html = renderEh();
   else if (S.view === 'cs') html = renderCs();
   else if (S.view === 'csck') html = renderCsCk();
+  else if (S.view === 'rw') html = renderRw();
   else if (S.view === 'status') html = renderStatus();
   else if (S.view === 'floor') html = S.st ? renderFloor() : renderStatus();
   else if (S.view === 'set' && isBoss()) html = renderSet();
