@@ -10,10 +10,10 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.25.7"></script>
-<script>window.WS_VERSION = '0.25.7';</script>
-<script src="offline.js?v=0.25.7"></script>
-<script src="ws-api.js?v=0.25.7"></script>
+<script src="config.js?v=0.26.2"></script>
+<script>window.WS_VERSION = '0.26.2';</script>
+<script src="offline.js?v=0.26.2"></script>
+<script src="ws-api.js?v=0.26.2"></script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -630,7 +630,6 @@ select.lgin{text-align:center;padding:0}
 .lgbv{font-size:11px;line-height:13px;text-align:right}.lgbv span{display:block}.lgbv .p{color:#5B6573}.lgbv .c{font-weight:500}
 .lgrt{font-size:11.5px;text-align:right;color:#3F4855}
 .lglg{display:inline-flex;align-items:center;gap:4px;margin-left:8px}.lglg i{width:10px;height:7px;border-radius:2px;display:inline-block}
-.lgrow{display:grid;grid-template-columns:1fr 360px;gap:16px}
 .lgac2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .acb{border:1px solid #DCE1E7;border-radius:8px;padding:8px 12px;display:flex;flex-direction:column;gap:6px}
 .ach{display:flex;align-items:baseline;gap:8px}.ach b{font-size:13px;font-weight:600}.ach span{margin-left:auto;font-size:11px;color:#5B6573}
@@ -646,11 +645,6 @@ select.lgin{text-align:center;padding:0}
 .lgwork li .n{width:20px;flex:none;color:#5B6573;text-align:right}
 .lgwork li .lgin{text-align:left;border-color:transparent;font-size:13.5px;height:24px}
 .lgwork li .lgin:placeholder-shown{border-color:#DCE1E7}
-.lgnight{border:1px solid #CBD2DB;height:282px;display:flex;align-items:center;justify-content:center;color:#5B6573;font-size:13px;position:relative;overflow:hidden;background:#fff}
-.lgnight img{max-width:100%;max-height:100%;object-fit:contain;display:block}
-.lgnight .lgnb{position:absolute;right:8px;bottom:8px;display:flex;gap:6px}
-.lgnight .lgnadd{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;color:#1F5FA8;font-size:14px;padding:24px}
-.lgnight .lgnadd small{color:#5B6573;font-size:12px}
 .lgfoot{display:flex;justify-content:flex-end;font-size:11px;color:#7A8494;margin-top:auto}
 .lgpc{max-width:520px;margin:40px auto;text-align:center}
 .devwrap{max-width:420px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding:var(--sp-12) var(--sp-6) var(--sp-6);gap:var(--sp-6)}
@@ -681,6 +675,19 @@ select.lgin{text-align:center;padding:0}
 .rwv{position:fixed;inset:0;z-index:60;background:var(--white);display:flex;flex-direction:column}.rwvh{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) var(--sp-3);border-bottom:1px solid var(--line2);font-size:var(--size-s)}.rwvh span{flex:1;min-width:0}
 .rwvb{flex:1;overflow:auto;background:var(--tint)}.rwvb img{display:block;margin:0 auto}.rwvf{display:flex;align-items:center;justify-content:center;gap:var(--sp-3);padding:var(--sp-2) var(--sp-3) calc(var(--sp-2) + env(safe-area-inset-bottom));border-top:1px solid var(--line2)}
 @media (max-width:599px){.rwg{gap:var(--sp-1);padding:var(--sp-2)}}
+/* 주간/야간 작업내역 (결정 240) */
+.whf{padding:var(--sp-3)}.whpic{min-width:0;margin-top:var(--sp-3)}.whpt{display:flex;align-items:baseline;gap:var(--sp-2);margin-bottom:var(--sp-1)}.whpt b{font-size:var(--size-s);font-weight:600;color:var(--sub)}.whpt small{color:var(--muted);font-size:var(--size-s)}
+.whpc{border:1px solid var(--line2);border-radius:var(--radius);padding:var(--sp-2);margin-top:var(--sp-2);min-width:0}.whpc h4{margin:0 0 var(--sp-1);font-size:var(--size-m);font-weight:600;color:var(--navy)}.whpc h4 small{margin-left:var(--sp-2);font-weight:400;color:var(--muted);font-size:var(--size-s)}
+.whg,.whg2{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-1)}.whg2{margin-top:var(--sp-2)}@media (min-width:768px){.whg{grid-template-columns:repeat(4,1fr)}}
+.wht{position:relative;min-width:0}.whim{display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:4/3;border:1px solid var(--line2);padding:0;background:var(--tint);cursor:pointer;overflow:hidden;color:var(--muted);font-size:var(--size-s)}.whim img{width:100%;height:100%;object-fit:contain}.whim.empty{cursor:default}
+.whx{position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:var(--radius);border:1px solid var(--line);background:var(--white);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.whbs{display:flex;gap:var(--sp-1);margin-top:var(--sp-1)}.whbs .btn{flex:1;min-width:0;min-height:var(--control-h);padding:0 var(--sp-1);gap:var(--sp-1)}
+.whsplit{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:var(--sp-2)}.whsplit .whcol{min-width:0;padding-right:var(--sp-2)}.whsplit .whcol+.whcol{padding:0 0 0 var(--sp-2);border-left:1px solid var(--line2)}.whsplit .whpc:first-child{margin-top:0}
+.whck{display:flex;gap:var(--sp-4);min-height:var(--control-h);align-items:center}.whck label{display:flex;align-items:center;gap:var(--sp-1);font-size:var(--size-m)}
+.whtwo{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3)}.whmat{display:grid;grid-template-columns:1fr 72px 72px 44px;gap:var(--sp-1);margin-bottom:var(--sp-1)}.whdel{margin-top:var(--sp-3);color:var(--error);border-color:var(--error)}
+.whrow{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;padding:var(--sp-3);background:var(--white);border:0;border-bottom:1px solid var(--line2);font:inherit;color:var(--ink);cursor:pointer}.whrow.on{background:var(--tint)}.whrow span{font-size:var(--size-m)}.whrow small{color:var(--muted);font-size:var(--size-s)}
+.whb{display:inline-block;margin-left:var(--sp-1);padding:0 var(--sp-1);border:1px solid var(--error);border-radius:var(--radius);color:var(--error)}
+@media (max-width:599px){.whtwo{grid-template-columns:1fr}}
 /* 온습도/공조기/에어커튼 입력 (WS_온습도공조기, 결정 212·196) — 시안 docs/시안/WS-온습도공조기 */
 .cltabs{margin-bottom:var(--sp-3)}.cltabs button{font-size:var(--size-s);line-height:1.3;padding:4px 2px}
 .flnav{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-1);margin-top:var(--sp-3)}
@@ -783,7 +790,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B3','B2','B1','1F','2F','3F','4F','5F','6F','7F','8F','9F','10F'];   // 소화기·소화전·공기호흡기 층 B3~10F (결정 228)
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.25.7' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.2' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -847,6 +854,7 @@ const ICON = {
   fire: _pi('<rect x="6.5" y="9" width="9" height="12" rx="2.5"/><path d="M6.5 14h9M11 9V5M8.5 5h5.5l3-1.5M14.5 6.5c3 0 5 1.5 5 4.5v4"/>'),
   plug: _pi('<path d="M9 3v5M15 3v5"/><path d="M6 8h12v3a6 6 0 01-12 0z"/><path d="M12 17v4"/>'),
   therm: _pi('<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7l1.5-3h5L16 7"/><circle cx="12" cy="13.5" r="3.5"/><path d="M10.5 13.5q.75-1.2 1.5 0t1.5 0"/>'),
+  work: _pi('<circle cx="8.5" cy="12" r="3"/><path d="M8.5 4.5v2M8.5 17.5v2M1.5 12h2M13.5 12h1M3.6 7.1l1.4 1.4M12 15.5l-1.4-1.4M3.6 16.9L5 15.5"/><path d="M21 14.2A5.2 5.2 0 0116.3 9a5.2 5.2 0 013.9-5 6.4 6.4 0 00.8 10.2z"/>'),
   hat: _pi('<path d="M4 16a8 8 0 0116 0"/><rect x="2.5" y="16" width="19" height="3" rx="1"/><path d="M12 8v8"/>'),
   qr: _pi('<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v.01M14 21h3M21 17v4h-1.5"/>', 24),
   stat: _pi('<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 13l2 2 4-4"/>', 24),
@@ -892,8 +900,8 @@ async function refreshFire() { try { const r = await call('bootstrap'); S.fire =
 // 소화전·공기호흡기 이번 달 숫자 (실패해도 메뉴는 그대로)
 async function refreshEq() { try { const e = await run('eqStatus', S.token, ''); if (e && e.ok) { S.eqc = e; S.eqAt = Date.now(); if (S.view === 'fire') render(); } } catch (e) {} }
 try { google.script.history.setChangeHandler(e => { const v = e.state && e.state.v; if (v && S.token) { S.view = v; render(); } }); } catch (e) {}
-const PARENT = { inspect: 'main', fire: 'inspect', eh: 'inspect', thermal: 'inspect', cs: 'inspect', csck: 'cs', qr: 'fire', hyd: 'fire', hydfl: 'hyd', status: 'fire', floor: 'status', docs: 'main', set: 'main', risk: 'set', map: 'main', cad: 'main', spec: 'main', tbm: 'docs', nw: 'docs', log: 'docs', rw: 'docs', ahu: 'docs', clim: 'docs', use: 'docs', rep: 'docs', kw: 'set', uhr: 'use', att: 'docs', attup: 'att' };
-function back() { if (S.view === 'pdf') return go((S.pdf && S.pdf.from) || 'main'); if (S.view === 'csck') return csLeave(); if (S.view === 'risk' && S.rk && S.rk.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; if (S.view === 'nw' && !nwLeaveOk()) return; if (S.view === 'log' && !lgLeaveOk()) return; if (S.view === 'ahu' && !ahuLeaveOk()) return; if ((S.view === 'clim' || S.view === 'use') && !clLeaveOk()) return; if (S.view === 'rep') return repBack(); if (S.view === 'uhr') return uhBack(); if (S.view === 'tbm' && S.tbm && S.tbm.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; go(PARENT[S.view] || 'main'); }
+const PARENT = { inspect: 'main', fire: 'inspect', eh: 'inspect', thermal: 'inspect', cs: 'inspect', csck: 'cs', qr: 'fire', hyd: 'fire', hydfl: 'hyd', status: 'fire', floor: 'status', docs: 'main', set: 'main', risk: 'set', map: 'main', cad: 'main', spec: 'main', tbm: 'docs', nw: 'docs', log: 'docs', rw: 'docs', wh: 'docs', ahu: 'docs', clim: 'docs', use: 'docs', rep: 'docs', kw: 'set', uhr: 'use', att: 'docs', attup: 'att' };
+function back() { if (S.view === 'pdf') return go((S.pdf && S.pdf.from) || 'main'); if (S.view === 'csck') return csLeave(); if (S.view === 'risk' && S.rk && S.rk.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; if (S.view === 'wh' && S.wh && (S.wh.d.dirty || S.wh.n.dirty) && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; if (S.view === 'nw' && !nwLeaveOk()) return; if (S.view === 'log' && !lgLeaveOk()) return; if (S.view === 'ahu' && !ahuLeaveOk()) return; if ((S.view === 'clim' || S.view === 'use') && !clLeaveOk()) return; if (S.view === 'rep') return repBack(); if (S.view === 'uhr') return uhBack(); if (S.view === 'tbm' && S.tbm && S.tbm.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; go(PARENT[S.view] || 'main'); }
 
 function topbar(sub, title) {
   const u = S.user || {};
@@ -1316,7 +1324,7 @@ function spPvHtml(x, big) {
 if (window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches) document.addEventListener('contextmenu', e => e.preventDefault());
 /* ── 메인 메뉴 켜기·끄기 (결정 148): 설정 표 「메인메뉴끄기」, 소장·관리자·옵저버는 꺼진 칸도 엶 ── */
 const MENU = [
-  ['docs', '서류작업', [['tbm', 'TBM'], ['nw', '명일 작업 예정'], ['att', '출근현황'], ['ahu', '온습도/공조기/에어커튼 입력'], ['log', '종합업무일지'], ['risk', '위험작업신청서']]],
+  ['docs', '서류작업', [['tbm', 'TBM'], ['nw', '명일 작업 예정'], ['att', '출근현황'], ['ahu', '온습도/공조기/에어커튼 입력'], ['log', '종합업무일지'], ['risk', '위험작업신청서'], ['work', '주간/야간 작업내역']]],
   ['inspect', '점검', [['fire', '소화기/소화전/공기호흡기 점검'], ['eh', '전열필증'], ['thermal', '열화상점검'], ['cs', '공사장 점검']]],
   ['spec', '시방서 검색', null], ['mat', '자재현황', null], ['map', '지도', null], ['cad', 'CAD', null]];   // 자재현황은 준비중이라 켜고 끄기 없음
 const menuOff = k => (S.menuOff || []).indexOf(k) !== -1;
@@ -1514,6 +1522,7 @@ function renderDocs() {
     R('ahu', 'openAhu()', 'var(--blue-bg)', 'var(--blue)', ICON.ahu, '온습도/공조기/에어커튼 입력', 'AHU 환기온도 11:00 · 16:00 · 매장 온습도 · 가동시간 · 리포트') +
     R('log', 'openLog()', 'var(--tint)', 'var(--sub)', ICON.log, '종합업무일지', '에너지 사용량 · 날씨 · 금일작업 · B4 인쇄 (PC)') +
     R('risk', 'openRw()', 'var(--orange-bg)', 'var(--orange)', ICON.hat, '위험작업신청서', '신청서 사진 · 날짜 · 업체 · 위치 · 검색 · 인쇄 A4') +
+    R('work', 'openWh()', 'var(--blue-bg)', 'var(--blue)', ICON.work, '주간/야간 작업내역', '작업 전·후 사진 · 사용자재 · 방염서류 · 각서 · 인쇄 A4 · PDF') +
     '</div>';
 }
 /* 미리 받기 (결정 78): 메인이 뜬 뒤 자주 여는 화면 내용을 뒤에서 받아 두고, 열 때 바로 보여 준 뒤 새로 받음 */
@@ -2029,7 +2038,7 @@ function lgSet(r) {
   // 그날 금일작업이 아직 비었으면 TBM 작업 표로 채워 둠 (10줄까지, 저장은 직원이 [저장])
   const tbm = r.tbm || {}, auto = LG_DEPTS.every(d => !works[d].some(x => x)) && LG_DEPTS.some(d => (tbm[d] || []).length);
   if (auto) LG_DEPTS.forEach(d => { works[d] = Array.from({ length: LG_LINES }, (_, i) => (tbm[d] || [])[i] || ''); });
-  S.lg = { srv: r, day: r.day, f, works, ver: r.ver, by: r.by, pdf: r.pdf, dirty: auto, busy: false, night: r.night || '', nightNew: '' };
+  S.lg = { srv: r, day: r.day, f, works, ver: r.ver, by: r.by, pdf: r.pdf, dirty: auto, busy: false };
   if (S.view === 'log') render();
   // Supabase 판: 공조기·에어커튼은 구글을 거쳐 늦게 옴(6~9초) → 일지를 먼저 보여 주고 그 칸만 나중에 채움
   if (r.acLater) r.acLater.then(ac => { r.ac = ac; delete r.acLater; const el = S.lg && S.lg.srv === r && document.querySelector('#app .lgac'); if (el) el.outerHTML = lgAc(ac); });
@@ -2089,30 +2098,9 @@ function lgSheet(edit) {
     '<div><div class="lgsec">에너지 사용량 <small>막대 = 같은 줄 안에서 전년과 비교<span class="lglg"><i style="background:#CBD2DB"></i>' + s.prevDay.slice(0, 4) + '</span><span class="lglg"><i style="background:#1F5FA8"></i>' + dd.slice(0, 4) + '</span> · 증감율 빨강 = 늘어남</small></div>' +
     '<div class="lgegrid">' + LG_METERS.map(([k, nm]) => '<div class="lgmc"><div class="lgmh"><b>' + nm + '</b>' + (edit ? inp(k) : '') + '</div><div data-bars="' + k + '">' + lgBars(k) + '</div></div>').join('') + '</div></div>' +
     lgAc(s.ac) +
-    '<div class="lgrow"><div class="lgworks"><div class="lgwk2">' + work('전기방재') + work('기계건축') + '</div>' +
-    '</div>' +
-    '<div><div class="lgsec">야간 일일 작업 현황</div><div class="lgnight" id="lgNight">' + lgNight(edit) + '</div></div></div>' +
+    '<div class="lgworks"><div class="lgwk2">' + work('전기방재') + work('기계건축') + '</div></div>' +
     '<div class="lgfoot">- 1 / 1 -</div></div>';
 }
-/** 야간 그림: 칸 크기에 맞춰 자르지 않고 줄여 가운데 (남는 곳 흰색) */
-function lgNight(edit) {
-  const g = S.lg, src = g.nightNew === '-' ? '' : (g.nightNew || g.night);
-  const file = '<input type="file" accept="image/*" hidden onchange="lgNightFile(this)">';
-  if (!edit) return src ? '<img src="' + src + '" alt="야간 일일 작업 현황">' : '';
-  if (!src) return '<label class="lgnadd">' + ICON.clip + '그림 올리기<small>사진·캡처 파일, 또는 Ctrl+V로 붙여 넣기</small>' + file + '</label>';
-  return '<img src="' + src + '" alt="야간 일일 작업 현황"><div class="lgnb"><label class="btn sm">바꾸기' + file + '</label><button class="btn sm" onclick="lgNightSet(\'-\')">빼기</button></div>';
-}
-function lgNightSet(v) { S.lg.nightNew = v; lgDirty(); const e = $('lgNight'); if (e) e.innerHTML = lgNight(true); }
-async function lgNightFile(el) {
-  const f = el.files && el.files[0]; if (!f) return;
-  try { lgNightSet(await shrinkJpeg(f, 2400, 0.85, true)); } catch (e) { toast('그림을 읽지 못했습니다'); }
-}
-document.addEventListener('paste', e => {
-  if (S.view !== 'log' || !S.lg || !lgPc()) return;
-  const it = Array.from((e.clipboardData && e.clipboardData.items) || []).find(x => x.type.indexOf('image/') === 0);
-  if (!it) return;
-  e.preventDefault(); shrinkJpeg(it.getAsFile(), 2400, 0.85, true).then(lgNightSet, () => toast('그림을 읽지 못했습니다'));
-});
 function lgState() {
   const g = S.lg;
   return g.dirty ? '<span class="nwstate dirty"><i class="dot"></i>저장 안 함</span>' : g.ver ? '<span class="nwstate">' + ICON.ok + '저장됨 · ' + h(String(g.ver).slice(5, 16).replace('-', '/')) + ' ' + h(g.by) + '</span>' : '<span class="nwstate" style="color:var(--muted)">아직 저장 안 함</span>';
@@ -2143,7 +2131,6 @@ function lgWork(el) { S.lg.works[el.dataset.d][Number(el.dataset.i)] = el.value;
 function lgPayload() {
   const g = S.lg, d = Object.assign({}, g.f, { works: {} });
   LG_DEPTS.forEach(x => { d.works[x] = g.works[x].map(t => t.trim()).filter(Boolean); });
-  if (g.nightNew) d.night = g.nightNew;
   return d;
 }
 /* 인쇄 = B4 가로 한 장. 종이 틀(1587×1120)을 0.867배 → 364×257mm */
@@ -2221,7 +2208,7 @@ function ahuNorm(x) { return String(x).replace(/[℃%\s]/g, '').replace(/,/g, '.
 // 칸 하나 검사 (서버 ws_ahu_save 와 같은 범위). 문제 없으면 ''
 function ahuCheck(k, val, name) {
   if (val === '') return '';
-  const rg = k === 'u' ? [-10, 50] : k.indexOf('out_t') === 0 ? [-30, 50] : k.indexOf('out_h') === 0 ? [0, 100] : [-5, 50];   // 냉수 최고 50 (결정 240)
+  const rg = k === 'u' ? [-10, 50] : k.indexOf('out_t') === 0 ? [-30, 50] : k.indexOf('out_h') === 0 ? [0, 100] : [-5, 50];   // 냉수 최고 50 (결정 242)
   return /^-?\d+(\.\d+)?$/.test(val) && Number(val) >= rg[0] && Number(val) <= rg[1] ? '' : (name || '') + ' ' + rg[0] + ' ~ ' + rg[1] + ' 숫자로 넣어 주세요';
 }
 // 고친 칸 중 문제 있는 칸 [{k, u, t, msg}]
@@ -4396,6 +4383,255 @@ function rwPrint() {
   const im = [...$('print').querySelectorAll('img')];
   Promise.all(im.map(i => i.decode ? i.decode().catch(() => {}) : null)).then(() => setTimeout(() => window.print(), 100));
 }
+/* ── 서류작업 › 주간/야간 작업내역 (WS_주야간작업내역, 결정 240): 주간작업 = 사진 전·후 + 사용자재 → 종합업무일지 금일작업 · 야간작업 = 현장·방염서류·각서 사진 → 인쇄 A4 / PDF ── */
+const WH_PARTS = [['전기방재', '전기·방재'], ['기계건축', '기계·건축']];
+const WH_API = { d: ['dwList', 'dwSave', 'dwDelete'], n: ['dnList', 'dnSave', 'dnDelete'] };
+const WH_TITLE = { d: '주간 작업내역', n: '야간 작업내역' };
+function whNew(k) {
+  const u = S.user || {}, part = u.part === '전방파트' ? ['전기방재'] : u.part === '기건파트' ? ['기계건축'] : [];
+  return k === 'n' ? { id: '', day: rwToday(), co: '', floor: '', content: '', note: '', photos: [], fire: [], pledge: [] }
+    : { id: '', day: rwToday(), parts: part, workers: u.name || '', floor: '', content: '', mats: [{ n: '', q: '', u: '' }], note: '', before: [], after: [] };
+}
+async function openWh() {
+  S.wh = S.wh || { tab: 'd', v: null, d: { list: null, q: '', qv: '', f: whNew('d'), dirty: false, busy: false, keys: [] }, n: { list: null, q: '', qv: '', f: whNew('n'), dirty: false, busy: false, keys: [] } };
+  go('wh'); await whLoad(S.wh.tab);
+}
+async function whLoad(k) {
+  const o = S.wh[k]; let r;
+  try { r = await call(WH_API[k][0], o.q, '', ''); } catch (e) { return; }
+  if (!r.ok) return toast(r.error || '불러오지 못했습니다');
+  o.list = r.list; if (S.view === 'wh') render();
+}
+function whTab(k) { const w = S.wh; if (w.tab === k) return; w.tab = k; if (!w[k].list) whLoad(k); render(); }
+function whSearch() { const o = S.wh[S.wh.tab]; o.q = o.qv.trim(); whLoad(S.wh.tab); }
+function whNewForm() { const o = S.wh.n; if (o.dirty && !confirm('저장하지 않은 내용이 있습니다. 새로 쓸까요?')) return; o.f = whNew('n'); o.dirty = false; render(); window.scrollTo(0, 0); }
+function whEdit(id) {
+  const k = S.wh.tab, o = S.wh[k], x = o.list.find(y => y.id === id); if (!x) return;
+  if (o.dirty && !confirm('저장하지 않은 내용이 있습니다. 다른 작업을 열까요?')) return;
+  o.f = JSON.parse(JSON.stringify(x)); if (k === 'd' && !o.f.mats.length) o.f.mats.push({ n: '', q: '', u: '' });
+  o.dirty = false; render(); window.scrollTo(0, 0);
+}
+function whDirty() { const o = S.wh[S.wh.tab]; o.dirty = true; const e = $('whState'); if (e) e.innerHTML = whState(); }
+function whState() { const o = S.wh[S.wh.tab]; return o.dirty ? '<span class="nwstate dirty"><i class="dot"></i>저장 안 함</span>' : o.f && o.f.id ? '<span class="nwstate">' + ICON.ok + '저장됨</span>' : ''; }
+function whIn(fld, el) { S.wh[S.wh.tab].f[fld] = el.value; whDirty(); }
+function whPart(key, el) { const f = S.wh.d.f, i = f.parts.indexOf(key); if (el.checked && i < 0) f.parts.push(key); if (!el.checked && i >= 0) f.parts.splice(i, 1); whDirty(); }
+function whFloor(fl) { const f = S.wh[S.wh.tab].f; f.floor = f.floor === fl ? '' : fl; whDirty(); render(); }
+function whMat(i, key, el) { S.wh.d.f.mats[i][key] = el.value; whDirty(); }
+function whMatAdd() { const m = S.wh.d.f.mats; if (m.length >= 20) return toast('자재는 20줄까지 넣을 수 있습니다'); m.push({ n: '', q: '', u: '' }); whDirty(); render(); }
+function whMatRm(i) { const m = S.wh.d.f.mats; m.splice(i, 1); if (!m.length) m.push({ n: '', q: '', u: '' }); whDirty(); render(); }
+
+/* 사진 칸 (스크린샷의 「회의 사진」 칸 모양): 제목 · 큰 4:3 칸 · 아래 카메라/파일 버튼 */
+function whBtns(k, fld, i, multi) {
+  const pick = cam => '<label class="btn whbt">' + (cam ? ICON.cam + ' 카메라' : ICON.folder + ' 파일') + '<input type="file" accept="image/*"' + (cam ? ' capture="environment"' : multi ? ' multiple' : '') + ' hidden onchange="whAdd(\'' + k + '\',\'' + fld + '\',this,' + i + ')"></label>';
+  return '<div class="whbs">' + pick(1) + pick(0) + '</div>';
+}
+function whTile(k, fld, p, i) {
+  return '<div class="wht"><button type="button" class="whim" onclick="whView(\'' + k + '\',\'' + fld + '\',' + i + ')" aria-label="사진 ' + (i + 1) + ' 크게 보기"><img src="' + h(p.src) + '" alt=""></button>' +
+    '<button type="button" class="whx" onclick="whRm(\'' + k + '\',\'' + fld + '\',' + i + ')" aria-label="사진 지우기">' + ICON.x + '</button></div>';
+}
+function whSlots(k, fld, title, max) {   // 주간: 칸 하나에 사진 한 장, 칸마다 카메라/파일 (예전에 더 넣어 둔 사진은 칸을 더 보여 줌)
+  const L = S.wh[k].f[fld], n = Math.max(max, L.length);
+  return '<div class="whcol">' + Array.from({ length: n }, (_, i) => '<div class="whpc"><h4>' + title + ' ' + (i + 1) + '</h4>' + (L[i] ? whTile(k, fld, L[i], i) : '<div class="whim empty">사진 없음</div>') + whBtns(k, fld, i, false) + '</div>').join('') + '</div>';
+}
+function whMulti(k, fld, title) {   // 야간: 개수 제한 없음, 휴대폰 2열 · PC 4열
+  const L = S.wh[k].f[fld];
+  return '<div class="whpc"><h4>' + title + '<small>' + L.length + '장</small></h4>' + (L.length ? '<div class="whg">' + L.map((p, i) => whTile(k, fld, p, i)).join('') + '</div>' : '') + whBtns(k, fld, -1, true) + '</div>';
+}
+function whSmall(k, fld, title) {   // 각서: 예전 모양 그대로
+  const L = S.wh[k].f[fld], pick = cam => '<label class="btn sm">' + (cam ? ICON.cam + ' 사진찍기' : ICON.folder + ' 갤러리') + '<input type="file" accept="image/*"' + (cam ? ' capture="environment"' : ' multiple') + ' hidden onchange="whAdd(\'' + k + '\',\'' + fld + '\',this,-1)"></label>';
+  return '<div class="whpic"><div class="whpt"><b>' + title + '</b><small>' + L.length + '장</small></div><div class="tbpb">' + pick(1) + pick(0) + '</div>' +
+    '<div class="whg2">' + L.map((p, i) => whTile(k, fld, p, i)).join('') + '</div></div>';
+}
+function whFloors(f) { return '<div class="rwfls">' + RW_FLOORS.map(x => '<button type="button" class="rwfl' + (f.floor === x ? ' on' : '') + '" aria-pressed="' + (f.floor === x) + '" onclick="whFloor(\'' + x + '\')">' + x + '</button>').join('') + '</div>'; }
+function whFormD(f) {
+  return '<div class="card whf"><label class="rwlb">일자</label><input class="inp" type="date" max="' + rwToday() + '" value="' + h(f.day) + '" onchange="whIn(\'day\',this)" aria-label="일자">' +
+    '<div class="rwlb">파트 (일지 금일작업에 들어갈 곳)</div><div class="whck">' + WH_PARTS.map(p => '<label><input type="checkbox"' + (f.parts.indexOf(p[0]) >= 0 ? ' checked' : '') + ' onchange="whPart(\'' + p[0] + '\',this)"> ' + p[1] + '</label>').join('') + '</div>' +
+    '<label class="rwlb">작업자</label><input class="inp" maxlength="60" placeholder="예: 홍길동, 김철수" value="' + h(f.workers) + '" oninput="whIn(\'workers\',this)">' +
+    '<div class="rwlb">작업위치 (버튼으로 선택)</div>' + whFloors(f) +
+    '<label class="rwlb">작업내용</label><textarea class="inp" rows="3" maxlength="300" oninput="whIn(\'content\',this)">' + h(f.content) + '</textarea>' +
+    '<div class="whsplit">' + whSlots('d', 'before', '작업 전', 2) + whSlots('d', 'after', '작업 후', 2) + '</div>' +
+    '<div class="rwlb">사용자재 (이름 · 수량 · 단위)</div>' + f.mats.map((m, i) => '<div class="whmat"><input class="inp" maxlength="30" placeholder="자재 이름" value="' + h(m.n) + '" oninput="whMat(' + i + ',\'n\',this)" aria-label="자재 이름">' +
+      '<input class="inp" maxlength="10" inputmode="decimal" placeholder="수량" value="' + h(m.q) + '" oninput="whMat(' + i + ',\'q\',this)" aria-label="수량"><input class="inp" maxlength="10" placeholder="단위" value="' + h(m.u) + '" oninput="whMat(' + i + ',\'u\',this)" aria-label="단위">' +
+      '<button type="button" class="btn sm" onclick="whMatRm(' + i + ')" aria-label="자재 줄 지우기">' + ICON.x + '</button></div>').join('') +
+    '<button type="button" class="btn sm" onclick="whMatAdd()">' + ICON.plus + ' 자재 추가</button>' +
+    '<label class="rwlb">비고</label><textarea class="inp" rows="2" maxlength="300" oninput="whIn(\'note\',this)">' + h(f.note) + '</textarea>' + whDelBtn(f) + '</div>';
+}
+function whFormN(f) {
+  return '<div class="card whf">' + whMulti('n', 'photos', '현장 사진') +
+    '<div class="whtwo"><div><label class="rwlb">일자</label><input class="inp" type="date" max="' + rwToday() + '" value="' + h(f.day) + '" onchange="whIn(\'day\',this)" aria-label="일자"></div>' +
+    '<div><label class="rwlb">업체명 (직접 입력)</label><input class="inp" maxlength="30" placeholder="예: OO인테리어" value="' + h(f.co) + '" oninput="whIn(\'co\',this)"></div></div>' +
+    '<div class="rwlb">작업위치 (버튼으로 선택)</div>' + whFloors(f) +
+    '<label class="rwlb">작업내용</label><textarea class="inp" rows="3" maxlength="300" oninput="whIn(\'content\',this)">' + h(f.content) + '</textarea>' +
+    whMulti('n', 'fire', '방염서류') + whSmall('n', 'pledge', '각서 (여러 장)') +
+    '<small class="rwhint">서류 사진은 누르면 크게 볼 수 있습니다. 흐리거나 어두우면 「다시 찍으세요」 안내가 나옵니다. 서류 사진은 일반 사진보다 덜 줄여 저장합니다.</small>' +
+    '<label class="rwlb">기타사항</label><textarea class="inp" rows="2" maxlength="300" oninput="whIn(\'note\',this)">' + h(f.note) + '</textarea>' + whDelBtn(f) + '</div>';
+}
+function whDelBtn(f) { return f.id ? '<button type="button" class="btn sm whdel" onclick="whDel()">이 작업 삭제</button>' : ''; }
+function whListHtml(k) {
+  const o = S.wh[k]; if (!o.list) return '<div class="banner b-gray">불러오는 중…</div>';
+  if (!o.list.length) return '<div class="banner b-gray">' + (o.q ? '찾는 작업이 없습니다' : k === 'd' ? '저장된 주간작업이 없습니다' : '저장된 야간작업이 없습니다') + '</div>';
+  const bad = (t, n) => n ? '' : '<span class="whb">' + t + ' 없음</span>';
+  return '<div class="card rwres">' + o.list.map(x => '<button type="button" class="whrow' + (o.f && o.f.id === x.id ? ' on' : '') + '" onclick="whEdit(\'' + x.id + '\')"><b>' + h(x.day.slice(5).replace('-', '/')) + (x.floor ? ' · ' + h(x.floor) : '') + (k === 'n' ? ' · ' + h(x.co) : '') + '</b>' +
+    '<span>' + h(x.content) + '</span><small>' + (k === 'd' ? h(x.workers) + ' · ' + x.parts.map(p => (WH_PARTS.find(y => y[0] === p) || [0, p])[1]).join('·') + ' · 사진 ' + (x.before.length + x.after.length) + '장'
+      : '현장 ' + x.photos.length + '장 ' + bad('방염서류', x.fire.length) + bad('각서', x.pledge.length)) + '</small></button>').join('') + '</div>';
+}
+function renderWh() {
+  const w = S.wh, k = w.tab, o = w[k];
+  const tabs = '<div class="seg cltabs" role="tablist" aria-label="작업내역 종류">' + [['d', '주간작업'], ['n', '야간작업']].map(t => '<button type="button" role="tab" aria-selected="' + (t[0] === k) + '" class="' + (t[0] === k ? 'on' : '') + '" onclick="whTab(\'' + t[0] + '\')">' + t[1] + '</button>').join('') + '</div>';
+  const srch = '<div class="cssec"><label class="cssrch"><input id="whQ" type="search" enterkeyhint="search" placeholder="' + (k === 'd' ? '일자 · 위치 · 내용 · 작업자' : '층 · 업체 · 작업내용') + '" aria-label="검색" value="' + h(o.qv) + '" oninput="S.wh.' + k + '.qv=this.value" onkeydown="if(event.key===\'Enter\')whSearch()"></label>' +
+    '<button class="btn pri" onclick="whSearch()">검색하기</button>' + (k === 'n' ? '<button class="btn" onclick="whNewForm()">신규작성</button>' : '') + '</div>';
+  const form = o.f ? (k === 'd' ? whFormD(o.f) : whFormN(o.f)) : '';
+  const bar = o.f ? '<div class="nwbar" id="whBar"><span id="whState">' + whState() + '</span><button class="btn" onclick="whPrint()">' + ICON.print + '인쇄 A4</button>' +
+    '<button class="btn" onclick="whPdf()"' + (o.pdfBusy ? ' disabled' : '') + '>' + (o.pdfBusy ? '<span class="spin"></span>' : ICON.file + 'PDF 보기') + '</button>' +
+    '<button class="btn pri" onclick="whSave()"' + (o.busy ? ' disabled' : '') + '>' + (o.busy ? '<span class="spin"></span>' : '저장') + '</button></div>' : '';
+  return topbar('서류작업 ›', '주간/야간 작업내역') + '<div class="wrap list">' + tabs + (k === 'd' ? form + srch : srch + form) +
+    '<div class="cssec">' + (o.q ? '「' + h(o.q) + '」 검색 결과' : '최근 60일') + ' · ' + (o.list ? o.list.length : '…') + '건</div>' + whListHtml(k) + bar + '</div>';
+}
+
+/* 사진 넣기: 현장·작업 사진 1600px·70%, 서류(방염·각서)는 글자가 읽히게 2400px·85%. 서류가 흐리거나 어두우면 다시 찍으라고 알림 */
+function whQuality(uri) {
+  return new Promise(ok => {
+    const im = new Image();
+    im.onload = () => {
+      const w = 320, hh = Math.max(1, Math.round(w * im.naturalHeight / im.naturalWidth)), c = document.createElement('canvas'); c.width = w; c.height = hh;
+      const g = c.getContext('2d'); g.drawImage(im, 0, 0, w, hh); const p = g.getImageData(0, 0, w, hh).data, L = [];
+      for (let i = 0; i < p.length; i += 4) L.push(0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2]);
+      if (L.reduce((a, b) => a + b, 0) / L.length < 45) return ok('어둡습니다');
+      let d = 0, n = 0; for (let y = 0; y < hh; y++) for (let x = 1; x < w; x++) { d += Math.abs(L[y * w + x] - L[y * w + x - 1]); n++; }
+      ok(d / n < 1.2 ? '흐립니다' : '');   // shortcut: 대충 거르는 기준 — 현장에서 써 보고 숫자 조정
+    };
+    im.onerror = () => ok(''); im.src = uri;
+  });
+}
+async function whAdd(k, fld, el, at) {
+  const fs = Array.from(el.files || []); el.value = ''; if (!fs.length) return;
+  const o = S.wh[k], L = o.f[fld], max = k === 'd' ? 2 : 0, doc = fld === 'fire' || fld === 'pledge'; let dup = 0, cut = 0, bad = '';
+  for (const f of fs) {
+    if (max && at < 0 && L.length >= max) { cut++; continue; }
+    const key = f.name + '|' + f.size + '|' + f.lastModified;
+    if (o.keys.indexOf(key) !== -1) { dup++; continue; }
+    try {
+      const data = await (doc ? shrinkJpeg(f, 2400, 0.85) : shrinkJpeg(f, 1600, 0.7));
+      if (at >= 0 && at < L.length) L[at] = { data, src: data }; else L.push({ data, src: data }); o.keys.push(key); if (o.keys.length > 80) o.keys.shift();
+      if (doc && !bad) bad = await whQuality(data);
+    } catch (e) { toast(e.message); }
+  }
+  if (cut) toast('사진은 ' + max + '장까지 넣을 수 있습니다');
+  else if (dup) toast(dup + '장은 이미 넣은 사진이라 건너뜁니다');
+  if (bad) toast('서류 사진이 ' + bad + '. 다시 찍어 주세요');
+  whDirty(); render();
+}
+function whRm(k, fld, i) { if (!confirm('이 사진을 지울까요?')) return; S.wh[k].f[fld].splice(i, 1); whDirty(); render(); }
+function whView(k, fld, i) { S.wh.v = { list: S.wh[k].f[fld].map(p => p.src), i, z: 1 }; whVDraw(); }
+function whVDraw() {
+  const v = S.wh.v;
+  $('layer').innerHTML = '<div class="rwv" role="dialog" aria-modal="true"><div class="rwvh"><span>' + (v.i + 1) + ' / ' + v.list.length + '</span><button class="btn sm" onclick="whVClose()">닫기</button></div>' +
+    '<div class="rwvb"><img src="' + h(v.list[v.i]) + '" style="width:' + v.z * 100 + '%" alt="확대 사진"></div>' +
+    '<div class="rwvf"><button class="btn sm" onclick="whVNav(-1)"' + (v.i ? '' : ' disabled') + '>이전</button><button class="btn sm" onclick="whVZoom(-0.5)" aria-label="작게">−</button><b>' + Math.round(v.z * 100) + '%</b><button class="btn sm" onclick="whVZoom(0.5)" aria-label="크게">＋</button><button class="btn sm" onclick="whVNav(1)"' + (v.i < v.list.length - 1 ? '' : ' disabled') + '>다음</button></div></div>';
+}
+function whVClose() { S.wh.v = null; closeDialog(); }
+function whVNav(d) { const v = S.wh.v; v.i = Math.max(0, Math.min(v.list.length - 1, v.i + d)); v.z = 1; whVDraw(); }
+function whVZoom(d) { const v = S.wh.v; v.z = Math.max(1, Math.min(4, v.z + d)); whVDraw(); }
+
+/* 저장 / 삭제 */
+function whPics4(l) { return l.map(p => p.id ? { id: p.id } : { data: p.data }); }
+async function whSave() {
+  const k = S.wh.tab, o = S.wh[k], f = o.f; if (o.busy) return;
+  if (k === 'd' && !f.parts.length) return toast('파트를 하나 이상 골라 주세요');
+  if (k === 'n' && !f.co.trim()) return toast('업체명을 입력해 주세요');
+  if (!f.content.trim()) return toast('작업내용을 입력해 주세요');
+  const d = k === 'd' ? { id: f.id, day: f.day, parts: f.parts, workers: f.workers, floor: f.floor, content: f.content, mats: f.mats, note: f.note, before: whPics4(f.before), after: whPics4(f.after) }
+    : { id: f.id, day: f.day, co: f.co, floor: f.floor, content: f.content, note: f.note, photos: whPics4(f.photos), fire: whPics4(f.fire), pledge: whPics4(f.pledge) };
+  o.busy = true; render();
+  try {
+    const r = await call(WH_API[k][1], d); o.busy = false;
+    if (!r.ok) { render(); return toast(r.error || '저장하지 못했습니다'); }
+    if (o.list) { const i = o.list.findIndex(x => x.id === r.item.id); if (i >= 0) o.list[i] = r.item; else o.list.unshift(r.item); o.list.sort((a, b) => a.day < b.day ? 1 : a.day > b.day ? -1 : 0); }
+    o.f = JSON.parse(JSON.stringify(r.item)); if (k === 'd' && !o.f.mats.length) o.f.mats.push({ n: '', q: '', u: '' });
+    o.dirty = false; render(); toast(k === 'd' ? '저장했습니다 · 종합업무일지 금일작업에도 들어갑니다' : '저장했습니다');
+  } catch (e) { o.busy = false; render(); }
+}
+async function whDel() {
+  const k = S.wh.tab, o = S.wh[k]; if (!o.f.id || !confirm('이 작업을 지울까요?' + (k === 'd' ? ' (종합업무일지 금일작업에서도 빠집니다)' : ''))) return;
+  try {
+    const r = await call(WH_API[k][2], o.f.id); if (!r.ok) return toast(r.error);
+    if (o.list) o.list = o.list.filter(x => x.id !== o.f.id);
+    o.f = whNew(k); o.dirty = false; render(); toast('지웠습니다');
+  } catch (e) { /* call() 이 알림 */ }
+}
+
+/* 인쇄 · PDF 쪽 만들기. 주간 = 1쪽. 야간 = ① 내용+현장 사진 쪽 · 각서 쪽 (양면으로 붙임, 항상 2쪽) → ② 방염서류 사진 한 장 = 한 쪽 (단면, 맨 뒤) */
+const WH_CSS = '.whp{font-family:"Noto Sans KR","Malgun Gothic",sans-serif;color:#000;background:#fff}.whp *{box-sizing:border-box}' +
+  '.whp .pg{width:794px;height:1122px;padding:40px 44px;overflow:hidden;background:#fff;page-break-after:always;break-after:page;position:relative}.whp .pg:last-child{page-break-after:auto;break-after:auto}' +
+  '.whp h1{font-size:22px;margin:0 0 4px}.whp .sub{font-size:11px;color:#444;margin-bottom:12px}.whp table{width:100%;border-collapse:collapse;table-layout:fixed;margin-bottom:10px}' +
+  '.whp td,.whp th{border:1px solid #888;font-size:12px;padding:5px 7px;text-align:left;vertical-align:top;line-height:1.45;word-break:break-all}.whp th{background:#e8edf3;width:72px;font-weight:600}' +
+  '.whp .bx{border:1px solid #888;padding:7px 9px;font-size:12px;line-height:1.5;min-height:48px;margin-bottom:10px;white-space:pre-wrap;word-break:break-all}.whp .bx b{display:block;font-size:11px;color:#444;margin-bottom:2px}' +
+  '.whp .ph{display:flex;gap:0;border:1px solid #888}.whp .col{flex:1;min-width:0;padding:6px}.whp .col+.col{border-left:1px solid #888}.whp .col h4{margin:0 0 5px;font-size:12px}' +
+  '.whp .gr{display:grid;gap:5px}.whp .cell{background:#f1f3f6;display:flex;align-items:center;justify-content:center;overflow:hidden}.whp .cell img{display:block}' +
+  '.whp .none{font-size:12px;color:#666;padding:10px 0}.whp .full{position:absolute;left:44px;right:44px;top:70px;bottom:44px;display:flex;align-items:center;justify-content:center}.whp .full img{display:block}' +
+  '.whp .ft{position:absolute;left:44px;right:44px;bottom:16px;font-size:10px;color:#666;display:flex;justify-content:space-between}.whp .pdfonly{color:#999}@media print{.whp .pdfonly{display:none}}';
+function whGrid(l, W, H) {   // 장수에 맞춰 칸 수·크기를 정함 (많으면 줄여서 한 쪽에 모음). 칸이 모자라면 빈 칸은 안 그림
+  if (!l.length) return '';
+  const n = l.length, cols = n === 1 ? 1 : n <= 4 ? 2 : n <= 9 ? 3 : n <= 16 ? 4 : 5, rows = Math.ceil(n / cols), gap = 5;
+  const ch = Math.floor((H - gap * (rows - 1)) / rows), cw = Math.floor((W - gap * (cols - 1)) / cols), s = Math.min(ch, Math.round(cw * 0.75));
+  return '<div class="gr" style="grid-template-columns:repeat(' + cols + ',1fr)">' + l.map(p => '<div class="cell" style="height:' + s + 'px"><img src="' + h(p.src) + '" alt=""></div>').join('') + '</div>';
+}
+function whDay(d) { return d.slice(0, 4) + '년 ' + Number(d.slice(5, 7)) + '월 ' + Number(d.slice(8, 10)) + '일'; }
+function whFt(t) { return '<div class="ft"><span>에비뉴엘 잠실점 시설팀 · 출력 ' + rwToday() + '</span><span>' + h(t) + '</span></div>'; }
+function whPages(k) {
+  const f = S.wh[k].f;
+  if (k === 'd') {
+    const mats = f.mats.filter(m => m.n.trim()), part = f.parts.map(p => (WH_PARTS.find(y => y[0] === p) || [0, p])[1]).join(' · ');
+    return '<div class="pg"><h1>주간 작업내역</h1><div class="sub">에비뉴엘 잠실점 시설팀</div>' +
+      '<table><tr><th>일자</th><td>' + h(whDay(f.day)) + '</td><th>파트</th><td>' + h(part) + '</td></tr><tr><th>작업자</th><td>' + h(f.workers) + '</td><th>작업위치</th><td>' + h(f.floor) + '</td></tr></table>' +
+      '<div class="bx"><b>작업내용</b>' + h(f.content) + '</div>' +
+      ((f.before.length || f.after.length) ? '<div class="ph"><div class="col"><h4>작업 전</h4>' + whGrid(f.before, 340, 560) + '</div><div class="col"><h4>작업 후</h4>' + whGrid(f.after, 340, 560) + '</div></div>' : '') +
+      (mats.length ? '<table style="margin-top:10px"><tr><th>사용자재</th><th style="width:auto">이름</th><th style="width:90px">수량</th><th style="width:90px">단위</th></tr>' + mats.map(m => '<tr><td></td><td>' + h(m.n) + '</td><td>' + h(m.q) + '</td><td>' + h(m.u) + '</td></tr>').join('') + '</table>' : '') +
+      (f.note.trim() ? '<div class="bx"><b>비고</b>' + h(f.note) + '</div>' : '') + whFt('주간 작업내역') + '</div>';
+  }
+  const head = '<h1>야간 작업내역</h1><div class="sub">에비뉴엘 잠실점 시설팀</div>';
+  const p1 = '<div class="pg">' + head + '<table><tr><th>일자</th><td>' + h(whDay(f.day)) + '</td><th>업체명</th><td>' + h(f.co) + '</td></tr><tr><th>작업위치</th><td colspan="3">' + h(f.floor) + '</td></tr></table>' +
+    '<div class="bx"><b>작업내용</b>' + h(f.content) + '</div>' + (f.note.trim() ? '<div class="bx"><b>기타사항</b>' + h(f.note) + '</div>' : '') +
+    '<div class="bx" style="padding:6px"><b>현장 사진 (' + f.photos.length + '장)</b>' + (f.photos.length ? whGrid(f.photos, 690, 640) : '<div class="none">미첨부</div>') + '</div>' + whFt('야간 작업내역 ①') + '</div>';
+  const p2 = '<div class="pg"><h1>각서</h1><div class="sub">' + h(f.co) + ' · ' + h(whDay(f.day)) + '</div>' + (f.pledge.length ? whGrid(f.pledge, 706, 940) : '<div class="none">각서 미첨부</div>') + whFt('야간 작업내역 ② 각서') + '</div>';
+  const fire = f.fire.length ? f.fire.map((p, i) => '<div class="pg"><div class="sub">방염서류 ' + (i + 1) + '/' + f.fire.length + ' · ' + h(f.co) + ' · ' + h(whDay(f.day)) + ' <span class="pdfonly">· 이 쪽부터 단면 인쇄</span></div><div class="full"><img src="' + h(p.src) + '" alt=""></div></div>').join('')
+    : '<div class="pg"><h1>방염서류</h1><div class="sub">' + h(f.co) + ' · ' + h(whDay(f.day)) + '</div><div class="none">방염서류 미첨부</div></div>';
+  return p1 + p2 + fire;
+}
+/* 사진은 자르지 않고 칸에 맞춰 줄임 — PDF 도구가 object-fit 을 못 읽어 크기를 직접 정함 */
+async function whFit(box) {
+  try { if (document.fonts) await document.fonts.ready; } catch (e) {}
+  const im = [...box.querySelectorAll('img')]; await Promise.all(im.map(i => i.decode ? i.decode().catch(() => {}) : null));
+  box.querySelectorAll('.cell img,.full img').forEach(i => {
+    const c = i.parentNode, sc = Math.min(c.clientWidth / i.naturalWidth, c.clientHeight / i.naturalHeight) || 1;
+    i.style.width = Math.floor(i.naturalWidth * sc) + 'px'; i.style.height = Math.floor(i.naturalHeight * sc) + 'px';
+  });
+}
+function whCheck() { const k = S.wh.tab, f = S.wh[k].f; if (!f.content.trim()) { toast('작업내용을 입력해 주세요'); return false; } return true; }
+async function whPrint() {
+  if (!whCheck()) return;
+  const k = S.wh.tab; $('print').innerHTML = '<style>@page{size:A4;margin:0}' + WH_CSS + '</style><div class="whp">' + whPages(k) + '</div>';
+  await whFit($('print')); setTimeout(() => window.print(), 100);
+}
+async function whPdf() {
+  if (!whCheck()) return;
+  const k = S.wh.tab, o = S.wh[k]; if (o.pdfBusy) return;
+  o.pdfBusy = true; render();
+  const wrap = document.createElement('div'); wrap.style.cssText = 'position:fixed;left:0;top:0;width:0;height:0;overflow:hidden;z-index:-1';
+  wrap.innerHTML = '<style>' + WH_CSS + '</style><div class="whp" style="width:794px">' + whPages(k) + '</div>'; document.body.appendChild(wrap);
+  try {
+    await loadH2p(); await whFit(wrap);
+    const keepY = window.scrollY; window.scrollTo(0, 0);
+    let blob; try {
+      blob = await html2pdf().set({ margin: 0, filename: o.f.day + '_' + WH_TITLE[k] + '.pdf', image: { type: 'jpeg', quality: 0.9 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, x: 0, y: 0, windowWidth: 794 },
+        jsPDF: { unit: 'px', format: [794, 1123], orientation: 'portrait', hotfixes: ['px_scaling'] }, pagebreak: { mode: ['css'] } }).from(wrap.querySelector('.whp')).outputPdf('blob');
+    } finally { window.scrollTo(0, keepY); }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.dataset.pv = JSON.stringify({ name: WH_TITLE[k], sub: o.f.day });
+    o.pdfBusy = false; pdfOpen(a);
+  } catch (e) { o.pdfBusy = false; render(); toast('PDF를 만들지 못했습니다: ' + (e && e.message ? e.message : e)); }
+  wrap.remove();
+}
 /* ── 그리기 ── */
 function render() {
   let html;
@@ -4430,6 +4666,7 @@ function render() {
   else if (S.view === 'cs') html = renderCs();
   else if (S.view === 'csck') html = renderCsCk();
   else if (S.view === 'rw') html = renderRw();
+  else if (S.view === 'wh') html = renderWh();
   else if (S.view === 'status') html = renderStatus();
   else if (S.view === 'floor') html = S.st ? renderFloor() : renderStatus();
   else if (S.view === 'set' && isBoss()) html = renderSet();
