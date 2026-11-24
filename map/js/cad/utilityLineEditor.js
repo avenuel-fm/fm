@@ -24,7 +24,7 @@ var UTIL_SPECS_CONFIG = {
     power: {
         id: 'power',
         label: '전기',
-        color: '#2563eb', // 파란색
+        color: '#dc2626', // 붉은색 (결정 254)
         className: 'util-line-eps',
         direction: 'forward', // 모 -> 자 (점 순서가 기능실 → 매장)
         unit: 'A',
@@ -110,6 +110,36 @@ function getMidPointOfPoints(points) {
     };
 }
 
+// 같은 기능실–같은 매장 사이 선이 여럿이면 선 사이 1px 간격으로 나란히 (선 굵기 3px + 간격 1px = 가운데끼리 4px). 저장 위치는 그대로, 그릴 때만 옮김 (결정 254)
+var UTIL_LINE_PITCH = 4;
+function offsetPolyline(pts, d) {
+    const p = pts.filter((q, i) => i === 0 || q.x !== pts[i - 1].x || q.y !== pts[i - 1].y);
+    if (!d || p.length < 2) return pts;
+    const nrm = [];
+    for (let i = 0; i < p.length - 1; i++) {
+        const dx = p[i + 1].x - p[i].x, dy = p[i + 1].y - p[i].y, len = Math.hypot(dx, dy) || 1;
+        nrm.push({ x: -dy / len, y: dx / len });
+    }
+    const out = [{ x: p[0].x + nrm[0].x * d, y: p[0].y + nrm[0].y * d }];
+    for (let j = 1; j < p.length - 1; j++) {
+        const a = nrm[j - 1], b = nrm[j], k = 1 + a.x * b.x + a.y * b.y;
+        const m = k > 0.2 ? { x: (a.x + b.x) * d / k, y: (a.y + b.y) * d / k } : { x: a.x * d, y: a.y * d };   // 뾰족한 꺾임은 모서리 안 뻗게
+        out.push({ x: p[j].x + m.x, y: p[j].y + m.y });
+    }
+    const l = nrm[nrm.length - 1], e = p[p.length - 1];
+    out.push({ x: e.x + l.x * d, y: e.y + l.y * d });
+    return out;
+}
+function utilPairOffsets(lines) {
+    const groups = {}, off = {};
+    lines.forEach(l => { const k = (l.sourceStoreId || l.sourceName || '') + '|' + (l.targetStoreId || l.targetName || ''); (groups[k] = groups[k] || []).push(l); });
+    Object.values(groups).forEach(g => {
+        g.sort((a, b) => String(a.id).localeCompare(String(b.id)));
+        g.forEach((l, i) => { off[l.id] = (i - (g.length - 1) / 2) * UTIL_LINE_PITCH; });
+    });
+    return off;
+}
+
 // ================= 도면 위 라인 및 스펙 라벨 렌더링 =================
 function renderFloorUtilityLines() {
     const svgEl = mapContainer?.querySelector('svg');
@@ -120,9 +150,11 @@ function renderFloorUtilityLines() {
     layer.innerHTML = '';
     const floor = FLOORS[currentFloorIdx];
     const lines = getFloorUtilityLines(floor.code);
+    const pairOff = utilPairOffsets(lines.filter(l => l.points && l.points.length >= 2));
 
     lines.forEach(line => {
         if (!line.points || line.points.length < 2) return;
+        const drawPts = offsetPolyline(line.points, pairOff[line.id] || 0);
 
         // 레이어 필터 가시성 확인
         const sub = line.subType || 'power';
@@ -134,7 +166,7 @@ function renderFloorUtilityLines() {
 
         // 1. 선분(Polyline)
         const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-        const ptsStr = line.points.map(p => `${p.x},${p.y}`).join(' ');
+        const ptsStr = drawPts.map(p => `${+p.x.toFixed(2)},${+p.y.toFixed(2)}`).join(' ');
         polyline.setAttribute('points', ptsStr);
         polyline.setAttribute('class', `util-feeder-line ${line.className || 'util-line-eps'}`);
         polyline.setAttribute('data-id', line.id);
@@ -154,7 +186,7 @@ function renderFloorUtilityLines() {
         }
 
         // 2. 스펙 라벨(Badge)
-        const midPt = getMidPointOfPoints(line.points);
+        const midPt = getMidPointOfPoints(drawPts);
         let labelGroup = null;
         if (midPt) {
             labelGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -199,11 +231,12 @@ function renderFloorUtilityLines() {
                 if (labelGroup) labelGroup.style.display = 'block';
             } else {
                 polyline.classList.add('inactive');
-                polyline.style.opacity = '0.12';
+                g.style.display = isSelected ? '' : 'none';   // 연결 안 된 선은 안 보임 (결정 254)
                 if (labelGroup) labelGroup.style.display = 'none';
             }
         } else {
-            polyline.style.opacity = isSelected ? '1' : '0.4';
+            polyline.style.opacity = '1';
+            g.style.display = isSelected ? '' : 'none';   // 평소에는 선이 안 보임. 매장·기능실을 누르면 연결선만 보임
             if (labelGroup) labelGroup.style.display = isSelected ? 'block' : 'none';
         }
 
@@ -277,18 +310,7 @@ function highlightUtilityLinesForStore(store) {
     if (!layer) return;
 
     const allGroups = layer.querySelectorAll('.util-line-item-group');
-    if (!store) {
-        allGroups.forEach(g => {
-            const line = g.querySelector('.util-feeder-line');
-            const badge = g.querySelector('.util-spec-badge-group');
-            if (line) {
-                line.classList.remove('highlighted', 'inactive');
-                line.style.opacity = '0.4';
-            }
-            if (badge) badge.style.display = 'none';
-        });
-        return;
-    }
+    if (!store) { clearUtilityLineHighlight(); return; }
 
     let connectedCount = 0;
     allGroups.forEach(g => {
@@ -310,13 +332,13 @@ function highlightUtilityLinesForStore(store) {
             line.classList.add('highlighted');
             line.classList.remove('inactive');
             line.style.opacity = '1';
-            line.style.display = 'block';
+            g.style.display = '';
             if (badge) badge.style.display = 'block';
             connectedCount++;
         } else {
             line.classList.remove('highlighted');
             line.classList.add('inactive');
-            line.style.opacity = '0.08';
+            g.style.display = 'none';
             if (badge) badge.style.display = 'none';
         }
     });
@@ -337,8 +359,9 @@ function clearUtilityLineHighlight() {
         const badge = g.querySelector('.util-spec-badge-group');
         if (line) {
             line.classList.remove('highlighted', 'inactive');
-            line.style.opacity = '0.4';
+            line.style.opacity = '1';
         }
+        g.style.display = (activeSelectedUtilLineId && g.getAttribute('data-id') === activeSelectedUtilLineId) ? '' : 'none';   // 평소엔 안 보임
         if (badge) badge.style.display = 'none';
     });
 }

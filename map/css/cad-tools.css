@@ -632,11 +632,11 @@
 
         /* EPS (전기): 자 -> 모, 파란색 점선 3px */
         .util-line-eps {
-            stroke: var(--navy) !important;
+            stroke: #dc2626 !important;
             stroke-width: 3px !important;
             stroke-dasharray: 8 6;
             animation: utilFlowForward 0.8s linear infinite;
-            filter: drop-shadow(0 0 2px rgba(37, 99, 235, 0.4));
+            filter: drop-shadow(0 0 2px rgba(220, 38, 38, 0.4));
         }
 
         /* PS / PD (급수): 자 -> 모, 하늘색 점선 3px */
