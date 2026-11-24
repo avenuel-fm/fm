@@ -197,8 +197,8 @@ function renderFloorUtilityLines() {
             const approxWidth = Math.max(specStr.length * 9 + 16, 54);
 
             const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-            rect.setAttribute('x', midPt.x - approxWidth / 2);
-            rect.setAttribute('y', midPt.y - 11);
+            rect.setAttribute('x', -approxWidth / 2);
+            rect.setAttribute('y', -11);
             rect.setAttribute('width', approxWidth);
             rect.setAttribute('height', 22);
             rect.setAttribute('rx', 5);
@@ -207,8 +207,8 @@ function renderFloorUtilityLines() {
             rect.setAttribute('stroke-width', '1.5');
 
             const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            text.setAttribute('x', midPt.x);
-            text.setAttribute('y', midPt.y + 4);
+            text.setAttribute('x', 0);
+            text.setAttribute('y', 4);
             text.setAttribute('fill', '#ffffff');
             text.setAttribute('font-size', '11');
             text.setAttribute('font-weight', '700');
@@ -217,6 +217,15 @@ function renderFloorUtilityLines() {
 
             labelGroup.appendChild(rect);
             labelGroup.appendChild(text);
+            labelGroup.setAttribute('transform', `translate(${midPt.x},${midPt.y})`);   // 실제 자리는 layoutUtilLabels 가 겹치지 않게 다시 정함 (결정 258)
+            labelGroup._w = approxWidth;
+            g._pts = drawPts;
+            const link = document.createElementNS('http://www.w3.org/2000/svg', 'line');   // 이름표가 선에서 떨어졌을 때 잇는 가는 선
+            link.setAttribute('class', 'util-label-link');
+            link.setAttribute('stroke', line.color || '#2563eb'); link.setAttribute('stroke-width', '1'); link.setAttribute('pointer-events', 'none');
+            link.style.display = 'none';
+            g._link = link;
+            g.appendChild(link);
         }
 
         // 활성/하이라이트 상태 동기화
@@ -262,6 +271,47 @@ function renderFloorUtilityLines() {
         g.appendChild(polyline);
         if (labelGroup) g.appendChild(labelGroup);
         layer.appendChild(g);
+    });
+    layoutUtilLabels();
+}
+
+// 보이는 선들의 이름표가 서로 겹치지 않게 자리를 정함 (결정 258): 선 따라 가운데 → 35% → 65% → 20% → 80%, 다 막히면 아래위로 24px씩 쌓음
+function utilPointAt(pts, f) {
+    let total = 0; const seg = [];
+    for (let i = 0; i < pts.length - 1; i++) { const l = Math.hypot(pts[i + 1].x - pts[i].x, pts[i + 1].y - pts[i].y); seg.push(l); total += l; }
+    let d = total * f;
+    for (let i = 0; i < seg.length; i++) {
+        if (d <= seg[i] || i === seg.length - 1) { const t = seg[i] ? Math.min(1, d / seg[i]) : 0; return { x: pts[i].x + (pts[i + 1].x - pts[i].x) * t, y: pts[i].y + (pts[i + 1].y - pts[i].y) * t }; }
+        d -= seg[i];
+    }
+    return pts[0];
+}
+function layoutUtilLabels() {
+    const layer = mapContainer?.querySelector('#utility-lines-layer');
+    if (!layer) return;
+    const placed = [], H = 22, PAD = 2;
+    const hit = (x, y, w) => placed.some(r => Math.abs(x - r.x) < (w + r.w) / 2 + PAD && Math.abs(y - r.y) < H + PAD);
+    layer.querySelectorAll('.util-line-item-group').forEach(g => {
+        const lab = g.querySelector('.util-spec-badge-group');
+        if (!lab || !g._pts || g.style.display === 'none' || lab.style.display === 'none') return;
+        const w = lab._w || 54;
+        let pos = null, anchor = null;
+        for (const f of [0.5, 0.35, 0.65, 0.2, 0.8]) {
+            const p = utilPointAt(g._pts, f);
+            if (!hit(p.x, p.y, w)) { pos = p; anchor = p; break; }
+        }
+        if (!pos) {
+            const base = utilPointAt(g._pts, 0.5); anchor = base;
+            for (let k = 1; k < 40 && !pos; k++) for (const sg of [1, -1]) { const y = base.y + sg * k * (H + PAD); if (!hit(base.x, y, w)) { pos = { x: base.x, y }; break; } }
+            pos = pos || base;
+        }
+        placed.push({ x: pos.x, y: pos.y, w });
+        lab.setAttribute('transform', `translate(${pos.x.toFixed(1)},${pos.y.toFixed(1)})`);
+        if (g._link) {
+            const moved = Math.hypot(pos.x - anchor.x, pos.y - anchor.y) > 1;
+            g._link.style.display = moved ? '' : 'none';
+            if (moved) { g._link.setAttribute('x1', anchor.x); g._link.setAttribute('y1', anchor.y); g._link.setAttribute('x2', pos.x); g._link.setAttribute('y2', pos.y); }
+        }
     });
 }
 
@@ -343,6 +393,7 @@ function highlightUtilityLinesForStore(store) {
         }
     });
 
+    layoutUtilLabels();
     if (connectedCount > 0) {
         showToast(`🔗 연결된 설비 라인 ${connectedCount}개가 표시됩니다.`, 1200);
     }
@@ -364,6 +415,7 @@ function clearUtilityLineHighlight() {
         g.style.display = (activeSelectedUtilLineId && g.getAttribute('data-id') === activeSelectedUtilLineId) ? '' : 'none';   // 평소엔 안 보임
         if (badge) badge.style.display = 'none';
     });
+    layoutUtilLabels();
 }
 
 // ================= 설비 라인 드로잉 모드 시작/종료 =================
