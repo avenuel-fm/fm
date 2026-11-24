@@ -236,7 +236,8 @@ function renderFloorUtilityLines() {
 function selectUtilLineForDelete(line) {
     activeSelectedUtilLineId = line.id;
     renderFloorUtilityLines();
-    if (mapStore.readOnly()) return;   // 보기 전용: 선택(라벨 보기)만
+    if (mapStore.readOnly()) return;
+    if (isLayerLocked(line.subType || 'power')) { warnLayerLocked(); return; }   // 보기 전용: 선택(라벨 보기)만
 
     const specDesc = line.specText ? ` (${line.specText})` : '';
     const confirmMsg = `[설비 연결선 선택]\n매장(자): ${line.sourceName || '매장'}\n기능실(모): ${line.targetName || '기능실'}\n구분: ${line.subTypeLabel || ''}${specDesc}\n\n이 연결선을 삭제하시겠습니까?`;
@@ -258,6 +259,8 @@ window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') { activeSelectedUtilLineId = null; renderFloorUtilityLines(); return; }
     if (e.key === 'Delete' && !mapStore.readOnly()) {
         const floor = FLOORS[currentFloorIdx];
+        const sel = getFloorUtilityLines(floor.code).find(l => l.id === activeSelectedUtilLineId);
+        if (sel && isLayerLocked(sel.subType || 'power')) { warnLayerLocked(); return; }
         deleteUtilityLine(floor.code, activeSelectedUtilLineId);
         activeSelectedUtilLineId = null;
         renderFloorUtilityLines();
@@ -361,12 +364,12 @@ function startUtilityLineDrawingMode(preStore = null) {
 function purgeLegacyUtilityLines() {
     if (mapStore.readOnly()) return;
     let total = 0;
-    FLOORS.forEach(f => { total += getFloorUtilityLines(f.code).filter(l => !l.auto).length; });
+    FLOORS.forEach(f => { total += getFloorUtilityLines(f.code).filter(l => !l.auto && !isLayerLocked(l.subType || 'power')).length; });
     if (!total) return;
     if (!confirm('예전 방식으로 그린 배관 ' + total + '개가 있습니다.\n배관 연결이 길 따라 자동으로 그리는 방식으로 바뀌어서 이 선들을 지웁니다. (기록에서 「이 날로 되돌리기」로 되살릴 수 있습니다)\n\n지울까요?')) return;
     if (typeof pushUndoState === 'function') pushUndoState('예전 배관 지움');
     FLOORS.forEach(f => {
-        const all = getFloorUtilityLines(f.code), keep = all.filter(l => l.auto);
+        const all = getFloorUtilityLines(f.code), keep = all.filter(l => l.auto || isLayerLocked(l.subType || 'power'));
         if (keep.length !== all.length) saveFloorUtilityLines(f.code, keep);
     });
     activeSelectedUtilLineId = null;

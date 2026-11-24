@@ -59,19 +59,19 @@
                         <span class="symbol-badge-dot" style="background:#2563eb; color:#ffffff;">🤿</span>
                         <span>공기호흡기</span>
                     </label>
-                    <div style="font-size:12px; font-weight:700; color:var(--text-main); margin:6px 0 4px; border-top:1px solid var(--border-light); padding-top:6px;">구역 레이어 표시</div>
+                    <div style="font-size:12px; font-weight:700; color:var(--text-main); margin:6px 0 4px; border-top:1px solid var(--border-light); padding-top:6px;">구역 레이어 표시 <span style="font-weight:400;color:var(--text-muted);font-size:11px;">(🔑 = 잠금)</span></div>
                     <label class="symbol-filter-item">
-                        <input type="checkbox" id="chk-zone-filter-fire" checked onchange="onZoneCheckboxChange('fire', this.checked)">
+                        <input type="checkbox" id="chk-zone-filter-fire" checked onchange="onZoneCheckboxChange('fire', this.checked)"><input type="checkbox" class="chk-lock" data-lock="fire" title="잠금 (수정·삭제 막기)" onchange="onLayerLockChange('fire', this.checked)">
                         <span class="symbol-badge-dot" style="background:#dc2626; color:#ffffff;">🔥</span>
                         <span>방화구역</span>
                     </label>
                     <label class="symbol-filter-item">
-                        <input type="checkbox" id="chk-zone-filter-smoke" checked onchange="onZoneCheckboxChange('smoke', this.checked)">
+                        <input type="checkbox" id="chk-zone-filter-smoke" checked onchange="onZoneCheckboxChange('smoke', this.checked)"><input type="checkbox" class="chk-lock" data-lock="smoke" title="잠금 (수정·삭제 막기)" onchange="onLayerLockChange('smoke', this.checked)">
                         <span class="symbol-badge-dot" style="background:#0284c7; color:#ffffff;">💨</span>
                         <span>제연구획</span>
                     </label>
                     <label class="symbol-filter-item">
-                        <input type="checkbox" id="chk-zone-filter-floor" onchange="onZoneCheckboxChange('floor', this.checked)">
+                        <input type="checkbox" id="chk-zone-filter-floor" onchange="onZoneCheckboxChange('floor', this.checked)"><input type="checkbox" class="chk-lock" data-lock="floor" title="잠금 (수정·삭제 막기)" onchange="onLayerLockChange('floor', this.checked)">
                         <span class="symbol-badge-dot" style="background:#ffffff; color:#000000; border:1.5px dashed #000000;"></span>
                         <span>바닥 (검은 점선)</span>
                     </label>
@@ -88,22 +88,22 @@
                     </label>
                     <div style="font-size:12px; font-weight:700; color:var(--text-main); margin:6px 0 4px; border-top:1px solid var(--border-light); padding-top:6px;">설비 배관/간선 레이어</div>
                     <label class="symbol-filter-item">
-                        <input type="checkbox" id="chk-util-power" checked onchange="onUtilLineCheckboxChange('power', this.checked)">
+                        <input type="checkbox" id="chk-util-power" checked onchange="onUtilLineCheckboxChange('power', this.checked)"><input type="checkbox" class="chk-lock" data-lock="power" title="잠금 (수정·삭제 막기)" onchange="onLayerLockChange('power', this.checked)">
                         <span class="symbol-badge-dot" style="background:#2563eb; color:#ffffff;">⚡</span>
                         <span>전기 (EPS)</span>
                     </label>
                     <label class="symbol-filter-item">
-                        <input type="checkbox" id="chk-util-water" checked onchange="onUtilLineCheckboxChange('water', this.checked)">
+                        <input type="checkbox" id="chk-util-water" checked onchange="onUtilLineCheckboxChange('water', this.checked)"><input type="checkbox" class="chk-lock" data-lock="water" title="잠금 (수정·삭제 막기)" onchange="onLayerLockChange('water', this.checked)">
                         <span class="symbol-badge-dot" style="background:#0284c7; color:#ffffff;">💧</span>
                         <span>급수 (PS/PD)</span>
                     </label>
                     <label class="symbol-filter-item">
-                        <input type="checkbox" id="chk-util-gas" checked onchange="onUtilLineCheckboxChange('gas', this.checked)">
+                        <input type="checkbox" id="chk-util-gas" checked onchange="onUtilLineCheckboxChange('gas', this.checked)"><input type="checkbox" class="chk-lock" data-lock="gas" title="잠금 (수정·삭제 막기)" onchange="onLayerLockChange('gas', this.checked)">
                         <span class="symbol-badge-dot" style="background:#eab308; color:#ffffff;">🔥</span>
                         <span>가스</span>
                     </label>
                     <label class="symbol-filter-item">
-                        <input type="checkbox" id="chk-util-drain" checked onchange="onUtilLineCheckboxChange('drain', this.checked)">
+                        <input type="checkbox" id="chk-util-drain" checked onchange="onUtilLineCheckboxChange('drain', this.checked)"><input type="checkbox" class="chk-lock" data-lock="drain" title="잠금 (수정·삭제 막기)" onchange="onLayerLockChange('drain', this.checked)">
                         <span class="symbol-badge-dot" style="background:#0f172a; color:#ffffff;">🚰</span>
                         <span>배수/오수 (PS/PD)</span>
                     </label>

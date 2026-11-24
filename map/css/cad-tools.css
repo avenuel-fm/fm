@@ -541,6 +541,9 @@
         .symbol-filter-item:hover {
             background: var(--bg-hover);
         }
+        .symbol-filter-item input.chk-lock { order: -1; appearance: none; -webkit-appearance: none; width: 18px; height: 18px; margin: 0; cursor: pointer; background: none; border: 0; position: relative; }
+        .symbol-filter-item input.chk-lock::before { content: '\1F511'; font-size: 14px; position: absolute; left: 0; top: 0; filter: grayscale(1); opacity: .3; }
+        .symbol-filter-item input.chk-lock:checked::before { filter: none; opacity: 1; }
         .symbol-filter-item input[type="checkbox"] {
             width: 15px;
             height: 15px;
@@ -735,9 +738,10 @@
         .sc .scale-preset-chip.on { background: var(--tint); border-color: var(--navy); }
 
         /* 바닥 · 지우개 · 직각 체크 (결정 216) */
-        .user-floor, .user-eraser { stroke: none; pointer-events: none; }
-        .show-floor-outline .user-floor, body.zone-drawing-mode .user-floor {
-            stroke: #000000; stroke-width: 1.5px; stroke-dasharray: 6 4; vector-effect: non-scaling-stroke;
+        .user-floor, .user-eraser, .user-floor-line { stroke: none; pointer-events: none; }
+        /* 바닥 점선은 면 아래에 따로 깔고(굵기 2배), 바닥 면(흰색)이 안쪽 절반을 덮어 겹친 바닥의 안쪽 선이 사라짐 */
+        .show-floor-outline .user-floor-line, body.zone-drawing-mode .user-floor-line {
+            stroke: #000000; stroke-width: 3px; stroke-dasharray: 6 4; vector-effect: non-scaling-stroke;
             pointer-events: stroke; cursor: pointer;
         }
         body.zone-drawing-mode .user-eraser {

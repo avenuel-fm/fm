@@ -30,6 +30,18 @@ function onZoneCheckboxChange(category, isChecked) {
     });
 }
 
+/* 레이어 열쇠(잠금): 켜면 그 레이어 도형은 수정·삭제 안 됨. 이 기기 브라우저에만 기억 */
+var layerLockState = {};
+try { layerLockState = JSON.parse(localStorage.getItem('lotte_map_layer_locks') || '{}') || {}; } catch (e) { layerLockState = {}; }
+function isLayerLocked(key) { return !!layerLockState[key]; }
+function warnLayerLocked() { if (typeof showToast === 'function') showToast('🔑 잠긴 레이어입니다. 열쇠를 풀어야 수정할 수 있습니다.', 2200); }
+function onLayerLockChange(key, on) {
+    layerLockState[key] = !!on;
+    try { localStorage.setItem('lotte_map_layer_locks', JSON.stringify(layerLockState)); } catch (e) {}
+}
+function syncLayerLockCheckboxes() { document.querySelectorAll('input.chk-lock[data-lock]').forEach(i => { i.checked = isLayerLocked(i.dataset.lock); }); }
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', syncLayerLockCheckboxes); else syncLayerLockCheckboxes();
+
 var NS_SVG = 'http://www.w3.org/2000/svg';
 function ensureSvgLayer(svgEl, id) {
     let g = svgEl.querySelector('#' + id);
@@ -747,6 +759,7 @@ function bringZoneLayersToFront() {
             const zones = getFloorZones(floorCode);
             const floorUser = ensureFloorLayer(svgEl).querySelector('#floor-user');
             floorUser.textContent = '';
+            floorUser.appendChild(document.createElementNS(NS_SVG, 'g')).setAttribute('class', 'floor-lines');   // 점선 아래 깔기, 면은 그 위
             const eraserLayer = ensureSvgLayer(svgEl, 'eraser-layer');
             Array.from(eraserLayer.querySelectorAll('polygon')).forEach(e => e.remove());
             zones.forEach(zone => {
@@ -847,6 +860,7 @@ function bringZoneLayersToFront() {
                     labelGroup.onpointerdown = (e) => {
                         e.stopPropagation();
                         if (isDrawingMode || isZoneDrawingMode) return;
+                        if (isLayerLocked(zone.category)) { warnLayerLocked(); return; }
 
                         let hasDragged = false;
                         const startClientX = e.clientX;
@@ -949,15 +963,29 @@ function bringZoneLayersToFront() {
             poly.setAttribute('fill', '#ffffff');
             poly.setAttribute('class', isFloor ? 'user-floor' : 'user-eraser');
             poly.setAttribute('data-zone-id', zone.id);
+            if (isFloor) {   // 점선만 따로(아래 층)에 그려 겹친 바닥의 안쪽 선을 면이 덮음
+                const line = poly.cloneNode(false);
+                line.setAttribute('fill', 'none');
+                line.setAttribute('class', 'user-floor-line');
+                line.onclick = (e) => {
+                    if (!isZoneDrawingMode || drawingZonePoints.length > 0 || isDrawingMode) return;
+                    e.stopPropagation();
+                    openZoneModal(zone);
+                };
+                floorUser.firstChild.appendChild(line);
+                floorUser.appendChild(poly);
+                return;
+            }
             poly.onclick = (e) => {
                 if (!isZoneDrawingMode || drawingZonePoints.length > 0 || isDrawingMode) return;
                 e.stopPropagation();
                 openZoneModal(zone);
             };
-            (isFloor ? floorUser : eraserLayer).appendChild(poly);
+            eraserLayer.appendChild(poly);
         }
 
         function openZoneModal(zone) {
+            if (isLayerLocked(zone.category)) { warnLayerLocked(); return; }
             closeAllPopovers();
             activeSelectedZone = zone;
 
