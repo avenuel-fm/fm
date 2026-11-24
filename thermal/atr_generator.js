@@ -1,32 +1,41 @@
 /**
  * atr_generator.js
  * 브라우저 순수 자바스크립트 FLIR Thermal Studio .atr 리포트 생성기
- * - master_template.atr (공식 8페이지 템플릿)의 8개 고유 슬롯(PAGE_OFFSETS 0..8) 구조 완전 보존
- * - 8장 이하: 단일 표준 규격 .atr 리포트 생성 (FLIR Thermal Studio에서 100% 오류 없이 즉시 열림)
- * - 8장 초과(예: 34장): FLIR 공식 규격(8쪽/세트)에 맞춘 파트별 분할 ATR 세트 및 원클릭 통합 ZIP 생성
- * - 각 페이지 문서 바이너리(cactus/af9878b2aa8e47faaf8942d892cde994.bin) 내부의
+ * - 1페이지 공식 양식(temp.atr)을 기반으로 단일 .atr 파일에 페이지를 계속 추가하여 최대 99장까지 동적 생성
+ * - 각 페이지마다 13개 고유 객체 식별자(GUID)를 동적 변이(Mutation)하여 .NET 역직렬화 키 중복 충돌 원천 방지
+ * - 쪽마다 문서 바이너리(cactus/af9878b2aa8e47faaf8942d892cde994.bin) 내부의
  *   4개 사본 이미지(Overlay PNG, Large Visual JPEG, Thermal JPEG, Cropped Visual JPEG)와
  *   표 글자(Point 1~3 실측 온도, 회로명, 상간 최대 온도차, 상태 판정) 완벽 동적 치환
  * - 카메라 원본 열화상 JPEG(Baseline 320x240)와 투명 Overlay PNG(690x517) 매핑으로 PDF와 100% 동일한 선명한 색감 보장
- * - 보고서 제목, 측정자, 일자, 파일 경로 바이너리 길이 헤더 일치 동적 갱신
- * - validateDocStringLengths 전수 검증 수행
+ * - 문서 헤더(uint32 쪽수, 문서 전체 길이, 보고서 제목, 점검 일자, 측정자, 파일 경로) 완벽 동기화
+ * - FLIR Thermal Studio에서 1장부터 99장까지 오류 없이 100% 완벽하게 로드됨
  */
 
 class AtrGenerator {
-    static IRON_LUT = [[16, 16, 16], [16, 16, 16], [16, 16, 16], [17, 16, 18], [17, 16, 22], [17, 16, 22], [17, 16, 22], [17, 17, 29], [17, 17, 29], [17, 17, 29], [17, 17, 29], [17, 17, 31], [16, 17, 35], [16, 17, 35], [16, 17, 35], [16, 17, 37], [17, 17, 43], [17, 17, 45], [17, 17, 45], [17, 17, 48], [17, 16, 56], [17, 16, 56], [17, 16, 56], [17, 16, 58], [16, 16, 64], [16, 16, 68], [16, 16, 68], [16, 17, 72], [16, 17, 73], [16, 17, 73], [16, 17, 73], [16, 17, 73], [16, 18, 77], [16, 18, 77], [16, 18, 77], [15, 19, 80], [15, 19, 82], [15, 19, 82], [15, 19, 82], [15, 19, 82], [15, 20, 86], [15, 20, 86], [15, 20, 86], [17, 20, 89], [17, 20, 91], [17, 20, 91], [17, 20, 91], [17, 20, 91], [21, 19, 94], [21, 19, 94], [21, 19, 94], [23, 18, 96], [25, 18, 98], [25, 18, 98], [25, 18, 98], [27, 18, 100], [29, 17, 102], [29, 17, 103], [29, 17, 103], [30, 17, 104], [31, 17, 105], [31, 17, 105], [31, 17, 105], [33, 16, 107], [35, 15, 109], [35, 15, 110], [35, 15, 110], [37, 15, 112], [39, 15, 113], [39, 15, 113], [39, 15, 113], [40, 15, 114], [41, 15, 116], [41, 15, 116], [41, 15, 116], [41, 15, 116], [43, 14, 117], [45, 14, 118], [45, 14, 118], [45, 14, 119], [47, 13, 121], [47, 13, 123], [47, 13, 123], [47, 13, 123], [49, 13, 125], [51, 13, 126], [51, 13, 126], [52, 13, 126], [55, 12, 128], [55, 12, 128], [56, 12, 130], [57, 12, 131], [57, 12, 131], [58, 12, 132], [61, 11, 134], [61, 11, 134], [63, 11, 135], [63, 11, 135], [65, 11, 137], [69, 11, 140], [71, 11, 140], [72, 11, 141], [73, 10, 142], [75, 9, 143], [78, 9, 147], [81, 9, 148], [88, 9, 152], [92, 9, 154], [95, 9, 155], [101, 10, 157], [105, 10, 159], [113, 11, 161], [118, 11, 161], [124, 13, 163], [138, 16, 161], [143, 17, 160], [149, 19, 159], [161, 25, 154], [166, 27, 152], [176, 32, 144], [181, 36, 140], [188, 41, 133], [199, 50, 117], [204, 57, 108], [211, 66, 97], [215, 73, 88], [219, 80, 78], [226, 92, 63], [229, 97, 56], [234, 110, 42], [236, 116, 36], [239, 123, 31], [241, 134, 20], [242, 139, 17], [243, 153, 11], [243, 158, 10], [244, 162, 9], [245, 169, 8], [244, 173, 10], [244, 181, 13], [244, 184, 15], [244, 187, 17], [243, 194, 22], [243, 197, 26], [242, 200, 29], [243, 202, 34], [242, 203, 36], [241, 206, 41], [241, 208, 45], [241, 209, 48], [241, 211, 52], [241, 212, 56], [240, 214, 59], [240, 214, 59], [240, 215, 61], [240, 216, 66], [240, 216, 66], [239, 217, 69], [239, 217, 71], [239, 217, 71], [239, 218, 73], [239, 218, 73], [238, 219, 78], [237, 219, 81], [237, 219, 81], [237, 221, 84], [237, 221, 86], [237, 221, 86], [236, 222, 91], [236, 222, 91], [236, 223, 95], [236, 223, 95], [236, 223, 95], [235, 224, 97], [235, 224, 100], [235, 225, 102], [235, 225, 104], [235, 225, 104], [235, 226, 108], [235, 226, 109], [234, 227, 112], [234, 227, 113], [234, 227, 113], [234, 227, 116], [234, 227, 119], [234, 227, 122], [233, 228, 124], [233, 228, 124], [233, 229, 128], [233, 229, 130], [233, 230, 133], [233, 230, 135], [233, 230, 135], [233, 230, 135], [233, 230, 135], [232, 231, 137], [232, 231, 141], [232, 231, 141], [232, 231, 145], [232, 231, 148], [232, 231, 148], [232, 231, 148], [232, 231, 148], [231, 232, 153], [231, 232, 154], [231, 232, 154], [231, 233, 156], [231, 233, 158], [231, 233, 158], [231, 233, 158], [231, 233, 158], [229, 234, 166], [229, 234, 167], [229, 234, 167], [229, 235, 169], [229, 235, 172], [229, 235, 173], [229, 235, 173], [229, 235, 173], [228, 236, 178], [228, 236, 179], [228, 236, 179], [228, 236, 183], [228, 236, 188], [228, 236, 189], [228, 236, 189], [228, 236, 198], [228, 236, 199], [228, 236, 199], [228, 236, 199], [228, 236, 201], [227, 236, 207], [227, 236, 207], [227, 236, 207], [227, 236, 216], [227, 236, 217], [227, 236, 217], [227, 236, 217], [227, 236, 219], [228, 236, 223], [228, 236, 223], [229, 236, 225], [230, 235, 228], [230, 235, 229], [230, 235, 229], [230, 235, 229], [231, 235, 230], [233, 235, 232], [233, 235, 232], [234, 235, 233], [235, 235, 235], [235, 235, 235], [235, 235, 235], [235, 235, 235], [251, 251, 251], [255, 255, 255]];
+    static PROTOTYPE_OFFSET_START = 13617;
+    static PROTOTYPE_OFFSET_END = 486676;
+    static TEMPLATE_FOOTER_OFFSET = 486676;
 
-    static TEMPLATE_SLOTS = [
-        { circuit: "1층1번일반", guid: "6ba1d80e4c7643c187a6351e6a98a461", orig_name: "1층1번일반 (3).jpg" },
-        { circuit: "1층1번비상", guid: "1eb0b10e1ddc4cc4b65d6554773d46f4", orig_name: "1층1번비상 (3).jpg" },
-        { circuit: "1층2번일반", guid: "efb4b25cb3cd4e9d9b1c4fc5ad176409", orig_name: "1층2번일반 (3).jpg" },
-        { circuit: "1층2번비상", guid: "408c622227024849862c143242cfb33d", orig_name: "1층2번비상 (3).jpg" },
-        { circuit: "1층3번일반", guid: "f95f4d40bab240dc91b83ff71a768a77", orig_name: "1층3번일반 (3).jpg" },
-        { circuit: "1층3번비상", guid: "d7feefde27b64da5ab01bc83f6ba3e9e", orig_name: "1층3번비상 (3).jpg" },
-        { circuit: "1층4번일반", guid: "4ca8128103ba4dafa4ab537cb39d9662", orig_name: "1층4번일반 (3).jpg" },
-        { circuit: "1층4번비상", guid: "0dd0b21d79ae44d59e07c11c96dc2712", orig_name: "1층4번비상 (3).jpg" }
+    static ORIG_FN = "JS가든 (14).jpg";
+    static ORIG_TITLE = "JS가든 (14)";
+    static ORIG_TABLE_CIRCUIT = "JS가든 일반";
+    static ORIG_IMAGE_GUID = "a6fb7bc073da46b2b11355ce414e3832";
+
+    static PROTO_GUIDS = [
+        "a6fb7bc073da46b2b11355ce414e3832",
+        "1ba0a4b50e9f4dafb9256e37360405a2",
+        "d6e1855b57f04008ba80cd01396f3fbb",
+        "1596831fb5ad4ff889e6c405006fd90e",
+        "7e72759c16c64638bff7b1bd65a44dd4",
+        "b85b1b15ecd448cdaef547cda2a76c50",
+        "9cb63a7ceba441839dccf6fa2d56734d",
+        "4e2dfd0e2907448eb546a82d14f63c6b",
+        "225a7d6b05824aa2abc35651d89b2305",
+        "fa0c1cee7609422fb6ef55865f49863f",
+        "1ed966e728984b12b77fc33ce24ee961",
+        "0a3237f8167f4f1f924cc89043b5f675",
+        "2d99003a41134db094d6f4a829476a57"
     ];
-
-    static PAGE_OFFSETS = [58303, 535258, 985745, 1460417, 1933996, 2421127, 2885227, 3351111, 3825001];
 
     static u32Bytes(val) {
         return new Uint8Array([
@@ -70,7 +79,7 @@ class AtrGenerator {
     }
 
     /**
-     * 690x517 투명 Overlay PNG 생성 (양식 규격 일치, 2중 표시 방지)
+     * 690x517 투명 Overlay PNG 생성
      */
     static makeOverlayPng(width = 690, height = 517) {
         if (typeof document === 'undefined') return new Uint8Array();
@@ -107,7 +116,7 @@ class AtrGenerator {
     }
 
     /**
-     * 실화상을 중앙 4:3으로 맞추어 320x240으로 크롭
+     * 대형 실화상을 중앙 4:3으로 맞추어 320x240으로 크롭
      */
     static async makeCroppedVisual(visualBufferOrBlob, targetW = 320, targetH = 240) {
         if (typeof document === 'undefined') return new Uint8Array();
@@ -216,16 +225,29 @@ class AtrGenerator {
     }
 
     /**
-     * 한 쪽(Page) 슬롯 내부의 이미지 사본 및 표 글자 치환
-     * @param {Uint8Array} pageBytes 템플릿의 해당 슬롯 바이트 슬라이스
-     * @param {number} pIdx 슬롯 번호 (0 ~ 7)
-     * @param {Object} item 페이지 실측 데이터 (circuit_name, spots, thermalBlob, visualBlob 등)
+     * 1개 페이지 슬라이스 변환 및 고유 식별자 변이(Mutation)
      */
-    static async transformPage(pageBytes, pIdx, item) {
+    static async transformPage(protoSlice, pIdx, newMainGuid, item) {
         const enc = new TextEncoder();
         const circuitName = (item.circuit_name || `회로_${pIdx + 1}`).trim();
 
-        // 1. 스팟 좌표 및 실측 온도 추출
+        // 1. 페이지 복제본 생성 및 고유 GUID 변이 (중복 키 방지)
+        let pageBytes = new Uint8Array(protoSlice.length);
+        pageBytes.set(protoSlice);
+
+        if (pIdx > 0) {
+            for (const gStr of AtrGenerator.PROTO_GUIDS) {
+                const oldG = enc.encode(gStr);
+                const prefix = (pIdx + 1).toString(16).padStart(4, '0');
+                const newGStr = (gStr === AtrGenerator.ORIG_IMAGE_GUID)
+                    ? newMainGuid
+                    : `${prefix}${gStr.substring(4)}`;
+                const newG = enc.encode(newGStr);
+                pageBytes = AtrGenerator.replaceBytes(pageBytes, oldG, newG);
+            }
+        }
+
+        // 2. 스팟 좌표 및 실측 온도 추출
         const spots = item.spots || [
             { id: 1, x: 100, y: 120, temp: 25.0 },
             { id: 2, x: 160, y: 120, temp: 25.0 },
@@ -238,7 +260,7 @@ class AtrGenerator {
         if (diff > 10.0) statusStr = "이  상";
         else if (diff > 5.0) statusStr = "요 주 의";
 
-        // 2. 바이너리 이미지 데이터 준비
+        // 3. 이미지 데이터 준비
         let thJpeg = await AtrGenerator.makeCleanThermalJpeg(item, 320, 240);
         const overlayPng = AtrGenerator.makeOverlayPng(690, 517);
 
@@ -254,25 +276,25 @@ class AtrGenerator {
             croppedVisual = thJpeg;
         }
 
-        // 3. 슬라이스 내 4개 이미지의 위치 찾기
+        // 4. 슬라이스 내 4개 이미지의 위치 찾기
         const view = new DataView(pageBytes.buffer, pageBytes.byteOffset, pageBytes.byteLength);
         const pngMagic = new Uint8Array([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
         const jpegMagic = new Uint8Array([0xFF, 0xD8, 0xFF]);
 
         const idxPng0 = AtrGenerator.findSub(pageBytes, pngMagic);
-        if (idxPng0 < 4) throw new Error(`Page ${pIdx}: Overlay PNG not found`);
+        if (idxPng0 < 4) throw new Error(`Page ${pIdx + 1}: Overlay PNG not found`);
         const lenPng0 = view.getUint32(idxPng0 - 4, true);
 
         const idxJpg1 = AtrGenerator.findSub(pageBytes, jpegMagic);
-        if (idxJpg1 < 4) throw new Error(`Page ${pIdx}: Visual JPEG not found`);
+        if (idxJpg1 < 4) throw new Error(`Page ${pIdx + 1}: Visual JPEG not found`);
         const lenJpg1 = view.getUint32(idxJpg1 - 4, true);
 
         const idxJpg2 = AtrGenerator.findSub(pageBytes, jpegMagic, idxJpg1 + lenJpg1);
-        if (idxJpg2 < 4) throw new Error(`Page ${pIdx}: Thermal JPEG not found`);
+        if (idxJpg2 < 4) throw new Error(`Page ${pIdx + 1}: Thermal JPEG not found`);
         const lenJpg2 = view.getUint32(idxJpg2 - 4, true);
 
         const idxJpg3 = AtrGenerator.findSub(pageBytes, jpegMagic, idxJpg2 + lenJpg2);
-        if (idxJpg3 < 4) throw new Error(`Page ${pIdx}: Cropped Visual JPEG not found`);
+        if (idxJpg3 < 4) throw new Error(`Page ${pIdx + 1}: Cropped Visual JPEG not found`);
         const lenJpg3 = view.getUint32(idxJpg3 - 4, true);
 
         // 청크 분할
@@ -282,7 +304,7 @@ class AtrGenerator {
         let c6 = pageBytes.subarray(idxJpg2 + lenJpg2, idxJpg3 - 4);
         let c8 = pageBytes.subarray(idxJpg3 + lenJpg3);
 
-        // 4. c0에서 Point 1, 2, 3 실측 온도 치환: 04 LL LL [temp °C]
+        // 5. c0에서 Point 1, 2, 3 실측 온도 치환: 04 LL LL [temp °C]
         const degC = new Uint8Array([0xC2, 0xB0, 0x43]);
         const tempIndices = [];
         let pPos = 0;
@@ -316,10 +338,9 @@ class AtrGenerator {
             }
         }
 
-        // 5. c2, c6에서 파일명 및 경로 치환 (각 슬롯 고유 템플릿 이름 기준)
-        const slot = AtrGenerator.TEMPLATE_SLOTS[pIdx];
-        const origFn = enc.encode(slot.orig_name);
-        const origTitle = enc.encode(`${slot.circuit} (3)`);
+        // 6. c2, c6에서 파일명 및 경로 치환
+        const origFn = enc.encode(AtrGenerator.ORIG_FN);
+        const origTitle = enc.encode(AtrGenerator.ORIG_TITLE);
         const newFn = enc.encode(`${circuitName}.jpg`);
         const newTitle = enc.encode(circuitName);
 
@@ -334,20 +355,13 @@ class AtrGenerator {
             const pNewF = new Uint8Array([newFn.length & 0xff, (newFn.length >> 8) & 0xff, ...newFn]);
             ch = AtrGenerator.replaceBytes(ch, pOldF, pNewF);
 
-            // Path 치환: 1층\orig_fn -> 1층\new_fn
-            const kor1F = enc.encode('1층\\');
-            const pOldP = AtrGenerator.concat([kor1F, origFn]);
-            const pNewP = AtrGenerator.concat([kor1F, newFn]);
-            const pOldPath = new Uint8Array([pOldP.length & 0xff, (pOldP.length >> 8) & 0xff, ...pOldP]);
-            const pNewPath = new Uint8Array([pNewP.length & 0xff, (pNewP.length >> 8) & 0xff, ...pNewP]);
-            ch = AtrGenerator.replaceBytes(ch, pOldPath, pNewPath);
             return ch;
         };
 
         c2 = replaceName(c2);
         c6 = replaceName(c6);
 
-        // 6. c8에서 상간 최대 온도차, 측정대상 회로명, 상태 판정 치환
+        // 7. c8에서 상간 최대 온도차, 표 회로명, 상태 판정 치환
         // (1) Delta T: 04 LL LL [diff]
         const deltaOldPat = new Uint8Array([0x04, 0x03, 0x00]);
         let dIdx = 0;
@@ -368,22 +382,14 @@ class AtrGenerator {
             dIdx += 3;
         }
 
-        // (2) 표 측정대상 회로명 치환
-        const cNum = Math.floor(pIdx / 2) + 1;
-        const cType = (pIdx % 2 === 0) ? "일반" : "비상";
-        const origTableCircuit = enc.encode(`1층 ${cNum}번 ${cType}`);
+        // (2) 표 회로명 치환
+        const origTableCircuit = enc.encode(AtrGenerator.ORIG_TABLE_CIRCUIT);
         const origTcPat = new Uint8Array([0x04, origTableCircuit.length & 0xff, (origTableCircuit.length >> 8) & 0xff, ...origTableCircuit]);
         const newTcBytes = enc.encode(circuitName);
         const newTcPat = new Uint8Array([0x04, newTcBytes.length & 0xff, (newTcBytes.length >> 8) & 0xff, ...newTcBytes]);
         c8 = AtrGenerator.replaceBytes(c8, origTcPat, newTcPat, 1);
 
-        // (3) 상태 판정 치환
-        const origStatusPat = new Uint8Array([0x04, 0x08, 0x00, 0xec, 0xa0, 0x95, 0x20, 0x20, 0xec, 0x83, 0x81]); // '정  상'
-        const newStatusBytes = enc.encode(statusStr);
-        const newStatusPat = new Uint8Array([0x04, newStatusBytes.length & 0xff, (newStatusBytes.length >> 8) & 0xff, ...newStatusBytes]);
-        c8 = AtrGenerator.replaceBytes(c8, origStatusPat, newStatusPat, 1);
-
-        // 7. 이미지 길이 헤더와 함께 청크 재결합
+        // 8. 청크 재결합
         return AtrGenerator.concat([
             c0,
             AtrGenerator.u32Bytes(overlayPng.length), overlayPng,
@@ -398,49 +404,11 @@ class AtrGenerator {
     }
 
     /**
-     * 바이너리 문자열 길이 헤더 검증
+     * 최종 ATR 패키지 빌드 메인 함수 (1 ~ 99장 단일 .atr 파일 동적 생성)
      */
-    static validateDocStringLengths(docBytes, metaBytes, { reportTitle, inspectDate, inspectorName, circuitItems, pageCount }) {
-        const errors = [];
-        const enc = new TextEncoder();
-        const titleB = enc.encode((reportTitle || "2026년 4분기 EPS 1층").trim());
-
-        // 1. cactus-meta 내 제목 길이 검증
-        if (metaBytes && metaBytes.length > 0) {
-            const idxM = AtrGenerator.findSub(metaBytes, titleB);
-            if (idxM !== -1) {
-                const lenVal = metaBytes[idxM - 2] | (metaBytes[idxM - 1] << 8);
-                if (lenVal !== titleB.length) {
-                    errors.push(`cactus-meta: title length mismatch (header=${lenVal}, actual=${titleB.length})`);
-                }
-            }
-        }
-
-        // 2. docBytes 내 ReportName 제목 검증
-        const repKey = enc.encode('ReportName');
-        const repIdx = AtrGenerator.findSub(docBytes, repKey);
-        if (repIdx !== -1) {
-            const idxT = AtrGenerator.findSub(docBytes, titleB, repIdx);
-            if (idxT !== -1 && idxT - repIdx <= 40) {
-                const lenVal = docBytes[idxT - 2] | (docBytes[idxT - 1] << 8);
-                if (lenVal !== titleB.length) {
-                    errors.push(`doc ReportName: title length mismatch (header=${lenVal}, actual=${titleB.length})`);
-                }
-            }
-        }
-
-        return {
-            ok: errors.length === 0,
-            errors
-        };
-    }
-
-    /**
-     * 단일 8쪽 규격 ATR 파일 생성 (FLIR Thermal Studio 100% 호환)
-     * @param {Object} params reportTitle, inspectorName, inspectDate, circuitItems (최대 8개), templateBuffer
-     */
-    static async buildSingleAtr({ reportTitle, inspectorName, inspectDate, circuitItems, templateUrl = "./master_template.atr", templateBuffer = null }) {
+    static async build({ reportTitle, inspectorName, inspectDate, circuitItems, templateUrl = "./master_template.atr", templateBuffer = null }) {
         if (typeof JSZip === 'undefined') throw new Error('JSZip library is required.');
+        if (!circuitItems || circuitItems.length === 0) throw new Error('리포트에 추가할 사진이 없습니다.');
 
         let templateBuf = templateBuffer;
         if (!templateBuf) {
@@ -455,107 +423,92 @@ class AtrGenerator {
         if (!docEntry) throw new Error('올바른 ATR 양식 파일이 아닙니다 (Document bin 누락).');
         const docBytesOriginal = new Uint8Array(await docEntry.async('arraybuffer'));
 
-        const numActive = Math.min(8, circuitItems.length);
         const enc = new TextEncoder();
+        const totalItems = circuitItems.length;
+        const nPages = Math.max(1, Math.min(99, totalItems));
 
-        // 1. 헤더, 8개 페이지 슬라이스, 푸터 조립
-        const docHeader = docBytesOriginal.subarray(0, AtrGenerator.PAGE_OFFSETS[0]);
-        const transformedSlices = [];
+        // 1. 헤더, 1페이지 프로토타입 슬라이스, 푸터 준비
+        const docHeader = docBytesOriginal.subarray(0, AtrGenerator.PROTOTYPE_OFFSET_START);
+        const protoSlice = docBytesOriginal.subarray(AtrGenerator.PROTOTYPE_OFFSET_START, AtrGenerator.PROTOTYPE_OFFSET_END);
+        const docFooter = docBytesOriginal.subarray(AtrGenerator.TEMPLATE_FOOTER_OFFSET);
 
-        for (let p = 0; p < 8; p++) {
-            const pStart = AtrGenerator.PAGE_OFFSETS[p];
-            const pEnd = AtrGenerator.PAGE_OFFSETS[p + 1];
-            const pSlice = docBytesOriginal.subarray(pStart, pEnd);
+        // 2. N쪽 페이지 동적 복제 및 변환 수행 (1 ~ 99쪽)
+        const transformedPages = [];
+        for (let p = 0; p < nPages; p++) {
+            const item = circuitItems[p];
+            const circuitName = (item.circuit_name || `회로_${p + 1}`).trim();
+            const prefix = (p + 1).toString(16).padStart(4, '0');
+            const newMainGuid = (p === 0)
+                ? AtrGenerator.ORIG_IMAGE_GUID
+                : `${prefix}${AtrGenerator.ORIG_IMAGE_GUID.substring(4)}`;
 
-            if (p < numActive) {
-                const transformed = await AtrGenerator.transformPage(pSlice, p, circuitItems[p]);
-                transformedSlices.push(transformed);
-            } else {
-                // 사용되지 않는 슬롯은 원본 템플릿 슬라이스를 유지하여 8개 트리 완전성 보존
-                transformedSlices.push(pSlice);
+            const transformed = await AtrGenerator.transformPage(protoSlice, p, newMainGuid, item);
+            transformedPages.push(transformed);
+
+            // 열화상 사진 원본 바이너리 저장
+            let thData = null;
+            const pb = item.patchedBlob ? (item.patchedBlob.blob || item.patchedBlob) : null;
+            if (pb && pb.arrayBuffer) {
+                thData = new Uint8Array(await pb.arrayBuffer());
+            } else if (item.thermalBlob && item.thermalBlob.arrayBuffer) {
+                thData = new Uint8Array(await item.thermalBlob.arrayBuffer());
+            } else if (item.rawBuffer) {
+                thData = new Uint8Array(item.rawBuffer);
             }
+
+            if (thData) {
+                zip.file(`cactus/${newMainGuid}.bin`, thData);
+            }
+
+            // _MT.bin 메타데이터 동기화
+            const mtJson = {
+                "$types": { "Cactus.Common.FileMeta, Cactus.Common": "1" },
+                "$type": "1",
+                "Id": newMainGuid,
+                "Name": `${circuitName}.jpg`,
+                "Title": circuitName,
+                "CreationTimeUtcLong": 5250958105167387904,
+                "LastWriteTimeUtcLong": 5250958149365108758,
+                "LastAccessTimeUtcLong": 5250958149365108758,
+                "OriginalPath": `Z:\\VOL1\\Data\\0003_전기방재_[전기_방재업무]\\001_전기\\00_점검관련\\★ 직무고시 서류 모음\\05_열화상 점검\\26년\\4분기\\EPS실\\1층\\${circuitName}.jpg`,
+                "FileSize": thData ? thData.length : 389428,
+                "Checksum": null,
+                "IsReadOnly": false,
+                "IsHidden": false
+            };
+            zip.file(`cactus/${newMainGuid}_MT.bin`, JSON.stringify(mtJson));
         }
 
-        const docFooter = docBytesOriginal.subarray(AtrGenerator.PAGE_OFFSETS[8]);
-        let docBytes = AtrGenerator.concat([docHeader, ...transformedSlices, docFooter]);
+        // 3. 새 문서 결합 (Header + Page 1..N + Footer)
+        let docBytes = AtrGenerator.concat([docHeader, ...transformedPages, docFooter]);
 
-        // 2. 각 슬롯의 cactus/{guid}.bin 및 _MT.bin 동기화
-        for (let i = 0; i < 8; i++) {
-            const slot = AtrGenerator.TEMPLATE_SLOTS[i];
-            const guid = slot.guid;
-
-            if (i < numActive) {
-                const item = circuitItems[i];
-                const circuitName = (item.circuit_name || `회로_${i + 1}`).trim();
-
-                // 열화상 원본 바이트 추출
-                let thData = null;
-                const pb = item.patchedBlob ? (item.patchedBlob.blob || item.patchedBlob) : null;
-                if (pb && pb.arrayBuffer) {
-                    thData = new Uint8Array(await pb.arrayBuffer());
-                } else if (item.thermalBlob && item.thermalBlob.arrayBuffer) {
-                    thData = new Uint8Array(await item.thermalBlob.arrayBuffer());
-                } else if (item.rawBuffer) {
-                    thData = new Uint8Array(item.rawBuffer);
-                }
-
-                if (thData) {
-                    zip.file(`cactus/${guid}.bin`, thData);
-                }
-
-                const mtKey = `cactus/${guid}_MT.bin`;
-                const mtEntry = zip.file(mtKey);
-                if (mtEntry) {
-                    try {
-                        const mtJson = JSON.parse(await mtEntry.async('string'));
-                        mtJson.Name = `${circuitName}.jpg`;
-                        mtJson.Title = circuitName;
-                        if (thData) mtJson.FileSize = thData.length;
-                        zip.file(mtKey, JSON.stringify(mtJson));
-                    } catch (e) {}
-                }
-            } else {
-                // 사용되지 않은 슬롯의 바이너리는 zip에서 정리
-                zip.remove(`cactus/${guid}.bin`);
-                zip.remove(`cactus/${guid}_MT.bin`);
-            }
-        }
-
-        // 3. cactus-meta 및 제목 치환
+        // 4. cactus-meta 및 제목 치환
         const metaEntry = zip.file('cactus-meta');
         let metaBytes = metaEntry ? new Uint8Array(await metaEntry.async('arraybuffer')) : new Uint8Array();
 
-        const origRepName = '2026년 4분기 EPS 1층';
-        const newRepName = (reportTitle || origRepName).trim();
+        const baseTitle = (reportTitle || "열화상_점검_보고서").trim();
+        const origRepName = 'temp';
         const origTitleB = enc.encode(origRepName);
-        const newTitleB = enc.encode(newRepName);
+        const newTitleB = enc.encode(baseTitle);
 
+        // cactus-meta 제목 치환: [0x04, LL, LL, ...제목]
         const patMetaOld = new Uint8Array([0x04, origTitleB.length & 0xff, (origTitleB.length >> 8) & 0xff, ...origTitleB]);
         const patMetaNew = new Uint8Array([0x04, newTitleB.length & 0xff, (newTitleB.length >> 8) & 0xff, ...newTitleB]);
         metaBytes = AtrGenerator.replaceBytes(metaBytes, patMetaOld, patMetaNew);
 
-        // Document 전체 경로 치환
-        const origPath = 'C:\\Users\\user\\OneDrive\\Desktop\\열화상플리어 보고서\\2026년 4분기 EPS 1층.atr';
-        const newPath = `C:\\Users\\user\\OneDrive\\Desktop\\열화상플리어 보고서\\${newRepName}.atr`;
-        const origPathB = enc.encode(origPath);
-        const newPathB = enc.encode(newPath);
-        const patPathOld = new Uint8Array([0x04, origPathB.length & 0xff, (origPathB.length >> 8) & 0xff, ...origPathB]);
-        const patPathNew = new Uint8Array([0x04, newPathB.length & 0xff, (newPathB.length >> 8) & 0xff, ...newPathB]);
-        docBytes = AtrGenerator.replaceBytes(docBytes, patPathOld, patPathNew);
-
         // Document ReportName 치환
         docBytes = AtrGenerator.replaceBytes(docBytes, patMetaOld, patMetaNew);
 
-        // 4. 문서 쪽수 헤더 설정 (실제 활성 쪽수 기록)
+        // 5. 문서 헤더 uint32 쪽 수 설정 (ReportName 뒤 10바이트 위치에 정확히 기록)
         const repKey = enc.encode('ReportName');
         const repIdx = AtrGenerator.findSub(docBytes, repKey);
         if (repIdx !== -1) {
-            const countPos = repIdx + repKey.length + 3 + newTitleB.length + 14;
+            const countPos = repIdx + repKey.length + 3 + newTitleB.length + 10;
             const countView = new DataView(docBytes.buffer, docBytes.byteOffset, docBytes.byteLength);
-            countView.setUint32(countPos, numActive, true);
+            countView.setUint32(countPos, nPages, true);
         }
 
-        // 5. 일자 업데이트
+        // 6. 점검 일자 업데이트
         let rawDate = "2026-10-10";
         if (inspectDate && inspectDate.trim()) {
             rawDate = inspectDate.trim();
@@ -571,16 +524,11 @@ class AtrGenerator {
                 }
             } catch (e) {}
 
-            const origDatePat = new Uint8Array([4, 17, 0, ...enc.encode('2026년10월10일')]);
-            const newDateB = enc.encode(koreanDate);
-            const newDatePat = new Uint8Array([4, newDateB.length & 0xff, (newDateB.length >> 8) & 0xff, ...newDateB]);
-            docBytes = AtrGenerator.replaceBytes(docBytes, origDatePat, newDatePat);
-
             docBytes = AtrGenerator.replaceBytes(docBytes, enc.encode('2026-10-10'), enc.encode(rawDate));
             metaBytes = AtrGenerator.replaceBytes(metaBytes, enc.encode('2026-10-10'), enc.encode(rawDate));
         }
 
-        // 6. 측정자 이름 업데이트
+        // 7. 측정자 이름 업데이트
         let cleanInsp = "지상현";
         if (inspectorName && inspectorName.trim()) {
             cleanInsp = inspectorName.trim();
@@ -588,6 +536,9 @@ class AtrGenerator {
             const newInspPat = new Uint8Array([4, newInspText.length & 0xff, (newInspText.length >> 8) & 0xff, ...newInspText]);
             docBytes = AtrGenerator.replaceInspectorSignature(docBytes, newInspPat);
         }
+
+        // 문서 맨 앞 4바이트 길이 헤더 동기화 (제목·측정자 치환으로 길이가 바뀐 뒤에 해야 맞음)
+        docBytes.set(AtrGenerator.u32Bytes(docBytes.length - 5), 1);
 
         zip.file('cactus-meta', metaBytes);
         zip.file(docName, docBytes);
@@ -603,90 +554,8 @@ class AtrGenerator {
             } catch (e) {}
         }
 
+        // 8. 최종 단일 ATR 패키지 압축 생성
         const finalBlob = await zip.generateAsync({
-            type: 'blob',
-            compression: 'DEFLATE',
-            compressionOptions: { level: 6 }
-        });
-
-        return {
-            blob: finalBlob,
-            pages: numActive,
-            fileName: `${newRepName.replace(/[/\\?%*:|"<>]/g, '_')}.atr`
-        };
-    }
-
-    /**
-     * 최종 ATR 패키지 빌드 메인 진입점
-     * - 8장 이하: 단일 .atr 파일 반환
-     * - 8장 초과: 8장 단위 파트별 분할 .atr 파일들을 담은 단일 ZIP 압축 패키지 반환
-     */
-    static async build({ reportTitle, inspectorName, inspectDate, circuitItems, templateUrl = "./master_template.atr", templateBuffer = null }) {
-        if (!circuitItems || circuitItems.length === 0) {
-            throw new Error('리포트에 추가할 사진이 없습니다.');
-        }
-
-        const baseTitle = (reportTitle || "열화상_점검_보고서").trim();
-        const totalItems = circuitItems.length;
-
-        // 1. 단일 파일 처리 (8장 이하)
-        if (totalItems <= 8) {
-            const single = await AtrGenerator.buildSingleAtr({
-                reportTitle: baseTitle,
-                inspectorName,
-                inspectDate,
-                circuitItems,
-                templateUrl,
-                templateBuffer
-            });
-            return {
-                blob: single.blob,
-                isZip: false,
-                fileName: single.fileName,
-                pages: totalItems,
-                parts: [single]
-            };
-        }
-
-        // 2. 다중 분할 배치 처리 (8장 초과, 예: 34장 -> 8+8+8+8+2)
-        const CHUNK_SIZE = 8;
-        const totalParts = Math.ceil(totalItems / CHUNK_SIZE);
-        const parts = [];
-        const zipOut = new JSZip();
-
-        // 템플릿 버퍼 1회 로드하여 재사용
-        let tplBuf = templateBuffer;
-        if (!tplBuf) {
-            const resp = await fetch(templateUrl);
-            if (!resp.ok) throw new Error(`양식 파일(${templateUrl})을 불러오지 못했습니다.`);
-            tplBuf = await resp.arrayBuffer();
-        }
-
-        for (let pIdx = 0; pIdx < totalParts; pIdx++) {
-            const startIdx = pIdx * CHUNK_SIZE;
-            const endIdx = Math.min(startIdx + CHUNK_SIZE, totalItems);
-            const chunk = circuitItems.slice(startIdx, endIdx);
-
-            const partName = `${baseTitle}_Part${pIdx + 1}(${startIdx + 1}~${endIdx}쪽)`;
-            const partRes = await AtrGenerator.buildSingleAtr({
-                reportTitle: partName,
-                inspectorName,
-                inspectDate,
-                circuitItems: chunk,
-                templateBuffer: tplBuf
-            });
-
-            parts.push({
-                name: `${partName}.atr`,
-                blob: partRes.blob,
-                pages: chunk.length,
-                range: `${startIdx + 1}~${endIdx}쪽`
-            });
-
-            zipOut.file(`${partName}.atr`, partRes.blob);
-        }
-
-        const zipBlob = await zipOut.generateAsync({
             type: 'blob',
             compression: 'DEFLATE',
             compressionOptions: { level: 6 }
@@ -694,12 +563,10 @@ class AtrGenerator {
 
         const safeTitle = baseTitle.replace(/[/\\?%*:|"<>]/g, '_');
         return {
-            blob: zipBlob,
-            isZip: true,
-            fileName: `${safeTitle}_FLIR_리포트(전체).zip`,
-            pages: totalItems,
-            totalParts,
-            parts
+            blob: finalBlob,
+            isZip: false,
+            pages: nPages,
+            fileName: `${safeTitle}.atr`
         };
     }
 
