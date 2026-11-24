@@ -99,12 +99,13 @@ function bringZoneLayersToFront() {
     ensureFloorLayer(svgEl);
     liftVendorStores(svgEl);
     ensureSvgLayer(svgEl, 'eraser-layer');
+    ensureSvgLayer(svgEl, 'floor-outline-layer');
     // 인포 레이어 (엘리베이터·화장실 등 업체 도면 그림): 직접 그린 매장보다 위 (결정 160)
     const infoLayer = typeof collectInfoLayer === 'function' ? collectInfoLayer(svgEl) : null;
     // 아래 → 위. 바닥 < 매장·기능실 < 격자 < 배관 < 구역 < 인포 < 심벌 < 지우개 < 그리는 중 (결정 216)
     [svgEl.querySelector('#floor-layer'), svgEl.querySelector('#vendor-stores-layer'), svgEl.querySelector('#custom-stores-top-layer'),
         svgEl.querySelector('#cad-floor-grid-rect'), svgEl.querySelector('#utility-lines-layer'), svgEl.querySelector('#safety-zones-layer'),
-        infoLayer, svgEl.querySelector('#map-symbols-layer'), svgEl.querySelector('#eraser-layer'),
+        infoLayer, svgEl.querySelector('#map-symbols-layer'), svgEl.querySelector('#eraser-layer'), svgEl.querySelector('#floor-outline-layer'),
         svgEl.querySelector('#temp-zone-drawing-layer'), svgEl.querySelector('#temp-drawing-layer')
     ].forEach(el => { if (el && (el.parentElement === svgEl || el === infoLayer)) svgEl.appendChild(el); });   // 인포는 처음 만들 때 아직 도면에 안 붙어 있음
     rebuildEraserMask(svgEl);
@@ -757,14 +758,35 @@ function bringZoneLayersToFront() {
             }
 
             const zones = getFloorZones(floorCode);
-            const floorUser = ensureFloorLayer(svgEl).querySelector('#floor-user');
-            floorUser.textContent = '';
-            floorUser.appendChild(document.createElementNS(NS_SVG, 'g')).setAttribute('class', 'floor-lines');   // 점선 아래 깔기, 면은 그 위
+            ensureFloorLayer(svgEl).querySelector('#floor-user').textContent = '';
+            // 직접 그린 바닥은 색 없는 투명 점선만, 맨 위 층(#floor-outline-layer). 겹친 바닥의 안쪽 선은 마스크로 가림 (결정 250)
+            const outLayer = ensureSvgLayer(svgEl, 'floor-outline-layer');
+            outLayer.textContent = '';
+            const lineG = document.createElementNS(NS_SVG, 'g');
+            lineG.setAttribute('class', 'floor-lines');
+            const floorZones = zones.filter(z => z.category === 'floor' && z.points && z.points.length >= 3);
+            if (floorZones.length) {
+                const defs = document.createElementNS(NS_SVG, 'defs'), mask = document.createElementNS(NS_SVG, 'mask');
+                mask.setAttribute('id', 'floor-union-mask'); mask.setAttribute('maskUnits', 'userSpaceOnUse');
+                mask.setAttribute('x', '-100000'); mask.setAttribute('y', '-100000'); mask.setAttribute('width', '300000'); mask.setAttribute('height', '300000');
+                const bg = document.createElementNS(NS_SVG, 'rect');
+                ['x', 'y'].forEach(k => bg.setAttribute(k, '-100000')); ['width', 'height'].forEach(k => bg.setAttribute(k, '300000')); bg.setAttribute('fill', '#fff');
+                mask.appendChild(bg);
+                floorZones.forEach(z => {
+                    const h = document.createElementNS(NS_SVG, 'polygon');
+                    h.setAttribute('points', z.points.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' '));
+                    h.setAttribute('fill', '#000');
+                    mask.appendChild(h);
+                });
+                defs.appendChild(mask); outLayer.appendChild(defs);
+                lineG.setAttribute('mask', 'url(#floor-union-mask)');
+            }
+            outLayer.appendChild(lineG);
             const eraserLayer = ensureSvgLayer(svgEl, 'eraser-layer');
             Array.from(eraserLayer.querySelectorAll('polygon')).forEach(e => e.remove());
             zones.forEach(zone => {
                 if (zone.category === 'floor' || zone.category === 'erase') {   // 바닥·지우개는 자기 층에 (결정 216)
-                    renderPaintZone(zone, floorUser, eraserLayer);
+                    renderPaintZone(zone, lineG, eraserLayer);
                     return;
                 }
                 const zoneGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -972,8 +994,7 @@ function bringZoneLayersToFront() {
                     e.stopPropagation();
                     openZoneModal(zone);
                 };
-                floorUser.firstChild.appendChild(line);
-                floorUser.appendChild(poly);
+                floorUser.appendChild(line);   // floorUser = 마스크 걸린 점선 그룹 (면은 그리지 않음 — 바닥은 투명)
                 return;
             }
             poly.onclick = (e) => {
@@ -1107,7 +1128,7 @@ function bringZoneLayersToFront() {
                 const clone = svgEl.cloneNode(true);
                 clone.querySelectorAll('#temp-zone-drawing-layer, #temp-drawing-layer, #wall-vertex-handles-layer, #cad-floor-grid-rect').forEach(el => el.remove());
                 clone.querySelectorAll('circle[stroke="#0ea5e9"], circle[fill="rgba(14, 165, 233, 0.25)"]').forEach(el => el.remove());
-                clone.querySelectorAll('#safety-zones-layer, #map-symbols-layer, #floor-layer, #eraser-layer, #eraser-defs').forEach(el => el.remove());
+                clone.querySelectorAll('#safety-zones-layer, #map-symbols-layer, #floor-layer, #floor-outline-layer, #eraser-layer, #eraser-defs').forEach(el => el.remove());
                 clone.querySelectorAll('.selected, .selected-zone').forEach(el => {
                     el.classList.remove('selected');
                     el.classList.remove('selected-zone');

@@ -739,7 +739,7 @@
 
         /* 바닥 · 지우개 · 직각 체크 (결정 216) */
         .user-floor, .user-eraser, .user-floor-line { stroke: none; pointer-events: none; }
-        /* 바닥 점선은 면 아래에 따로 깔고(굵기 2배), 바닥 면(흰색)이 안쪽 절반을 덮어 겹친 바닥의 안쪽 선이 사라짐 */
+        /* 바닥은 색 없는 투명 점선만, 맨 위 층. 마스크가 바닥 안쪽을 가려 겹친 바닥의 안쪽 선이 사라짐 (굵기 2배 → 바깥 절반만 보임) */
         .show-floor-outline .user-floor-line, body.zone-drawing-mode .user-floor-line {
             stroke: #000000; stroke-width: 3px; stroke-dasharray: 6 4; vector-effect: non-scaling-stroke;
             pointer-events: stroke; cursor: pointer;
