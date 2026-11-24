@@ -501,6 +501,8 @@ button.attag{cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:n
 .csrow+.csrow{border-top:1px solid var(--line3)}
 .csrow .fname b{font-size:var(--size-m)}
 .csgo{flex:1;min-width:0;display:flex;align-items:center;gap:var(--sp-2);min-height:44px;border:0;background:none;padding:0;cursor:pointer;text-align:left;color:inherit}
+.csacc.whmo{background:var(--bg2,#F1F4F8)}.csacc.whwk{padding-left:calc(var(--sp-3) + 14px)}.whrow{padding-left:calc(var(--sp-3) + 28px)}
+.whrep{margin:var(--sp-2) 0;border-color:var(--blue-d,#1F5FA8)}.whrl{display:flex;gap:var(--sp-3);align-items:center;flex-wrap:wrap;margin:var(--sp-2) 0}.whrl small{color:var(--muted)}.whrl label{display:flex;gap:6px;align-items:center}
 .csno{width:28px;height:28px;border-radius:var(--radius);background:var(--blue-bg);color:var(--blue-d);font-size:var(--size-s);font-weight:500;display:flex;align-items:center;justify-content:center;flex:none}
 .csadd{width:100%;border-style:dashed;color:var(--blue-d);background:var(--blue-bg);border-color:var(--line);font-weight:500}
 .csday{padding:var(--sp-2) var(--sp-3);background:var(--ground);font-size:var(--size-s);font-weight:600;color:var(--sub);border-top:1px solid var(--line3)}
@@ -2208,7 +2210,7 @@ function ahuNorm(x) { return String(x).replace(/[℃%\s]/g, '').replace(/,/g, '.
 // 칸 하나 검사 (서버 ws_ahu_save 와 같은 범위). 문제 없으면 ''
 function ahuCheck(k, val, name) {
   if (val === '') return '';
-  const rg = k === 'u' ? [-10, 50] : k.indexOf('out_t') === 0 ? [-30, 50] : k.indexOf('out_h') === 0 ? [0, 100] : [-5, 50];   // 냉수 최고 50 (결정 242)
+  const rg = k === 'u' ? [-10, 50] : k.indexOf('out_t') === 0 ? [-30, 50] : k.indexOf('out_h') === 0 ? [0, 100] : [-5, 40];
   return /^-?\d+(\.\d+)?$/.test(val) && Number(val) >= rg[0] && Number(val) <= rg[1] ? '' : (name || '') + ' ' + rg[0] + ' ~ ' + rg[1] + ' 숫자로 넣어 주세요';
 }
 // 고친 칸 중 문제 있는 칸 [{k, u, t, msg}]
@@ -4393,7 +4395,7 @@ function whNew(k) {
     : { id: '', day: rwToday(), parts: part, workers: u.name || '', floor: '', content: '', mats: [{ n: '', q: '', u: '' }], note: '', before: [], after: [] };
 }
 async function openWh() {
-  S.wh = S.wh || { tab: 'd', v: null, d: { list: null, q: '', qv: '', f: whNew('d'), dirty: false, busy: false, keys: [] }, n: { list: null, q: '', qv: '', f: whNew('n'), dirty: false, busy: false, keys: [] } };
+  S.wh = S.wh || { tab: 'd', v: null, d: { list: null, q: '', qv: '', f: whNew('d'), dirty: false, busy: false, keys: [], open: {}, dflt: [] }, n: { list: null, q: '', qv: '', f: whNew('n'), dirty: false, busy: false, keys: [], open: {}, dflt: [] } };
   go('wh'); await whLoad(S.wh.tab);
 }
 async function whLoad(k) {
@@ -4437,11 +4439,6 @@ function whMulti(k, fld, title) {   // 야간: 개수 제한 없음, 휴대폰 2
   const L = S.wh[k].f[fld];
   return '<div class="whpc"><h4>' + title + '<small>' + L.length + '장</small></h4>' + (L.length ? '<div class="whg">' + L.map((p, i) => whTile(k, fld, p, i)).join('') + '</div>' : '') + whBtns(k, fld, -1, true) + '</div>';
 }
-function whSmall(k, fld, title) {   // 각서: 예전 모양 그대로
-  const L = S.wh[k].f[fld], pick = cam => '<label class="btn sm">' + (cam ? ICON.cam + ' 사진찍기' : ICON.folder + ' 갤러리') + '<input type="file" accept="image/*"' + (cam ? ' capture="environment"' : ' multiple') + ' hidden onchange="whAdd(\'' + k + '\',\'' + fld + '\',this,-1)"></label>';
-  return '<div class="whpic"><div class="whpt"><b>' + title + '</b><small>' + L.length + '장</small></div><div class="tbpb">' + pick(1) + pick(0) + '</div>' +
-    '<div class="whg2">' + L.map((p, i) => whTile(k, fld, p, i)).join('') + '</div></div>';
-}
 function whFloors(f) { return '<div class="rwfls">' + RW_FLOORS.map(x => '<button type="button" class="rwfl' + (f.floor === x ? ' on' : '') + '" aria-pressed="' + (f.floor === x) + '" onclick="whFloor(\'' + x + '\')">' + x + '</button>').join('') + '</div>'; }
 function whFormD(f) {
   return '<div class="card whf"><label class="rwlb">일자</label><input class="inp" type="date" max="' + rwToday() + '" value="' + h(f.day) + '" onchange="whIn(\'day\',this)" aria-label="일자">' +
@@ -4462,18 +4459,99 @@ function whFormN(f) {
     '<div><label class="rwlb">업체명 (직접 입력)</label><input class="inp" maxlength="30" placeholder="예: OO인테리어" value="' + h(f.co) + '" oninput="whIn(\'co\',this)"></div></div>' +
     '<div class="rwlb">작업위치 (버튼으로 선택)</div>' + whFloors(f) +
     '<label class="rwlb">작업내용</label><textarea class="inp" rows="3" maxlength="300" oninput="whIn(\'content\',this)">' + h(f.content) + '</textarea>' +
-    whMulti('n', 'fire', '방염서류') + whSmall('n', 'pledge', '각서 (여러 장)') +
+    whMulti('n', 'fire', '방염서류') + whMulti('n', 'pledge', '각서') +
     '<small class="rwhint">서류 사진은 누르면 크게 볼 수 있습니다. 흐리거나 어두우면 「다시 찍으세요」 안내가 나옵니다. 서류 사진은 일반 사진보다 덜 줄여 저장합니다.</small>' +
     '<label class="rwlb">기타사항</label><textarea class="inp" rows="2" maxlength="300" oninput="whIn(\'note\',this)">' + h(f.note) + '</textarea>' + whDelBtn(f) + '</div>';
 }
 function whDelBtn(f) { return f.id ? '<button type="button" class="btn sm whdel" onclick="whDel()">이 작업 삭제</button>' : ''; }
+/* 목록 묶기: 월 → 주(일~토) → 일. 가장 최근 달·주만 펼침, 머리줄을 누르면 열고 닫음 */
+function whWeek(day) { const d = new Date(day + 'T00:00:00Z'), a = new Date(d - d.getUTCDay() * 864e5), z = new Date(+a + 6 * 864e5), f = x => x.toISOString().slice(0, 10); return [f(a), f(z)]; }
+function whAcc(key) { const o = S.wh[S.wh.tab]; const cur = key in o.open ? o.open[key] : o.dflt.indexOf(key) !== -1; o.open[key] = !cur; render(); }
 function whListHtml(k) {
   const o = S.wh[k]; if (!o.list) return '<div class="banner b-gray">불러오는 중…</div>';
   if (!o.list.length) return '<div class="banner b-gray">' + (o.q ? '찾는 작업이 없습니다' : k === 'd' ? '저장된 주간작업이 없습니다' : '저장된 야간작업이 없습니다') + '</div>';
   const bad = (t, n) => n ? '' : '<span class="whb">' + t + ' 없음</span>';
-  return '<div class="card rwres">' + o.list.map(x => '<button type="button" class="whrow' + (o.f && o.f.id === x.id ? ' on' : '') + '" onclick="whEdit(\'' + x.id + '\')"><b>' + h(x.day.slice(5).replace('-', '/')) + (x.floor ? ' · ' + h(x.floor) : '') + (k === 'n' ? ' · ' + h(x.co) : '') + '</b>' +
+  const row = x => '<button type="button" class="whrow' + (o.f && o.f.id === x.id ? ' on' : '') + '" onclick="whEdit(&quot;' + x.id + '&quot;)"><b>' + h(x.day.slice(5).replace('-', '/')) + (x.floor ? ' · ' + h(x.floor) : '') + (k === 'n' ? ' · ' + h(x.co) : '') + '</b>' +
     '<span>' + h(x.content) + '</span><small>' + (k === 'd' ? h(x.workers) + ' · ' + x.parts.map(p => (WH_PARTS.find(y => y[0] === p) || [0, p])[1]).join('·') + ' · 사진 ' + (x.before.length + x.after.length) + '장'
-      : '현장 ' + x.photos.length + '장 ' + bad('방염서류', x.fire.length) + bad('각서', x.pledge.length)) + '</small></button>').join('') + '</div>';
+      : '현장 ' + x.photos.length + '장 ' + bad('방염서류', x.fire.length) + bad('각서', x.pledge.length)) + '</small></button>';
+  const mons = []; o.list.forEach(x => {   // 목록은 최근 날짜가 위
+    const m = x.day.slice(0, 7), w = whWeek(x.day)[0]; let M = mons.find(y => y.m === m); if (!M) mons.push(M = { m, n: 0, wk: [] });
+    let W = M.wk.find(y => y.w === w); if (!W) M.wk.push(W = { w, list: [] }); W.list.push(x); M.n++;
+  });
+  o.dflt = ['m:' + mons[0].m, 'w:' + mons[0].m + ':' + mons[0].wk[0].w];
+  const on = key => key in o.open ? o.open[key] : o.dflt.indexOf(key) !== -1;
+  const hd = (key, cls, t, n) => '<button type="button" class="csacc ' + cls + (on(key) ? ' on' : '') + '" aria-expanded="' + on(key) + '" onclick="whAcc(&quot;' + key + '&quot;)"><b>' + t + '</b><span class="csn">' + n + '건</span><span class="csar" aria-hidden="true"></span></button>';
+  const f = d => Number(d.slice(5, 7)) + '/' + Number(d.slice(8, 10));
+  return '<div class="card rwres">' + mons.map(M => hd('m:' + M.m, 'whmo', M.m.slice(0, 4) + '년 ' + Number(M.m.slice(5)) + '월', M.n) + (on('m:' + M.m) ? M.wk.map(W => {
+    const key = 'w:' + M.m + ':' + W.w, r = whWeek(W.w);
+    return hd(key, 'whwk', f(r[0]) + '(일) ~ ' + f(r[1]) + '(토)', W.list.length) + (on(key) ? W.list.map(row).join('') : '');
+  }).join('') : '')).join('') + '</div>';
+}
+/* 주간보고 (엑셀): 기준일이 있는 주(일~토)의 고른 파트 작업내용 + 전·후 사진을 한 파일로 PC에 내려받음. 엑셀 도구(ExcelJS)는 처음 쓸 때 불러옴 */
+let XJ = null;
+function loadExcelJs() {
+  if (window.ExcelJS) return Promise.resolve();
+  return XJ || (XJ = new Promise((ok, no) => {
+    const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';
+    sc.onload = ok; sc.onerror = () => { XJ = null; no(new Error('엑셀 도구를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.')); };
+    document.head.appendChild(sc);
+  }));
+}
+function whRepToggle() { const w = S.wh; w.rep = w.rep || { open: false, day: rwToday(), parts: w.d.f.parts.slice(), busy: false }; w.rep.open = !w.rep.open; render(); }
+function whRepPart(key, el) { const r = S.wh.rep, i = r.parts.indexOf(key); if (el.checked && i < 0) r.parts.push(key); if (!el.checked && i >= 0) r.parts.splice(i, 1); }
+function whRepDay(el) { S.wh.rep.day = el.value || rwToday(); render(); }
+function whRepHtml() {
+  const r = S.wh.rep; if (!r || !r.open) return '';
+  const w = whWeek(r.day);
+  return '<div class="card whrep"><b>주간보고작성</b><div class="whrl"><label>기준일 <input class="inp" type="date" value="' + h(r.day) + '" onchange="whRepDay(this)"></label><small>' + w[0].slice(5).replace('-', '/') + '(일) ~ ' + w[1].slice(5).replace('-', '/') + '(토) 작업을 모읍니다</small></div>' +
+    '<div class="whrl whck">' + WH_PARTS.map(p => '<label><input type="checkbox"' + (r.parts.indexOf(p[0]) >= 0 ? ' checked' : '') + ' onchange="whRepPart(&quot;' + p[0] + '&quot;,this)"> ' + p[1] + '</label>').join('') + '</div>' +
+    '<button class="btn pri" onclick="whRepGo()"' + (r.busy ? ' disabled' : '') + '>' + (r.busy ? '<span class="spin"></span>' : ICON.dl + '엑셀 저장') + '</button></div>';
+}
+async function whImg(src) {
+  const rs = await fetch(src); if (!rs.ok) throw new Error('사진을 가져오지 못했습니다');
+  const b = await rs.blob(), u = URL.createObjectURL(b);
+  const d = await new Promise(ok => { const im = new Image(); im.onload = () => ok([im.naturalWidth, im.naturalHeight]); im.onerror = () => ok([4, 3]); im.src = u; });
+  URL.revokeObjectURL(u); return { buf: await b.arrayBuffer(), w: d[0], h: d[1] };
+}
+async function whExcel(list, from, to, parts) {
+  const wb = new ExcelJS.Workbook(), ws = wb.addWorksheet('주간보고'), lab = parts.map(p => (WH_PARTS.find(y => y[0] === p) || [0, p])[1]).join('·');
+  const bd = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } };
+  ws.columns = [12, 12, 14, 8, 40, 26, 20, 27, 27, 27, 27].map(width => ({ width }));
+  ws.mergeCells('A1:K1'); ws.getCell('A1').value = '주간 작업 보고 (' + from + ' ~ ' + to + ')'; ws.getCell('A1').font = { bold: true, size: 16 };
+  ws.mergeCells('A2:K2'); ws.getCell('A2').value = '에비뉴엘 잠실점 시설팀 · ' + lab + ' · ' + list.length + '건';
+  const hr = ws.getRow(4); hr.values = ['일자', '파트', '작업자', '위치', '작업내용', '사용자재', '비고', '작업 전 1', '작업 전 2', '작업 후 1', '작업 후 2'];
+  hr.font = { bold: true }; hr.alignment = { horizontal: 'center', vertical: 'middle' };
+  hr.eachCell(c => { c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8EDF3' } }; c.border = bd; });
+  let r = 5;
+  for (const x of list) {
+    const dw = '일월화수목금토'[new Date(x.day + 'T00:00:00Z').getUTCDay()], row = ws.getRow(r); row.height = 112;
+    row.values = [x.day.slice(5).replace('-', '/') + '(' + dw + ')', x.parts.map(p => (WH_PARTS.find(y => y[0] === p) || [0, p])[1]).join('·'), x.workers, x.floor, x.content,
+      x.mats.map(m => m.n + (m.q ? ' ' + m.q : '') + (m.u || '')).join(String.fromCharCode(10)), x.note];
+    for (let c = 1; c <= 11; c++) { const cell = row.getCell(c); cell.alignment = { vertical: 'top', wrapText: true }; cell.border = bd; }
+    const pics = x.before.slice(0, 2).map((p, i) => [7 + i, p]).concat(x.after.slice(0, 2).map((p, i) => [9 + i, p]));
+    for (const [col, p] of pics) {
+      try {
+        const im = await whImg(p.src), sc = Math.min(184 / im.w, 139 / im.h, 1), id = wb.addImage({ buffer: im.buf, extension: 'jpeg' });
+        ws.addImage(id, { tl: { col: col + 0.04, row: r - 1 + 0.04 }, ext: { width: Math.round(im.w * sc), height: Math.round(im.h * sc) } });
+      } catch (e) { ws.getCell(r, col + 1).value = '(사진을 가져오지 못함)'; }
+    }
+    r++;
+  }
+  const buf = await wb.xlsx.writeBuffer(), a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+  a.download = '주간보고_' + from + '~' + to + '_' + lab + '.xlsx'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+async function whRepGo() {
+  const rp = S.wh.rep; if (rp.busy) return;
+  if (!rp.parts.length) return toast('파트를 하나 이상 골라 주세요');
+  const w = whWeek(rp.day); rp.busy = true; render();
+  try {
+    const r = await call('dwList', '', w[0], w[1]); if (!r.ok) throw new Error(r.error || '불러오지 못했습니다');
+    const L = r.list.filter(x => x.day >= w[0] && x.day <= w[1] && x.parts.some(p => rp.parts.indexOf(p) !== -1)).sort((a, b) => a.day < b.day ? -1 : a.day > b.day ? 1 : 0);
+    if (!L.length) { rp.busy = false; render(); return toast('그 주에 고른 파트의 작업이 없습니다'); }
+    await loadExcelJs(); await whExcel(L, w[0], w[1], rp.parts);
+    rp.busy = false; render(); toast('엑셀을 저장했습니다 (' + L.length + '건)');
+  } catch (e) { rp.busy = false; render(); toast('엑셀을 만들지 못했습니다: ' + (e && e.message ? e.message : e)); }
 }
 function renderWh() {
   const w = S.wh, k = w.tab, o = w[k];
@@ -4485,7 +4563,7 @@ function renderWh() {
     '<button class="btn" onclick="whPdf()"' + (o.pdfBusy ? ' disabled' : '') + '>' + (o.pdfBusy ? '<span class="spin"></span>' : ICON.file + 'PDF 보기') + '</button>' +
     '<button class="btn pri" onclick="whSave()"' + (o.busy ? ' disabled' : '') + '>' + (o.busy ? '<span class="spin"></span>' : '저장') + '</button></div>' : '';
   return topbar('서류작업 ›', '주간/야간 작업내역') + '<div class="wrap list">' + tabs + (k === 'd' ? form + srch : srch + form) +
-    '<div class="cssec">' + (o.q ? '「' + h(o.q) + '」 검색 결과' : '최근 60일') + ' · ' + (o.list ? o.list.length : '…') + '건</div>' + whListHtml(k) + bar + '</div>';
+    '<div class="cssec">' + (o.q ? '「' + h(o.q) + '」 검색 결과' : '최근 60일') + ' · ' + (o.list ? o.list.length : '…') + '건' + (k === 'd' ? '<button class="btn" onclick="whRepToggle()">주간보고작성</button>' : '') + '</div>' + (k === 'd' ? whRepHtml() : '') + whListHtml(k) + bar + '</div>';
 }
 
 /* 사진 넣기: 현장·작업 사진 1600px·70%, 서류(방염·각서)는 글자가 읽히게 2400px·85%. 서류가 흐리거나 어두우면 다시 찍으라고 알림 */
@@ -4547,8 +4625,8 @@ async function whSave() {
     const r = await call(WH_API[k][1], d); o.busy = false;
     if (!r.ok) { render(); return toast(r.error || '저장하지 못했습니다'); }
     if (o.list) { const i = o.list.findIndex(x => x.id === r.item.id); if (i >= 0) o.list[i] = r.item; else o.list.unshift(r.item); o.list.sort((a, b) => a.day < b.day ? 1 : a.day > b.day ? -1 : 0); }
-    o.f = JSON.parse(JSON.stringify(r.item)); if (k === 'd' && !o.f.mats.length) o.f.mats.push({ n: '', q: '', u: '' });
-    o.dirty = false; render(); toast(k === 'd' ? '저장했습니다 · 종합업무일지 금일작업에도 들어갑니다' : '저장했습니다');
+    o.f = whNew(k); o.keys = [];   // 저장하면 빈 양식 (저장한 작업은 아래 목록에서 눌러 다시 고침)
+    o.dirty = false; render(); window.scrollTo(0, 0); toast(k === 'd' ? '저장했습니다 · 종합업무일지 금일작업에도 들어갑니다' : '저장했습니다');
   } catch (e) { o.busy = false; render(); }
 }
 async function whDel() {
