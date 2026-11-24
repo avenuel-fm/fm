@@ -12,6 +12,8 @@
  */
 
 class AtrGenerator {
+    static IRON_LUT = [[16, 16, 16], [16, 16, 16], [16, 16, 16], [17, 16, 18], [17, 16, 22], [17, 16, 22], [17, 16, 22], [17, 17, 29], [17, 17, 29], [17, 17, 29], [17, 17, 29], [17, 17, 31], [16, 17, 35], [16, 17, 35], [16, 17, 35], [16, 17, 37], [17, 17, 43], [17, 17, 45], [17, 17, 45], [17, 17, 48], [17, 16, 56], [17, 16, 56], [17, 16, 56], [17, 16, 58], [16, 16, 64], [16, 16, 68], [16, 16, 68], [16, 17, 72], [16, 17, 73], [16, 17, 73], [16, 17, 73], [16, 17, 73], [16, 18, 77], [16, 18, 77], [16, 18, 77], [15, 19, 80], [15, 19, 82], [15, 19, 82], [15, 19, 82], [15, 19, 82], [15, 20, 86], [15, 20, 86], [15, 20, 86], [17, 20, 89], [17, 20, 91], [17, 20, 91], [17, 20, 91], [17, 20, 91], [21, 19, 94], [21, 19, 94], [21, 19, 94], [23, 18, 96], [25, 18, 98], [25, 18, 98], [25, 18, 98], [27, 18, 100], [29, 17, 102], [29, 17, 103], [29, 17, 103], [30, 17, 104], [31, 17, 105], [31, 17, 105], [31, 17, 105], [33, 16, 107], [35, 15, 109], [35, 15, 110], [35, 15, 110], [37, 15, 112], [39, 15, 113], [39, 15, 113], [39, 15, 113], [40, 15, 114], [41, 15, 116], [41, 15, 116], [41, 15, 116], [41, 15, 116], [43, 14, 117], [45, 14, 118], [45, 14, 118], [45, 14, 119], [47, 13, 121], [47, 13, 123], [47, 13, 123], [47, 13, 123], [49, 13, 125], [51, 13, 126], [51, 13, 126], [52, 13, 126], [55, 12, 128], [55, 12, 128], [56, 12, 130], [57, 12, 131], [57, 12, 131], [58, 12, 132], [61, 11, 134], [61, 11, 134], [63, 11, 135], [63, 11, 135], [65, 11, 137], [69, 11, 140], [71, 11, 140], [72, 11, 141], [73, 10, 142], [75, 9, 143], [78, 9, 147], [81, 9, 148], [88, 9, 152], [92, 9, 154], [95, 9, 155], [101, 10, 157], [105, 10, 159], [113, 11, 161], [118, 11, 161], [124, 13, 163], [138, 16, 161], [143, 17, 160], [149, 19, 159], [161, 25, 154], [166, 27, 152], [176, 32, 144], [181, 36, 140], [188, 41, 133], [199, 50, 117], [204, 57, 108], [211, 66, 97], [215, 73, 88], [219, 80, 78], [226, 92, 63], [229, 97, 56], [234, 110, 42], [236, 116, 36], [239, 123, 31], [241, 134, 20], [242, 139, 17], [243, 153, 11], [243, 158, 10], [244, 162, 9], [245, 169, 8], [244, 173, 10], [244, 181, 13], [244, 184, 15], [244, 187, 17], [243, 194, 22], [243, 197, 26], [242, 200, 29], [243, 202, 34], [242, 203, 36], [241, 206, 41], [241, 208, 45], [241, 209, 48], [241, 211, 52], [241, 212, 56], [240, 214, 59], [240, 214, 59], [240, 215, 61], [240, 216, 66], [240, 216, 66], [239, 217, 69], [239, 217, 71], [239, 217, 71], [239, 218, 73], [239, 218, 73], [238, 219, 78], [237, 219, 81], [237, 219, 81], [237, 221, 84], [237, 221, 86], [237, 221, 86], [236, 222, 91], [236, 222, 91], [236, 223, 95], [236, 223, 95], [236, 223, 95], [235, 224, 97], [235, 224, 100], [235, 225, 102], [235, 225, 104], [235, 225, 104], [235, 226, 108], [235, 226, 109], [234, 227, 112], [234, 227, 113], [234, 227, 113], [234, 227, 116], [234, 227, 119], [234, 227, 122], [233, 228, 124], [233, 228, 124], [233, 229, 128], [233, 229, 130], [233, 230, 133], [233, 230, 135], [233, 230, 135], [233, 230, 135], [233, 230, 135], [232, 231, 137], [232, 231, 141], [232, 231, 141], [232, 231, 145], [232, 231, 148], [232, 231, 148], [232, 231, 148], [232, 231, 148], [231, 232, 153], [231, 232, 154], [231, 232, 154], [231, 233, 156], [231, 233, 158], [231, 233, 158], [231, 233, 158], [231, 233, 158], [229, 234, 166], [229, 234, 167], [229, 234, 167], [229, 235, 169], [229, 235, 172], [229, 235, 173], [229, 235, 173], [229, 235, 173], [228, 236, 178], [228, 236, 179], [228, 236, 179], [228, 236, 183], [228, 236, 188], [228, 236, 189], [228, 236, 189], [228, 236, 198], [228, 236, 199], [228, 236, 199], [228, 236, 199], [228, 236, 201], [227, 236, 207], [227, 236, 207], [227, 236, 207], [227, 236, 216], [227, 236, 217], [227, 236, 217], [227, 236, 217], [227, 236, 219], [228, 236, 223], [228, 236, 223], [229, 236, 225], [230, 235, 228], [230, 235, 229], [230, 235, 229], [230, 235, 229], [231, 235, 230], [233, 235, 232], [233, 235, 232], [234, 235, 233], [235, 235, 235], [235, 235, 235], [235, 235, 235], [235, 235, 235], [251, 251, 251], [255, 255, 255]];
+
     static TEMPLATE_SLOTS = [
         { circuit: "1층1번일반", guid: "6ba1d80e4c7643c187a6351e6a98a461", orig_name: "1층1번일반 (3).jpg" },
         { circuit: "1층1번비상", guid: "1eb0b10e1ddc4cc4b65d6554773d46f4", orig_name: "1층1번비상 (3).jpg" },
@@ -155,9 +157,11 @@ class AtrGenerator {
     }
 
     /**
-     * 690x517 투명 Overlay PNG 생성 (스팟 마커 및 좌측 상단 온도 박스)
+     * 690x517 투명 Overlay PNG 생성 (양식 master_template.atr 쪽 1과 100% 동일 규격)
+     * - 좌측 눈금 막대: 상단 최고 온도 박스, 가운데 Iron 컬러바, 하단 최저 온도 박스
+     * - 스팟 마커: Sp1, Sp2, Sp3 원형 십자선 마커 및 라벨 (카메라 UI 검은 박스는 제외)
      */
-    static makeOverlayPng(spots, temps, width = 690, height = 517) {
+    static makeOverlayPng(spots, scaleMin = 20.0, scaleMax = 30.0, width = 690, height = 517, srcW = 320, srcH = 240) {
         if (typeof document === 'undefined') {
             return new Uint8Array();
         }
@@ -166,21 +170,48 @@ class AtrGenerator {
         canvas.height = height;
         const ctx = canvas.getContext('2d');
 
-        // 1. 좌측 상단 반투명 검은 박스 + 텍스트
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.fillRect(10, 10, 160, 95);
-        ctx.strokeStyle = 'rgba(50, 50, 50, 0.8)';
+        // 1. 좌측 눈금 막대
+        // (1) 상단 최고 온도 박스 (10, 10, 89x55)
+        ctx.fillStyle = 'rgba(10, 10, 20, 0.6)';
+        ctx.fillRect(10, 10, 89, 55);
+        ctx.strokeStyle = 'rgba(246, 246, 245, 1)';
         ctx.lineWidth = 1;
-        ctx.strokeRect(10, 10, 160, 95);
+        ctx.strokeRect(10, 10, 89, 55);
 
         ctx.fillStyle = '#ffffff';
-        ctx.font = '14px sans-serif';
-        const tList = temps || [25.0, 25.0, 25.0];
-        for (let i = 0; i < 3; i++) {
-            const tVal = (tList[i] !== undefined) ? Number(tList[i]).toFixed(1) : '25.0';
-            const y = 35 + i * 26;
-            ctx.fillText(`스팟 ${i + 1}   ${tVal} °C`, 20, y);
+        ctx.font = 'bold 20px "Malgun Gothic", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`${Number(scaleMax).toFixed(1)} °C`, 10 + 44.5, 10 + 27.5);
+
+        // (2) 세로 컬러바 (16, 79, 32x356)
+        ctx.strokeStyle = 'rgba(240, 240, 240, 0.86)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(15, 78, 34, 358);
+
+        const barTop = 79;
+        const barBot = 434;
+        const barH = barBot - barTop;
+        for (let y = barTop; y <= barBot; y++) {
+            const norm = 1.0 - (y - barTop) / barH;
+            const idx = Math.max(0, Math.min(255, Math.round(norm * 255)));
+            const rgb = AtrGenerator.IRON_LUT[idx] || [0, 0, 0];
+            ctx.fillStyle = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
+            ctx.fillRect(16, y, 32, 1);
         }
+
+        // (3) 하단 최저 온도 박스 (10, 451, 89x55)
+        ctx.fillStyle = 'rgba(10, 10, 20, 0.6)';
+        ctx.fillRect(10, 451, 89, 55);
+        ctx.strokeStyle = 'rgba(246, 246, 245, 1)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(10, 451, 89, 55);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 20px "Malgun Gothic", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`${Number(scaleMin).toFixed(1)} °C`, 10 + 44.5, 451 + 27.5);
 
         // 2. 스팟 마커 (Sp1, Sp2, Sp3)
         const spList = spots || [
@@ -188,54 +219,140 @@ class AtrGenerator {
             { digit: '2', x: 160, y: 120 },
             { digit: '3', x: 220, y: 120 }
         ];
-        const sx = width / 320.0;
-        const sy = height / 240.0;
+        const sx = width / srcW;
+        const sy = height / srcH;
 
         for (let i = 0; i < 3; i++) {
             const sp = spList[i] || { digit: String(i + 1), x: 100 + i * 60, y: 120 };
             const cx = Math.round((sp.x || 100) * sx);
             const cy = Math.round((sp.y || 120) * sy);
-            const r = 12;
+            const r = 14;
 
-            // 흰색 십자선 원
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 2;
+            // 외곽선 (그림자)
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.lineWidth = 3;
             ctx.beginPath();
             ctx.arc(cx, cy, r, 0, Math.PI * 2);
             ctx.stroke();
 
             ctx.beginPath();
-            ctx.moveTo(cx - r - 4, cy);
-            ctx.lineTo(cx + r + 4, cy);
+            ctx.moveTo(cx - r - 6, cy); ctx.lineTo(cx + r + 6, cy);
+            ctx.moveTo(cx, cy - r - 6); ctx.lineTo(cx, cy + r + 6);
+            ctx.stroke();
+
+            // 흰색 원 및 십자선
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
             ctx.stroke();
 
             ctx.beginPath();
-            ctx.moveTo(cx, cy - r - 4);
-            ctx.lineTo(cx, cy + r + 4);
+            ctx.moveTo(cx - r - 5, cy); ctx.lineTo(cx - r + 3, cy);
+            ctx.moveTo(cx + r - 3, cy); ctx.lineTo(cx + r + 5, cy);
+            ctx.moveTo(cx, cy - r - 5); ctx.lineTo(cx, cy - r + 3);
+            ctx.moveTo(cx, cy + r - 3); ctx.lineTo(cx, cy + r + 5);
             ctx.stroke();
 
-            // 라벨 박스
-            const lx = cx + r + 2;
-            const ly = cy - 8;
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
-            ctx.fillRect(lx, ly, 16, 16);
+            // 중앙 십자 포인트
+            ctx.beginPath();
+            ctx.moveTo(cx - 3, cy); ctx.lineTo(cx + 3, cy);
+            ctx.moveTo(cx, cy - 3); ctx.lineTo(cx, cy + 3);
+            ctx.stroke();
+
+            // 라벨: "Sp1", "Sp2", "Sp3"
+            const label = `Sp${sp.digit || sp.id || (i + 1)}`;
+            const lx = cx + r + 4;
+            const ly = cy - r + 4;
+
+            ctx.font = 'bold 16px "Malgun Gothic", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'alphabetic';
+
+            // 텍스트 외곽선
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
+            ctx.lineWidth = 3;
+            ctx.strokeText(label, lx, ly);
+
+            // 텍스트 본문
             ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 12px sans-serif';
-            ctx.fillText(String(sp.digit || sp.id || (i + 1)), lx + 4, ly + 12);
+            ctx.fillText(label, lx, ly);
         }
 
         return AtrGenerator.canvasToPngBytes(canvas);
     }
 
     /**
-     * 열화상 카메라 사진을 순수한 320x240 Baseline JPEG(JFIF 1.1, no FLIR APP1)로 깨끗하게 재인코딩
+     * 원시 온도 자료(rawPixels / FlirCalculator)로 직접 320x240 Baseline 열화상 JPEG 렌더링
+     * (카메라 UI 그래픽, 박스, 로고가 일체 없는 순수 팔레트 비트맵)
      */
-    static async makeCleanThermalJpeg(thermalBufferOrBlob, targetW = 320, targetH = 240) {
+    static async makeCleanThermalJpeg(item, targetW = 320, targetH = 240) {
         if (typeof document === 'undefined') return new Uint8Array();
 
-        let blob = thermalBufferOrBlob;
-        if (thermalBufferOrBlob instanceof ArrayBuffer || thermalBufferOrBlob instanceof Uint8Array) {
-            blob = new Blob([thermalBufferOrBlob], { type: 'image/jpeg' });
+        // 1. calculator 또는 rawPixels가 있는 경우 순수 원시 비트맵 직접 렌더링
+        const calc = item ? (item.calculator || (item.rawPixels ? item : null)) : null;
+        if (calc && calc.rawPixels && calc.rawPixels.length >= 240) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 320;
+            canvas.height = 240;
+            const ctx = canvas.getContext('2d');
+            const imgData = ctx.createImageData(320, 240);
+            const data = imgData.data;
+
+            // 전체 픽셀 온도 범위 계산
+            let minT = 999.0, maxT = -999.0;
+            const tempGrid = [];
+            const gx = (calc.width || 320) / 320, gy = (calc.height || 240) / 240; // 640x480 사진은 2칸씩 건너뛰어 읽음
+            for (let y = 0; y < 240; y++) {
+                const rowT = [];
+                for (let x = 0; x < 320; x++) {
+                    const t = calc.getTempAt(x * gx, y * gy);
+                    rowT.push(t);
+                    if (t < minT) minT = t;
+                    if (t > maxT) maxT = t;
+                }
+                tempGrid.push(rowT);
+            }
+
+            let scaleMin = Math.floor(minT * 10) / 10.0;
+            let scaleMax = Math.ceil(maxT * 10) / 10.0;
+            if (scaleMax - scaleMin < 2.0) {
+                const mid = (scaleMax + scaleMin) / 2.0;
+                scaleMin = Math.round((mid - 1.0) * 10) / 10.0;
+                scaleMax = Math.round((mid + 1.0) * 10) / 10.0;
+            }
+            const span = (scaleMax - scaleMin) > 0 ? (scaleMax - scaleMin) : 1.0;
+
+            let pIdx = 0;
+            for (let y = 0; y < 240; y++) {
+                for (let x = 0; x < 320; x++) {
+                    const t = tempGrid[y][x];
+                    const norm = (t - scaleMin) / span;
+                    const cIdx = Math.max(0, Math.min(255, Math.round(norm * 255)));
+                    const rgb = AtrGenerator.IRON_LUT[cIdx] || [0, 0, 0];
+                    data[pIdx] = rgb[0];
+                    data[pIdx + 1] = rgb[1];
+                    data[pIdx + 2] = rgb[2];
+                    data[pIdx + 3] = 255;
+                    pIdx += 4;
+                }
+            }
+
+            ctx.putImageData(imgData, 0, 0);
+
+            // item에 scaleMin, scaleMax 보관 (overlayPng에서 사용)
+            if (item) {
+                item.scaleMin = scaleMin;
+                item.scaleMax = scaleMax;
+            }
+
+            return AtrGenerator.canvasToJpegBytes(canvas, 0.85);
+        }
+
+        // 2. Fallback: 기존 JPEG 이미지를 Canvas에 리사이즈
+        let blob = item ? (item.patchedBlob ? (item.patchedBlob.blob || item.patchedBlob) : (item.thermalBlob || item.rawBuffer || item)) : null;
+        if (blob instanceof ArrayBuffer || blob instanceof Uint8Array) {
+            blob = new Blob([blob], { type: 'image/jpeg' });
         }
         if (!blob) return new Uint8Array();
 
@@ -314,10 +431,7 @@ class AtrGenerator {
         else if (diff > 5.0) statusStr = "요 주 의";
 
         // 2. 바이너리 이미지 데이터 추출 및 가공
-        // (1) Overlay PNG
-        const overlayPng = AtrGenerator.makeOverlayPng(spots, temps, 690, 517);
-
-        // (2) Thermal JPEG (순수 320x240 Baseline JPEG로 재인코딩)
+        // (1) Thermal JPEG (원시 센서 데이터 직접 변환 순수 320x240 baseline)
         let thermalBytes = null;
         const pb = item.patchedBlob ? (item.patchedBlob.blob || item.patchedBlob) : null;
         if (pb && pb.arrayBuffer) {
@@ -328,12 +442,14 @@ class AtrGenerator {
             thermalBytes = new Uint8Array(item.rawBuffer);
         }
 
-        let thJpegOnly = await AtrGenerator.makeCleanThermalJpeg(
-            pb || item.thermalBlob || thermalBytes, 320, 240
-        );
+        let thJpegOnly = await AtrGenerator.makeCleanThermalJpeg(item, 320, 240);
         if (!thJpegOnly || thJpegOnly.length === 0) {
             thJpegOnly = thermalBytes;
         }
+
+        // (2) Overlay PNG (690x517 양식 규격 스팟/눈금 막대)
+        const overlayPng = AtrGenerator.makeOverlayPng(spots, item.scaleMin || 20.0, item.scaleMax || 30.0, 690, 517,
+            (item.calculator && item.calculator.width) || 320, (item.calculator && item.calculator.height) || 240);
 
         // (3) Visual JPEG (2048x1536 실화상)
         let visualBytes = null;
@@ -674,7 +790,7 @@ class AtrGenerator {
         // 2. 문서 헤더 준비 (0 .. PAGE_OFFSETS[0])
         let docHeader = docBytesOriginal.subarray(0, AtrGenerator.PAGE_OFFSETS[0]);
 
-        // 3. 각 쪽 내부 이미지 사본 및 표 글자 치환 변환 수행
+        // 3. 각 쪽 내부 이미지 사본 및 표 글자 치환 변환 수행 (쓰는 쪽만 넣음: 쪽 수 칸과 실제 쪽 수를 맞춤)
         const transformedPages = [];
         for (let p = 0; p < nPages; p++) {
             const pStart = AtrGenerator.PAGE_OFFSETS[p];
