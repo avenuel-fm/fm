@@ -512,7 +512,7 @@ button.attag{cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:n
 .csit p{margin:var(--sp-1) 0 var(--sp-2);font-size:var(--size-s);color:var(--muted);line-height:1.45}
 .csseg button{font-size:var(--size-m);font-weight:500}
 .csseg button.on.bad{background:var(--navy)}.csseg button.on.na{background:var(--muted)}
-.csph{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-2);margin-top:var(--sp-2)}
+.csph{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-2);margin-top:var(--sp-2)}@media (min-width:768px){.csph{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .csph .ph43{position:relative;border-radius:var(--radius)}
 .csph .ph43 img{width:100%;height:100%}
 .csph .tm{position:absolute;left:0;right:0;bottom:0;font-size:var(--size-s);color:var(--white);background:var(--overlay);padding:var(--sp-1) var(--sp-1)}
@@ -3929,12 +3929,12 @@ async function ehXSave() {
 
 /* ── 공사장 점검 (WS_공사장점검, 결정 100): 현장 목록 → 현장 점검(자동 저장) → 날짜별·현장별 PDF ── */
 const CS_ST = [['양호', 'ok'], ['미흡', 'bad'], ['해당없음', 'na']];
-const CS_MAX_PHOTOS = 6;   // 한 줄 3장 × 2줄 (사용자 11-11)
+const CS_MAX_PHOTOS = 4;   // 새로 넣는 한도: 휴대폰 2열×2줄 · PC 4열 한 줄 (사용자 11-24, 결정 238). 서버는 예전 기록(6장)도 받도록 6장 그대로
 // 사진 넣기 (사용자 11-24, TBM 사진칸과 같게): [카메라] 바로 찍기 · [파일] 갤러리에서 여러 장 고르기, 최대 6장
 function csPhBar(x, i) {
   const n = x.photos.length, full = n >= CS_MAX_PHOTOS;
   const pick = cam => '<label class="btn sm' + (full ? ' off' : '') + '">' + (cam ? ICON.cam + ' 카메라' : ICON.folder + ' 파일') + '<input type="file" accept="image/*"' + (cam ? ' capture="environment"' : ' multiple') + (full ? ' disabled' : '') + ' hidden onchange="csPhAdd(' + i + ',this)"></label>';
-  return '<div class="tbpb csphb">' + pick(true) + pick(false) + '</div><small class="csphn">사진 ' + n + ' / ' + CS_MAX_PHOTOS + '장</small>';
+  return '<div class="tbpb csphb">' + pick(true) + pick(false) + '</div><small class="csphn">사진 ' + (n > CS_MAX_PHOTOS ? n + '장' : n + ' / ' + CS_MAX_PHOTOS + '장') + '</small>';
 }
 function csDay(d) { return Number(d.slice(5, 7)) + '월 ' + Number(d.slice(8, 10)) + '일 (' + '일월화수목금토'[new Date(d + 'T00:00:00').getDay()] + ')'; }
 function csNow(dateToo) { const d = new Date(), p = n => String(n).padStart(2, '0'); return (dateToo ? d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' : '') + p(d.getHours()) + ':' + p(d.getMinutes()); }
@@ -4156,7 +4156,7 @@ function csSt(i, s) { const x = S.ck.items[i]; x.st = x.st === s ? '' : s; csDir
 function csMemo(i, el) { S.ck.items[i].memo = el.value; csDirty(); }
 async function csPhAdd(i, el) {
   const fs = Array.from(el.files || []); el.value = ''; if (!fs.length) return;   // 같은 파일을 또 골라도 다시 들어오게 비움
-  const x = S.ck.items[i], room = CS_MAX_PHOTOS - x.photos.length;
+  const x = S.ck.items[i], room = Math.max(0, CS_MAX_PHOTOS - x.photos.length);   // 예전에 5~6장 넣은 항목은 그대로 두고 더 못 넣음
   try { for (const f of fs.slice(0, room)) x.photos.push({ id: '', src: await shrinkJpeg(f, 1600, 0.7), at: csNow() }); } catch (e) { toast(e.message); }
   csDirty(true); render();
   if (fs.length > room) toast('사진은 한 항목에 ' + CS_MAX_PHOTOS + '장까지입니다');
