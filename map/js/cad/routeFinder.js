@@ -1,10 +1,10 @@
 /* ==========================================================================
-   routeFinder.js - 길찾기 (결정 246): 배관/간선 연결이 쓰는 직각 동선 계산
+   routeFinder.js - 길찾기 (결정 246, 끊긴 중앙선 잇기 결정 256): 배관/간선 연결이 쓰는 직각 동선 계산
    복도 = 구역 그리기의 「바닥」 면. 입구(복도 쪽 가장 긴 변의 한가운데) → 수직으로 복도 중앙선 → 중앙선만 따라 → 수직으로 입구.
    계산 부분(routeCompute)은 화면과 따로라 시험에서 바로 부름.
    ========================================================================== */
 
-var RT = { TOL: 1.5, ZONE_COLOR: '#dc2626' };
+var RT = { TOL: 1.5, GAP: 8, ZONE_COLOR: '#dc2626' };
 
 // ---- 기하 도우미 ----
 function rtInPoly(p, poly) {
@@ -124,7 +124,7 @@ function rtEntrance(poly, segs, obstacles) {
 }
 
 // ---- 중앙선 그물 만들고 최단 경로 ----
-function rtShortest(segs, J1, s1, J2, s2) {
+function rtShortest(segs, J1, s1, J2, s2, walk) {
     const key = p => (Math.round(p.x * 10) / 10) + ',' + (Math.round(p.y * 10) / 10);
     segs[s1].pts.push(J1); segs[s2].pts.push(J2);
     const T = RT.TOL;
@@ -141,6 +141,28 @@ function rtShortest(segs, J1, s1, J2, s2) {
             }));
         }
     }));
+    // 겹치거나 어긋나서 안 만나는 중앙선 이어 주기 (결정 256): 바닥 안쪽으로 곧게 갈 수 있을 때만
+    const extras = [];
+    if (walk) segs.forEach((a, i) => segs.forEach((b, j) => {
+        if (j <= i) return;
+        const pt = (u, t) => u.h ? { x: t, y: u.c } : { x: u.c, y: t };
+        if (a.h !== b.h) {
+            const hs = a.h ? a : b, vs = a.h ? b : a, J = { x: vs.c, y: hs.c };
+            if (vs.c >= hs.a - T && vs.c <= hs.b + T && hs.c >= vs.a - T && hs.c <= vs.b + T) return;   // 이미 만남
+            const near = (u, p) => { const t = u.h ? p.x : p.y; return pt(u, Math.max(u.a, Math.min(u.b, t))); };
+            const ea = near(a, J), eb = near(b, J);
+            if (walk(ea, J) && walk(eb, J)) { a.pts.push(J); b.pts.push(J); }   // 끝이 조금 못 닿은 ㄱ·ㅜ자: 만나는 곳까지 늘림
+        } else if (Math.abs(a.c - b.c) <= T) {                                  // 같은 줄인데 사이가 떨어짐
+            const [lo, hi] = a.b < b.a ? [a, b] : (b.b < a.a ? [b, a] : [null, null]);
+            if (lo && walk(pt(lo, lo.b), pt(hi, hi.a))) { lo.pts.push(pt(hi, hi.a)); hi.pts.push(pt(lo, lo.b)); }
+        } else {                                                                 // 나란하고 위치가 다름 (겹친 바닥): 겹치는 구간 가운데에서 직각으로 건넘
+            const lo = Math.max(a.a, b.a), hi = Math.min(a.b, b.b);
+            if (hi - lo > T) {
+                const m = (lo + hi) / 2, pa = pt(a, m), pb = pt(b, m);
+                if (walk(pa, pb)) { a.pts.push(pa); b.pts.push(pb); extras.push([pa, pb]); }
+            }
+        }
+    }));
     const adj = new Map(), pos = new Map();
     const link = (p, q) => {
         const kp = key(p), kq = key(q); if (kp === kq) return;
@@ -154,6 +176,7 @@ function rtShortest(segs, J1, s1, J2, s2) {
             .sort((p, q) => (s.h ? p.x - q.x : p.y - q.y));
         for (let k = 0; k < pts.length - 1; k++) link(pts[k], pts[k + 1]);
     });
+    extras.forEach(([p, q]) => link(p, q));
     const from = key(J1), to = key(J2);
     if (from === to) return [J1];
     if (!adj.has(from) || !adj.has(to)) return null;
@@ -179,7 +202,10 @@ function routeCompute(fromPoly, toPoly, otherPolys, corridorPolys) {
     const e1 = rtEntrance(fromPoly, segs, otherPolys.concat([toPoly]));
     const e2 = rtEntrance(toPoly, segs, otherPolys.concat([fromPoly]));
     if (!e1 || !e2) return { ok: false, error: (!e1 ? '출발' : '도착') + ' 매장에서 복도로 이어지는 곳을 찾지 못했습니다.' };
-    const mid = rtShortest(segs, e1.J, e1.seg, e2.J, e2.seg);
+    // 두 점 사이 곧은 선이 전부 바닥 안쪽인가 (끊긴 중앙선 잇기용. 바닥 경계 위도 안쪽으로 봄)
+    const inFloor = p => corridorPolys.some(poly => [[0, 0], [.6, 0], [-.6, 0], [0, .6], [0, -.6]].some(([dx, dy]) => rtInPoly({ x: p.x + dx, y: p.y + dy }, poly)));
+    const walk = (p, q) => { const L = Math.hypot(q.x - p.x, q.y - p.y), n = Math.max(2, Math.ceil(L / 2)); let out = 0; for (let k = 0; k <= n; k++) { out = inFloor({ x: p.x + (q.x - p.x) * k / n, y: p.y + (q.y - p.y) * k / n }) ? 0 : out + L / n; if (out > RT.GAP) return false; } return true; };   // 바닥이 살짝(RT.GAP 이하) 끊긴 틈은 그려 둔 사람 실수로 보고 건넘
+    const mid = rtShortest(segs, e1.J, e1.seg, e2.J, e2.seg, walk);
     if (!mid) return { ok: false, error: '두 매장 사이를 잇는 복도가 끊겨 있습니다.' };
     const raw = [e1.E, ...mid, e2.E], pts = [];
     raw.forEach(p => {                                  // 겹친 점·일직선 가운데 점 정리
