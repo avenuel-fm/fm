@@ -217,6 +217,14 @@
       return rpc('ws_cs_save_pdf', { p_token: token, p_ck_id: String(ckId || ''), p_file: await upload('cs_pdf', pdf) });
     },
 
+    /* ── 위험작업신청서 (supabase/25_risk.sql): 사진은 버킷 risk_photo/ 에 먼저 — 글자가 읽히게 다시 줄이지 않고 그대로 (화면이 2400px·85%로 줄여 보냄) ── */
+    rwList: (token, q, from, to) => rpc('ws_rw_list', { p_token: token, p_q: q || '', p_from: from || '', p_to: to || '' }),
+    async rwAdd(token, day, co, floor, dataUri, cid) {
+      let blob; try { blob = dataUrlToBlob(dataUri); } catch (e) { return { ok: false, error: '사진을 읽지 못했습니다. 다시 찍어 주세요.' }; }
+      return rpc('ws_rw_add', { p_token: token, p_day: day || '', p_co: co || '', p_floor: floor || '', p_file: await upload('risk_photo', blob, 'jpg'), p_cid: cid || '' });
+    },
+    rwDelete: (token, id) => rpc('ws_rw_delete', { p_token: token, p_id: String(id || '') }),
+
     /* ── 3-6 환경설정 (supabase/08_settings.sql, 소장만). 위험성 목록은 시트 대신 여기서 고침 ── */
     adminStaff: token => rpc('ws_admin_staff', { p_token: token }),
     adminSetToast: (token, sec) => rpc('ws_admin_set_toast', { p_token: token, p_sec: Number(sec) }),
