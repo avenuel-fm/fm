@@ -209,23 +209,26 @@ class FlirParser {
             }
         }
 
-        // 5. 스팟 위치 (Sp1, Sp2, Sp3) 다형 파싱
+        // 5. 스팟 위치 (Sp1, Sp2, Sp3) 다형 파싱 (Tag 33 스팟 전용 태그 범위 내에서만 정밀 탐색)
         // Pattern A: UTF-16LE "Sp1", "Sp2", "Sp3" (53 00 70 00 31 00 ...) 앞 4바이트
-        // Pattern B: UTF-16LE "1", "2", "3" (31 00 00 00 ...) 앞 4바이트
+        // Pattern B: "1\0\0\0", "2\0\0\0", "3\0\0\0" 앞 4바이트
         let detectedSpots = [];
         let spotPattern = null;
 
-        // Pattern A 시도
+        const t33Start = tags[33] ? tags[33].offset : 0;
+        const t33End = tags[33] ? (tags[33].offset + tags[33].length) : fffBytes.length;
+
+        // Pattern A 시도 (Tag 33 범위 내)
         const spotsA = [];
         for (const digit of ['1', '2', '3']) {
             const pat = [83, 0, 112, 0, digit.charCodeAt(0), 0];
             let foundPos = -1;
-            for (let i = 0; i <= fffBytes.length - pat.length; i++) {
+            for (let i = t33Start; i <= t33End - pat.length; i++) {
                 let m = true;
                 for (let k = 0; k < pat.length; k++) {
                     if (fffBytes[i + k] !== pat[k]) { m = false; break; }
                 }
-                if (m && i >= 4) {
+                if (m && i >= t33Start + 4) {
                     const x = fffView.getUint16(i - 4, true);
                     const y = fffView.getUint16(i - 2, true);
                     if (x < 640 && y < 480) {
@@ -241,17 +244,17 @@ class FlirParser {
             detectedSpots = spotsA;
             spotPattern = 'A';
         } else {
-            // Pattern B 시도 (Tag 33 위주 및 전체 검색)
+            // Pattern B 시도 (Tag 33 범위 내)
             const spotsB = [];
             for (const digit of ['1', '2', '3']) {
                 const pat = [digit.charCodeAt(0), 0, 0, 0];
                 let foundPos = -1;
-                for (let i = 0; i <= fffBytes.length - pat.length; i++) {
+                for (let i = t33Start; i <= t33End - pat.length; i++) {
                     let m = true;
                     for (let k = 0; k < pat.length; k++) {
                         if (fffBytes[i + k] !== pat[k]) { m = false; break; }
                     }
-                    if (m && i >= 4) {
+                    if (m && i >= t33Start + 4) {
                         const x = fffView.getUint16(i - 4, true);
                         const y = fffView.getUint16(i - 2, true);
                         if (x < 640 && y < 480) {
