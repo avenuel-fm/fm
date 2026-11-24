@@ -10,10 +10,10 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.26.3"></script>
-<script>window.WS_VERSION = '0.26.3';</script>
-<script src="offline.js?v=0.26.3"></script>
-<script src="ws-api.js?v=0.26.3"></script>
+<script src="config.js?v=0.26.4"></script>
+<script>window.WS_VERSION = '0.26.4';</script>
+<script src="offline.js?v=0.26.4"></script>
+<script src="ws-api.js?v=0.26.4"></script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -792,7 +792,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B3','B2','B1','1F','2F','3F','4F','5F','6F','7F','8F','9F','10F'];   // 소화기·소화전·공기호흡기 층 B3~10F (결정 228)
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.3' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.4' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -891,8 +891,8 @@ function ymLabel(ym) { return Number(ym.slice(0, 4)) + '년 ' + Number(ym.slice(
 
 /* ── 화면 이동 (뒤로 가기 지원) ── */
 function go(view, push) {
-  S.view = view;
-  if (push !== false) { try { google.script.history.push({ v: view }, { }); } catch (e) {} }
+  const cur = S.view; S.view = view;
+  if (push !== false) hist(view, cur);
   render();
   window.scrollTo(0, 0);
   if (view === 'fire' && !(S.fireAt && Date.now() - S.fireAt < 60000)) refreshFire();
@@ -901,7 +901,28 @@ function go(view, push) {
 async function refreshFire() { try { const r = await call('bootstrap'); S.fire = r.fire; S.user = r.user; S.fireAt = Date.now(); if (S.view === 'fire') render(); } catch (e) {} }
 // 소화전·공기호흡기 이번 달 숫자 (실패해도 메뉴는 그대로)
 async function refreshEq() { try { const e = await run('eqStatus', S.token, ''); if (e && e.ok) { S.eqc = e; S.eqAt = Date.now(); if (S.view === 'fire') render(); } } catch (e) {} }
-try { google.script.history.setChangeHandler(e => { const v = e.state && e.state.v; if (v && S.token) { S.view = v; render(); } }); } catch (e) {}
+// 브라우저 기본 기록으로 안드로이드·아이폰 뒤로가기 지원 (결정 244). 구글 웹앱·바로가기 주소 양쪽에서 같이 됨.
+// HS = 화면 기록 거울. 메인이 바닥 — 메인에서는 기록을 더 쌓지 않아 뒤로가기가 앱을 바로 끝냄.
+let HS = ['main'], histIgn = 0;
+function histSkip() { histIgn++; setTimeout(() => { histIgn = 0; }, 700); }
+function hist(view, cur) {
+  try {
+    if (view === cur) history.replaceState({ v: view }, '');
+    else if (HS.length > 1 && HS[HS.length - 2] === view) { HS.pop(); histSkip(); history.back(); }
+    else if (view === 'main') { const n = HS.length - 1; HS = ['main']; if (n > 0) { histSkip(); history.go(-n); } }
+    else { HS.push(view); history.pushState({ v: view }, ''); }
+  } catch (e) {}
+}
+function histReset() { const n = HS.length - 1; HS = ['main']; if (n > 0) { try { histSkip(); history.go(-n); } catch (e) {} } }
+window.addEventListener('popstate', () => {
+  if (histIgn > 0) { histIgn--; return; }
+  if (!S.token || !S.user) return;
+  const open = document.querySelector('#layer > *') || (S.sp && S.sp.big);
+  if (S.view === 'main' || HS.length <= 1) { if (!open) return; }
+  try { history.pushState({ v: S.view }, ''); } catch (e) {}   // 이미 한 칸 물러났으므로 현재 화면 기록을 되돌려 놓고, 실제 이동은 아래 버튼과 같은 흐름
+  if (open) { if (S.sp && S.sp.big) spBigClose(); else closeDialog(); return; }
+  back();
+});
 const PARENT = { inspect: 'main', fire: 'inspect', eh: 'inspect', thermal: 'inspect', cs: 'inspect', csck: 'cs', qr: 'fire', hyd: 'fire', hydfl: 'hyd', status: 'fire', floor: 'status', docs: 'main', set: 'main', risk: 'set', map: 'main', cad: 'main', spec: 'main', tbm: 'docs', nw: 'docs', log: 'docs', rw: 'docs', wh: 'docs', ahu: 'docs', clim: 'docs', use: 'docs', rep: 'docs', kw: 'set', uhr: 'use', att: 'docs', attup: 'att' };
 function back() { if (S.view === 'pdf') return go((S.pdf && S.pdf.from) || 'main'); if (S.view === 'csck') return csLeave(); if (S.view === 'risk' && S.rk && S.rk.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; if (S.view === 'wh' && S.wh && (S.wh.d.dirty || S.wh.n.dirty) && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; if (S.view === 'nw' && !nwLeaveOk()) return; if (S.view === 'log' && !lgLeaveOk()) return; if (S.view === 'ahu' && !ahuLeaveOk()) return; if ((S.view === 'clim' || S.view === 'use') && !clLeaveOk()) return; if (S.view === 'rep') return repBack(); if (S.view === 'uhr') return uhBack(); if (S.view === 'tbm' && S.tbm && S.tbm.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; go(PARENT[S.view] || 'main'); }
 
@@ -955,7 +976,7 @@ function loggedIn(r) { S.token = r.token; store('ws_token', r.token); SHELL.set(
 const OFFMSG = '이 기기에 저장했습니다. 신호가 잡히면 자동으로 보냅니다';   // 서버에 들어가기 전에는 「저장되었습니다」라고 하지 않음 (결정 222)
 function logoutAsk() { if (window.WS_OFFLINE && WS_OFFLINE.count() && !confirm('아직 전송되지 않은 저장 대기 ' + WS_OFFLINE.count() + '건이 있습니다. 로그아웃해도 이 기기에 남아 있다가, 본인이 다시 로그인하면 보냅니다. 로그아웃할까요?')) return; logout(); }
 if (window.WS_OFFLINE) { WS_OFFLINE.tokenFn = () => S.token; WS_OFFLINE.onSent = n => toast('저장 대기 ' + n + '건을 전송했습니다'); }
-function logout(expired) { store('ws_token', null); store('ws_main', null); SHELL.set(''); bootSeq++; S.token = ''; S.user = null; S.sign = null; S.pin = ''; S.view = 'login'; render(); if (expired === true) toast('다시 로그인해 주세요.'); }
+function logout(expired) { store('ws_token', null); store('ws_main', null); SHELL.set(''); bootSeq++; S.token = ''; S.user = null; S.sign = null; S.pin = ''; S.view = 'login'; histReset(); render(); if (expired === true) toast('다시 로그인해 주세요.'); }
 
 /* ── 근무일 첫 서명 (결정 56·60) — 서명하지 않으면 로그인되지 않음 ── */
 function renderSign() {
@@ -1457,7 +1478,7 @@ async function deviceReg() {
 async function deviceOff() {
   if (!confirm('이 기기의 등록을 풀까요? 다시 쓰려면 시설팀 계정으로 기기 등록을 해야 합니다.')) return;
   await WS_API.unregister(S.token);
-  store('ws_token', null); store('ws_main', null); S.token = ''; S.user = null; S.device = null; S.view = 'device'; render();
+  store('ws_token', null); store('ws_main', null); S.token = ''; S.user = null; S.device = null; S.view = 'device'; histReset(); render();
 }
 async function setToastSec(v) {
   const r = await call('adminSetToast', v);
