@@ -14,19 +14,32 @@
 class AtrGenerator {
     static IRON_LUT = [[16, 16, 16], [16, 16, 16], [16, 16, 16], [17, 16, 18], [17, 16, 22], [17, 16, 22], [17, 16, 22], [17, 17, 29], [17, 17, 29], [17, 17, 29], [17, 17, 29], [17, 17, 31], [16, 17, 35], [16, 17, 35], [16, 17, 35], [16, 17, 37], [17, 17, 43], [17, 17, 45], [17, 17, 45], [17, 17, 48], [17, 16, 56], [17, 16, 56], [17, 16, 56], [17, 16, 58], [16, 16, 64], [16, 16, 68], [16, 16, 68], [16, 17, 72], [16, 17, 73], [16, 17, 73], [16, 17, 73], [16, 17, 73], [16, 18, 77], [16, 18, 77], [16, 18, 77], [15, 19, 80], [15, 19, 82], [15, 19, 82], [15, 19, 82], [15, 19, 82], [15, 20, 86], [15, 20, 86], [15, 20, 86], [17, 20, 89], [17, 20, 91], [17, 20, 91], [17, 20, 91], [17, 20, 91], [21, 19, 94], [21, 19, 94], [21, 19, 94], [23, 18, 96], [25, 18, 98], [25, 18, 98], [25, 18, 98], [27, 18, 100], [29, 17, 102], [29, 17, 103], [29, 17, 103], [30, 17, 104], [31, 17, 105], [31, 17, 105], [31, 17, 105], [33, 16, 107], [35, 15, 109], [35, 15, 110], [35, 15, 110], [37, 15, 112], [39, 15, 113], [39, 15, 113], [39, 15, 113], [40, 15, 114], [41, 15, 116], [41, 15, 116], [41, 15, 116], [41, 15, 116], [43, 14, 117], [45, 14, 118], [45, 14, 118], [45, 14, 119], [47, 13, 121], [47, 13, 123], [47, 13, 123], [47, 13, 123], [49, 13, 125], [51, 13, 126], [51, 13, 126], [52, 13, 126], [55, 12, 128], [55, 12, 128], [56, 12, 130], [57, 12, 131], [57, 12, 131], [58, 12, 132], [61, 11, 134], [61, 11, 134], [63, 11, 135], [63, 11, 135], [65, 11, 137], [69, 11, 140], [71, 11, 140], [72, 11, 141], [73, 10, 142], [75, 9, 143], [78, 9, 147], [81, 9, 148], [88, 9, 152], [92, 9, 154], [95, 9, 155], [101, 10, 157], [105, 10, 159], [113, 11, 161], [118, 11, 161], [124, 13, 163], [138, 16, 161], [143, 17, 160], [149, 19, 159], [161, 25, 154], [166, 27, 152], [176, 32, 144], [181, 36, 140], [188, 41, 133], [199, 50, 117], [204, 57, 108], [211, 66, 97], [215, 73, 88], [219, 80, 78], [226, 92, 63], [229, 97, 56], [234, 110, 42], [236, 116, 36], [239, 123, 31], [241, 134, 20], [242, 139, 17], [243, 153, 11], [243, 158, 10], [244, 162, 9], [245, 169, 8], [244, 173, 10], [244, 181, 13], [244, 184, 15], [244, 187, 17], [243, 194, 22], [243, 197, 26], [242, 200, 29], [243, 202, 34], [242, 203, 36], [241, 206, 41], [241, 208, 45], [241, 209, 48], [241, 211, 52], [241, 212, 56], [240, 214, 59], [240, 214, 59], [240, 215, 61], [240, 216, 66], [240, 216, 66], [239, 217, 69], [239, 217, 71], [239, 217, 71], [239, 218, 73], [239, 218, 73], [238, 219, 78], [237, 219, 81], [237, 219, 81], [237, 221, 84], [237, 221, 86], [237, 221, 86], [236, 222, 91], [236, 222, 91], [236, 223, 95], [236, 223, 95], [236, 223, 95], [235, 224, 97], [235, 224, 100], [235, 225, 102], [235, 225, 104], [235, 225, 104], [235, 226, 108], [235, 226, 109], [234, 227, 112], [234, 227, 113], [234, 227, 113], [234, 227, 116], [234, 227, 119], [234, 227, 122], [233, 228, 124], [233, 228, 124], [233, 229, 128], [233, 229, 130], [233, 230, 133], [233, 230, 135], [233, 230, 135], [233, 230, 135], [233, 230, 135], [232, 231, 137], [232, 231, 141], [232, 231, 141], [232, 231, 145], [232, 231, 148], [232, 231, 148], [232, 231, 148], [232, 231, 148], [231, 232, 153], [231, 232, 154], [231, 232, 154], [231, 233, 156], [231, 233, 158], [231, 233, 158], [231, 233, 158], [231, 233, 158], [229, 234, 166], [229, 234, 167], [229, 234, 167], [229, 235, 169], [229, 235, 172], [229, 235, 173], [229, 235, 173], [229, 235, 173], [228, 236, 178], [228, 236, 179], [228, 236, 179], [228, 236, 183], [228, 236, 188], [228, 236, 189], [228, 236, 189], [228, 236, 198], [228, 236, 199], [228, 236, 199], [228, 236, 199], [228, 236, 201], [227, 236, 207], [227, 236, 207], [227, 236, 207], [227, 236, 216], [227, 236, 217], [227, 236, 217], [227, 236, 217], [227, 236, 219], [228, 236, 223], [228, 236, 223], [229, 236, 225], [230, 235, 228], [230, 235, 229], [230, 235, 229], [230, 235, 229], [231, 235, 230], [233, 235, 232], [233, 235, 232], [234, 235, 233], [235, 235, 235], [235, 235, 235], [235, 235, 235], [235, 235, 235], [251, 251, 251], [255, 255, 255]];
 
-    static TEMPLATE_SLOTS = [
-        { circuit: "1층1번일반", guid: "6ba1d80e4c7643c187a6351e6a98a461", orig_name: "1층1번일반 (3).jpg" },
-        { circuit: "1층1번비상", guid: "1eb0b10e1ddc4cc4b65d6554773d46f4", orig_name: "1층1번비상 (3).jpg" },
-        { circuit: "1층2번일반", guid: "efb4b25cb3cd4e9d9b1c4fc5ad176409", orig_name: "1층2번일반 (3).jpg" },
-        { circuit: "1층2번비상", guid: "408c622227024849862c143242cfb33d", orig_name: "1층2번비상 (3).jpg" },
-        { circuit: "1층3번일반", guid: "f95f4d40bab240dc91b83ff71a768a77", orig_name: "1층3번일반 (3).jpg" },
-        { circuit: "1층3번비상", guid: "d7feefde27b64da5ab01bc83f6ba3e9e", orig_name: "1층3번비상 (3).jpg" },
-        { circuit: "1층4번일반", guid: "4ca8128103ba4dafa4ab537cb39d9662", orig_name: "1층4번일반 (3).jpg" },
-        { circuit: "1층4번비상", guid: "0dd0b21d79ae44d59e07c11c96dc2712", orig_name: "1층4번비상 (3).jpg" }
-    ];
+    static PROTOTYPE_SLOT = {
+        circuit: "1층1번일반",
+        guid: "6ba1d80e4c7643c187a6351e6a98a461",
+        orig_name: "1층1번일반 (3).jpg"
+    };
 
-    static PAGE_OFFSETS = [58303, 535258, 985745, 1460417, 1933996, 2421127, 2885227, 3351111, 3825001];
+    static PROTOTYPE_OFFSET_START = 58303;
+    static PROTOTYPE_OFFSET_END = 535258;
+    static TEMPLATE_FOOTER_OFFSET = 3825001;
     static PAGE_COUNT_POS = 55903;
+
+    /**
+     * 32자리 고유 GUID 생성 (소문자 hex)
+     */
+    static generateGuid(idx) {
+        let rnd = '';
+        if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+            const arr = new Uint8Array(12);
+            crypto.getRandomValues(arr);
+            rnd = Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+        } else {
+            rnd = Math.random().toString(16).substring(2).padEnd(24, '0').substring(0, 24);
+        }
+        const pStr = (idx + 1).toString(16).padStart(4, '0');
+        return `e001${pStr}${rnd}`.substring(0, 32);
+    }
 
     /**
      * 바이트 검색 헬퍼
@@ -168,117 +181,7 @@ class AtrGenerator {
         const canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = height;
-        const ctx = canvas.getContext('2d');
-
-        // 1. 좌측 눈금 막대
-        // (1) 상단 최고 온도 박스 (10, 10, 89x55)
-        ctx.fillStyle = 'rgba(10, 10, 20, 0.6)';
-        ctx.fillRect(10, 10, 89, 55);
-        ctx.strokeStyle = 'rgba(246, 246, 245, 1)';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(10, 10, 89, 55);
-
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 20px "Malgun Gothic", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(`${Number(scaleMax).toFixed(1)} °C`, 10 + 44.5, 10 + 27.5);
-
-        // (2) 세로 컬러바 (16, 79, 32x356)
-        ctx.strokeStyle = 'rgba(240, 240, 240, 0.86)';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(15, 78, 34, 358);
-
-        const barTop = 79;
-        const barBot = 434;
-        const barH = barBot - barTop;
-        for (let y = barTop; y <= barBot; y++) {
-            const norm = 1.0 - (y - barTop) / barH;
-            const idx = Math.max(0, Math.min(255, Math.round(norm * 255)));
-            const rgb = AtrGenerator.IRON_LUT[idx] || [0, 0, 0];
-            ctx.fillStyle = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
-            ctx.fillRect(16, y, 32, 1);
-        }
-
-        // (3) 하단 최저 온도 박스 (10, 451, 89x55)
-        ctx.fillStyle = 'rgba(10, 10, 20, 0.6)';
-        ctx.fillRect(10, 451, 89, 55);
-        ctx.strokeStyle = 'rgba(246, 246, 245, 1)';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(10, 451, 89, 55);
-
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 20px "Malgun Gothic", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(`${Number(scaleMin).toFixed(1)} °C`, 10 + 44.5, 451 + 27.5);
-
-        // 2. 스팟 마커 (Sp1, Sp2, Sp3)
-        const spList = spots || [
-            { digit: '1', x: 100, y: 120 },
-            { digit: '2', x: 160, y: 120 },
-            { digit: '3', x: 220, y: 120 }
-        ];
-        const sx = width / srcW;
-        const sy = height / srcH;
-
-        for (let i = 0; i < 3; i++) {
-            const sp = spList[i] || { digit: String(i + 1), x: 100 + i * 60, y: 120 };
-            const cx = Math.round((sp.x || 100) * sx);
-            const cy = Math.round((sp.y || 120) * sy);
-            const r = 14;
-
-            // 외곽선 (그림자)
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(cx, cy, r, 0, Math.PI * 2);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(cx - r - 6, cy); ctx.lineTo(cx + r + 6, cy);
-            ctx.moveTo(cx, cy - r - 6); ctx.lineTo(cx, cy + r + 6);
-            ctx.stroke();
-
-            // 흰색 원 및 십자선
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.arc(cx, cy, r, 0, Math.PI * 2);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(cx - r - 5, cy); ctx.lineTo(cx - r + 3, cy);
-            ctx.moveTo(cx + r - 3, cy); ctx.lineTo(cx + r + 5, cy);
-            ctx.moveTo(cx, cy - r - 5); ctx.lineTo(cx, cy - r + 3);
-            ctx.moveTo(cx, cy + r - 3); ctx.lineTo(cx, cy + r + 5);
-            ctx.stroke();
-
-            // 중앙 십자 포인트
-            ctx.beginPath();
-            ctx.moveTo(cx - 3, cy); ctx.lineTo(cx + 3, cy);
-            ctx.moveTo(cx, cy - 3); ctx.lineTo(cx, cy + 3);
-            ctx.stroke();
-
-            // 라벨: "Sp1", "Sp2", "Sp3"
-            const label = `Sp${sp.digit || sp.id || (i + 1)}`;
-            const lx = cx + r + 4;
-            const ly = cy - r + 4;
-
-            ctx.font = 'bold 16px "Malgun Gothic", sans-serif';
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'alphabetic';
-
-            // 텍스트 외곽선
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
-            ctx.lineWidth = 3;
-            ctx.strokeText(label, lx, ly);
-
-            // 텍스트 본문
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText(label, lx, ly);
-        }
-
+        // 완전 투명 상태로 반환하여 카메라 본체 열화상 사진이 PDF와 100% 동일하게 온전히 표시되도록 함
         return AtrGenerator.canvasToPngBytes(canvas);
     }
 
@@ -289,67 +192,7 @@ class AtrGenerator {
     static async makeCleanThermalJpeg(item, targetW = 320, targetH = 240) {
         if (typeof document === 'undefined') return new Uint8Array();
 
-        // 1. calculator 또는 rawPixels가 있는 경우 순수 원시 비트맵 직접 렌더링
-        const calc = item ? (item.calculator || (item.rawPixels ? item : null)) : null;
-        if (calc && calc.rawPixels && calc.rawPixels.length >= 240) {
-            const canvas = document.createElement('canvas');
-            canvas.width = 320;
-            canvas.height = 240;
-            const ctx = canvas.getContext('2d');
-            const imgData = ctx.createImageData(320, 240);
-            const data = imgData.data;
-
-            // 전체 픽셀 온도 범위 계산
-            let minT = 999.0, maxT = -999.0;
-            const tempGrid = [];
-            const gx = (calc.width || 320) / 320, gy = (calc.height || 240) / 240; // 640x480 사진은 2칸씩 건너뛰어 읽음
-            for (let y = 0; y < 240; y++) {
-                const rowT = [];
-                for (let x = 0; x < 320; x++) {
-                    const t = calc.getTempAt(x * gx, y * gy);
-                    rowT.push(t);
-                    if (t < minT) minT = t;
-                    if (t > maxT) maxT = t;
-                }
-                tempGrid.push(rowT);
-            }
-
-            let scaleMin = Math.floor(minT * 10) / 10.0;
-            let scaleMax = Math.ceil(maxT * 10) / 10.0;
-            if (scaleMax - scaleMin < 2.0) {
-                const mid = (scaleMax + scaleMin) / 2.0;
-                scaleMin = Math.round((mid - 1.0) * 10) / 10.0;
-                scaleMax = Math.round((mid + 1.0) * 10) / 10.0;
-            }
-            const span = (scaleMax - scaleMin) > 0 ? (scaleMax - scaleMin) : 1.0;
-
-            let pIdx = 0;
-            for (let y = 0; y < 240; y++) {
-                for (let x = 0; x < 320; x++) {
-                    const t = tempGrid[y][x];
-                    const norm = (t - scaleMin) / span;
-                    const cIdx = Math.max(0, Math.min(255, Math.round(norm * 255)));
-                    const rgb = AtrGenerator.IRON_LUT[cIdx] || [0, 0, 0];
-                    data[pIdx] = rgb[0];
-                    data[pIdx + 1] = rgb[1];
-                    data[pIdx + 2] = rgb[2];
-                    data[pIdx + 3] = 255;
-                    pIdx += 4;
-                }
-            }
-
-            ctx.putImageData(imgData, 0, 0);
-
-            // item에 scaleMin, scaleMax 보관 (overlayPng에서 사용)
-            if (item) {
-                item.scaleMin = scaleMin;
-                item.scaleMax = scaleMax;
-            }
-
-            return AtrGenerator.canvasToJpegBytes(canvas, 0.85);
-        }
-
-        // 2. Fallback: 기존 JPEG 이미지를 Canvas에 리사이즈
+        // PDF에서 보여지는 것과 100% 동일한 카메라 열화상 본체 사진을 320x240 Baseline JPEG로 렌더링
         let blob = item ? (item.patchedBlob ? (item.patchedBlob.blob || item.patchedBlob) : (item.thermalBlob || item.rawBuffer || item)) : null;
         if (blob instanceof ArrayBuffer || blob instanceof Uint8Array) {
             blob = new Blob([blob], { type: 'image/jpeg' });
@@ -364,7 +207,7 @@ class AtrGenerator {
             canvas.height = targetH;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, targetW, targetH);
-            return AtrGenerator.canvasToJpegBytes(canvas, 0.85);
+            return AtrGenerator.canvasToJpegBytes(canvas, 0.90);
         } finally {
             URL.revokeObjectURL(url);
         }
@@ -411,9 +254,13 @@ class AtrGenerator {
     }
 
     /**
-     * 한 쪽(Page) 내부의 4개 이미지 사본 및 표 글자 전면 치환
+     * 한 쪽(Page) 내부의 4개 이미지 사본 및 표 글자 전면 치환 및 고유 GUID 부여
+     * @param {Uint8Array} protoSlice 템플릿의 Page 1 바이트 슬라이스 (58303 .. 535258)
+     * @param {number} pIdx 페이지 인덱스 (0-based)
+     * @param {string} newGuid 이 페이지의 고유 32자리 GUID
+     * @param {Object} item 페이지 데이터 (circuit_name, spots, thermalBlob, visualBlob, scaleMin, scaleMax 등)
      */
-    static async transformPage(pageBytes, pIdx, item) {
+    static async transformPage(protoSlice, pIdx, newGuid, item) {
         const enc = new TextEncoder();
         const circuitName = (item.circuit_name || `회로_${pIdx + 1}`).trim();
 
@@ -466,7 +313,8 @@ class AtrGenerator {
             croppedVisual = thJpegOnly;
         }
 
-        // 3. 쪽 원본에서 4개 이미지의 위치 찾기
+        // 3. 슬라이스 내 4개 이미지의 위치 찾기
+        const pageBytes = protoSlice;
         const view = new DataView(pageBytes.buffer, pageBytes.byteOffset, pageBytes.byteLength);
         const pngMagic = new Uint8Array([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
         const jpegMagic = new Uint8Array([0xFF, 0xD8, 0xFF]);
@@ -495,14 +343,12 @@ class AtrGenerator {
         let c8 = pageBytes.subarray(idxJpg3 + lenJpg3);
 
         // 4. c0에서 Point 1, 2, 3 온도 치환: 04 LL LL [temp °C]
-        // c0 내에서 °C 기호(0xC2 0xB0 0x43)를 찾아 앞쪽 헤더 갱신
         const degC = new Uint8Array([0xC2, 0xB0, 0x43]);
         const tempIndices = [];
         let pPos = 0;
         while (true) {
             const dIdx = AtrGenerator.findSub(c0, degC, pPos);
             if (dIdx === -1) break;
-            // 숫자 시작점 찾기 (앞으로 거슬러 올라감)
             let nStart = dIdx - 1;
             while (nStart >= 0 && ((c0[nStart] >= 0x30 && c0[nStart] <= 0x39) || c0[nStart] === 0x2E || c0[nStart] === 0x2D || c0[nStart] === 0x20)) {
                 nStart--;
@@ -518,7 +364,6 @@ class AtrGenerator {
         }
 
         if (tempIndices.length >= 3) {
-            // 역순 치환으로 인덱스 유지
             for (let sIdx = 2; sIdx >= 0; sIdx--) {
                 const ti = tempIndices[sIdx];
                 const newTStr = enc.encode(`${temps[sIdx].toFixed(1)} °C`);
@@ -531,10 +376,9 @@ class AtrGenerator {
             }
         }
 
-        // 5. c2, c6에서 파일명 및 경로 치환
-        const slot = AtrGenerator.TEMPLATE_SLOTS[pIdx];
-        const origFn = enc.encode(slot.orig_name || `${slot.circuit} (3).jpg`);
-        const origTitle = enc.encode(`${slot.circuit} (3)`);
+        // 5. c2, c6에서 파일명 및 경로 치환 (Page 1 원본 "1층1번일반 (3).jpg" 대상)
+        const origFn = enc.encode("1층1번일반 (3).jpg");
+        const origTitle = enc.encode("1층1번일반 (3)");
         const newFn = enc.encode(`${circuitName}.jpg`);
         const newTitle = enc.encode(circuitName);
 
@@ -583,10 +427,8 @@ class AtrGenerator {
             dIdx += 3;
         }
 
-        // (2) 측정대상 회로명: 04 10 00 [1층 N번 일반/비상]
-        const cNum = Math.floor(pIdx / 2) + 1;
-        const cType = (pIdx % 2 === 0) ? "일반" : "비상";
-        const origTableCircuit = enc.encode(`1층 ${cNum}번 ${cType}`);
+        // (2) 측정대상 회로명: 04 10 00 [1층 1번 일반] (Page 1 고정 패턴 치환)
+        const origTableCircuit = enc.encode("1층 1번 일반");
         const origTcPat = new Uint8Array([0x04, origTableCircuit.length & 0xff, (origTableCircuit.length >> 8) & 0xff, ...origTableCircuit]);
         const newTcStr = enc.encode(circuitName);
         const newTcPat = new Uint8Array([0x04, newTcStr.length & 0xff, (newTcStr.length >> 8) & 0xff, ...newTcStr]);
@@ -598,8 +440,8 @@ class AtrGenerator {
         const newStatusPat = new Uint8Array([0x04, newStatusStr.length & 0xff, (newStatusStr.length >> 8) & 0xff, ...newStatusStr]);
         c8 = AtrGenerator.replaceBytes(c8, origStatusPat, newStatusPat, 1);
 
-        // 7. 최종 쪽 바이너리 결합
-        return AtrGenerator.concat([
+        // 7. 쪽 바이너리 결합
+        let pageCombined = AtrGenerator.concat([
             c0,
             AtrGenerator.u32Bytes(overlayPng.length), overlayPng,
             c2,
@@ -610,6 +452,13 @@ class AtrGenerator {
             AtrGenerator.u32Bytes(croppedVisual.length), croppedVisual,
             c8
         ]);
+
+        // 8. GUID 치환 (Page 1 프로토타입 GUID -> 새 고유 GUID)
+        const origGuidB = enc.encode(AtrGenerator.PROTOTYPE_SLOT.guid);
+        const newGuidB = enc.encode(newGuid);
+        pageCombined = AtrGenerator.replaceBytes(pageCombined, origGuidB, newGuidB);
+
+        return pageCombined;
     }
 
     /**
@@ -784,33 +633,78 @@ class AtrGenerator {
         const docBytesOriginal = new Uint8Array(await docEntry.async('arraybuffer'));
 
         const totalItems = circuitItems.length;
-        const nPages = Math.max(1, Math.min(AtrGenerator.TEMPLATE_SLOTS.length, totalItems));
+        const nPages = Math.max(1, Math.min(99, totalItems));
         const enc = new TextEncoder();
 
-        // 2. 문서 헤더 준비 (0 .. PAGE_OFFSETS[0])
-        let docHeader = docBytesOriginal.subarray(0, AtrGenerator.PAGE_OFFSETS[0]);
-
-        // 3. 각 쪽 내부 이미지 사본 및 표 글자 치환 변환 수행 (쓰는 쪽만 넣음: 쪽 수 칸과 실제 쪽 수를 맞춤)
-        const transformedPages = [];
-        for (let p = 0; p < nPages; p++) {
-            const pStart = AtrGenerator.PAGE_OFFSETS[p];
-            const pEnd = AtrGenerator.PAGE_OFFSETS[p + 1];
-            const pSlice = docBytesOriginal.subarray(pStart, pEnd);
-            const transformed = await AtrGenerator.transformPage(pSlice, p, circuitItems[p]);
-            transformedPages.push(transformed);
+        // 2. 기존 템플릿의 초기 8개 슬롯 파일들 제거 (완전 동적 생성 체계)
+        const oldTemplateGuids = [
+            '6ba1d80e4c7643c187a6351e6a98a461',
+            'efb4b25cb3cd4e9d9b1c4fc5ad176409',
+            '1eb0b10e1ddc4cc4b65d6554773d46f4',
+            '4ca8128103ba4dafa4ab537cb39d9662',
+            '408c622227024849862c143242cfb33d',
+            'f95f4d40bab240dc91b83ff71a768a77',
+            '0dd0b21d79ae44d59e07c11c96dc2712',
+            'd7feefde27b64da5ab01bc83f6ba3e9e'
+        ];
+        for (const g of oldTemplateGuids) {
+            zip.remove(`cactus/${g}.bin`);
+            zip.remove(`cactus/${g}_MT.bin`);
         }
 
-        // 4. 문서 푸터 준비 (PAGE_OFFSETS[8] .. end)
-        const docFooter = docBytesOriginal.subarray(AtrGenerator.PAGE_OFFSETS[8]);
+        // 3. 문서 헤더, 1페이지 프로토타입 슬라이스, 공통 푸터 준비
+        const docHeader = docBytesOriginal.subarray(0, AtrGenerator.PROTOTYPE_OFFSET_START);
+        const protoSlice = docBytesOriginal.subarray(AtrGenerator.PROTOTYPE_OFFSET_START, AtrGenerator.PROTOTYPE_OFFSET_END);
+        const docFooter = docBytesOriginal.subarray(AtrGenerator.TEMPLATE_FOOTER_OFFSET);
 
-        // 5. 새 문서 결합
+        // 4. 각 쪽 동적 복제 및 변환 수행 (1 ~ 99장)
+        const transformedPages = [];
+        for (let p = 0; p < nPages; p++) {
+            const newGuid = AtrGenerator.generateGuid(p);
+            const item = circuitItems[p];
+            const circuitName = (item.circuit_name || `회로_${p + 1}`).trim();
+
+            const transformed = await AtrGenerator.transformPage(protoSlice, p, newGuid, item);
+            transformedPages.push(transformed);
+
+            // 새 열화상 사진 원본 바이너리 저장
+            let thData = null;
+            const pb = item.patchedBlob ? (item.patchedBlob.blob || item.patchedBlob) : null;
+            if (pb && pb.arrayBuffer) {
+                thData = new Uint8Array(await pb.arrayBuffer());
+            } else if (item.thermalBlob && item.thermalBlob.arrayBuffer) {
+                thData = new Uint8Array(await item.thermalBlob.arrayBuffer());
+            } else if (item.rawBuffer) {
+                thData = new Uint8Array(item.rawBuffer);
+            }
+
+            if (thData) {
+                zip.file(`cactus/${newGuid}.bin`, thData);
+            }
+
+            // _MT.bin 메타데이터 동기화
+            const mtJson = {
+                "$types": { "Cactus.Common.FileMeta, Cactus.Common": "1" },
+                "$type": "1",
+                "Id": newGuid,
+                "Name": `${circuitName}.jpg`,
+                "Title": circuitName,
+                "CreationTimeUtcLong": 5250958105167387904,
+                "LastWriteTimeUtcLong": 5250958149365108758,
+                "LastAccessTimeUtcLong": 5250958149365108758,
+                "OriginalPath": `Z:\\VOL1\\Data\\0003_전기방재_[전기_방재업무]\\001_전기\\00_점검관련\\★ 직무고시 서류 모음\\05_열화상 점검\\26년\\4분기\\EPS실\\1층\\${circuitName}.jpg`,
+                "FileSize": thData ? thData.length : 389428,
+                "Checksum": null,
+                "IsReadOnly": false,
+                "IsHidden": false
+            };
+            zip.file(`cactus/${newGuid}_MT.bin`, JSON.stringify(mtJson));
+        }
+
+        // 5. 새 문서 결합 (Header + Page 1..N + Footer)
         let docBytes = AtrGenerator.concat([docHeader, ...transformedPages, docFooter]);
 
-        // 6. 문서 헤더 uint32 쪽 수 설정
-        const countView = new DataView(docBytes.buffer, docBytes.byteOffset, docBytes.byteLength);
-        countView.setUint32(AtrGenerator.PAGE_COUNT_POS, nPages, true);
-
-        // 7. cactus-meta 및 Document text 업데이트 (보고서 제목 길이 헤더 동기화)
+        // 6. cactus-meta 및 Document text 업데이트 (보고서 제목 길이 헤더 동기화)
         const metaEntry = zip.file('cactus-meta');
         let metaBytes = metaEntry ? new Uint8Array(await metaEntry.async('arraybuffer')) : new Uint8Array();
 
@@ -835,6 +729,15 @@ class AtrGenerator {
 
         // (3) Document ReportName 및 본문/하단 제목 치환: [0x04, LL, LL, ...제목]
         docBytes = AtrGenerator.replaceBytes(docBytes, patMetaOld, patMetaNew);
+
+        // 7. 문서 헤더 uint32 쪽 수 설정 (ReportName 뒤 14바이트 위치에 정확히 동적 기록)
+        const repKey = enc.encode('ReportName');
+        const repIdx = AtrGenerator.findSub(docBytes, repKey);
+        if (repIdx !== -1) {
+            const countPos = repIdx + repKey.length + 3 + newTitleB.length + 14;
+            const countView = new DataView(docBytes.buffer, docBytes.byteOffset, docBytes.byteLength);
+            countView.setUint32(countPos, nPages, true);
+        }
 
         // 8. 점검 일자 업데이트
         let rawDate = "2026-10-10";
@@ -872,70 +775,7 @@ class AtrGenerator {
 
         zip.file('cactus-meta', metaBytes);
 
-        // 10. 각 슬롯의 새 사진 원본 및 _MT.bin 메타데이터 저장
-        for (let i = 0; i < nPages; i++) {
-            const slot = AtrGenerator.TEMPLATE_SLOTS[i];
-            const item = circuitItems[i];
-            const guid = slot.guid;
-
-            const circuitName = (item.circuit_name || `회로_${i+1}`).trim();
-            const mtKey = `cactus/${guid}_MT.bin`;
-
-            let oldName = slot.orig_name || `${slot.circuit} (3).jpg`;
-            let oldTitle = `${slot.circuit} (3)`;
-            let oldPath = null;
-
-            const mtEntry = zip.file(mtKey);
-            let mtJson = null;
-            if (mtEntry) {
-                try {
-                    mtJson = JSON.parse(await mtEntry.async('string'));
-                    if (mtJson.Name) oldName = mtJson.Name;
-                    if (mtJson.Title) oldTitle = mtJson.Title;
-                    if (mtJson.OriginalPath) oldPath = mtJson.OriginalPath;
-                } catch (e) {}
-            }
-
-            const newTitle = circuitName;
-            const newName = `${circuitName}.jpg`;
-            let newPath = oldPath;
-            if (oldPath && oldPath.includes('\\')) {
-                newPath = oldPath.substring(0, oldPath.lastIndexOf('\\') + 1) + newName;
-            }
-
-            // 새 열화상 사진 원본 바이너리 저장
-            let thData = null;
-            const pb = item.patchedBlob ? (item.patchedBlob.blob || item.patchedBlob) : null;
-            if (pb && pb.arrayBuffer) {
-                thData = new Uint8Array(await pb.arrayBuffer());
-            } else if (item.thermalBlob && item.thermalBlob.arrayBuffer) {
-                thData = new Uint8Array(await item.thermalBlob.arrayBuffer());
-            } else if (item.rawBuffer) {
-                thData = new Uint8Array(item.rawBuffer);
-            }
-
-            if (thData) {
-                zip.file(`cactus/${guid}.bin`, thData);
-            }
-
-            // _MT.bin 메타데이터 동기화
-            if (mtJson) {
-                mtJson.Name = newName;
-                mtJson.Title = newTitle;
-                if (newPath) mtJson.OriginalPath = newPath;
-                if (thData) mtJson.FileSize = thData.length;
-                zip.file(mtKey, JSON.stringify(mtJson));
-            }
-        }
-
-        // 11. 미사용 슬롯 제거
-        for (let i = nPages; i < AtrGenerator.TEMPLATE_SLOTS.length; i++) {
-            const slot = AtrGenerator.TEMPLATE_SLOTS[i];
-            zip.remove(`cactus/${slot.guid}.bin`);
-            zip.remove(`cactus/${slot.guid}_MT.bin`);
-        }
-
-        // 12. Document 및 Document_MT 저장
+        // 10. Document 및 Document_MT 저장
         zip.file(docName, docBytes);
 
         const docMtKey = 'cactus/af9878b2aa8e47faaf8942d892cde994_MT.bin';
