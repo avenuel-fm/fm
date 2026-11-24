@@ -10,10 +10,10 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.26.0"></script>
-<script>window.WS_VERSION = '0.26.0';</script>
-<script src="offline.js?v=0.26.0"></script>
-<script src="ws-api.js?v=0.26.0"></script>
+<script src="config.js?v=0.26.1"></script>
+<script>window.WS_VERSION = '0.26.1';</script>
+<script src="offline.js?v=0.26.1"></script>
+<script src="ws-api.js?v=0.26.1"></script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -676,15 +676,18 @@ select.lgin{text-align:center;padding:0}
 .rwvb{flex:1;overflow:auto;background:var(--tint)}.rwvb img{display:block;margin:0 auto}.rwvf{display:flex;align-items:center;justify-content:center;gap:var(--sp-3);padding:var(--sp-2) var(--sp-3) calc(var(--sp-2) + env(safe-area-inset-bottom));border-top:1px solid var(--line2)}
 @media (max-width:599px){.rwg{gap:var(--sp-1);padding:var(--sp-2)}}
 /* 주간/야간 작업내역 (결정 240) */
-.whf{padding:var(--sp-3)}.whpic{min-width:0}.whpt{display:flex;align-items:baseline;gap:var(--sp-2);margin:var(--sp-3) 0 var(--sp-1)}.whpt b{font-size:var(--size-s);font-weight:600;color:var(--sub)}.whpt small{color:var(--muted);font-size:var(--size-s)}
-.whpic .btn.dis{opacity:.5;pointer-events:none}.whg{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-1);margin-top:var(--sp-2)}.wht{position:relative;min-width:0}.whim{display:flex;width:100%;aspect-ratio:4/3;border:1px solid var(--line2);padding:0;background:var(--tint);cursor:pointer;overflow:hidden}.whim img{width:100%;height:100%;object-fit:contain}
+.whf{padding:var(--sp-3)}.whpic{min-width:0;margin-top:var(--sp-3)}.whpt{display:flex;align-items:baseline;gap:var(--sp-2);margin-bottom:var(--sp-1)}.whpt b{font-size:var(--size-s);font-weight:600;color:var(--sub)}.whpt small{color:var(--muted);font-size:var(--size-s)}
+.whpc{border:1px solid var(--line2);border-radius:var(--radius);padding:var(--sp-2);margin-top:var(--sp-2);min-width:0}.whpc h4{margin:0 0 var(--sp-1);font-size:var(--size-m);font-weight:600;color:var(--navy)}.whpc h4 small{margin-left:var(--sp-2);font-weight:400;color:var(--muted);font-size:var(--size-s)}
+.whg,.whg2{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-1)}.whg2{margin-top:var(--sp-2)}@media (min-width:768px){.whg{grid-template-columns:repeat(4,1fr)}}
+.wht{position:relative;min-width:0}.whim{display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:4/3;border:1px solid var(--line2);padding:0;background:var(--tint);cursor:pointer;overflow:hidden;color:var(--muted);font-size:var(--size-s)}.whim img{width:100%;height:100%;object-fit:contain}.whim.empty{cursor:default}
 .whx{position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:var(--radius);border:1px solid var(--line);background:var(--white);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
-.whsplit{display:grid;grid-template-columns:1fr 1fr;gap:0}.whsplit .whpic{padding-right:var(--sp-3)}.whsplit .whpic+.whpic{padding:0 0 0 var(--sp-3);border-left:1px solid var(--line2)}
+.whbs{display:flex;gap:var(--sp-1);margin-top:var(--sp-1)}.whbs .btn{flex:1;min-width:0;min-height:var(--control-h);padding:0 var(--sp-1);gap:var(--sp-1)}
+.whsplit{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:var(--sp-2)}.whsplit .whcol{min-width:0;padding-right:var(--sp-2)}.whsplit .whcol+.whcol{padding:0 0 0 var(--sp-2);border-left:1px solid var(--line2)}.whsplit .whpc:first-child{margin-top:0}
 .whck{display:flex;gap:var(--sp-4);min-height:var(--control-h);align-items:center}.whck label{display:flex;align-items:center;gap:var(--sp-1);font-size:var(--size-m)}
 .whtwo{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3)}.whmat{display:grid;grid-template-columns:1fr 72px 72px 44px;gap:var(--sp-1);margin-bottom:var(--sp-1)}.whdel{margin-top:var(--sp-3);color:var(--error);border-color:var(--error)}
 .whrow{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;padding:var(--sp-3);background:var(--white);border:0;border-bottom:1px solid var(--line2);font:inherit;color:var(--ink);cursor:pointer}.whrow.on{background:var(--tint)}.whrow span{font-size:var(--size-m)}.whrow small{color:var(--muted);font-size:var(--size-s)}
 .whb{display:inline-block;margin-left:var(--sp-1);padding:0 var(--sp-1);border:1px solid var(--error);border-radius:var(--radius);color:var(--error)}
-@media (max-width:599px){.whtwo{grid-template-columns:1fr}.whsplit .whpic{padding-right:var(--sp-2)}.whsplit .whpic+.whpic{padding-left:var(--sp-2)}}
+@media (max-width:599px){.whtwo{grid-template-columns:1fr}}
 /* 온습도/공조기/에어커튼 입력 (WS_온습도공조기, 결정 212·196) — 시안 docs/시안/WS-온습도공조기 */
 .cltabs{margin-bottom:var(--sp-3)}.cltabs button{font-size:var(--size-s);line-height:1.3;padding:4px 2px}
 .flnav{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-1);margin-top:var(--sp-3)}
@@ -787,7 +790,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B3','B2','B1','1F','2F','3F','4F','5F','6F','7F','8F','9F','10F'];   // 소화기·소화전·공기호흡기 층 B3~10F (결정 228)
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.0' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.1' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -4390,7 +4393,7 @@ function whNew(k) {
     : { id: '', day: rwToday(), parts: part, workers: u.name || '', floor: '', content: '', mats: [{ n: '', q: '', u: '' }], note: '', before: [], after: [] };
 }
 async function openWh() {
-  S.wh = S.wh || { tab: 'd', v: null, d: { list: null, q: '', qv: '', f: whNew('d'), dirty: false, busy: false, keys: [] }, n: { list: null, q: '', qv: '', f: null, dirty: false, busy: false, keys: [] } };
+  S.wh = S.wh || { tab: 'd', v: null, d: { list: null, q: '', qv: '', f: whNew('d'), dirty: false, busy: false, keys: [] }, n: { list: null, q: '', qv: '', f: whNew('n'), dirty: false, busy: false, keys: [] } };
   go('wh'); await whLoad(S.wh.tab);
 }
 async function whLoad(k) {
@@ -4417,13 +4420,27 @@ function whMat(i, key, el) { S.wh.d.f.mats[i][key] = el.value; whDirty(); }
 function whMatAdd() { const m = S.wh.d.f.mats; if (m.length >= 20) return toast('자재는 20줄까지 넣을 수 있습니다'); m.push({ n: '', q: '', u: '' }); whDirty(); render(); }
 function whMatRm(i) { const m = S.wh.d.f.mats; m.splice(i, 1); if (!m.length) m.push({ n: '', q: '', u: '' }); whDirty(); render(); }
 
-/* 사진 칸 하나 (제목 · 사진찍기 · 갤러리 · 격자 · 장마다 ✕). max = 장수 제한 (없으면 제한 없음) */
-function whPics(k, fld, title, max) {
-  const L = S.wh[k].f[fld], full = max && L.length >= max;
-  const pick = cam => '<label class="btn sm' + (full ? ' dis' : '') + '">' + (cam ? ICON.cam + ' 사진찍기' : ICON.folder + ' 갤러리') + '<input type="file" accept="image/*"' + (cam ? ' capture="environment"' : ' multiple') + (full ? ' disabled' : '') + ' hidden onchange="whAdd(\'' + k + '\',\'' + fld + '\',this)"></label>';
-  return '<div class="whpic"><div class="whpt"><b>' + title + '</b><small>' + L.length + (max ? '/' + max : '') + '장</small></div><div class="tbpb">' + pick(1) + pick(0) + '</div>' +
-    '<div class="whg">' + L.map((p, i) => '<div class="wht"><button type="button" class="whim" onclick="whView(\'' + k + '\',\'' + fld + '\',' + i + ')" aria-label="' + title + ' ' + (i + 1) + ' 크게 보기"><img src="' + h(p.src) + '" alt=""></button>' +
-      '<button type="button" class="whx" onclick="whRm(\'' + k + '\',\'' + fld + '\',' + i + ')" aria-label="사진 지우기">' + ICON.x + '</button></div>').join('') + '</div></div>';
+/* 사진 칸 (스크린샷의 「회의 사진」 칸 모양): 제목 · 큰 4:3 칸 · 아래 카메라/파일 버튼 */
+function whBtns(k, fld, i, multi) {
+  const pick = cam => '<label class="btn whbt">' + (cam ? ICON.cam + ' 카메라' : ICON.folder + ' 파일') + '<input type="file" accept="image/*"' + (cam ? ' capture="environment"' : multi ? ' multiple' : '') + ' hidden onchange="whAdd(\'' + k + '\',\'' + fld + '\',this,' + i + ')"></label>';
+  return '<div class="whbs">' + pick(1) + pick(0) + '</div>';
+}
+function whTile(k, fld, p, i) {
+  return '<div class="wht"><button type="button" class="whim" onclick="whView(\'' + k + '\',\'' + fld + '\',' + i + ')" aria-label="사진 ' + (i + 1) + ' 크게 보기"><img src="' + h(p.src) + '" alt=""></button>' +
+    '<button type="button" class="whx" onclick="whRm(\'' + k + '\',\'' + fld + '\',' + i + ')" aria-label="사진 지우기">' + ICON.x + '</button></div>';
+}
+function whSlots(k, fld, title, max) {   // 주간: 칸 하나에 사진 한 장, 칸마다 카메라/파일 (예전에 더 넣어 둔 사진은 칸을 더 보여 줌)
+  const L = S.wh[k].f[fld], n = Math.max(max, L.length);
+  return '<div class="whcol">' + Array.from({ length: n }, (_, i) => '<div class="whpc"><h4>' + title + ' ' + (i + 1) + '</h4>' + (L[i] ? whTile(k, fld, L[i], i) : '<div class="whim empty">사진 없음</div>') + whBtns(k, fld, i, false) + '</div>').join('') + '</div>';
+}
+function whMulti(k, fld, title) {   // 야간: 개수 제한 없음, 휴대폰 2열 · PC 4열
+  const L = S.wh[k].f[fld];
+  return '<div class="whpc"><h4>' + title + '<small>' + L.length + '장</small></h4>' + (L.length ? '<div class="whg">' + L.map((p, i) => whTile(k, fld, p, i)).join('') + '</div>' : '') + whBtns(k, fld, -1, true) + '</div>';
+}
+function whSmall(k, fld, title) {   // 각서: 예전 모양 그대로
+  const L = S.wh[k].f[fld], pick = cam => '<label class="btn sm">' + (cam ? ICON.cam + ' 사진찍기' : ICON.folder + ' 갤러리') + '<input type="file" accept="image/*"' + (cam ? ' capture="environment"' : ' multiple') + ' hidden onchange="whAdd(\'' + k + '\',\'' + fld + '\',this,-1)"></label>';
+  return '<div class="whpic"><div class="whpt"><b>' + title + '</b><small>' + L.length + '장</small></div><div class="tbpb">' + pick(1) + pick(0) + '</div>' +
+    '<div class="whg2">' + L.map((p, i) => whTile(k, fld, p, i)).join('') + '</div></div>';
 }
 function whFloors(f) { return '<div class="rwfls">' + RW_FLOORS.map(x => '<button type="button" class="rwfl' + (f.floor === x ? ' on' : '') + '" aria-pressed="' + (f.floor === x) + '" onclick="whFloor(\'' + x + '\')">' + x + '</button>').join('') + '</div>'; }
 function whFormD(f) {
@@ -4432,7 +4449,7 @@ function whFormD(f) {
     '<label class="rwlb">작업자</label><input class="inp" maxlength="60" placeholder="예: 홍길동, 김철수" value="' + h(f.workers) + '" oninput="whIn(\'workers\',this)">' +
     '<div class="rwlb">작업위치 (버튼으로 선택)</div>' + whFloors(f) +
     '<label class="rwlb">작업내용</label><textarea class="inp" rows="3" maxlength="300" oninput="whIn(\'content\',this)">' + h(f.content) + '</textarea>' +
-    '<div class="whsplit">' + whPics('d', 'before', '작업 전 사진', 4) + whPics('d', 'after', '작업 후 사진', 4) + '</div>' +
+    '<div class="whsplit">' + whSlots('d', 'before', '작업 전', 2) + whSlots('d', 'after', '작업 후', 2) + '</div>' +
     '<div class="rwlb">사용자재 (이름 · 수량 · 단위)</div>' + f.mats.map((m, i) => '<div class="whmat"><input class="inp" maxlength="30" placeholder="자재 이름" value="' + h(m.n) + '" oninput="whMat(' + i + ',\'n\',this)" aria-label="자재 이름">' +
       '<input class="inp" maxlength="10" inputmode="decimal" placeholder="수량" value="' + h(m.q) + '" oninput="whMat(' + i + ',\'q\',this)" aria-label="수량"><input class="inp" maxlength="10" placeholder="단위" value="' + h(m.u) + '" oninput="whMat(' + i + ',\'u\',this)" aria-label="단위">' +
       '<button type="button" class="btn sm" onclick="whMatRm(' + i + ')" aria-label="자재 줄 지우기">' + ICON.x + '</button></div>').join('') +
@@ -4440,12 +4457,12 @@ function whFormD(f) {
     '<label class="rwlb">비고</label><textarea class="inp" rows="2" maxlength="300" oninput="whIn(\'note\',this)">' + h(f.note) + '</textarea>' + whDelBtn(f) + '</div>';
 }
 function whFormN(f) {
-  return '<div class="card whf">' + whPics('n', 'photos', '현장 사진 (개수 제한 없음)') +
+  return '<div class="card whf">' + whMulti('n', 'photos', '현장 사진') +
     '<div class="whtwo"><div><label class="rwlb">일자</label><input class="inp" type="date" max="' + rwToday() + '" value="' + h(f.day) + '" onchange="whIn(\'day\',this)" aria-label="일자"></div>' +
     '<div><label class="rwlb">업체명 (직접 입력)</label><input class="inp" maxlength="30" placeholder="예: OO인테리어" value="' + h(f.co) + '" oninput="whIn(\'co\',this)"></div></div>' +
     '<div class="rwlb">작업위치 (버튼으로 선택)</div>' + whFloors(f) +
     '<label class="rwlb">작업내용</label><textarea class="inp" rows="3" maxlength="300" oninput="whIn(\'content\',this)">' + h(f.content) + '</textarea>' +
-    '<div class="whsplit">' + whPics('n', 'fire', '방염서류 (여러 장)') + whPics('n', 'pledge', '각서 (여러 장)') + '</div>' +
+    whMulti('n', 'fire', '방염서류') + whSmall('n', 'pledge', '각서 (여러 장)') +
     '<small class="rwhint">서류 사진은 누르면 크게 볼 수 있습니다. 흐리거나 어두우면 「다시 찍으세요」 안내가 나옵니다. 서류 사진은 일반 사진보다 덜 줄여 저장합니다.</small>' +
     '<label class="rwlb">기타사항</label><textarea class="inp" rows="2" maxlength="300" oninput="whIn(\'note\',this)">' + h(f.note) + '</textarea>' + whDelBtn(f) + '</div>';
 }
@@ -4463,7 +4480,7 @@ function renderWh() {
   const tabs = '<div class="seg cltabs" role="tablist" aria-label="작업내역 종류">' + [['d', '주간작업'], ['n', '야간작업']].map(t => '<button type="button" role="tab" aria-selected="' + (t[0] === k) + '" class="' + (t[0] === k ? 'on' : '') + '" onclick="whTab(\'' + t[0] + '\')">' + t[1] + '</button>').join('') + '</div>';
   const srch = '<div class="cssec"><label class="cssrch"><input id="whQ" type="search" enterkeyhint="search" placeholder="' + (k === 'd' ? '일자 · 위치 · 내용 · 작업자' : '층 · 업체 · 작업내용') + '" aria-label="검색" value="' + h(o.qv) + '" oninput="S.wh.' + k + '.qv=this.value" onkeydown="if(event.key===\'Enter\')whSearch()"></label>' +
     '<button class="btn pri" onclick="whSearch()">검색하기</button>' + (k === 'n' ? '<button class="btn" onclick="whNewForm()">신규작성</button>' : '') + '</div>';
-  const form = o.f ? (k === 'd' ? whFormD(o.f) : whFormN(o.f)) : '<div class="banner b-gray">「신규작성」을 누르거나 아래 목록에서 작업을 고르세요</div>';
+  const form = o.f ? (k === 'd' ? whFormD(o.f) : whFormN(o.f)) : '';
   const bar = o.f ? '<div class="nwbar" id="whBar"><span id="whState">' + whState() + '</span><button class="btn" onclick="whPrint()">' + ICON.print + '인쇄 A4</button>' +
     '<button class="btn" onclick="whPdf()"' + (o.pdfBusy ? ' disabled' : '') + '>' + (o.pdfBusy ? '<span class="spin"></span>' : ICON.file + 'PDF 보기') + '</button>' +
     '<button class="btn pri" onclick="whSave()"' + (o.busy ? ' disabled' : '') + '>' + (o.busy ? '<span class="spin"></span>' : '저장') + '</button></div>' : '';
@@ -4486,16 +4503,16 @@ function whQuality(uri) {
     im.onerror = () => ok(''); im.src = uri;
   });
 }
-async function whAdd(k, fld, el) {
+async function whAdd(k, fld, el, at) {
   const fs = Array.from(el.files || []); el.value = ''; if (!fs.length) return;
-  const o = S.wh[k], L = o.f[fld], max = k === 'd' ? 4 : 0, doc = fld === 'fire' || fld === 'pledge'; let dup = 0, cut = 0, bad = '';
+  const o = S.wh[k], L = o.f[fld], max = k === 'd' ? 2 : 0, doc = fld === 'fire' || fld === 'pledge'; let dup = 0, cut = 0, bad = '';
   for (const f of fs) {
-    if (max && L.length >= max) { cut++; continue; }
+    if (max && at < 0 && L.length >= max) { cut++; continue; }
     const key = f.name + '|' + f.size + '|' + f.lastModified;
     if (o.keys.indexOf(key) !== -1) { dup++; continue; }
     try {
       const data = await (doc ? shrinkJpeg(f, 2400, 0.85) : shrinkJpeg(f, 1600, 0.7));
-      L.push({ data, src: data }); o.keys.push(key); if (o.keys.length > 80) o.keys.shift();
+      if (at >= 0 && at < L.length) L[at] = { data, src: data }; else L.push({ data, src: data }); o.keys.push(key); if (o.keys.length > 80) o.keys.shift();
       if (doc && !bad) bad = await whQuality(data);
     } catch (e) { toast(e.message); }
   }
@@ -4539,7 +4556,7 @@ async function whDel() {
   try {
     const r = await call(WH_API[k][2], o.f.id); if (!r.ok) return toast(r.error);
     if (o.list) o.list = o.list.filter(x => x.id !== o.f.id);
-    o.f = k === 'd' ? whNew('d') : null; o.dirty = false; render(); toast('지웠습니다');
+    o.f = whNew(k); o.dirty = false; render(); toast('지웠습니다');
   } catch (e) { /* call() 이 알림 */ }
 }
 
