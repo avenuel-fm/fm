@@ -1,10 +1,10 @@
 /* ==========================================================================
-   utilityLineEditor.js - 기능실(자) - 매장(모) 설비 배관/간선(전기, 수도, 가스, 배수) CAD 엔진
+   utilityLineEditor.js - 매장(자) ← 기능실(모) 설비 배관/간선(전기, 수도, 가스, 배수). 선은 길찾기로 자동 (결정 246)
    ========================================================================== */
 
 var isUtilLineDrawingMode = false;
-var utilLineSourceStore = null;    // 시작 기능실(자)
-var utilLineTargetStore = null;    // 도착 매장(모)
+var utilLineSourceStore = null;    // 자 = 매장 (결정 246. 예전에는 기능실이 자)
+var utilLineTargetStore = null;    // 모 = 기능실. 흐름은 모 → 자
 var utilLineSelectedType = 'power';// 'power'(전기) | 'water'(수도) | 'gas'(가스) | 'drain'(배수)
 var utilLineInputValue = '50';     // 입력 규격 (전기: A, 수도: mm, 배수: mm, 가스: 비활성)
 var utilLineDrawingPoints = [];    // 선분 점 목록 [{x, y}, ...]
@@ -26,7 +26,7 @@ var UTIL_SPECS_CONFIG = {
         label: '전기',
         color: '#2563eb', // 파란색
         className: 'util-line-eps',
-        direction: 'forward', // 자 -> 모
+        direction: 'forward', // 모 -> 자 (점 순서가 기능실 → 매장)
         unit: 'A',
         defaultVal: '50',
         disabledInput: false,
@@ -37,7 +37,7 @@ var UTIL_SPECS_CONFIG = {
         label: '수도',
         color: '#0284c7', // 파란색/하늘색
         className: 'util-line-water',
-        direction: 'forward', // 자 -> 모
+        direction: 'forward', // 모 -> 자 (점 순서가 기능실 → 매장)
         unit: 'mm',
         defaultVal: '25',
         disabledInput: false,
@@ -48,7 +48,7 @@ var UTIL_SPECS_CONFIG = {
         label: '가스',
         color: '#eab308', // 노란색
         className: 'util-line-gas',
-        direction: 'forward', // 자 -> 모
+        direction: 'forward', // 모 -> 자 (점 순서가 기능실 → 매장)
         unit: '',
         defaultVal: '',
         disabledInput: true, // 입력칸 비활성화
@@ -59,7 +59,7 @@ var UTIL_SPECS_CONFIG = {
         label: '배수',
         color: '#0f172a', // 검은색
         className: 'util-line-drain',
-        direction: 'reverse', // 모 -> 자
+        direction: 'forward', // 모 -> 자
         unit: 'mm',
         defaultVal: '50',
         disabledInput: false,
@@ -239,7 +239,7 @@ function selectUtilLineForDelete(line) {
     if (mapStore.readOnly()) return;   // 보기 전용: 선택(라벨 보기)만
 
     const specDesc = line.specText ? ` (${line.specText})` : '';
-    const confirmMsg = `[설비 연결선 선택]\n기능실(자): ${line.sourceName || '기능실'}\n매장(모): ${line.targetName || '매장'}\n구분: ${line.subTypeLabel || ''}${specDesc}\n\n이 연결선을 삭제하시겠습니까?`;
+    const confirmMsg = `[설비 연결선 선택]\n매장(자): ${line.sourceName || '매장'}\n기능실(모): ${line.targetName || '기능실'}\n구분: ${line.subTypeLabel || ''}${specDesc}\n\n이 연결선을 삭제하시겠습니까?`;
 
     if (confirm(confirmMsg)) {
         const floor = FLOORS[currentFloorIdx];
@@ -341,40 +341,38 @@ function clearUtilityLineHighlight() {
 }
 
 // ================= 설비 라인 드로잉 모드 시작/종료 =================
-function startUtilityLineDrawingMode(sourceStore = null) {
+function startUtilityLineDrawingMode(preStore = null) {
     // 1. 기능실 등록 여부 사전 가드 체크
     if (!hasAnyUtilityStores()) {
         showToast('⚠️ 도면에 등록된 기능실이 없습니다. [매장 추가/편집]에서 기능실을 먼저 등록해주세요.', 3000);
         return;
     }
-
     isUtilLineDrawingMode = true;
     utilLineDrawingPoints = [];
-    utilLineSourceStore = (sourceStore && sourceStore.type === 'utility') ? sourceStore : null;
+    utilLineSourceStore = null;
     utilLineTargetStore = null;
-
-    // 소스 기능실이 주어졌을 때 타입 자동 감지
-    if (sourceStore && sourceStore.type === 'utility' && sourceStore.name) {
-        const nm = sourceStore.name.toUpperCase();
-        if (nm.includes('EPS')) setUtilLineType('power');
-        else if (nm.includes('PS')) setUtilLineType('water');
-        else if (nm.includes('PD')) setUtilLineType('drain');
-        else if (nm.includes('가스')) setUtilLineType('gas');
-    }
-
-    // 소스 기능실 중심점을 첫 번째 점으로 등록
-    if (utilLineSourceStore) {
-        const center = getStoreCenter(utilLineSourceStore);
-        if (center) utilLineDrawingPoints.push(center);
-    }
-
+    purgeLegacyUtilityLines();
     showUtilLineGuideBanner();
-    const promptMsg = utilLineSourceStore ? 
-        `자[${utilLineSourceStore.name}] 선택됨. 경로를 그린 뒤 도착 매장(모)을 클릭하세요.` : 
-        '도면에서 시작할 기능실(자)을 먼저 클릭하세요.';
-    showToast(promptMsg, 2500);
+    if (preStore) { handleUtilLineMapClick(null, preStore); return; }   // 기능실 창의 「매장 연결선」에서 온 경우
+    showToast('매장(자)과 기능실(모)을 차례로 누르면 선이 길을 따라 자동으로 그려집니다.', 2500);
 }
 
+// 예전 방식(손으로 꺾어 그린) 배관은 길찾기 방식으로 바뀌며 지움 (결정 246). 자동으로 그린 선은 auto 표시가 있음
+function purgeLegacyUtilityLines() {
+    if (mapStore.readOnly()) return;
+    let total = 0;
+    FLOORS.forEach(f => { total += getFloorUtilityLines(f.code).filter(l => !l.auto).length; });
+    if (!total) return;
+    if (!confirm('예전 방식으로 그린 배관 ' + total + '개가 있습니다.\n배관 연결이 길 따라 자동으로 그리는 방식으로 바뀌어서 이 선들을 지웁니다. (기록에서 「이 날로 되돌리기」로 되살릴 수 있습니다)\n\n지울까요?')) return;
+    if (typeof pushUndoState === 'function') pushUndoState('예전 배관 지움');
+    FLOORS.forEach(f => {
+        const all = getFloorUtilityLines(f.code), keep = all.filter(l => l.auto);
+        if (keep.length !== all.length) saveFloorUtilityLines(f.code, keep);
+    });
+    activeSelectedUtilLineId = null;
+    renderFloorUtilityLines();
+    showToast('예전 배관 ' + total + '개를 지웠습니다.', 2000);
+}
 function exitUtilityLineDrawingMode() {
     isUtilLineDrawingMode = false;
     utilLineDrawingPoints = [];
@@ -441,95 +439,59 @@ function removeTempDrawingLine() {
     if (tempPoly) tempPoly.remove();
 }
 
-// 뷰포트 클릭 시 점 추가 또는 매장 연결 완료 (직각 스냅 적용)
+// 매장(자)·기능실(모)을 누르면 둘이 모였을 때 길찾기로 선을 그림. 누르는 순서는 상관없음
 function handleUtilLineMapClick(svgPt, targetStore = null) {
     if (!isUtilLineDrawingMode) return false;
-
-    // 1. 소스 기능실(자)이 아직 선택되지 않은 상태
-    if (!utilLineSourceStore) {
-        if (targetStore) {
-            if (targetStore.type !== 'utility') {
-                showToast(`⚠️ [${targetStore.name}] 매장은 기능실이 아닙니다. 시작할 기능실(자: EPS, PS 등)을 먼저 선택하세요.`, 2500);
-                return true;
-            }
-            utilLineSourceStore = targetStore;
-            const center = getStoreCenter(targetStore) || svgPt;
-            utilLineDrawingPoints.push(center);
-            updateUtilLineGuideUI();
-            showToast(`자[${targetStore.name}] 선택 완료! 도면을 클릭하여 경로를 그린 후 도착 매장(모)을 클릭하세요.`, 2000);
-            return true;
-        } else {
-            showToast('⚠️ 먼저 공급할 기능실(자)을 클릭하여 선택해주세요.', 1500);
-            return true;
-        }
-    }
-
-    // 2. 소스 기능실(자)이 이미 있고, 다른 매장(모)을 클릭한 경우 -> 연결 완료!
-    if (utilLineDrawingPoints.length >= 1 && targetStore && targetStore !== utilLineSourceStore) {
+    if (!targetStore) { showToast('도면의 매장 또는 기능실을 눌러 주세요.', 1500); return true; }
+    if (targetStore.type === 'utility') {
         utilLineTargetStore = targetStore;
-        const endCenter = getStoreCenter(targetStore) || svgPt;
-        const lastPt = utilLineDrawingPoints[utilLineDrawingPoints.length - 1];
-        const finalPt = typeof snapToOrtho === 'function' ? snapToOrtho(endCenter, lastPt) : endCenter;
-        utilLineDrawingPoints.push(finalPt);
-        finishUtilityLine();
-        return true;
+        const nm = (targetStore.name || '').toUpperCase();   // 기능실 이름으로 종류 자동
+        if (nm.includes('EPS')) setUtilLineType('power');
+        else if (nm.includes('PS')) setUtilLineType('water');
+        else if (nm.includes('PD')) setUtilLineType('drain');
+        else if (nm.includes('가스')) setUtilLineType('gas');
+    } else {
+        utilLineSourceStore = targetStore;
     }
-
-    // 3. 중간 꺾임점 추가 (직각 스냅 적용)
-    let ptToAdd = svgPt;
-    if (utilLineDrawingPoints.length > 0) {
-        const lastPt = utilLineDrawingPoints[utilLineDrawingPoints.length - 1];
-        ptToAdd = typeof snapToOrtho === 'function' ? snapToOrtho(svgPt, lastPt) : svgPt;
-    }
-
-    utilLineDrawingPoints.push(ptToAdd);
-    updateTempDrawingLine();
     updateUtilLineGuideUI();
+    if (utilLineSourceStore && utilLineTargetStore) { finishUtilityLine(); return true; }
+    showToast(utilLineTargetStore ? '이제 연결할 매장(자)을 눌러 주세요.' : '이제 연결할 기능실(모)을 눌러 주세요.', 1800);
     return true;
 }
 
-// 라인 완성 및 저장
 function finishUtilityLine() {
-    if (utilLineDrawingPoints.length < 2) {
-        showToast('최소 2개 이상의 점이 필요합니다.', 1500);
+    if (!utilLineSourceStore || !utilLineTargetStore) { showToast('매장(자)과 기능실(모)을 모두 눌러 주세요.', 1500); return; }
+    const res = routeBetweenStores(utilLineTargetStore, utilLineSourceStore);   // 기능실 → 매장 순서의 점
+    if (!res.ok) {
+        showToast(res.error, 2800);
+        utilLineTargetStore = null; utilLineSourceStore = null;   // 선은 안 그리고 처음부터 다시 고르게
+        updateUtilLineGuideUI();
         return;
     }
-
     const floor = FLOORS[currentFloorIdx];
     const cfg = UTIL_SPECS_CONFIG[utilLineSelectedType] || UTIL_SPECS_CONFIG.power;
-
-    const inputEl = document.getElementById('input-util-spec-val');
     let specText = '';
     if (!cfg.disabledInput) {
-        const rawVal = inputEl?.value?.trim() || utilLineInputValue || cfg.defaultVal;
+        const rawVal = document.getElementById('input-util-spec-val')?.value?.trim() || utilLineInputValue || cfg.defaultVal;
         specText = rawVal ? `${rawVal}${cfg.unit}` : '';
     } else {
         specText = '가스배관';
     }
-
     const newLine = {
         id: `util-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-        sourceType: utilLineSourceStore?.name || '기능실',
-        subType: cfg.id,
-        subTypeLabel: cfg.label,
-        specText: specText,
-        className: cfg.className,
-        color: cfg.color,
-        direction: cfg.direction,
-        sourceStoreId: utilLineSourceStore?.id || '',
-        sourceName: utilLineSourceStore?.name || '기능실',
-        targetStoreId: utilLineTargetStore?.id || '',
-        targetName: utilLineTargetStore?.name || '매장',
-        points: [...utilLineDrawingPoints]
+        auto: true,
+        sourceType: utilLineSourceStore.name || '매장',
+        subType: cfg.id, subTypeLabel: cfg.label, specText, className: cfg.className, color: cfg.color,
+        direction: 'forward',
+        sourceStoreId: utilLineSourceStore.id || '', sourceName: utilLineSourceStore.name || '매장',
+        targetStoreId: utilLineTargetStore.id || '', targetName: utilLineTargetStore.name || '기능실',
+        points: res.points
     };
-
     addUtilityLine(floor.code, newLine);
-    showToast(`✅ 자[${newLine.sourceName}] ➔ 모[${newLine.targetName}] ${newLine.subTypeLabel} 연결 완료!`, 2000);
-
-    // 완성된 라인 즉시 하이라이트 표시
-    const finalTarget = utilLineTargetStore;
+    showToast(`✅ 기능실[${newLine.targetName}] ➔ 매장[${newLine.sourceName}] ${newLine.subTypeLabel} 연결 완료!`, 2000);
+    const finalStore = utilLineSourceStore;
     exitUtilityLineDrawingMode();
-    if (finalTarget) highlightUtilityLinesForStore(finalTarget);
+    highlightUtilityLinesForStore(finalStore);
 }
 
 // ================= UI 가이드 배너 및 라디오 버튼 4종 =================
@@ -604,8 +566,8 @@ function updateUtilLineGuideUI() {
             <!-- 자 -> 모 표시 및 점선 이동 연출 -->
             <div style="display:flex; align-items:center; gap:6px; font-weight:700; font-size:13px; color:#0f172a;">
                 <span>설비연결:</span>
-                <span style="padding:2px 8px; border-radius:4px; background:${utilLineSourceStore ? '#eff6ff' : '#f1f5f9'}; color:${utilLineSourceStore ? '#2563eb' : '#64748b'}; border:1px solid ${utilLineSourceStore ? '#bfdbfe' : '#e2e8f0'};">
-                    자[${srcText}]
+                <span style="padding:2px 8px; border-radius:4px; background:${utilLineTargetStore ? '#eff6ff' : '#f1f5f9'}; color:${utilLineTargetStore ? '#2563eb' : '#64748b'}; border:1px solid ${utilLineTargetStore ? '#bfdbfe' : '#e2e8f0'};">
+                    모 기능실[${tgtText}]
                 </span>
                 <!-- 점선 흐름 연출 인디케이터 -->
                 <div style="display:inline-flex; align-items:center; gap:2px; padding:0 4px; overflow:hidden;">
@@ -614,8 +576,8 @@ function updateUtilLineGuideUI() {
                     </div>
                     <span style="color:${cfg.color}; font-size:12px; font-weight:900;">➔</span>
                 </div>
-                <span style="padding:2px 8px; border-radius:4px; background:${utilLineTargetStore ? '#eff6ff' : '#f1f5f9'}; color:${utilLineTargetStore ? '#2563eb' : '#64748b'}; border:1px solid ${utilLineTargetStore ? '#bfdbfe' : '#e2e8f0'};">
-                    모[${tgtText}]
+                <span style="padding:2px 8px; border-radius:4px; background:${utilLineSourceStore ? '#eff6ff' : '#f1f5f9'}; color:${utilLineSourceStore ? '#2563eb' : '#64748b'}; border:1px solid ${utilLineSourceStore ? '#bfdbfe' : '#e2e8f0'};">
+                    자 매장[${srcText}]
                 </span>
             </div>
 
@@ -627,16 +589,11 @@ function updateUtilLineGuideUI() {
             <!-- 규격 입력 -->
             ${inputFieldHtml}
 
-            <!-- 직각 스냅 버튼 -->
-            <button type="button" class="zone-toggle-btn btn-toggle-ortho ${isOrtho ? 'active' : ''}" onclick="toggleGlobalOrthoMode()" title="직각 스냅 (단축키: Shift 누른 채 클릭)">
-                📐 직각 (Shift)
-            </button>
 
-            <span class="zone-pts-badge">${utilLineDrawingPoints.length}점</span>
+            <span class="zone-pts-badge">길은 자동</span>
         </div>
 
         <div style="display:flex; align-items:center; gap:8px;">
-            <button class="btn-guide-finish" onclick="finishUtilityLine()">완료 (Enter)</button>
             <button class="btn-guide-close" onclick="exitUtilityLineDrawingMode()">취소 (ESC)</button>
         </div>
     `;

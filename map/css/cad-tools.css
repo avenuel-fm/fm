@@ -650,7 +650,7 @@
             stroke: var(--navy) !important;
             stroke-width: 3px !important;
             stroke-dasharray: 8 6;
-            animation: utilFlowReverse 0.8s linear infinite;
+            animation: utilFlowForward 0.8s linear infinite;
             filter: drop-shadow(0 0 2px rgba(15, 23, 42, 0.4));
         }
 
@@ -685,7 +685,7 @@
             stroke: var(--navy) !important;
             stroke-width: 3px !important;
             stroke-dasharray: 8 6;
-            animation: utilFlowReverse 0.8s linear infinite;
+            animation: utilFlowForward 0.8s linear infinite;
         }
 
         /* 비활성 상태 라인 */
@@ -752,3 +752,4 @@
             .zone-guide-banner { flex-wrap: wrap; justify-content: center; white-space: normal; bottom: 52px; border-bottom: 1px solid var(--border-medium); border-radius: var(--radius); }   /* 왼쪽 아래 「뒤로」 버튼 위로 */
             .zone-guide-banner .zone-banner-controls { flex-wrap: wrap; white-space: normal; row-gap: var(--sp-2); justify-content: center; }
         }
+
