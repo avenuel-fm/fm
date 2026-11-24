@@ -61,6 +61,7 @@
         templateFileInput: document.getElementById('templateFileInput'),
         reportLayout: document.getElementById('reportLayout'),
         sidebarList: document.getElementById('sidebarList'),
+        sidebarAside: document.getElementById('sidebarAside'),
         pageCountBadge: document.getElementById('pageCountBadge'),
         inpCircuitName: document.getElementById('inpCircuitName'),
         envNotice: document.getElementById('envNotice'),
@@ -599,7 +600,7 @@
         state.pages.forEach((page, idx) => {
             const item = document.createElement('div');
             item.className = `sidebar-item ${idx === state.currentIndex ? 'active' : ''}`;
-            item.addEventListener('click', () => selectPage(idx));
+            item.addEventListener('click', () => { selectPage(idx); if (DOM.sidebarAside) DOM.sidebarAside.focus({ preventScroll: true }); });   // 목록을 누르면 방향키 ↑↓ 로 쪽 이동
 
             const maxT = Math.max(page.spots[0].temp, page.spots[1].temp, page.spots[2].temp);
             const minT = Math.min(page.spots[0].temp, page.spots[1].temp, page.spots[2].temp);
@@ -614,6 +615,7 @@
                 </div>
             `;
             DOM.sidebarList.appendChild(item);
+            if (idx === state.currentIndex) item.scrollIntoView({ block: 'nearest' });
         });
     }
 
@@ -862,6 +864,15 @@
         window.addEventListener('keydown', (e) => {
             if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
                 if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+                // 쪽 목록에 포커스가 있으면 ↑↓ 는 쪽 이동 (그 밖에는 기존대로 스팟 미세 이동)
+                if (DOM.sidebarAside && DOM.sidebarAside.contains(document.activeElement)) {
+                    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        selectPage(state.currentIndex + (e.key === 'ArrowUp' ? -1 : 1));
+                    }
+                    return;
+                }
 
                 const page = state.pages[state.currentIndex];
                 if (!page) return;
@@ -1209,10 +1220,14 @@
             }
 
             const patchMsg = (totalPatched === totalSpots)
-                ? `스팟 위치 기록: 모든 사진(총 ${totalSpots}개 스팟)의 위치가 사진 바이너리에 성공적으로 새로 기록되었습니다.`
+                ? `스팟 위치 기록: 모든 사진(총 ${totalSpots}개 스팟)의 위치가 바이너리에 정상 반영되었습니다.`
                 : `스팟 위치 기록: 총 ${totalSpots}개 중 ${totalPatched}개 스팟 위치 갱신 완료.`;
 
-            alert(`리포트(${result.fileName})가 성공적으로 생성되어 내려받았습니다! (총 ${result.pages}쪽)\n\n${patchMsg}\n\n※ FLIR Thermal Studio 및 PDF 저장 모두 ${result.pages}쪽 전 페이지가 완벽하게 기록되었습니다.`);
+            if (result.isZip) {
+                alert(`[FLIR Thermal Studio 호환 완료]\n총 ${result.pages}장의 사진이 FLIR 공식 리포트 규격(8쪽 단위)에 맞추어 총 ${result.totalParts}개 파트로 자동 분할되어 ZIP 파일(${result.fileName})로 내려받았습니다!\n\n압축을 풀면 각 파트별 .atr 파일이 FLIR Thermal Studio에서 오류 없이 100% 정상적으로 열립니다.\n\n${patchMsg}\n※ 전체 통합 보고서는 'PDF 저장' 버튼을 누르시면 1장의 완성된 ${result.pages}쪽 PDF로 바로 출력됩니다.`);
+            } else {
+                alert(`리포트(${result.fileName})가 성공적으로 생성되어 내려받았습니다! (총 ${result.pages}쪽)\n\n${patchMsg}\n\n※ FLIR Thermal Studio 및 PDF 저장 모두 ${result.pages}쪽이 완벽하게 열립니다.`);
+            }
         } catch (err) {
             console.error('Report build error:', err);
             alert(`리포트 내려받기 중 오류: ${err.message}`);
