@@ -10,10 +10,10 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.26.10"></script>
-<script>window.WS_VERSION = '0.26.10';</script>
-<script src="offline.js?v=0.26.10"></script>
-<script src="ws-api.js?v=0.26.10"></script>
+<script src="config.js?v=0.26.11"></script>
+<script>window.WS_VERSION = '0.26.11';</script>
+<script src="offline.js?v=0.26.11"></script>
+<script src="ws-api.js?v=0.26.11"></script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -792,7 +792,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B3','B2','B1','1F','2F','3F','4F','5F','6F','7F','8F','9F','10F'];   // 소화기·소화전·공기호흡기 층 B3~10F (결정 228)
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.10' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.11' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -3120,7 +3120,7 @@ async function xlSave() {
     closeDialog(); toast('소화기 ' + done + '대를 등록했습니다');
   } catch (e) { closeDialog(); toast((done ? done + '대까지 등록했고 ' : '') + (e && e.message ? e.message : '중간에 멈췄습니다') + ' — 같은 파일을 다시 올리면 남은 것만 등록합니다'); }
   S.xlPlan = null;
-  if (S.st) await loadStatus(S.st.ym);
+  await stRefresh();
 }
 async function xlDown(fl) {
   try {
@@ -3137,26 +3137,55 @@ async function xlDown(fl) {
     XLSX.writeFile(wb, '소화기 현황_' + (fl || '전체') + '.xlsx');
   } catch (e) { toast(e && e.message ? e.message : '엑셀을 만들지 못했습니다'); }
 }
-function openFloor(fl) { S.floor = fl; go('floor'); }
+/* ── 층 화면에서 소화기 삭제 (결정 250) — QR 관리와 같은 feDelete. 점검 기록은 남고 지운 달부터 목록에서 빠짐 ── */
+async function stRefresh() { if (!S.st) return; const r = await call('feStatus', S.st.ym); if (r && r.ok) { S.st = r; render(); } }
+function fdelOn() { S.fdel = true; S.fsel = {}; render(); }
+function fdelOff() { S.fdel = false; S.fsel = {}; render(); }
+function fdelIds() { return Object.keys(S.fsel || {}).filter(k => S.fsel[k]); }
+function fdelPick(id) { S.fsel[id] = !S.fsel[id]; render(); }
+function fdelStore(i) {
+  const list = S.st.items.filter(x => x.floor === S.floor && x.store === S.fdelStores[i]), all = list.every(x => S.fsel[x.id]);
+  list.forEach(x => { S.fsel[x.id] = !all; }); render();
+}
+function fdelAsk() {
+  const ids = fdelIds(), pick = S.st.items.filter(i => S.fsel[i.id]), has = pick.filter(i => i.checkId).length;
+  if (!ids.length) return;
+  dialog('<h2 style="margin:0 0 var(--sp-2);font-size:var(--size-l)">소화기 ' + ids.length + '대 삭제</h2>' +
+    '<div style="max-height:200px;overflow:auto;margin-bottom:var(--sp-2)">' + pick.map(i => '<div style="padding:4px 0;border-top:1px solid var(--line)"><b>' + h(i.name) + '</b></div>').join('') + '</div>' +
+    '<div class="banner b-gray">삭제하면 다음 달 점검 목록부터 빠집니다.' + (has ? ' 이번 달 점검을 이미 입력한 <b>' + has + '대</b>는 이번 달 현황과 지난 기록에는 그대로 남습니다.' : ' 이번 달 점검 목록에서도 바로 빠집니다.') + ' QR 라벨은 쓸 수 없게 됩니다.</div>' +
+    '<div style="display:flex;gap:var(--sp-2);margin-top:var(--sp-3)"><button class="btn big" style="flex:1" onclick="closeDialog()">취소</button><button id="fdBtn" class="btn big pri" style="flex:2" onclick="fdelGo()">삭제</button></div>');
+}
+async function fdelGo() {
+  const ids = fdelIds(), b = $('fdBtn'); if (b) b.disabled = true;
+  try {
+    const r = await call('feDelete', ids);
+    if (!r || !r.ok) throw new Error((r && r.error) || '삭제하지 못했습니다');
+    closeDialog(); toast('소화기 ' + r.count + '대를 삭제했습니다'); S.fdel = false; S.fsel = {};
+    await stRefresh();
+  } catch (e) { if (b) b.disabled = false; toast(e && e.message ? e.message : '삭제하지 못했습니다'); }
+}
+function openFloor(fl) { S.fdel = false; S.fsel = {}; S.floor = fl; go('floor'); }
 function renderFloor() {
   const st = S.st;
   const it = st.items.filter(i => i.floor === S.floor);
   const stores = [...new Set(it.map(i => i.store))];
-  const chips = FLOORS.map(f => '<button class="fl' + (f === S.floor ? ' on' : '') + '" aria-pressed="' + (f === S.floor) + '" onclick="S.floor=\'' + f + '\';render()">' + f + '</button>').join('');
-  const m = Number(st.ym.slice(5, 7));
-  const body = stores.length ? stores.map(s => {
+  const chips = FLOORS.map(f => '<button class="fl' + (f === S.floor ? ' on' : '') + '" aria-pressed="' + (f === S.floor) + '" onclick="S.floor=\'' + f + '\';S.fsel={};render()">' + f + '</button>').join('');
+  const m = Number(st.ym.slice(5, 7)), del = !!S.fdel, sel = S.fsel || {};
+  S.fdelStores = stores;
+  const body = stores.length ? stores.map((s, si) => {
     const list = it.filter(i => i.store === s);
     const done = list.filter(i => i.state === 'ok' || i.state === 'bad').length;
-    return '<div class="store"><div class="store-h"><b>' + h(s) + '</b><small style="color:var(--muted)">' + done + ' / ' + list.length + '</small></div>' +
+    return '<div class="store"><div class="store-h"><b>' + h(s) + '</b>' + (del ? '<button class="btn sm" onclick="fdelStore(' + si + ')">' + (list.every(x => sel[x.id]) ? '전체 해제' : '전체 선택') + '</button>' : '<small style="color:var(--muted)">' + done + ' / ' + list.length + '</small>') + '</div>' +
       list.map(i => {
         const has = i.state === 'ok' || i.state === 'bad';
         const sub = has ? i.at + ' 입력' + (i.late ? ' · 기한 후' : '') : (i.state === 'miss' ? m + '월 ' + st.window.end + '일까지 입력 없음' : m + '월 ' + st.window.end + '일까지 입력 받는 중');
+        if (del) return '<button class="feb" aria-pressed="' + !!sel[i.id] + '" onclick="fdelPick(\'' + i.id + '\')"><span style="font-size:22px;width:28px">' + (sel[i.id] ? '☑' : '☐') + '</span><span class="fname"><b>' + h(i.name) + '</b><small>' + h(has ? '이번 달 점검 입력 있음' : sub) + '</small></span></button>';
         return '<button class="feb" ' + (has ? 'onclick="detail(\'' + i.checkId + '\')"' : 'disabled') + '><span class="fname"><b>' + h(i.name) + '</b><small>' + h(sub) + '</small></span>' +
           (i.late ? '<span class="chip c-wait">기한 후</span>' : '') + '<span class="chip ' + STATE[i.state][1] + '">' + STATE[i.state][0] + '</span></button>';
       }).join('') + '</div>';
   }).join('') : '<div class="banner b-gray">' + S.floor + '에 등록된 소화기가 없습니다.</div>';
   return topbar('월별 점검 현황 › ' + ymLabel(st.ym) + ' ›', S.floor + ' · 소화기 ' + it.length + '대') + '<div class="wrap list">' +
-    '<div style="display:flex;gap:var(--sp-1);overflow-x:auto;padding-bottom:var(--sp-1)">' + chips + '</div>' + xlBtns(S.floor) + body +
+    '<div style="display:flex;gap:var(--sp-1);overflow-x:auto;padding-bottom:var(--sp-1)">' + chips + '</div>' + (del ? '<div class="banner b-gray">지울 소화기를 눌러 고르세요 (매장 이름 옆 [전체 선택]으로 한 매장 모두 선택)</div><div style="display:flex;gap:var(--sp-2)"><button class="btn big" style="flex:1" onclick="fdelOff()">취소</button><button class="btn big pri" style="flex:2" ' + (fdelIds().length ? '' : 'disabled ') + 'onclick="fdelAsk()">선택 ' + fdelIds().length + '대 삭제</button></div>' : xlBtns(S.floor) + (it.length ? '<button class="btn" style="min-height:52px" onclick="fdelOn()">소화기 삭제</button>' : '')) + body +
     '<small style="text-align:center;color:var(--muted)">점검완료 · 이상 있음을 누르면 매장에서 입력한 내용을 봅니다</small></div>';
 }
 async function detail(id) {
