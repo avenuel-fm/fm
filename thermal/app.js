@@ -1161,13 +1161,15 @@
 
         try {
             let totalPatched = 0;
-            const totalSpots = state.pages.length * 3;
+            const MAX_PATCH_PAGES = 20;   // 스팟 위치 기록은 앞 20장까지만, 나머지는 원본 사진 그대로
+            const totalSpots = Math.min(state.pages.length, MAX_PATCH_PAGES) * 3;
 
-            for (const page of state.pages) {
+            state.pages.forEach((page, i) => {
+                if (i >= MAX_PATCH_PAGES) { page.patchedBlob = null; return; }
                 const patchRes = page.patchSpots(page.spots);
                 page.patchedBlob = patchRes.blob || patchRes;
                 totalPatched += (patchRes.patchedCount !== undefined ? patchRes.patchedCount : 3);
-            }
+            });
 
             const result = await AtrGenerator.build({
                 reportTitle: title,
@@ -1220,7 +1222,7 @@
             }
 
             const patchMsg = (totalPatched === totalSpots)
-                ? `스팟 위치 기록: 모든 사진(총 ${totalSpots}개 스팟)의 위치가 바이너리에 정상 반영되었습니다.`
+                ? `스팟 위치 기록: ${state.pages.length > MAX_PATCH_PAGES ? '앞 ' + MAX_PATCH_PAGES + '장(' : '모든 사진('}총 ${totalSpots}개 스팟)의 위치를 기록했습니다.${state.pages.length > MAX_PATCH_PAGES ? ' 나머지 사진은 원본 그대로 넣었습니다.' : ''}`
                 : `스팟 위치 기록: 총 ${totalSpots}개 중 ${totalPatched}개 스팟 위치 갱신 완료.`;
 
             alert(`리포트(${result.fileName})가 성공적으로 생성되어 내려받았습니다! (단일 파일 총 ${result.pages}쪽)\n\n${patchMsg}\n\n※ FLIR Thermal Studio 및 PDF 저장 모두 ${result.pages}쪽 전 페이지가 한 파일에 완벽하게 표시됩니다.`);
