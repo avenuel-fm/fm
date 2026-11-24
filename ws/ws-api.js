@@ -43,6 +43,16 @@
     return { path, url: sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl };
   }
 
+  /** 작업내역 사진 칸: 이미 있는 것은 {id}, 새 것({data})은 버킷에 올려 {file} */
+  async function dwPics(list) {
+    const out = [];
+    for (const p of Array.isArray(list) ? list : []) {
+      if (p && p.data) { let blob; try { blob = dataUrlToBlob(p.data); } catch (e) { throw new Error('사진을 읽지 못했습니다. 다시 찍어 주세요.'); } out.push({ file: await upload('dw_photo', blob, 'jpg') }); }
+      else if (p && p.id) out.push({ id: p.id });
+    }
+    return out;
+  }
+
   /* ── DB 함수 부르기: 오류 글('LOGIN' 등)을 그대로 넘겨 화면의 call()이 알아듣게 ── */
   async function rpc(fn, args) {
     const { data, error } = await sb.rpc(fn, args);
@@ -224,6 +234,14 @@
       return rpc('ws_rw_add', { p_token: token, p_day: day || '', p_co: co || '', p_floor: floor || '', p_file: await upload('risk_photo', blob, 'jpg'), p_cid: cid || '' });
     },
     rwDelete: (token, id) => rpc('ws_rw_delete', { p_token: token, p_id: String(id || '') }),
+
+    /* ── 주간/야간 작업내역 (supabase/26_workhist.sql): 사진은 버킷 dw_photo/ 에 먼저 — 화면이 이미 줄여 보내므로 그대로 ── */
+    dwList: (token, q, from, to) => rpc('ws_dw_list', { p_token: token, p_q: q || '', p_from: from || '', p_to: to || '' }),
+    dwSave: async (token, d) => rpc('ws_dw_save', { p_token: token, p_d: Object.assign({}, d, { before: await dwPics(d.before), after: await dwPics(d.after) }) }),
+    dwDelete: (token, id) => rpc('ws_dw_delete', { p_token: token, p_id: String(id || '') }),
+    dnList: (token, q, from, to) => rpc('ws_dn_list', { p_token: token, p_q: q || '', p_from: from || '', p_to: to || '' }),
+    dnSave: async (token, d) => rpc('ws_dn_save', { p_token: token, p_d: Object.assign({}, d, { photos: await dwPics(d.photos), fire: await dwPics(d.fire), pledge: await dwPics(d.pledge) }) }),
+    dnDelete: (token, id) => rpc('ws_dn_delete', { p_token: token, p_id: String(id || '') }),
 
     /* ── 3-6 환경설정 (supabase/08_settings.sql, 소장만). 위험성 목록은 시트 대신 여기서 고침 ── */
     adminStaff: token => rpc('ws_admin_staff', { p_token: token }),
