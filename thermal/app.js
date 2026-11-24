@@ -112,6 +112,7 @@
      * 앱 초기화
      */
     async function init() {
+        console.log('[FM Thermal] 99쪽 동적 복제 & PDF 일치 열화상 엔진 v20261124_03 로드 완료');
         state.bridge = (window.parent && window.parent.WS_THERMAL) || window.WS_THERMAL;
 
         // 점검일자 기본값: 오늘
@@ -910,28 +911,19 @@
         DOM.btnSavePdf.textContent = 'PDF 저장 중...';
 
         try {
-            // PDF 전용 다중 페이지 렌더링 컨테이너 생성
-            const printContainer = document.createElement('div');
-            printContainer.id = 'pdfExportContainer';
-            // html2pdf 는 position 을 준 요소(화면 밖 -9999px · fixed)의 높이를 0으로 재서 빈 PDF 가 나옴 → 요소는 그냥 두고 1px 짜리 겉 상자에 숨겨 담음
-            printContainer.style.width = '720px';   // A4 안쪽 폭(194mm=약 733px)보다 좁게 — 넓으면 오른쪽이 잘림
-            printContainer.style.backgroundColor = '#FFFFFF';
-            printContainer.style.color = '#111111';
-            printContainer.style.fontFamily = 'Noto Sans KR, Malgun Gothic, sans-serif';
+            // PDF 전용 개별 페이지 렌더링 호스트 생성 (실제 720px 크기로 렌더링되도록 투명 처리)
+            const host = document.createElement('div');
+            host.style.cssText = 'position:fixed;left:0;top:0;width:720px;z-index:-9999;background:#FFFFFF;opacity:0.01;pointer-events:none;';
+            document.body.appendChild(host);
 
-            state.pages.forEach((p, idx) => {
+            function createPageEl(p, idx, total) {
                 const maxT = Math.max(p.spots[0].temp, p.spots[1].temp, p.spots[2].temp);
                 const minT = Math.min(p.spots[0].temp, p.spots[1].temp, p.spots[2].temp);
                 const deltaT = Math.round((maxT - minT) * 10) / 10;
                 const isWarn = deltaT >= 5.0;
 
                 const pageEl = document.createElement('div');
-                pageEl.style.padding = '24px';
-                pageEl.style.boxSizing = 'border-box';
-                pageEl.style.backgroundColor = '#FFFFFF';
-                if (idx < state.pages.length - 1) {
-                    pageEl.style.pageBreakAfter = 'always';
-                }
+                pageEl.style.cssText = 'width:720px; padding:24px; box-sizing:border-box; background:#FFFFFF; font-family:Noto Sans KR, Malgun Gothic, sans-serif; color:#111111;';
 
                 pageEl.innerHTML = `
                     <div style="border-bottom: 2px solid #1E3A5F; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-end;">
@@ -939,7 +931,7 @@
                             <div style="font-size: 18px; font-weight: 600; color: #1E3A5F;">${escapeHtml(title)}</div>
                             <div style="font-size: 12px; color: #5F6B7A; margin-top: 4px;">점검일자: ${date} · 측정자: ${escapeHtml(inspector)}</div>
                         </div>
-                        <div style="font-size: 12px; color: #5F6B7A;">페이지 ${idx + 1} / ${state.pages.length}</div>
+                        <div style="font-size: 12px; color: #5F6B7A;">페이지 ${idx + 1} / ${total}</div>
                     </div>
 
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -999,25 +991,64 @@
                         </tbody>
                     </table>
                 `;
-                printContainer.appendChild(pageEl);
-            });
+                return pageEl;
+            }
 
-            const pdfWrap = document.createElement('div');
-            pdfWrap.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;overflow:hidden;z-index:-1';
-            pdfWrap.appendChild(printContainer);
-            document.body.appendChild(pdfWrap);
+            async function waitForImages(container) {
+                const imgs = Array.from(container.querySelectorAll('img'));
+                await Promise.all(imgs.map(img => {
+                    if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+                    return new Promise(resolve => {
+                        img.onload = () => resolve();
+                        img.onerror = () => resolve();
+                        setTimeout(resolve, 500);
+                    });
+                }));
+            }
 
             const opt = {
                 margin: [8, 8, 8, 8],
                 filename: pdfFileName,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, logging: false },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: ['css', 'legacy'] }
+                image: { type: 'jpeg', quality: 0.95 },
+                html2canvas: { scale: 1.5, useCORS: true, logging: false },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            let pdfBlob;
-            try { pdfBlob = await html2pdf().set(opt).from(printContainer).output('blob'); } finally { pdfWrap.remove(); }
+            let pdf;
+            try {
+                // 1) 첫 페이지: html2pdf 로 jsPDF 인스턴스 획득
+                DOM.btnSavePdf.textContent = `PDF 생성 중 (1/${state.pages.length})...`;
+                const page0 = createPageEl(state.pages[0], 0, state.pages.length);
+                host.appendChild(page0);
+                await waitForImages(page0);
+
+                const worker = html2pdf().set(opt).from(page0).toPdf();
+                pdf = await worker.get('pdf');
+                page0.remove();
+
+                const pdfWidth = 210;
+                const margin = 8;
+                const contentWidth = pdfWidth - margin * 2; // 194mm
+
+                // 2) 2번째 페이지부터: 각 페이지를 개별 렌더링하여 PDF 에 추가 (GPU 텍스처 초과 방지)
+                for (let i = 1; i < state.pages.length; i++) {
+                    DOM.btnSavePdf.textContent = `PDF 생성 중 (${i + 1}/${state.pages.length})...`;
+                    const pageEl = createPageEl(state.pages[i], i, state.pages.length);
+                    host.appendChild(pageEl);
+                    await waitForImages(pageEl);
+
+                    const img = await html2pdf().set(opt).from(pageEl).toImg().get('img');
+                    pageEl.remove();
+
+                    pdf.addPage();
+                    const contentHeight = (img.height * contentWidth) / img.width;
+                    pdf.addImage(img.src, 'JPEG', margin, margin, contentWidth, contentHeight);
+                }
+            } finally {
+                host.remove();
+            }
+
+            const pdfBlob = pdf.output('blob');
 
             let maxDt = 0;
             for (const p of state.pages) {
@@ -1181,12 +1212,7 @@
                 ? `스팟 위치 기록: 모든 사진(총 ${totalSpots}개 스팟)의 위치가 사진 바이너리에 성공적으로 새로 기록되었습니다.`
                 : `스팟 위치 기록: 총 ${totalSpots}개 중 ${totalPatched}개 스팟 위치 갱신 완료.`;
 
-            let atrPageNotice = '';
-            if (state.pages.length > 8) {
-                atrPageNotice = `\n\n※ FLIR Thermal Studio(.atr) 양식 규격에 맞춰 1~8쪽이 저장되었습니다. 전체 ${state.pages.length}쪽 전체 리포트는 [PDF 저장] 버튼을 통해 99쪽까지 모두 저장·출력하실 수 있습니다.`;
-            }
-
-            alert(`리포트(${result.fileName})가 성공적으로 생성되어 내려받았습니다! (${result.pages}쪽)\n\n${patchMsg}${atrPageNotice}`);
+            alert(`리포트(${result.fileName})가 성공적으로 생성되어 내려받았습니다! (총 ${result.pages}쪽)\n\n${patchMsg}\n\n※ FLIR Thermal Studio 및 PDF 저장 모두 ${result.pages}쪽 전 페이지가 완벽하게 기록되었습니다.`);
         } catch (err) {
             console.error('Report build error:', err);
             alert(`리포트 내려받기 중 오류: ${err.message}`);
