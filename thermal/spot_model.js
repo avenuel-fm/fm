@@ -1256,16 +1256,34 @@ class SpotModelManager {
         return out;
     }
 
+    isFull() {
+        return Object.keys(this.model.patterns || {}).length >= 200;
+    }
+
+    hasPattern(circuitName) {
+        const key = this.normalizeKey(circuitName);
+        return !!(key && this.model.patterns && this.model.patterns[key]);
+    }
+
     /**
      * 단일 샘플 학습 (기존 데이터와 누적 가중 평균)
+     * 패턴 수가 200개에 도달하면 신규 학습을 금지합니다.
      */
     learn(circuitName, spots) {
         const key = this.normalizeKey(circuitName);
-        if (!key || !spots || spots.length < 3) return;
+        if (!key || !spots || spots.length < 3) return false;
 
         if (!this.model.patterns) this.model.patterns = {};
 
         const existing = this.model.patterns[key];
+        const currentCount = Object.keys(this.model.patterns).length;
+
+        // 패턴 수 200개 도달 시 신규 패턴 학습 금지
+        if (!existing && currentCount >= 200) {
+            console.warn(`[SpotModelManager] 학습된 위치 패턴 수가 200개에 도달하여 신규 학습이 제한됩니다.`);
+            return false;
+        }
+
         if (existing && existing.count) {
             const n = existing.count;
             const newSpots = [];
@@ -1292,6 +1310,7 @@ class SpotModelManager {
                 updatedAt: new Date().toISOString()
             };
         }
+        return true;
     }
 
     /**
@@ -1300,9 +1319,15 @@ class SpotModelManager {
     async trainFromFiles(files, progressCb = null) {
         let learnedCount = 0;
         let totalCount = 0;
+        let reachedLimit = false;
         const failedFiles = [];
 
         for (let i = 0; i < files.length; i++) {
+            if (this.isFull()) {
+                reachedLimit = true;
+                break;
+            }
+
             const file = files[i];
             const isAtr = /\.atr$/i.test(file.name);
             const isJpg = /\.(jpe?g)$/i.test(file.name);
@@ -1323,6 +1348,10 @@ class SpotModelManager {
 
                     let atrLearned = 0;
                     for (const entry of binEntries) {
+                        if (this.isFull()) {
+                            reachedLimit = true;
+                            break;
+                        }
                         try {
                             const bytes = await entry.async('uint8array');
                             if (bytes.length > 2 && bytes[0] === 0xFF && bytes[1] === 0xD8) {
@@ -1341,9 +1370,14 @@ class SpotModelManager {
                                         } catch (_) {}
                                     }
                                     circuitName = circuitName.replace(/\.[^/.]+$/, '').trim();
-                                    this.learn(circuitName, parsed.spots);
-                                    learnedCount++;
-                                    atrLearned++;
+                                    const ok = this.learn(circuitName, parsed.spots);
+                                    if (ok) {
+                                        learnedCount++;
+                                        atrLearned++;
+                                    } else {
+                                        reachedLimit = true;
+                                        break;
+                                    }
                                 } else {
                                     failedFiles.push(`${file.name}:${entry.name}`);
                                 }
@@ -1353,7 +1387,7 @@ class SpotModelManager {
                         }
                     }
 
-                    if (atrLearned === 0) {
+                    if (atrLearned === 0 && !reachedLimit) {
                         failedFiles.push(`${file.name} (스팟 미발견)`);
                     }
                 } catch (err) {
@@ -1367,8 +1401,13 @@ class SpotModelManager {
                     const parsed = await FlirParser.parse(file);
                     if (parsed.hasNativeSpots) {
                         let circuitName = file.name.replace(/\.[^/.]+$/, '').trim();
-                        this.learn(circuitName, parsed.spots);
-                        learnedCount++;
+                        const ok = this.learn(circuitName, parsed.spots);
+                        if (ok) {
+                            learnedCount++;
+                        } else {
+                            reachedLimit = true;
+                            break;
+                        }
                     } else {
                         failedFiles.push(file.name);
                     }
@@ -1383,7 +1422,8 @@ class SpotModelManager {
             ok: learnedCount > 0,
             totalCount,
             learnedCount,
-            failedFiles
+            failedFiles,
+            reachedLimit
         };
     }
 

@@ -431,6 +431,96 @@ class AtrGenerator {
         const newTcPat = new Uint8Array([0x04, newTitleB.length & 0xff, (newTitleB.length >> 8) & 0xff, ...newTitleB]);
         c8 = AtrGenerator.replaceBytes(c8, origTcPat, newTcPat, 1);
 
+        // 6-1. c8에서 양식 내 텍스트 필드 치환 (측정대상, 사용전압, 측정자, 점검일자)
+        const VAL_HDR = new Uint8Array([0xe4, 0xd5, 0x62, 0xd4, 0x04]);
+
+        const replaceFieldAfterKeyword = (buf, keywordBytes, newTextBytes) => {
+            const kPos = AtrGenerator.findSub(buf, keywordBytes);
+            if (kPos === -1) return buf;
+            const vPos = AtrGenerator.findSub(buf, VAL_HDR, kPos);
+            if (vPos === -1 || vPos > kPos + 400) return buf;
+
+            const oldLen = buf[vPos + 5] | (buf[vPos + 6] << 8);
+            const oldBlockEnd = vPos + 7 + oldLen;
+
+            const newLen = newTextBytes.length;
+            const newHeader = new Uint8Array([0xe4, 0xd5, 0x62, 0xd4, 0x04, newLen & 0xff, (newLen >> 8) & 0xff, ...newTextBytes]);
+
+            const nextBuf = new Uint8Array(buf.length + (newHeader.length - (oldBlockEnd - vPos)));
+            nextBuf.set(buf.subarray(0, vPos), 0);
+            nextBuf.set(newHeader, vPos);
+            nextBuf.set(buf.subarray(oldBlockEnd), vPos + newHeader.length);
+            return nextBuf;
+        };
+
+        // (1) 측정대상 -> 사용자가 입력한 회로명/측정위치 (circuitName)
+        const targetKeyword = enc.encode("측정대상");
+        const targetVal = enc.encode(circuitName);
+        c8 = replaceFieldAfterKeyword(c8, targetKeyword, targetVal);
+
+        // (2) 사용전압 -> "380V"
+        const voltKeyword = enc.encode("사용전압");
+        const voltVal = enc.encode("380V");
+        c8 = replaceFieldAfterKeyword(c8, voltKeyword, voltVal);
+
+        // (3) 측정자 : [이름] (서명)
+        const inspKeyword = enc.encode("측정자");
+        const inspPos = AtrGenerator.findSub(c8, inspKeyword);
+        if (inspPos !== -1) {
+            let vPos = -1;
+            for (let o = -15; o <= 0; o++) {
+                if (inspPos + o >= 0 && inspPos + o + 5 <= c8.length) {
+                    let match = true;
+                    for (let b = 0; b < 5; b++) {
+                        if (c8[inspPos + o + b] !== VAL_HDR[b]) { match = false; break; }
+                    }
+                    if (match) { vPos = inspPos + o; break; }
+                }
+            }
+            if (vPos !== -1) {
+                const oldLen = c8[vPos + 5] | (c8[vPos + 6] << 8);
+                const oldBlockEnd = vPos + 7 + oldLen;
+
+                const inspector = (slotInfo.inspector_name || "").trim();
+                const inspStr = inspector
+                    ? `측정자 :        ${inspector}     (서명)`
+                    : `측정자 :                (서명)`;
+                const newInspBytes = enc.encode(inspStr);
+                const newInspHeader = new Uint8Array([0xe4, 0xd5, 0x62, 0xd4, 0x04, newInspBytes.length & 0xff, (newInspBytes.length >> 8) & 0xff, ...newInspBytes]);
+
+                const nextC8 = new Uint8Array(c8.length + (newInspHeader.length - (oldBlockEnd - vPos)));
+                nextC8.set(c8.subarray(0, vPos), 0);
+                nextC8.set(newInspHeader, vPos);
+                nextC8.set(c8.subarray(oldBlockEnd), vPos + newInspHeader.length);
+                c8 = nextC8;
+            }
+        }
+
+        // (4) 점검일자 (슬롯 0 또는 양식에 날짜가 있는 경우)
+        if (slotInfo.inspect_date) {
+            let dStr = slotInfo.inspect_date;
+            const dMatch = dStr.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+            if (dMatch) {
+                dStr = `${dMatch[1]}년${parseInt(dMatch[2], 10)}월${parseInt(dMatch[3], 10)}일`;
+            }
+            const dateOldPattern = enc.encode("2026년10월16일");
+            const dPos = AtrGenerator.findSub(c8, dateOldPattern);
+            if (dPos !== -1) {
+                let vPos = dPos - 7;
+                if (vPos >= 0 && c8[vPos] === 0xe4 && c8[vPos + 1] === 0xd5 && c8[vPos + 2] === 0x62 && c8[vPos + 3] === 0xd4 && c8[vPos + 4] === 0x04) {
+                    const oldLen = c8[vPos + 5] | (c8[vPos + 6] << 8);
+                    const oldBlockEnd = vPos + 7 + oldLen;
+                    const newDBytes = enc.encode(dStr);
+                    const newDHdr = new Uint8Array([0xe4, 0xd5, 0x62, 0xd4, 0x04, newDBytes.length & 0xff, (newDBytes.length >> 8) & 0xff, ...newDBytes]);
+                    const nextC8 = new Uint8Array(c8.length + (newDHdr.length - (oldBlockEnd - vPos)));
+                    nextC8.set(c8.subarray(0, vPos), 0);
+                    nextC8.set(newDHdr, vPos);
+                    nextC8.set(c8.subarray(oldBlockEnd), vPos + newDHdr.length);
+                    c8 = nextC8;
+                }
+            }
+        }
+
         // 7. 청크 재결합
         return AtrGenerator.concat([
             c0,
@@ -567,7 +657,10 @@ class AtrGenerator {
                 slot: p,
                 guid: mainGuid,
                 orig_name: origName,
-                orig_title: origTitle
+                orig_title: origTitle,
+                circuit_name: circuitName,
+                inspector_name: inspectorName,
+                inspect_date: inspectDate
             };
 
             const transformed = await AtrGenerator.transformSlot(slotSlice, p, slotInfo, item);

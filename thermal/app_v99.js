@@ -402,7 +402,13 @@
         DOM.btnLearnCurrent.addEventListener('click', async () => {
             const page = state.pages[state.currentIndex];
             if (!page) return alert('학습할 사진 페이지가 없습니다.');
-            state.spotModel.learn(page.circuit_name, page.spots);
+            if (state.spotModel.isFull() && !state.spotModel.hasPattern(page.circuit_name)) {
+                return alert('학습된 위치 패턴 목록 수가 최대 한도인 200개에 도달하여 더 이상 신규 학습할 수 없습니다.\n[학습된 모든 패턴 초기화]를 진행하시면 다시 처음부터 학습이 가능합니다.');
+            }
+            const ok = state.spotModel.learn(page.circuit_name, page.spots);
+            if (!ok) {
+                return alert('학습된 위치 패턴 목록 수가 200개에 도달하여 더 이상 학습할 수 없습니다.\n[학습된 모든 패턴 초기화]를 진행하시면 다시 학습이 가능합니다.');
+            }
             saveSpotModel();
             renderPatternsTable();
             alert(`[${page.circuit_name}] 위치에 대한 스팟 좌표가 학습 및 저장되었습니다.`);
@@ -455,6 +461,10 @@
      * 학습용 예제 파일 일괄 분석 및 모델 고도화 (.jpg 및 .atr 보고서 지원)
      */
     async function processTrainingFiles(files) {
+        if (state.spotModel.isFull()) {
+            return alert('학습된 위치 패턴 목록 수가 최대 한도인 200개에 도달하여 더 이상 추가 학습할 수 없습니다.\n[학습된 모든 패턴 초기화]를 진행하시면 다시 학습이 가능합니다.');
+        }
+
         const valid = files.filter(f => /\.(jpe?g|atr)$/i.test(f.name));
         if (valid.length === 0) return alert('열화상 사진(.jpg) 또는 서멀스튜디오 보고서(.atr) 파일을 선택해 주세요.');
 
@@ -478,11 +488,13 @@
             return;
         }
 
-        if (state.bridge && state.bridge.saveModel) {
-            await state.bridge.saveModel(state.spotModel.export());
-        }
+        saveSpotModel();
 
-        DOM.trainingProgress.textContent = `학습 완료: 총 ${res.totalCount}장 중 스팟이 포함된 ${res.learnedCount}장의 위치 데이터를 누적 학습했습니다.`;
+        let limitMsg = '';
+        if (res.reachedLimit || state.spotModel.isFull()) {
+            limitMsg = ' (위치 패턴 목록 수가 최대 한도인 200개에 도달하여 이후 추가 학습이 제한됩니다)';
+        }
+        DOM.trainingProgress.textContent = `학습 완료: 총 ${res.totalCount}장 중 스팟이 포함된 ${res.learnedCount}장의 위치 데이터를 누적 학습했습니다.${limitMsg}`;
         if (DOM.trainingFailedNotice) {
             if (res.failedFiles.length > 0) {
                 DOM.trainingFailedNotice.style.display = 'block';
@@ -494,7 +506,10 @@
 
         renderPatternsTable();
 
-        let msg = `학습 완료!\n총 ${res.totalCount}개 사진 중 스팟 좌표가 있는 ${res.learnedCount}개 사진의 위치 패턴을 성공적으로 반영하여 고도화했습니다.`;
+        let msg = `학습 완료!\n총 ${res.totalCount}개 파일 중 스팟 좌표가 있는 ${res.learnedCount}개 사진의 위치 패턴을 성공적으로 반영했습니다.`;
+        if (res.reachedLimit || state.spotModel.isFull()) {
+            msg += `\n\n⚠️ 학습된 위치 패턴 수가 최대 한도인 200개에 도달하여 추가 학습이 중단되었습니다.\n[학습된 모든 패턴 초기화] 진행 시 다시 처음부터 학습이 가능합니다.`;
+        }
         if (res.failedFiles.length > 0) {
             msg += `\n\n※ 이 사진에는 스팟 위치 기록이 없어 학습하지 못했습니다:\n${res.failedFiles.map(f => '· ' + f).join('\n')}`;
         }
@@ -506,9 +521,14 @@
      */
     function renderPatternsTable() {
         const list = state.spotModel.getPatternsList();
-        DOM.patternCount.textContent = list.length;
+        const count = list.length;
+        if (count >= 200) {
+            DOM.patternCount.innerHTML = `<span style="color: var(--error); font-weight: 700;">${count} / 200 (최대 한도 도달 - 추가 학습 제한)</span>`;
+        } else {
+            DOM.patternCount.textContent = `${count}개`;
+        }
 
-        if (list.length === 0) {
+        if (count === 0) {
             DOM.patternsTableBody.innerHTML = `
                 <tr>
                     <td colspan="6" style="text-align: center; color: var(--text-sub); padding: 16px;">
