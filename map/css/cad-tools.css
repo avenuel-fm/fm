@@ -752,7 +752,7 @@
         .zone-toggle-btn.zone-eraser.on { background: var(--navy); color: var(--white); border-color: var(--navy); }
         .zone-ortho-check { display: inline-flex; align-items: center; gap: 6px; font-size: var(--size-s); font-weight: 600; color: var(--navy); cursor: pointer; }
         .zone-ortho-check input { width: 16px; height: 16px; accent-color: var(--navy); }
-        @media (max-width: 1400px) {   /* 휴대폰·태블릿·작은 PC: 줄이 옆으로 잘리지 않게 줄바꿈 + 왼쪽 아래 「뒤로」 버튼 위로 */
+        @media (max-width: 1100px) {   /* 휴대폰·태블릿·작은 PC: 줄이 옆으로 잘리지 않게 줄바꿈 + 왼쪽 아래 「뒤로」 버튼 위로 */
             .zone-guide-banner { flex-wrap: wrap; justify-content: center; white-space: normal; bottom: 52px; border-bottom: 1px solid var(--border-medium); border-radius: var(--radius); }   /* 왼쪽 아래 「뒤로」 버튼 위로 */
             .zone-guide-banner .zone-banner-controls { flex-wrap: wrap; white-space: normal; row-gap: var(--sp-2); justify-content: center; }
         }

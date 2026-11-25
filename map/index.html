@@ -249,19 +249,19 @@
                 <div class="zone-banner-controls">
                     <!-- 구역 구분: 방화구역 / 제연구획 / 외벽 -->
                     <div class="zone-toggle-group">
-                        <button type="button" class="zone-toggle-btn active" id="btn-zone-cat-fire" onclick="setZoneCategory('fire')">🔥 방화구역</button>
-                        <button type="button" class="zone-toggle-btn" id="btn-zone-cat-smoke" onclick="setZoneCategory('smoke')">💨 제연구획</button>
-                        <button type="button" class="zone-toggle-btn" id="btn-zone-cat-wall" onclick="setZoneCategory('wall')">🧱 외벽</button>
-                        <button type="button" class="zone-toggle-btn" id="btn-zone-cat-floor" onclick="setZoneCategory('floor')" title="매장·기능실 아래에 깔리는 흰색 바닥 면 (면만)">⬜ 바닥</button>
+                        <button type="button" class="zone-toggle-btn active" id="btn-zone-cat-fire" onclick="setZoneCategory('fire')">방화구역</button>
+                        <button type="button" class="zone-toggle-btn" id="btn-zone-cat-smoke" onclick="setZoneCategory('smoke')">제연구획</button>
+                        <button type="button" class="zone-toggle-btn" id="btn-zone-cat-wall" onclick="setZoneCategory('wall')">외벽</button>
+                        <button type="button" class="zone-toggle-btn" id="btn-zone-cat-floor" onclick="setZoneCategory('floor')" title="매장·기능실 아래에 깔리는 흰색 바닥 면 (면만)">바닥</button>
                     </div>
                     <!-- 형태 구분: 선 / 면 -->
                     <div class="zone-toggle-group">
-                        <button type="button" class="zone-toggle-btn" id="btn-zone-geom-line" onclick="setZoneGeometry('line')" disabled title="방화구역은 면(영역)으로만 지정 가능합니다">〰️ 선 (경계)</button>
-                        <button type="button" class="zone-toggle-btn active" id="btn-zone-geom-polygon" onclick="setZoneGeometry('polygon')">⬡ 면 (영역)</button>
+                        <button type="button" class="zone-toggle-btn" id="btn-zone-geom-line" onclick="setZoneGeometry('line')" disabled title="방화구역은 면(영역)으로만 지정 가능합니다">선 (경계)</button>
+                        <button type="button" class="zone-toggle-btn active" id="btn-zone-geom-polygon" onclick="setZoneGeometry('polygon')">면 (영역)</button>
                     </div>
-                    <button type="button" class="zone-toggle-btn zone-eraser" id="btn-zone-eraser" onclick="toggleEraserMode()" title="그린 면 안의 도면 원본·구역·심벌·인포를 바닥색(흰색)으로 지움. 매장·바닥·배관은 그대로">🧽 지우개</button>
+                    <button type="button" class="zone-toggle-btn zone-eraser" id="btn-zone-eraser" onclick="toggleEraserMode()" title="그린 면 안의 도면 원본·구역·심벌·인포를 바닥색(흰색)으로 지움. 매장·바닥·배관은 그대로">지우개</button>
                     <span id="floor-cl-controls" class="zone-toggle-group" style="display:none;align-items:center;gap:4px">
-                        <button type="button" class="zone-toggle-btn" id="btn-centerline-floor" onclick="toggleCenterlineFloor()" title="중심선을 그리면 폭만큼 펼친 바닥이 자동으로 만들어지고 겹치는 바닥과 하나로 합쳐집니다">🛤 복도 중심선</button>
+                        <button type="button" class="zone-toggle-btn" id="btn-centerline-floor" onclick="toggleCenterlineFloor()" title="중심선을 그리면 폭만큼 펼친 바닥이 자동으로 만들어지고 겹치는 바닥과 하나로 합쳐집니다">복도 중심선</button>
                         <span style="font-size:12px">폭</span><input type="number" id="input-floor-width-px" value="80" min="10" max="600" step="10" style="width:56px;height:26px;text-align:center" onchange="setFloorRibbonWidth(this.value)"><span style="font-size:12px">px</span>
                         <button type="button" class="zone-toggle-btn" onclick="setFloorRibbonWidth(80)" title="주동선 복도">주동선 80</button>
                         <button type="button" class="zone-toggle-btn" onclick="setFloorRibbonWidth(50)" title="일반 복도">일반 50</button>
