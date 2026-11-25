@@ -1,28 +1,10 @@
 @echo off
-chcp 65001 >nul
-title 열화상점검 실행 연결 등록
-echo ========================================================
-echo   업무지원 [점검 - 열화상점검] 버튼 -> PC 열화상 프로그램 실행 연결
-echo   (이 PC에서 딱 한 번만 하면 됩니다)
-echo ========================================================
-echo.
-set "BAT=C:\avenuel\열화상리포트_오프라인_완전체\열화상리포트_실행.bat"
-if not exist "%BAT%" (
-    echo [안 됨] 아래 파일이 없습니다. 폴더 위치를 확인해 주세요.
-    echo   %BAT%
-    pause
-    exit /b 1
-)
-reg add "HKCU\Software\Classes\avenuel-thermal" /ve /d "URL:Avenuel Thermal" /f >nul
-reg add "HKCU\Software\Classes\avenuel-thermal" /v "URL Protocol" /d "" /f >nul
-reg add "HKCU\Software\Classes\avenuel-thermal\shell\open\command" /ve /d "cmd.exe /c \"\"%BAT%\"\"" /f >nul
+title Thermal link setup
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$b='C:\avenuel\'+([char]0xC5F4+[char]0xD654+[char]0xC0C1+[char]0xB9AC+[char]0xD3EC+[char]0xD2B8+[char]0x005F+[char]0xC624+[char]0xD504+[char]0xB77C+[char]0xC778+[char]0x005F+[char]0xC644+[char]0xC804+[char]0xCCB4)+'\'+([char]0xC5F4+[char]0xD654+[char]0xC0C1+[char]0xB9AC+[char]0xD3EC+[char]0xD2B8+[char]0x005F+[char]0xC2E4+[char]0xD589)+'.bat'; if(-not (Test-Path -LiteralPath $b)){ Write-Host ('['+([char]0xC2E4+[char]0xD328)+'] '+([char]0xD30C+[char]0xC77C+[char]0xC774+[char]0x0020+[char]0xC5C6+[char]0xC2B5+[char]0xB2C8+[char]0xB2E4)+': '+$b); exit 1 }; $k='HKCU:\Software\Classes\avenuel-thermal'; New-Item -Path $k -Force | Out-Null; Set-ItemProperty -Path $k -Name '(default)' -Value 'URL:Avenuel Thermal'; New-ItemProperty -Path $k -Name 'URL Protocol' -Value '' -Force | Out-Null; New-Item -Path ($k+'\shell\open\command') -Force | Out-Null; Set-ItemProperty -Path ($k+'\shell\open\command') -Name '(default)' -Value ('cmd.exe /c \"\"'+$b+'\"\"'); Write-Host ('['+([char]0xC644+[char]0xB8CC)+'] OK - Thermal button is linked to this PC.')"
 if errorlevel 1 (
-    echo [실패] 등록하지 못했습니다.
-    pause
-    exit /b 1
+  echo FAILED. Check that the folder exists under C:venuel
+) else (
+  echo Now click the Thermal button in the work-support app.
 )
-echo [완료] 이제 업무지원에서 열화상점검 버튼을 누르면 열화상 프로그램이 실행됩니다.
-echo   처음 누를 때 브라우저가 "열기" 허용을 물으면 [허용] 또는 [열기]를 누르세요.
-echo   연결을 없애려면:  reg delete "HKCU\Software\Classes\avenuel-thermal" /f
 echo.
 pause
