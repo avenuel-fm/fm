@@ -10,10 +10,10 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.26.15"></script>
-<script>window.WS_VERSION = '0.26.15';</script>
-<script src="offline.js?v=0.26.15"></script>
-<script src="ws-api.js?v=0.26.15"></script>
+<script src="config.js?v=0.26.16"></script>
+<script>window.WS_VERSION = '0.26.16';</script>
+<script src="offline.js?v=0.26.16"></script>
+<script src="ws-api.js?v=0.26.16"></script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -792,7 +792,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B3','B2','B1','1F','2F','3F','4F','5F','6F','7F','8F','9F','10F','POPUP'];   // 소화기·소화전·공기호흡기 층 B3~10F · 맨 아래 POPUP (결정 228·260)
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.15' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.16' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -923,7 +923,7 @@ window.addEventListener('popstate', () => {
   if (open) { if (S.sp && S.sp.big) spBigClose(); else closeDialog(); return; }
   back();
 });
-const PARENT = { inspect: 'main', fire: 'inspect', eh: 'inspect', thermal: 'inspect', cs: 'inspect', csck: 'cs', qr: 'fire', hyd: 'fire', hydfl: 'hyd', status: 'fire', floor: 'status', docs: 'main', set: 'main', risk: 'set', map: 'main', cad: 'main', spec: 'main', tbm: 'docs', nw: 'docs', log: 'docs', rw: 'docs', wh: 'docs', ahu: 'docs', clim: 'docs', use: 'docs', rep: 'docs', kw: 'set', uhr: 'use', att: 'docs', attup: 'att' };
+const PARENT = { inspect: 'main', fire: 'inspect', eh: 'inspect', cs: 'inspect', csck: 'cs', qr: 'fire', hyd: 'fire', hydfl: 'hyd', status: 'fire', floor: 'status', docs: 'main', set: 'main', risk: 'set', map: 'main', cad: 'main', spec: 'main', tbm: 'docs', nw: 'docs', log: 'docs', rw: 'docs', wh: 'docs', ahu: 'docs', clim: 'docs', use: 'docs', rep: 'docs', kw: 'set', uhr: 'use', att: 'docs', attup: 'att' };
 function back() { if (S.view === 'pdf') return go((S.pdf && S.pdf.from) || 'main'); if (S.view === 'csck') return csLeave(); if (S.view === 'risk' && S.rk && S.rk.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; if (S.view === 'wh' && S.wh && (S.wh.d.dirty || S.wh.n.dirty) && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; if (S.view === 'nw' && !nwLeaveOk()) return; if (S.view === 'log' && !lgLeaveOk()) return; if (S.view === 'ahu' && !ahuLeaveOk()) return; if ((S.view === 'clim' || S.view === 'use') && !clLeaveOk()) return; if (S.view === 'rep') return repBack(); if (S.view === 'uhr') return uhBack(); if (S.view === 'tbm' && S.tbm && S.tbm.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; go(PARENT[S.view] || 'main'); }
 
 function topbar(sub, title) {
@@ -2527,43 +2527,41 @@ function renderInspect() {
   return topbar('업무지원 ›', '점검') + '<div class="wrap list">' +
     R('fire', "go('fire')", 'var(--blue-bg)', 'var(--blue)', ICON.fire, '소화기/소화전/공기호흡기 점검', 'QR 관리 · 월별 점검 현황') +
     R('eh', 'openEh()', 'var(--orange-bg)', 'var(--orange)', ICON.plug, '전열필증', '층·매장별 전열기기 관리 · 신고필증' + (CAN_PRINT ? ' 출력' : ' (출력은 PC에서)')) +
-    R('thermal', "go('thermal')", 'var(--blue-bg)', 'var(--blue)', ICON.therm, '열화상점검', 'FLIR 열화상 사진 → 점검 보고서(.atr) · PC 전용', !thCanOpen()) +
+    R('thermal', 'openThermal()', 'var(--blue-bg)', 'var(--blue)', ICON.therm, '열화상점검', 'FLIR 열화상 사진 → 점검 보고서(.atr) · PC 전용', !thCanOpen()) +
     R('cs', 'openCs()', 'var(--green-bg)', 'var(--green)', ICON.hat, '공사장 점검', '공사 현장 안전 순찰 · 사진 · 날짜별 현장별 PDF') +
     '</div>';
 }
 
-/* ── 열화상점검 (결정 166 → 212): 로그인한 모든 직원이 엶. 양식 파일 바꾸기만 소장·부소장·관리자·옵저버 (서버 16_thermal.sql 에서 막음) ── */
+/* ── 열화상점검 (결정 262): 업무지원 안에서 만들지 않고, PC 에 둔 오프라인 단독 프로그램을 실행한다. 모바일은 안내만 ──
+   브라우저는 .bat 을 직접 못 돌리므로 윈도우에 한 번 등록한 연결(avenuel-thermal://, apps/ws/tools/열화상_실행_등록.bat)로 부른다 */
 const thCanOpen = () => !!S.user;
-const THERMAL_ON = true;   // 작성기 fm/thermal 이 바로가기 페이지에 올라간 뒤 (결정 168). 구글 웹앱(WS_API 없음)에서는 안내 화면
-function renderThermal() {
-  if (!thCanOpen()) return renderInspect();
-  if (window.WS_API && THERMAL_ON) return '<div class="thview">' + topbar('점검 ›', '열화상점검') + '<iframe class="mapframe" src="../thermal/index.html" title="열화상 보고서 작성" allow="fullscreen"></iframe></div>';   // 작성기(fm/thermal)를 화면 안 창으로. 뒤로는 아래 공통 긴 버튼 하나만 (결정 168)
-  return topbar('점검 ›', '열화상점검') + '<div class="wrap list">' +
-    '<div class="banner b-gray">준비 중입니다. 지금은 사무실 PC에서만 씁니다.</div>' +
-    '<div class="card" style="padding:var(--sp-4)"><h3 style="margin:0 0 var(--sp-2);font-size:var(--size-m)">할 수 있는 일</h3><div style="line-height:1.7">FLIR 열화상 사진(.jpg)을 넣으면 점 3개(R·S·T상) 온도와 상간 온도차를 계산해 FLIR Thermal Studio 보고서(.atr)로 만듭니다.</div></div>' +
-    '<div class="card" style="padding:var(--sp-4)"><h3 style="margin:0 0 var(--sp-2);font-size:var(--size-m)">쓰는 방법 (PC)</h3><div style="line-height:1.7">FLIR Thermal Studio가 깔린 PC에서 <b>run.bat</b>을 두 번 누르면 화면이 열립니다. 사진 이름은 <b>1층1번_일반.jpg</b>처럼 붙입니다.</div></div>' +
-    '</div>';
+const TH_REG_URL = 'https://avenuel-fm.github.io/fm/ws/thermal_register.bat';   // 등록 파일(apps/ws/tools/열화상_실행_등록.bat 와 같은 내용)
+function thermalLaunch() {
+  toast('열화상 리포트를 실행합니다');
+  location.href = 'avenuel-thermal://run';
 }
-
-/* 작성기(fm/thermal)가 부르는 통로 (결정 168, WS_열화상점검 3장). 자료는 PIN 로그인 표로 16_thermal.sql 함수만 */
-const thExt = n => { const m = /\.([A-Za-z0-9]{1,5})$/.exec(String(n || '')); return m ? m[1].toLowerCase() : 'bin'; };
-const thOk = r => { if (!r || !r.ok) throw new Error((r && r.error) || '저장하지 못했습니다'); return r; };
-window.WS_THERMAL = {
-  me: async () => ({ name: S.user ? S.user.name : '', role: S.user ? S.user.role : '' }),
-  boot: async () => { const r = thOk(await call('thermalBoot')); return { me: r.me, model: r.model, template: r.template, template_url: r.template ? r.template.url : '', reports: r.reports }; },
-  saveModel: async m => thOk(await call('thermalSet', 'model', m)),
-  saveTemplate: async t => thOk(await call('thermalSet', 'template', t)),   // t = upload() 결과 + name
-  upload: (blob, name) => WS_API.upload('thermal', blob, thExt(name)),   // 원본 그대로 (줄이지 않음)
-  saveReport: async r => thOk(await call('thermalReport', r)),
-  toDrive: async (path, name) => {   // 서버에 올린 PDF를 구글 드라이브 폴더로 복사 (구글 웹앱 ?api=thermaldrive, 결정 168)
-    const C = window.WS_CONFIG || {};
-    if (!C.WS_GAS_URL) throw new Error('구글 웹앱 주소가 설정에 없습니다');
-    const r = await (await fetch(C.WS_GAS_URL + '?api=thermaldrive&path=' + encodeURIComponent(path) + '&name=' + encodeURIComponent(name || ''), { credentials: 'omit' })).json();
-    if (!r.ok) throw new Error(r.error || '드라이브로 옮기지 못했습니다');
-    return { ok: true, url: r.url };
-  },
-  full: on => mapFull(on)
-};
+function thermalGuideClose() { const e = document.getElementById('thguide'); if (e) e.remove(); }
+function thermalGo() { store('ws_thermal_reg', '1'); thermalGuideClose(); thermalLaunch(); }
+function thermalGuide() {
+  thermalGuideClose();
+  const d = document.createElement('div');
+  d.id = 'thguide'; d.className = 'spsheet'; d.setAttribute('role', 'dialog'); d.setAttribute('aria-modal', 'true');
+  d.onclick = e => { if (e.target === d) thermalGuideClose(); };
+  d.innerHTML = '<div class="card" style="max-width:460px;width:100%;padding:var(--sp-4);line-height:1.7">' +
+    '<h3 style="margin:0 0 var(--sp-2);font-size:var(--size-m)">열화상 프로그램 연결 등록</h3>' +
+    '<div style="margin-bottom:var(--sp-3)">이 PC에서 <b>처음 한 번만</b> 하면 됩니다. 등록하면 다음부터는 단추만 누르면 열화상 프로그램이 열립니다.</div>' +
+    '<ol style="margin:0 0 var(--sp-3);padding-left:1.3em"><li>아래 <b>등록 파일 받기</b>를 누릅니다.</li><li>받은 파일을 <b>두 번 눌러 실행</b>하고 <b>[완료]</b>가 나오면 닫습니다.</li><li><b>등록했어요 · 열화상 실행</b>을 누릅니다. (브라우저가 열기 허용을 물으면 허용)</li></ol>' +
+    '<div style="display:flex;gap:var(--sp-2);flex-wrap:wrap">' +
+    '<a class="btn" id="thdl" href="' + TH_REG_URL + '" download="thermal_register.bat">등록 파일 받기</a>' +
+    '<button class="btn" id="thgo" onclick="thermalGo()">등록했어요 · 열화상 실행</button>' +
+    '<button class="btn" id="thx" onclick="thermalGuideClose()">닫기</button></div></div>';
+  document.body.appendChild(d);
+}
+function openThermal() {
+  if (!thCanOpen()) return;
+  if (!(window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches)) { toast('PC에서만 작업 가능합니다'); return; }
+  if (store('ws_thermal_reg') === '1') thermalLaunch(); else thermalGuide();   // 등록 전이면 안내 팝업
+}
 
 /* ── CAD (WS_CAD.md): 변환된 도면(DXF) 뷰어 fm/cad 를 화면 안 창으로. 자료는 18_cad.sql 함수만 · 파일은 ws-files/cad + 구글 드라이브 사본 ── */
 function renderCad() {
@@ -4904,7 +4902,6 @@ function render() {
   else if (S.view === 'att') html = renderAtt();
   else if (S.view === 'attup') html = renderAttUp();
   else if (S.view === 'inspect') html = renderInspect();
-  else if (S.view === 'thermal') html = renderThermal();
   else if (S.view === 'cad') html = renderCad();
   else if (S.view === 'fire') html = renderFire();
   else if (S.view === 'qr') html = renderQr();
