@@ -575,10 +575,12 @@
                     ];
                 }
 
-                const isDefault = (predicted[0].x === 102 && predicted[0].y === 126);
-
-                // 학습된 패턴이 있거나, 원본에 스팟이 없으면 학습/예측 좌표로 자동 이동
-                if (!isDefault || !parsed.hasNativeSpots) {
+                // [핵심 원칙 1] 원본 사진에 이미 촬영자가 맞춘 스팟(Sp1~3)이 있는 경우: 원본 실측 좌표(parsed.spots) 100% 그대로 유지!
+                // [핵심 원칙 2] 원본에 스팟이 아예 없는 사진인 경우에만: 학습 모델 예측 좌표(predicted)로 스팟 자동 배치
+                if (parsed.hasNativeSpots) {
+                    state.spotModel.learn(circuitName, parsed.spots);
+                    saveSpotModel();
+                } else {
                     if (Array.isArray(parsed.spots) && parsed.spots.length >= 3) {
                         for (let i = 0; i < 3; i++) {
                             if (parsed.spots[i] && predicted[i]) {
