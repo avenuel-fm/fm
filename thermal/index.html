@@ -5,9 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>열화상 리포트 자동 작성기</title>
   <link rel="stylesheet" href="./styles.css?v=20261124_08">
-  <!-- 로컬 오프라인 의존성 (인터넷 없이 100% 동작) -->
+  <!-- 로컬 오프라인 의존성 (로컬 우선 + CDN 자동 폴백) -->
   <script src="./vendor/pako.min.js"></script>
   <script src="./vendor/jszip.min.js"></script>
+  <script>
+    if (typeof pako === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"><\/script>');
+    }
+    if (typeof JSZip === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"><\/script>');
+    }
+  </script>
 </head>
 <body>
 
