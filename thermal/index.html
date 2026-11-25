@@ -4,22 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>열화상 리포트 자동 작성기</title>
-  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./styles.css?v=20261124_08">
   <!-- 고정 버전 CDN 의존성 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
   <!-- 페이지 헤더 -->
   <header class="page-header">
-    <h1 class="page-title">열화상 리포트 자동 작성</h1>
+    <h1 class="page-title">열화상 리포트 자동 작성 <span style="font-size: 13px; font-weight: normal; color: var(--text-sub); margin-left: 8px;">(v99.5 배포엔진)</span></h1>
     <div class="header-actions">
       <button type="button" id="btnReset" class="btn btn-secondary">새 문서 (초기화)</button>
       <button type="button" id="btnModelModal" class="btn btn-secondary">스팟 위치 학습 관리</button>
-      <button type="button" id="btnDownloadAtr" class="btn btn-secondary" disabled>내려받기</button>
-      <button type="button" id="btnSavePdf" class="btn btn-primary" disabled>PDF 저장</button>
+      <button type="button" id="btnDownloadAtr" class="btn btn-primary" disabled>내려받기 (.atr)</button>
     </div>
   </header>
 
@@ -67,7 +65,7 @@
   <!-- 리포트 작업 영역 (사이드바 목록 + 상세 뷰) -->
   <main id="reportLayout" class="report-layout" style="display: none;">
     <!-- 좌측 쪽 목록 -->
-    <aside class="page-list-sidebar" id="sidebarAside" tabindex="0" title="목록을 누른 뒤 키보드 ↑↓ 로 쪽 이동">
+    <aside class="page-list-sidebar">
       <div class="sidebar-title">
         <span>페이지 목록</span>
         <span id="pageCountBadge">0 / 99</span>
@@ -166,15 +164,16 @@
       <!-- 하단 온도 요약 표 및 키보드 조작 안내 -->
       <div class="temp-table-wrap">
         <table class="temp-table">
-          <thead>
-            <tr>
-              <th>Sp1 (R상)</th>
-              <th>Sp2 (S상)</th>
-              <th>Sp3 (T상)</th>
-              <th>상간 최대 온도차 (ΔT)</th>
-              <th>상태 판정</th>
-            </tr>
-          </thead>
+              <thead>
+                <tr>
+                  <th>위치 / 패턴명</th>
+                  <th style="width: 55px;">샘플수</th>
+                  <th>Sp1 (R)</th>
+                  <th>Sp2 (S)</th>
+                  <th>Sp3 (T)</th>
+                  <th style="width: 48px; text-align: center;">관리</th>
+                </tr>
+              </thead>
           <tbody>
             <tr>
               <td id="tblSp1" class="temp-val">--.- °C</td>
@@ -227,15 +226,16 @@
         <label class="form-label">학습된 위치 패턴 목록 (<span id="patternCount">0</span>개)</label>
         <div class="patterns-table-wrap">
           <table class="patterns-table">
-            <thead>
-              <tr>
-                <th>위치 / 패턴명</th>
-                <th style="width: 60px;">샘플수</th>
-                <th>Sp1 (R)</th>
-                <th>Sp2 (S)</th>
-                <th>Sp3 (T)</th>
-              </tr>
-            </thead>
+              <thead>
+                <tr>
+                  <th>위치 / 패턴명</th>
+                  <th style="width: 55px;">샘플수</th>
+                  <th>Sp1 (R)</th>
+                  <th>Sp2 (S)</th>
+                  <th>Sp3 (T)</th>
+                  <th style="width: 48px; text-align: center;">관리</th>
+                </tr>
+              </thead>
             <tbody id="patternsTableBody">
               <tr>
                 <td colspan="5" style="text-align: center; color: var(--text-sub); padding: 12px;">
@@ -260,11 +260,11 @@
     </div>
   </div>
 
-  <!-- 스크립트 연결 (캐시 방지 버전 파라미터 적용) -->
-  <script src="./mock_bridge.js?v=20261124_09"></script>
-  <script src="./flir_parser.js?v=20261124_09"></script>
-  <script src="./atr_generator.js?v=20261124_09"></script>
-  <script src="./spot_model.js?v=20261124_09"></script>
-  <script src="./app.js?v=20261124_09"></script>
+  <!-- 스크립트 연결 (CDN 캐시 완전 우회 버전 파라미터 적용) -->
+  <script src="./mock_bridge.js?v=99.5"></script>
+  <script src="./flir_parser.js?v=99.5"></script>
+  <script src="./atr_generator_v99.js?v=99.5"></script>
+  <script src="./spot_model.js?v=99.5"></script>
+  <script src="./app_v99.js?v=99.5"></script>
 </body>
 </html>

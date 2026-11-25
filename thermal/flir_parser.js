@@ -280,7 +280,7 @@ class FlirParser {
             { id: 3, name: 'Sp3 (T상)', x: hasNativeSpots ? detectedSpots[2].x : 220, y: hasNativeSpots ? detectedSpots[2].y : 120 }
         ];
 
-        // 6. Raw Thermal Data (Tag 1) PNG 디코딩
+        // 6. Raw Thermal Data (Tag 1) 디코딩 (PNG 압축 또는 비압축 16-bit Raw 동시 지원)
         let rawPixels = null;
         const width = 320;
         const height = 240;
@@ -288,8 +288,28 @@ class FlirParser {
         if (tags[1]) {
             const rawStart = tags[1].offset;
             const rawLen = tags[1].length;
-            const pngBytes = fffBytes.slice(rawStart + 32, rawStart + rawLen);
-            rawPixels = await FlirParser.decodePng16(pngBytes, width, height);
+            const payload = fffBytes.slice(rawStart + 32, rawStart + rawLen);
+
+            // PNG 매직 넘버 검사 (\x89PNG\r\n\x1a\n)
+            const isPng = payload.length >= 8 &&
+                          payload[0] === 0x89 && payload[1] === 0x50 &&
+                          payload[2] === 0x4E && payload[3] === 0x47;
+
+            if (isPng) {
+                rawPixels = await FlirParser.decodePng16(payload, width, height);
+            } else if (payload.length >= width * height * 2) {
+                // 비압축 16-bit 리틀 엔디안 Raw 픽셀 직접 디코딩
+                rawPixels = [];
+                const pView = new DataView(payload.buffer, payload.byteOffset, payload.byteLength);
+                for (let y = 0; y < height; y++) {
+                    const row = new Uint16Array(width);
+                    const rowOffset = y * width * 2;
+                    for (let x = 0; x < width; x++) {
+                        row[x] = pView.getUint16(rowOffset + x * 2, true);
+                    }
+                    rawPixels.push(row);
+                }
+            }
         }
 
         // 7. 정밀 복사 온도 계산기 생성 (FLIR 표준 물리 공식)
@@ -581,4 +601,9 @@ class FlirCalculator {
     }
 }
 
-window.FlirParser = FlirParser;
+if (typeof window !== 'undefined') {
+    window.FlirParser = FlirParser;
+}
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = FlirParser;
+}
