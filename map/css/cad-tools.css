@@ -584,7 +584,7 @@
             font-weight: 600;
             background: var(--white);
             border: 1.5px solid transparent;
-            color: var(--white);
+            color: var(--navy);   /* 선택 안 된 버튼도 글자가 보이게 (흰 바탕에 흰 글자였음) */
             cursor: pointer;
             transition: all 0.15s ease;
         }
@@ -594,7 +594,7 @@
         .symbol-type-chip.active {
             background: var(--white);
             color: var(--navy);
-            border-color: var(--white);
+            border-color: #38bdf8;   /* 선택된 버튼은 하늘색 테두리 */
             box-shadow: none;
         }
 
