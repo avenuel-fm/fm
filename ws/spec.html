@@ -9,7 +9,7 @@
 <title>시방서 검색 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.26.15"></script>
+<script src="config.js?v=0.26.18"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
@@ -680,6 +680,12 @@ select.lgin{text-align:center;padding:0}
 .whsplit{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:var(--sp-2)}.whsplit .whcol{min-width:0;padding-right:var(--sp-2)}.whsplit .whcol+.whcol{padding:0 0 0 var(--sp-2);border-left:1px solid var(--line2)}.whsplit .whpc:first-child{margin-top:0}
 .whck{display:flex;gap:var(--sp-4);min-height:var(--control-h);align-items:center}.whck label{display:flex;align-items:center;gap:var(--sp-1);font-size:var(--size-m)}
 .whtwo{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3)}.whmat{display:grid;grid-template-columns:1fr 72px 72px 44px;gap:var(--sp-1);margin-bottom:var(--sp-1)}.whdel{margin-top:var(--sp-3);color:var(--error);border-color:var(--error)}
+/* 하자점검 (WS_하자점검, 결정 266) */
+@media (min-width:768px){.whg.dfg{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.dfc .dfh{display:flex;gap:var(--sp-1);margin-bottom:var(--sp-1)}.dfc .dfh .inp{flex:1;min-width:0}.dfc textarea.inp{margin-bottom:var(--sp-1);resize:vertical}
+.dfph{position:relative;cursor:default}.dfph .dfcam{width:72%}.dfbt{width:100%}
+.dfplus{display:flex;align-items:center;justify-content:center;min-height:160px;font-size:38px;border:2px dashed var(--line);border-radius:var(--radius);background:var(--white);color:var(--muted);cursor:pointer}.dfplus:disabled{opacity:.4;cursor:default}
+.dfsgs{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);margin-top:var(--sp-3)}.dfsg small{display:block;font-size:var(--size-s);font-weight:600;color:var(--sub);margin-bottom:var(--sp-1)}.dfsb{width:100%;min-height:96px;cursor:pointer;color:var(--muted);font-size:var(--size-s)}
 .whrow{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;padding:var(--sp-3);background:var(--white);border:0;border-bottom:1px solid var(--line2);font:inherit;color:var(--ink);cursor:pointer}.whrow.on{background:var(--tint)}.whrow span{font-size:var(--size-m)}.whrow small{color:var(--muted);font-size:var(--size-s)}
 .whb{display:inline-block;margin-left:var(--sp-1);padding:0 var(--sp-1);border:1px solid var(--error);border-radius:var(--radius);color:var(--error)}
 @media (max-width:599px){.whtwo{grid-template-columns:1fr}}

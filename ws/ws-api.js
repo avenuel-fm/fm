@@ -239,6 +239,15 @@
     dnSave: async (token, d) => rpc('ws_dn_save', { p_token: token, p_d: Object.assign({}, d, { photos: await dwPics(d.photos), fire: await dwPics(d.fire), pledge: await dwPics(d.pledge) }) }),
     dnDelete: (token, id) => rpc('ws_dn_delete', { p_token: token, p_id: String(id || '') }),
 
+    /* ── 하자점검 (supabase/27_defect.sql): 사진·서명은 버킷 dw_photo/ 에 먼저 올리고 {file} 로 넘김 ── */
+    hjList: (token, q, from, to) => rpc('ws_hj_list', { p_token: token, p_q: q || '', p_from: from || '', p_to: to || '' }),
+    async hjSave(token, d) {
+      const one = async (p, ext) => p && p.data ? { file: await upload('dw_photo', dataUrlToBlob(p.data), ext) } : p && p.id ? { id: p.id } : null;
+      const items = []; for (const it of d.items || []) items.push({ n: it.n, t: it.t, photo: await one(it.photo, 'jpg') });
+      return rpc('ws_hj_save', { p_token: token, p_d: { id: d.id, day: d.day, items, signSite: await one(d.signSite, 'png'), signFm: await one(d.signFm, 'png') } });
+    },
+    hjDelete: (token, id) => rpc('ws_hj_delete', { p_token: token, p_id: String(id || '') }),
+
     /* ── 3-6 환경설정 (supabase/08_settings.sql, 소장만). 위험성 목록은 시트 대신 여기서 고침 ── */
     adminStaff: token => rpc('ws_admin_staff', { p_token: token }),
     adminSetToast: (token, sec) => rpc('ws_admin_set_toast', { p_token: token, p_sec: Number(sec) }),

@@ -10,10 +10,10 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.26.17"></script>
-<script>window.WS_VERSION = '0.26.17';</script>
-<script src="offline.js?v=0.26.17"></script>
-<script src="ws-api.js?v=0.26.17"></script>
+<script src="config.js?v=0.26.18"></script>
+<script>window.WS_VERSION = '0.26.18';</script>
+<script src="offline.js?v=0.26.18"></script>
+<script src="ws-api.js?v=0.26.18"></script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -687,6 +687,12 @@ select.lgin{text-align:center;padding:0}
 .whsplit{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:var(--sp-2)}.whsplit .whcol{min-width:0;padding-right:var(--sp-2)}.whsplit .whcol+.whcol{padding:0 0 0 var(--sp-2);border-left:1px solid var(--line2)}.whsplit .whpc:first-child{margin-top:0}
 .whck{display:flex;gap:var(--sp-4);min-height:var(--control-h);align-items:center}.whck label{display:flex;align-items:center;gap:var(--sp-1);font-size:var(--size-m)}
 .whtwo{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3)}.whmat{display:grid;grid-template-columns:1fr 72px 72px 44px;gap:var(--sp-1);margin-bottom:var(--sp-1)}.whdel{margin-top:var(--sp-3);color:var(--error);border-color:var(--error)}
+/* 하자점검 (WS_하자점검, 결정 266) */
+@media (min-width:768px){.whg.dfg{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.dfc .dfh{display:flex;gap:var(--sp-1);margin-bottom:var(--sp-1)}.dfc .dfh .inp{flex:1;min-width:0}.dfc textarea.inp{margin-bottom:var(--sp-1);resize:vertical}
+.dfph{position:relative;cursor:default}.dfph .dfcam{width:72%}.dfbt{width:100%}
+.dfplus{display:flex;align-items:center;justify-content:center;min-height:160px;font-size:38px;border:2px dashed var(--line);border-radius:var(--radius);background:var(--white);color:var(--muted);cursor:pointer}.dfplus:disabled{opacity:.4;cursor:default}
+.dfsgs{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);margin-top:var(--sp-3)}.dfsg small{display:block;font-size:var(--size-s);font-weight:600;color:var(--sub);margin-bottom:var(--sp-1)}.dfsb{width:100%;min-height:96px;cursor:pointer;color:var(--muted);font-size:var(--size-s)}
 .whrow{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;padding:var(--sp-3);background:var(--white);border:0;border-bottom:1px solid var(--line2);font:inherit;color:var(--ink);cursor:pointer}.whrow.on{background:var(--tint)}.whrow span{font-size:var(--size-m)}.whrow small{color:var(--muted);font-size:var(--size-s)}
 .whb{display:inline-block;margin-left:var(--sp-1);padding:0 var(--sp-1);border:1px solid var(--error);border-radius:var(--radius);color:var(--error)}
 @media (max-width:599px){.whtwo{grid-template-columns:1fr}}
@@ -792,7 +798,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B3','B2','B1','1F','2F','3F','4F','5F','6F','7F','8F','9F','10F','POPUP'];   // 소화기·소화전·공기호흡기 층 B3~10F · 맨 아래 POPUP (결정 228·260)
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.17' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.18' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -923,8 +929,8 @@ window.addEventListener('popstate', () => {
   if (open) { if (S.sp && S.sp.big) spBigClose(); else closeDialog(); return; }
   back();
 });
-const PARENT = { inspect: 'main', fire: 'inspect', eh: 'inspect', cs: 'inspect', csck: 'cs', qr: 'fire', hyd: 'fire', hydfl: 'hyd', status: 'fire', floor: 'status', docs: 'main', set: 'main', risk: 'set', map: 'main', cad: 'main', spec: 'main', tbm: 'docs', nw: 'docs', log: 'docs', rw: 'docs', wh: 'docs', ahu: 'docs', clim: 'docs', use: 'docs', rep: 'docs', kw: 'set', uhr: 'use', att: 'docs', attup: 'att' };
-function back() { if (S.view === 'pdf') return go((S.pdf && S.pdf.from) || 'main'); if (S.view === 'csck') return csLeave(); if (S.view === 'risk' && S.rk && S.rk.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; if (S.view === 'wh' && S.wh && (S.wh.d.dirty || S.wh.n.dirty) && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; if (S.view === 'nw' && !nwLeaveOk()) return; if (S.view === 'log' && !lgLeaveOk()) return; if (S.view === 'ahu' && !ahuLeaveOk()) return; if ((S.view === 'clim' || S.view === 'use') && !clLeaveOk()) return; if (S.view === 'rep') return repBack(); if (S.view === 'uhr') return uhBack(); if (S.view === 'tbm' && S.tbm && S.tbm.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; go(PARENT[S.view] || 'main'); }
+const PARENT = { inspect: 'main', fire: 'inspect', eh: 'inspect', cs: 'inspect', df: 'inspect', csck: 'cs', qr: 'fire', hyd: 'fire', hydfl: 'hyd', status: 'fire', floor: 'status', docs: 'main', set: 'main', risk: 'set', map: 'main', cad: 'main', spec: 'main', tbm: 'docs', nw: 'docs', log: 'docs', rw: 'docs', wh: 'docs', ahu: 'docs', clim: 'docs', use: 'docs', rep: 'docs', kw: 'set', uhr: 'use', att: 'docs', attup: 'att' };
+function back() { if (S.view === 'pdf') return go((S.pdf && S.pdf.from) || 'main'); if (S.view === 'csck') return csLeave(); if (S.view === 'risk' && S.rk && S.rk.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; if (S.view === 'wh' && S.wh && (S.wh.d.dirty || S.wh.n.dirty) && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; if (S.view === 'df' && S.df && S.df.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; if (S.view === 'nw' && !nwLeaveOk()) return; if (S.view === 'log' && !lgLeaveOk()) return; if (S.view === 'ahu' && !ahuLeaveOk()) return; if ((S.view === 'clim' || S.view === 'use') && !clLeaveOk()) return; if (S.view === 'rep') return repBack(); if (S.view === 'uhr') return uhBack(); if (S.view === 'tbm' && S.tbm && S.tbm.dirty && !confirm('저장하지 않은 내용이 있습니다. 저장하지 않고 나갈까요?')) return; go(PARENT[S.view] || 'main'); }
 
 function topbar(sub, title) {
   const u = S.user || {};
@@ -1348,7 +1354,7 @@ if (window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matche
 /* ── 메인 메뉴 켜기·끄기 (결정 148): 설정 표 「메인메뉴끄기」, 소장·관리자·옵저버는 꺼진 칸도 엶 ── */
 const MENU = [
   ['docs', '서류작업', [['tbm', 'TBM'], ['nw', '명일 작업 예정'], ['att', '출근현황'], ['ahu', '온습도/공조기/에어커튼 입력'], ['log', '종합업무일지'], ['risk', '위험작업신청서'], ['work', '주간/야간 작업내역']]],
-  ['inspect', '점검', [['fire', '소화기/소화전/공기호흡기 점검'], ['eh', '전열필증'], ['thermal', '열화상점검'], ['cs', '공사장 점검']]],
+  ['inspect', '점검', [['fire', '소화기/소화전/공기호흡기 점검'], ['eh', '전열필증'], ['thermal', '열화상점검'], ['cs', '공사장 점검'], ['defect', '하자점검']]],
   ['spec', '시방서 검색', null], ['mat', '자재현황', null], ['map', '지도', null], ['cad', 'CAD', null]];   // 자재현황은 준비중이라 켜고 끄기 없음
 const menuOff = k => (S.menuOff || []).indexOf(k) !== -1;
 const menuCanOpen = () => !!S.user && ['소장', '관리자', '옵저버'].indexOf(S.user.role) !== -1;
@@ -2529,6 +2535,7 @@ function renderInspect() {
     R('eh', 'openEh()', 'var(--orange-bg)', 'var(--orange)', ICON.plug, '전열필증', '층·매장별 전열기기 관리 · 신고필증' + (CAN_PRINT ? ' 출력' : ' (출력은 PC에서)')) +
     R('thermal', 'openThermal()', 'var(--blue-bg)', 'var(--blue)', ICON.therm, '열화상점검', 'FLIR 열화상 사진 → 점검 보고서(.atr) · PC 전용', !thCanOpen()) +
     R('cs', 'openCs()', 'var(--green-bg)', 'var(--green)', ICON.hat, '공사장 점검', '공사 현장 안전 순찰 · 사진 · 날짜별 현장별 PDF') +
+    R('defect', 'openDf()', 'var(--red-bg)', 'var(--red)', ICON.file, '하자점검', '현장·하자내용 · 사진 · 서명 · 인쇄 A4 · PDF') +
     '</div>';
 }
 
@@ -4883,6 +4890,153 @@ async function whPdf() {
   } catch (e) { o.pdfBusy = false; render(); toast('PDF를 만들지 못했습니다: ' + (e && e.message ? e.message : e)); }
   wrap.remove();
 }
+/* ── 점검 › 하자점검 (WS_하자점검, 결정 266): 하자 칸(현장명·하자내용·사진 1장) 여러 개 → 인쇄 A4 / PDF + 현장책임자·시설팀 손글씨 서명. 처리 기한 = 작성일 + 10일 자동 ── */
+const DF_MAX = 40;
+function dfNew() { return { id: '', day: rwToday(), items: [{ n: '', t: '', photo: null }], signSite: null, signFm: null }; }
+function dfDue(day) { const d = new Date(day + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + 10); return d.toISOString().slice(0, 10); }
+async function openDf() {
+  if (!window.WS_API) return toast('하자점검은 바로가기 앱(Supabase)에서만 열립니다');
+  S.df = S.df || { list: null, f: dfNew(), dirty: false, busy: false, pdfBusy: false, pdfUrl: null, keys: [] };
+  go('df'); await dfLoad();
+}
+async function dfLoad() {
+  let r; try { r = await call('hjList', '', '', ''); } catch (e) { return; }
+  if (!r.ok) return toast(r.error || '불러오지 못했습니다');
+  S.df.list = r.list; if (S.view === 'df') render();
+}
+function dfDirty() {
+  const o = S.df; o.dirty = true; o.pdfUrl = null;
+  const e = $('dfState'); if (e) e.innerHTML = dfState();
+  const b = $('dfPdfB'); if (b && !o.pdfBusy) b.innerHTML = ICON.file + 'PDF 생성';
+}
+function dfState() { const o = S.df; return o.dirty ? '<span class="nwstate dirty"><i class="dot"></i>저장 안 함</span>' : o.f.id ? '<span class="nwstate">' + ICON.ok + '저장됨</span>' : ''; }
+function dfIn(i, fld, el) { S.df.f.items[i][fld] = el.value; dfDirty(); }
+function dfAdd() {
+  const L = S.df.f.items; if (L.length >= DF_MAX) return toast('하자 칸은 ' + DF_MAX + '개까지 넣을 수 있습니다');
+  const base = (L[0].n || '').replace(/\s*\d+$/, '').trim();   // 첫 칸 현장명 뒤에 순서 숫자 (고쳐 쓸 수 있음)
+  L.push({ n: base ? base + ' ' + (L.length + 1) : '', t: '', photo: null }); dfDirty(); render();
+}
+function dfRm(i) { const L = S.df.f.items; if (L.length < 2) return; const x = L[i]; if ((x.n || x.t || x.photo) && !confirm('이 하자 칸을 지울까요?')) return; L.splice(i, 1); dfDirty(); render(); }
+async function dfPhoto(i, el) {
+  const f = (el.files || [])[0]; el.value = ''; if (!f) return;
+  const o = S.df, key = f.name + '|' + f.size + '|' + f.lastModified;
+  if (o.keys.indexOf(key) !== -1 && !confirm('이미 넣은 사진 같습니다. 그래도 넣을까요?')) return;
+  try { const data = await shrinkJpeg(f, 1600, 0.7); o.f.items[i].photo = { data, src: data }; o.keys.push(key); if (o.keys.length > 80) o.keys.shift(); dfDirty(); render(); } catch (e) { toast(e.message); }
+}
+function dfPhotoRm(i) { if (!confirm('이 사진을 지울까요?')) return; S.df.f.items[i].photo = null; dfDirty(); render(); }
+function dfCard(x, i, n) {
+  const pick = cam => '<label class="btn dfbt' + (cam ? ' dfcam' : '') + '">' + (cam ? ICON.cam + ' 카메라' : ICON.folder + ' 파일') + '<input type="file" accept="image/*"' + (cam ? ' capture="environment"' : '') + ' hidden onchange="dfPhoto(' + i + ',this)"></label>';
+  return '<div class="whpc dfc"><div class="dfh"><input class="inp" maxlength="40" placeholder="현장명" aria-label="현장명 ' + (i + 1) + '" value="' + h(x.n) + '" oninput="dfIn(' + i + ',\'n\',this)">' +
+    (n > 1 ? '<button type="button" class="btn sm" onclick="dfRm(' + i + ')" aria-label="하자 칸 지우기">' + ICON.x + '</button>' : '') + '</div>' +
+    '<textarea class="inp" rows="3" maxlength="300" placeholder="하자내용" aria-label="하자내용 ' + (i + 1) + '" oninput="dfIn(' + i + ',\'t\',this)">' + h(x.t) + '</textarea>' +
+    '<div class="whim dfph">' + (x.photo ? '<img src="' + h(x.photo.src) + '" alt="하자 사진 ' + (i + 1) + '"><button type="button" class="whx" onclick="dfPhotoRm(' + i + ')" aria-label="사진 지우기">' + ICON.x + '</button>' : pick(1)) + '</div>' +
+    '<div class="whbs">' + pick(0) + '</div></div>';
+}
+function dfSignBox(key, label) {
+  const s = S.df.f[key];
+  return '<div class="dfsg"><small>' + label + '</small><button type="button" class="sig dfsb" onclick="dfSign(\'' + key + '\')" aria-label="' + label + ' 서명하기">' + (s ? '<img src="' + h(s.src) + '" alt="' + label + ' 서명">' : '<span>눌러서 서명</span>') + '</button></div>';
+}
+function dfSign(key) {
+  const label = key === 'signSite' ? '현장책임자' : '시설팀';
+  dialog('<h2 class="ehdh">' + label + ' 서명</h2><div class="spad" id="dfsp"><canvas class="g"></canvas><canvas class="i" aria-label="서명 칸"></canvas></div>' +
+    '<div id="dfsm" role="alert" class="ehmsg"></div><div class="ehda"><button class="btn big" onclick="closeDialog()">취소</button><button class="btn big" onclick="DFPAD.clear()">지우기</button><button class="btn big pri" onclick="dfSignOk(\'' + key + '\')">확인</button></div>');
+  DFPAD = makeSignPad($('dfsp'), label, () => { const m = $('dfsm'); if (m) m.textContent = ''; });
+}
+let DFPAD = null;
+function dfSignOk(key) {
+  if (!DFPAD || !DFPAD.has()) { $('dfsm').textContent = '서명이 너무 짧습니다. 크게 써 주세요.'; return; }
+  const data = DFPAD.png(); S.df.f[key] = { data, src: data }; closeDialog(); dfDirty(); render();
+}
+function dfListHtml() {
+  const o = S.df; if (!o.list) return '<div class="banner b-gray">불러오는 중…</div>';
+  if (!o.list.length) return '<div class="banner b-gray">저장된 하자점검서가 없습니다</div>';
+  return '<div class="card rwres">' + o.list.map(x => '<button type="button" class="whrow' + (o.f.id === x.id ? ' on' : '') + '" onclick="dfEdit(&quot;' + x.id + '&quot;)"><b>' + h(x.day.slice(5).replace('-', '/')) + ' · ' + h(x.items[0] ? x.items[0].n : '') + (x.items.length > 1 ? ' 외 ' + (x.items.length - 1) + '곳' : '') + '</b>' +
+    '<span>' + h(x.items[0] ? x.items[0].t : '') + '</span><small>하자 ' + x.items.length + '건 · 처리 기한 ' + h(x.due.slice(5).replace('-', '/')) + '</small></button>').join('') + '</div>';
+}
+function dfEdit(id) {
+  const o = S.df, x = o.list.find(y => y.id === id); if (!x) return;
+  if (o.dirty && !confirm('저장하지 않은 내용이 있습니다. 다른 하자점검서를 열까요?')) return;
+  o.f = JSON.parse(JSON.stringify(x)); o.dirty = false; o.pdfUrl = null; render(); window.scrollTo(0, 0);
+}
+function dfDel() {
+  const o = S.df; if (!o.f.id || !confirm('이 하자점검서를 지울까요?')) return;
+  call('hjDelete', o.f.id).then(r => { if (!r.ok) return toast(r.error); o.list = o.list.filter(x => x.id !== o.f.id); o.f = dfNew(); o.dirty = false; o.pdfUrl = null; render(); toast('지웠습니다'); }).catch(() => {});
+}
+function renderDf() {
+  const o = S.df, f = o.f, n = f.items.length;
+  const bar = '<div class="nwbar" id="dfBar"><span id="dfState">' + dfState() + '</span><button class="btn" onclick="dfPrint()">' + ICON.print + '인쇄 A4</button>' +
+    '<button class="btn" id="dfPdfB" onclick="dfPdf()"' + (o.pdfBusy ? ' disabled' : '') + '>' + (o.pdfBusy ? '<span class="spin"></span>' : ICON.file + (o.pdfUrl ? 'PDF 보기' : 'PDF 생성')) + '</button>' +
+    '<button class="btn pri" onclick="dfSave()"' + (o.busy ? ' disabled' : '') + '>' + (o.busy ? '<span class="spin"></span>' : '저장') + '</button></div>';
+  return topbar('점검 ›', '하자점검') + '<div class="wrap list"><div class="card whf">' +
+    '<div class="whg dfg">' + f.items.map((x, i) => dfCard(x, i, n)).join('') + '<button type="button" class="dfplus" onclick="dfAdd()"' + (n >= DF_MAX ? ' disabled' : '') + ' aria-label="하자 칸 추가 (' + n + ' / ' + DF_MAX + ')">+</button></div>' +
+    '<div class="dfsgs">' + dfSignBox('signSite', '현장책임자 서명') + dfSignBox('signFm', '시설팀 서명') + '</div>' +
+    '<small class="rwhint">처리 기한은 작성일(' + h(whDay(f.day)) + ') + 10일 = <b>' + h(whDay(dfDue(f.day))) + '</b> 로 자동 기입됩니다. PDF 생성을 누르면 먼저 저장합니다.</small>' +
+    (f.id ? '<button type="button" class="btn sm whdel" onclick="dfDel()">이 하자점검서 삭제</button>' : '') + '</div>' +
+    '<div class="cssec">최근 60일 · ' + (o.list ? o.list.length : '…') + '건</div>' + dfListHtml() + bar + '</div>';
+}
+function dfCheck() {
+  const f = S.df.f; if (!f.items.some(x => x.t.trim())) { toast('하자내용을 입력해 주세요'); return false; } return true;
+}
+/** 저장. stay = PDF 만들기 직전 저장이라 화면에 그대로 둠 (아니면 빈 양식으로) */
+async function dfSave(stay) {
+  const o = S.df, f = o.f; if (o.busy || !dfCheck()) return false;
+  o.busy = true; if (!stay) render();
+  try {
+    const r = await call('hjSave', { id: f.id, day: f.day, items: f.items.map(x => ({ n: x.n, t: x.t, photo: x.photo && x.photo.id ? { id: x.photo.id } : x.photo && x.photo.data ? { data: x.photo.data } : null })),
+      signSite: f.signSite && f.signSite.id ? { id: f.signSite.id } : f.signSite && f.signSite.data ? { data: f.signSite.data } : null,
+      signFm: f.signFm && f.signFm.id ? { id: f.signFm.id } : f.signFm && f.signFm.data ? { data: f.signFm.data } : null });
+    o.busy = false;
+    if (!r.ok) { render(); toast(r.error || '저장하지 못했습니다'); return false; }
+    if (o.list) { const i = o.list.findIndex(x => x.id === r.item.id); if (i >= 0) o.list[i] = r.item; else o.list.unshift(r.item); o.list.sort((a, b) => a.day < b.day ? 1 : a.day > b.day ? -1 : 0); }
+    o.f = stay ? JSON.parse(JSON.stringify(r.item)) : dfNew(); o.keys = []; o.dirty = false;
+    if (!stay) o.pdfUrl = null;
+    render(); if (!stay) { window.scrollTo(0, 0); toast('저장했습니다'); }
+    return true;
+  } catch (e) { o.busy = false; render(); return false; }
+}
+
+/* 인쇄 · PDF: 사진 4열 · 하자내용 표 · 확인 문구 · 처리 기한 · 서명. 한 쪽에 하자 8칸 (shortcut: 하자내용이 아주 길면 한 쪽을 넘칠 수 있음 — 현장에서 써 보고 칸 수 조정) */
+const DF_CSS = '.whp .cap{font-size:11px;line-height:1.3;margin-top:2px;word-break:break-all;min-height:14px}.whp .dfn{text-align:center;font-size:12px;color:#666}' +
+  '.whp .ok{text-align:center;font-size:15px;font-weight:600;margin:26px 0 8px}.whp .due{text-align:center;font-size:13px;margin-bottom:18px}' +
+  '.whp .sgs{display:flex;gap:12px}.whp .sgb{flex:1;border:1px solid #888;height:104px;padding:6px 8px;position:relative}.whp .sgb b{font-size:12px}.whp .sgb img{position:absolute;left:50%;top:54%;transform:translate(-50%,-50%);max-width:88%;max-height:70px}';
+function dfPages() {
+  const f = S.df.f, L = f.items.filter(x => x.n.trim() || x.t.trim() || x.photo), P = 8, np = Math.max(1, Math.ceil(L.length / P)), who = (S.user && S.user.name) || '';
+  return Array.from({ length: np }, (_, k) => {
+    const c = L.slice(k * P, k * P + P), last = k === np - 1;
+    const cells = c.map(x => '<div><div class="cell" style="height:129px">' + (x.photo ? '<img src="' + h(x.photo.src) + '" alt="">' : '<span class="dfn">사진 없음</span>') + '</div><div class="cap">' + h(x.n) + '</div></div>').join('');
+    const sg = (s, t) => '<div class="sgb"><b>' + t + ' (서명)</b>' + (s ? '<img src="' + h(s.src) + '" alt="">' : '') + '</div>';
+    return '<div class="pg"><h1>하자 점검 확인서</h1><div class="sub">에비뉴엘 잠실점 시설팀 · 작성일 ' + h(whDay(f.day)) + (who ? ' · 작성자 ' + h(who) : '') + (np > 1 ? ' · ' + (k + 1) + '/' + np + '쪽' : '') + '</div>' +
+      '<div class="gr" style="grid-template-columns:repeat(4,1fr);margin-bottom:12px">' + cells + '</div>' +
+      '<table><tr><th style="width:34px">No</th><th style="width:130px">현장명</th><th style="width:auto">하자내용</th></tr>' + c.map((x, i) => '<tr><td>' + (k * P + i + 1) + '</td><td>' + h(x.n) + '</td><td style="white-space:pre-wrap">' + h(x.t) + '</td></tr>').join('') + '</table>' +
+      (last ? '<div class="ok">위 하자 내용을 확인했으며 기한 내 처리하겠습니다.</div><div class="due">처리 기한 : ' + h(whDay(dfDue(f.day))) + '</div><div class="sgs">' + sg(f.signSite, '현장책임자') + sg(f.signFm, '시설팀') + '</div>' : '') +
+      whFt('하자 점검 확인서') + '</div>';
+  }).join('');
+}
+async function dfPrint() {
+  if (!dfCheck()) return;
+  $('print').innerHTML = '<style>@page{size:A4;margin:0}' + WH_CSS + DF_CSS + '</style><div class="whp">' + dfPages() + '</div>';
+  await whFit($('print')); setTimeout(() => window.print(), 100);
+}
+function dfPdfShow() { const a = document.createElement('a'); a.href = S.df.pdfUrl; a.dataset.pv = JSON.stringify({ name: '하자 점검 확인서', sub: S.df.f.day }); pdfOpen(a); }
+async function dfPdf() {
+  const o = S.df; if (o.pdfBusy || !dfCheck()) return;
+  if (o.pdfUrl) return dfPdfShow();   // 이미 만든 PDF (고친 곳이 없을 때)
+  o.pdfBusy = true; render();
+  if (!await dfSave(true)) { o.pdfBusy = false; render(); return; }   // PDF 생성 = 먼저 자동 저장
+  const wrap = document.createElement('div'); wrap.style.cssText = 'position:fixed;left:0;top:0;width:0;height:0;overflow:hidden;z-index:-1';
+  wrap.innerHTML = '<style>' + WH_CSS + DF_CSS + '</style><div class="whp" style="width:794px">' + dfPages() + '</div>'; document.body.appendChild(wrap);
+  try {
+    await loadH2p(); await whFit(wrap);
+    const keepY = window.scrollY; window.scrollTo(0, 0);
+    let blob; try {
+      blob = await html2pdf().set({ margin: 0, filename: o.f.day + '_하자점검.pdf', image: { type: 'jpeg', quality: 0.9 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, x: 0, y: 0, windowWidth: 794 },
+        jsPDF: { unit: 'px', format: [794, 1123], orientation: 'portrait', hotfixes: ['px_scaling'] }, pagebreak: { mode: ['css'] } }).from(wrap.querySelector('.whp')).outputPdf('blob');
+    } finally { window.scrollTo(0, keepY); }
+    o.pdfUrl = URL.createObjectURL(blob); o.pdfBusy = false; dfPdfShow();
+  } catch (e) { o.pdfBusy = false; render(); toast('PDF를 만들지 못했습니다: ' + (e && e.message ? e.message : e)); }
+  wrap.remove();
+}
 /* ── 그리기 ── */
 function render() {
   let html;
@@ -4917,6 +5071,7 @@ function render() {
   else if (S.view === 'csck') html = renderCsCk();
   else if (S.view === 'rw') html = renderRw();
   else if (S.view === 'wh') html = renderWh();
+  else if (S.view === 'df') html = renderDf();
   else if (S.view === 'status') html = renderStatus();
   else if (S.view === 'floor') html = S.st ? renderFloor() : renderStatus();
   else if (S.view === 'set' && isBoss()) html = renderSet();
