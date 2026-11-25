@@ -247,12 +247,6 @@
       return rpc('ws_hj_save', { p_token: token, p_d: { id: d.id, day: d.day, items, signSite: await one(d.signSite, 'png'), signFm: await one(d.signFm, 'png') } });
     },
     hjDelete: (token, id) => rpc('ws_hj_delete', { p_token: token, p_id: String(id || '') }),
-    /* PDF: 화면이 만든 PDF(Blob)를 버킷에 올리고 번호만 기록 · 메일: 구글 서버(doPost hjMail)가 PDF를 드라이브로 옮겨 보냄 (결정 270) */
-    async hjPdf(token, id, blob) { return rpc('ws_hj_pdf', { p_token: token, p_id: String(id || ''), p_file: await upload('dw_photo', blob, 'pdf') }); },
-    async hjMail(token, id, to) {
-      const res = await fetch(C.WS_GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'hjMail', token, id: String(id || ''), to: String(to || '') }) });
-      return res.json();
-    },
 
     /* ── 3-6 환경설정 (supabase/08_settings.sql, 소장만). 위험성 목록은 시트 대신 여기서 고침 ── */
     adminStaff: token => rpc('ws_admin_staff', { p_token: token }),
@@ -449,19 +443,23 @@
     sb, upload, compressImage, dataUrlToBlob,
     /** 기기 등록 상태: 등록됐으면 { email, at } , 아니면 null */
     async device() {
-      const { data } = await sb.auth.getSession();
+      const { data, error } = await sb.auth.getSession();
       const s = data && data.session;
-      let at = ''; try { at = localStorage.getItem('ws_dev_at') || ''; } catch (e) {}
+      let at = '', kept = false; try { at = localStorage.getItem('ws_dev_at') || ''; kept = !!localStorage.getItem('ws_sb_auth'); } catch (e) {}
+      // 등록 기록은 남았는데 새로 받기만 실패(인터넷 늦음 등) → 등록 화면 대신 다시 시도 (결정 286). 서버가 무효로 본 기록은 supabase-js 가 이미 지움
+      if (!s && error && kept) throw new Error('RETRY');
+      this.gone = !s && !!at;   // 등록한 날은 남았는데 로그인만 없음 = 브라우저가 지운 게 아니라 서버에서 풀림 (등록 화면 안내용)
       return s ? { email: s.user.email || '', at } : null;   // at = 이 기기에서 등록한 날 (계정 전체의 마지막 로그인이 아님)
     },
     async register(email, password) {
       const { error } = await sb.auth.signInWithPassword({ email: String(email || '').trim(), password: String(password || '') });
-      if (!error) try { localStorage.setItem('ws_dev_at', new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10)); } catch (e) {}
+      if (!error) try { localStorage.setItem('ws_dev_at', new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10)); navigator.storage && navigator.storage.persist && navigator.storage.persist().catch(() => {}); } catch (e) {}   // persist: 저장 공간이 모자랄 때 브라우저가 먼저 지우지 않게 (닫을 때 삭제 설정은 못 막음)
       if (error) throw new Error(/invalid/i.test(error.message) ? '이메일 또는 비밀번호가 맞지 않습니다. 관리자에게 확인해 주세요.' : '등록하지 못했습니다: ' + error.message);
     },
     async unregister(token) {
       try { if (token) await rpc('ws_logout', { p_token: token }); } catch (e) { /* 표가 이미 없어도 등록은 풂 */ }
       await sb.auth.signOut();
+      try { localStorage.removeItem('ws_dev_at'); } catch (e) {}
     },
     run(fn, ...args) {
       if (!API[fn]) return Promise.reject(new Error('아직 옮기지 않은 기능입니다 (Supabase 이관 중): ' + fn));
