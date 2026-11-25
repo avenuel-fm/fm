@@ -247,6 +247,12 @@
       return rpc('ws_hj_save', { p_token: token, p_d: { id: d.id, day: d.day, items, signSite: await one(d.signSite, 'png'), signFm: await one(d.signFm, 'png') } });
     },
     hjDelete: (token, id) => rpc('ws_hj_delete', { p_token: token, p_id: String(id || '') }),
+    /* PDF: 화면이 만든 PDF(Blob)를 버킷에 올리고 번호만 기록 · 메일: 구글 서버(doPost hjMail)가 PDF를 드라이브로 옮겨 보냄 (결정 270) */
+    async hjPdf(token, id, blob) { return rpc('ws_hj_pdf', { p_token: token, p_id: String(id || ''), p_file: await upload('dw_photo', blob, 'pdf') }); },
+    async hjMail(token, id, to) {
+      const res = await fetch(C.WS_GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'hjMail', token, id: String(id || ''), to: String(to || '') }) });
+      return res.json();
+    },
 
     /* ── 3-6 환경설정 (supabase/08_settings.sql, 소장만). 위험성 목록은 시트 대신 여기서 고침 ── */
     adminStaff: token => rpc('ws_admin_staff', { p_token: token }),
