@@ -260,6 +260,13 @@
                         <button type="button" class="zone-toggle-btn active" id="btn-zone-geom-polygon" onclick="setZoneGeometry('polygon')">⬡ 면 (영역)</button>
                     </div>
                     <button type="button" class="zone-toggle-btn zone-eraser" id="btn-zone-eraser" onclick="toggleEraserMode()" title="그린 면 안의 도면 원본·구역·심벌·인포를 바닥색(흰색)으로 지움. 매장·바닥·배관은 그대로">🧽 지우개</button>
+                    <span id="floor-cl-controls" class="zone-toggle-group" style="display:none;align-items:center;gap:4px">
+                        <button type="button" class="zone-toggle-btn" id="btn-centerline-floor" onclick="toggleCenterlineFloor()" title="중심선을 그리면 폭만큼 펼친 바닥이 자동으로 만들어지고 겹치는 바닥과 하나로 합쳐집니다">🛤 복도 중심선</button>
+                        <span style="font-size:12px">폭</span><input type="number" id="input-floor-width-px" value="80" min="10" max="600" step="10" style="width:56px;height:26px;text-align:center" onchange="setFloorRibbonWidth(this.value)"><span style="font-size:12px">px</span>
+                        <button type="button" class="zone-toggle-btn" onclick="setFloorRibbonWidth(80)" title="주동선 복도">주동선 80</button>
+                        <button type="button" class="zone-toggle-btn" onclick="setFloorRibbonWidth(50)" title="일반 복도">일반 50</button>
+                        <button type="button" class="zone-toggle-btn" onclick="setFloorRibbonWidth(35)" title="후방·기능실 통로">후방 35</button>
+                    </span>
                     <label class="zone-ortho-check" title="직각 스냅 (단축키: Shift)"><input type="checkbox" id="chk-zone-ortho" class="chk-ortho" onchange="toggleGlobalOrthoMode()"><span>직각 (Shift)</span></label><span id="zone-points-indicator" class="zone-pts-badge">0점</span>
                     <button class="btn-guide-finish" onclick="finishDrawingZone()">완료 (Enter)</button>
                     <button class="btn-guide-close" onclick="handleZoneCancelOrEsc()">취소 (ESC)</button>
@@ -660,6 +667,8 @@
     <script src="js/scale/scaleCalibrator.js"></script>
     <script src="js/cad/storeEditor.js"></script>
     <script src="js/cad/storeExcel.js"></script>
+    <script src="js/lib/polygon-clipping.umd.min.js"></script>
+    <script src="js/cad/floorCenterline.js"></script>
     <script src="js/cad/zoneEditor.js"></script>
     <script src="js/cad/symbolEditor.js"></script>
     <script src="js/cad/utilityLineEditor.js"></script>

@@ -295,6 +295,13 @@
                 }
 
                 // 외벽 수정 모드 활성화 시: 도면 클릭을 통한 선분 연장
+                if (typeof fclActive === 'function' && fclActive()) {   // 복도 중심선 모드: 자석 → 45도, 시작점 닫기 없음 (결정 260)
+                    const q = fclPickPoint(svgX, svgY);
+                    drawingZonePoints.push({ x: q.x, y: q.y });
+                    updateZoneDrawingPreview(q.x, q.y);
+                    updateZoneGuideUI();
+                    return;
+                }
                 if (typeof activeEditingWallZone !== 'undefined' && activeEditingWallZone) {
                     pushUndoState('외벽 선분 연장');
                     activeEditingWallZone.points.push({ x: ptX, y: ptY });
@@ -334,7 +341,7 @@
                 e.preventDefault();
                 finishDrawingPolygon();
             } else if (isZoneDrawingMode) {
-                const minPts = currentZoneGeometry === 'polygon' ? 3 : 2;
+                const minPts = (typeof fclActive === 'function' && fclActive()) ? 2 : (currentZoneGeometry === 'polygon' ? 3 : 2);
                 if (drawingZonePoints.length >= minPts) {
                     e.preventDefault();
                     finishDrawingZone();

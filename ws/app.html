@@ -10,10 +10,10 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.26.18"></script>
-<script>window.WS_VERSION = '0.26.18';</script>
-<script src="offline.js?v=0.26.18"></script>
-<script src="ws-api.js?v=0.26.18"></script>
+<script src="config.js?v=0.26.21"></script>
+<script>window.WS_VERSION = '0.26.21';</script>
+<script src="offline.js?v=0.26.21"></script>
+<script src="ws-api.js?v=0.26.21"></script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -643,9 +643,10 @@ select.lgin{text-align:center;padding:0}
 .lgworks{display:flex;flex-direction:column;gap:10px}
 .lgwk2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .lgwork ol{margin:0;padding:0;list-style:none;border-top:2px solid #18202B}
-.lgwork li{display:flex;gap:8px;align-items:center;min-height:28px;border-bottom:1px solid #CBD2DB;font-size:13.5px;padding:0 4px}
+.lgwork li{display:flex;gap:8px;align-items:center;min-height:var(--lh,28px);border-bottom:1px solid #CBD2DB;font-size:var(--fs,13.5px);padding:0 4px}
+.lgwork .lgadd{margin-top:6px}
 .lgwork li .n{width:20px;flex:none;color:#5B6573;text-align:right}
-.lgwork li .lgin{text-align:left;border-color:transparent;font-size:13.5px;height:24px}
+.lgwork li .lgin{text-align:left;border-color:transparent;font-size:var(--fs,13.5px);height:calc(var(--lh,28px) - 4px)}
 .lgwork li .lgin:placeholder-shown{border-color:#DCE1E7}
 .lgfoot{display:flex;justify-content:flex-end;font-size:11px;color:#7A8494;margin-top:auto}
 .lgpc{max-width:520px;margin:40px auto;text-align:center}
@@ -798,7 +799,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B3','B2','B1','1F','2F','3F','4F','5F','6F','7F','8F','9F','10F','POPUP'];   // 소화기·소화전·공기호흡기 층 B3~10F · 맨 아래 POPUP (결정 228·260)
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.18' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.21' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -2051,7 +2052,7 @@ function atCal() {
 const LG_METERS = [['시수', '에비뉴엘 시수'], ['중수', '에비뉴엘 중수'], ['식당시수', '직원식당 시수'], ['식당온수', '직원식당 온수'], ['식당가스', '직원식당 가스'], ['식당분전반', '직원식당 분전반'],
   ['식기세척분전반', '식기세척실 분전반'], ['매점분전반', '직원식당 매점 분전반']];   // 급탕·환탕·급탕탱크·실온수는 안 씀 (사용자 11-13)
 const LG_FIELDS = ['영업시간', '날씨', '최저', '최고', '최고풍속', '미세먼지', '미세먼지등급', '전기', '비고'].concat(LG_METERS.map(m => m[0]));
-const LG_DEPTS = ['전기방재', '기계건축'], LG_LINES = 10, LG_GRADES = ['', '좋음', '보통', '나쁨', '매우나쁨'];
+const LG_DEPTS = ['전기방재', '기계건축'], LG_LINES = 10, LG_MAX = 15, LG_GRADES = ['', '좋음', '보통', '나쁨', '매우나쁨'];
 const lgPc = () => window.innerWidth >= 1024;
 async function openLog() { S.lg = null; go('log'); await loadLog(''); }
 async function loadLog(day) {
@@ -2063,10 +2064,10 @@ function lgSet(r) {
   const f = {}, cur = r.cur || {};
   LG_FIELDS.forEach(k => { f[k] = cur[k] || ''; });
   const works = {};
-  LG_DEPTS.forEach(d => { const w = (cur.works && cur.works[d]) || []; works[d] = Array.from({ length: LG_LINES }, (_, i) => w[i] || ''); });
-  // 그날 금일작업이 아직 비었으면 TBM 작업 표로 채워 둠 (10줄까지, 저장은 직원이 [저장])
+  LG_DEPTS.forEach(d => { const w = (cur.works && cur.works[d]) || []; works[d] = Array.from({ length: Math.min(LG_MAX, Math.max(LG_LINES, w.length)) }, (_, i) => w[i] || ''); });
+  // 그날 금일작업이 아직 비었으면 서버가 준 주간작업으로 채워 둠 (저장은 직원이 [저장]). 명일 작업 일정·TBM 표는 서버가 안 줌 (결정 268)
   const tbm = r.tbm || {}, auto = LG_DEPTS.every(d => !works[d].some(x => x)) && LG_DEPTS.some(d => (tbm[d] || []).length);
-  if (auto) LG_DEPTS.forEach(d => { works[d] = Array.from({ length: LG_LINES }, (_, i) => (tbm[d] || [])[i] || ''); });
+  if (auto) LG_DEPTS.forEach(d => { const a = tbm[d] || []; works[d] = Array.from({ length: Math.min(LG_MAX, Math.max(LG_LINES, a.length)) }, (_, i) => a[i] || ''); });
   S.lg = { srv: r, day: r.day, f, works, ver: r.ver, by: r.by, pdf: r.pdf, dirty: auto, busy: false };
   if (S.view === 'log') render();
   // Supabase 판: 공조기·에어커튼은 구글을 거쳐 늦게 옴(6~9초) → 일지를 먼저 보여 주고 그 칸만 나중에 채움
@@ -2112,8 +2113,11 @@ function lgSheet(edit) {
   const dd = s.day, wd = '일월화수목금토'[new Date(dd + 'T12:00:00+09:00').getDay()], pwd = '일월화수목금토'[new Date(s.prevDay + 'T12:00:00+09:00').getDay()];
   const ko = d => Number(d.slice(0, 4)) + '년 ' + Number(d.slice(5, 7)) + '월 ' + Number(d.slice(8, 10)) + '일';
   const pE = s.vals.p['전기'], cE = lgCur('전기'), yE = s.vals.y['전기'], r1 = lgRate(cE, pE), r2 = lgRate(cE, yE);
-  const work = d => '<div class="lgwork"><div class="lgsec">금일작업 · ' + d + '</div><ol>' + g.works[d].map((t, i) => '<li><span class="n">' + (i + 1) + '</span>' +
-    (edit ? '<input class="lgin" maxlength="100" data-d="' + d + '" data-i="' + i + '" value="' + h(t) + '" placeholder=" " oninput="lgWork(this)" aria-label="' + d + ' ' + (i + 1) + '번">' : '<span>' + h(t) + '</span>') + '</li>').join('') + '</ol></div>';
+  // 10줄 넘으면 줄 높이를 줄여 B4 한 장에 그대로 들어가게 함
+  const lh = n => n > LG_LINES ? Math.max(18, Math.floor(LG_LINES * 28 / n)) : 28;
+  const work = d => '<div class="lgwork"><div class="lgsec">금일작업 · ' + d + '</div><ol style="--lh:' + lh(g.works[d].length) + 'px;--fs:' + (g.works[d].length > LG_LINES ? 12.5 : 13.5) + 'px">' + g.works[d].map((t, i) => '<li><span class="n">' + (i + 1) + '</span>' +
+    (edit ? '<input class="lgin" maxlength="100" data-d="' + d + '" data-i="' + i + '" value="' + h(t) + '" placeholder=" " oninput="lgWork(this)" aria-label="' + d + ' ' + (i + 1) + '번">' : '<span>' + h(t) + '</span>') + '</li>').join('') + '</ol>' +
+    (edit && g.works[d].length < LG_MAX ? '<button class="btn sm lgadd" onclick="lgAddLine(\'' + d + '\')">+ 줄 추가</button>' : '') + '</div>';
   return '<div class="lgs">' +
     '<div class="lghead"><div><h1>에비뉴엘 종합업무일지</h1><div class="d">' + ko(dd) + ' (' + wd + ') · 잠실점 에비뉴엘 시설관리</div></div>' +
     '<table class="lgsign"><tr><th>전방책임자</th><th>기건책임자</th><th>시설부소장</th><th>시설소장</th></tr><tr>' +
@@ -2155,6 +2159,11 @@ function lgIn(el) {
   document.querySelectorAll('[data-bars]').forEach(b => { const m = b.dataset.bars; if (m === k) b.innerHTML = lgBars(m); });
   if (k === '영업시간') $('lgHours').textContent = lgF(lgSum('month', '영업시간'));
   if (k === '전기') { const c = lgCur('전기'); [['lgE1', s.vals.p['전기']], ['lgE2', s.vals.y['전기']]].forEach(([id, p]) => { const r = lgRate(c, p), e = $(id); e.textContent = r[0]; e.className = r[1]; }); }
+}
+function lgAddLine(d) {
+  const w = S.lg.works[d]; if (w.length >= LG_MAX) return;
+  w.push(''); $('lgSheet').innerHTML = lgSheet(true);
+  const e = document.querySelector('.lgin[data-d="' + d + '"][data-i="' + (w.length - 1) + '"]'); if (e) e.focus();
 }
 function lgWork(el) { S.lg.works[el.dataset.d][Number(el.dataset.i)] = el.value; lgDirty(); }
 function lgPayload() {
@@ -2535,7 +2544,7 @@ function renderInspect() {
     R('eh', 'openEh()', 'var(--orange-bg)', 'var(--orange)', ICON.plug, '전열필증', '층·매장별 전열기기 관리 · 신고필증' + (CAN_PRINT ? ' 출력' : ' (출력은 PC에서)')) +
     R('thermal', 'openThermal()', 'var(--blue-bg)', 'var(--blue)', ICON.therm, '열화상점검', 'FLIR 열화상 사진 → 점검 보고서(.atr) · PC 전용', !thCanOpen()) +
     R('cs', 'openCs()', 'var(--green-bg)', 'var(--green)', ICON.hat, '공사장 점검', '공사 현장 안전 순찰 · 사진 · 날짜별 현장별 PDF') +
-    R('defect', 'openDf()', 'var(--red-bg)', 'var(--red)', ICON.file, '하자점검', '현장·하자내용 · 사진 · 서명 · 인쇄 A4 · PDF') +
+    R('defect', 'openDf()', 'var(--green-bg)', 'var(--green)', ICON.file, '하자점검', '현장·하자내용 · 사진 · 서명 · 인쇄 A4 · PDF') +
     '</div>';
 }
 

@@ -132,6 +132,7 @@ function bringZoneLayersToFront() {
             if (btnPoly) { btnPoly.disabled = !polyOnly; btnPoly.classList.toggle('active', polyOnly); }
             currentZoneGeometry = polyOnly ? 'polygon' : 'line';
 
+            if (typeof syncCenterlineUI === 'function') syncCenterlineUI();   // 바닥일 때만 중심선 줄 보임 (결정 260)
             updateZoneGuideUI();
             updateZoneDrawingPreview();
         }
@@ -378,6 +379,7 @@ function bringZoneLayersToFront() {
             }
             tempZoneDrawingGroup.innerHTML = '';
             if (drawingZonePoints.length === 0 && currentMouseSvgX === null) return;
+            if (typeof fclActive === 'function' && fclActive()) { fclPreview(tempZoneDrawingGroup, currentMouseSvgX, currentMouseSvgY); return; }   // 복도 중심선 띠 미리보기
 
             const isPoly = currentZoneGeometry === 'polygon';
             const isWall = currentZoneCategory === 'wall';
@@ -702,6 +704,7 @@ function bringZoneLayersToFront() {
         }
 
         function finishDrawingZone() {
+            if (typeof fclActive === 'function' && fclActive()) { finishCenterlineFloor(); return; }   // 복도 중심선 → 띠 만들고 합치기 (결정 260)
             const minPts = currentZoneGeometry === 'polygon' ? 3 : 2;
             if (drawingZonePoints.length < minPts) {
                 showToast(currentZoneGeometry === 'polygon' ? '구역 면을 완성하려면 3개 이상의 점이 필요합니다.' : '구역 선을 완성하려면 2개 이상의 점이 필요합니다.', 1500);

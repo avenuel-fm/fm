@@ -9,7 +9,7 @@
 <title>시방서 검색 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.26.18"></script>
+<script src="config.js?v=0.26.21"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
@@ -636,9 +636,10 @@ select.lgin{text-align:center;padding:0}
 .lgworks{display:flex;flex-direction:column;gap:10px}
 .lgwk2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .lgwork ol{margin:0;padding:0;list-style:none;border-top:2px solid #18202B}
-.lgwork li{display:flex;gap:8px;align-items:center;min-height:28px;border-bottom:1px solid #CBD2DB;font-size:13.5px;padding:0 4px}
+.lgwork li{display:flex;gap:8px;align-items:center;min-height:var(--lh,28px);border-bottom:1px solid #CBD2DB;font-size:var(--fs,13.5px);padding:0 4px}
+.lgwork .lgadd{margin-top:6px}
 .lgwork li .n{width:20px;flex:none;color:#5B6573;text-align:right}
-.lgwork li .lgin{text-align:left;border-color:transparent;font-size:13.5px;height:24px}
+.lgwork li .lgin{text-align:left;border-color:transparent;font-size:var(--fs,13.5px);height:calc(var(--lh,28px) - 4px)}
 .lgwork li .lgin:placeholder-shown{border-color:#DCE1E7}
 .lgfoot{display:flex;justify-content:flex-end;font-size:11px;color:#7A8494;margin-top:auto}
 .lgpc{max-width:520px;margin:40px auto;text-align:center}

@@ -147,6 +147,11 @@
             if (!forceOrtho && !isShift && !isGlobalOrthoMode) {
                 return current;
             }
+            if (typeof fclActive === 'function' && fclActive()) {   // 복도 중심선 모드: 0·45·90도 단위로 고정 (결정 260)
+                const ang = Math.round(Math.atan2(current.y - origin.y, current.x - origin.x) / (Math.PI / 4)) * (Math.PI / 4);
+                const dist = Math.hypot(current.x - origin.x, current.y - origin.y);
+                return { x: origin.x + Math.cos(ang) * dist, y: origin.y + Math.sin(ang) * dist };
+            }
             const dx = Math.abs(current.x - origin.x);
             const dy = Math.abs(current.y - origin.y);
             if (dx >= dy) {
