@@ -195,9 +195,99 @@ function rtShortest(segs, J1, s1, J2, s2, walk) {
     return out;
 }
 
-// 계산 본체: 시작·도착 매장 모양(점 목록), 다른 매장들, 복도(바닥) 면들 → { ok, points } 또는 { ok:false, error }
-function routeCompute(fromPoly, toPoly, otherPolys, corridorPolys) {
+// ==================== 대각선 복도 (결정 272): 중심선(cl) 선분 그대로 길 찾기 ====================
+// 복도 중심선 도구로 그린 바닥에 기울어진 선이 하나라도 있으면, 가로·세로 전용 계산 대신 이 계산을 씀
+function rtHasDiag(cls) {
+    return cls.some(s => { const dx = Math.abs(s[2] - s[0]), dy = Math.abs(s[3] - s[1]), m = Math.min(dx, dy); return m > 1 && m > 0.02 * Math.max(dx, dy); });
+}
+function rtRouteGeneral(fromPoly, toPoly, otherPolys, cls) {
+    const T = RT.TOL, cr = (ax, ay, bx, by) => ax * by - ay * bx;
+    const segs = cls.map(c => ({ P: { x: c[0], y: c[1] }, Q: { x: c[2], y: c[3] }, pts: [] })).filter(s => Math.hypot(s.Q.x - s.P.x, s.Q.y - s.P.y) > 0.5);
+    const rayHit = (E, d, obstacles) => {                 // E 에서 d(단위벡터) 방향으로 나가 처음 닿는 중심선
+        let best = null;
+        segs.forEach((s, idx) => {
+            const rx = s.Q.x - s.P.x, ry = s.Q.y - s.P.y, den = cr(d.x, d.y, rx, ry);
+            if (Math.abs(den) < 1e-9) return;
+            const t = cr(s.P.x - E.x, s.P.y - E.y, rx, ry) / den, u = cr(s.P.x - E.x, s.P.y - E.y, d.x, d.y) / den, eu = T / Math.hypot(rx, ry);
+            if (t < -T || u < -eu || u > 1 + eu) return;
+            const J = { x: E.x + d.x * Math.max(t, 0), y: E.y + d.y * Math.max(t, 0) };
+            if (best && best.t <= t) return;
+            if (t > T && obstacles.some(o => rtSegHitsPoly(E, J, o))) return;
+            best = { t, J, idx };
+        });
+        return best;
+    };
+    const entrance = (poly, obstacles) => {
+        const n = poly.length, cx = poly.reduce((a, p) => a + p.x, 0) / n, cy = poly.reduce((a, p) => a + p.y, 0) / n, edges = [];
+        for (let i = 0; i < n; i++) {
+            const p1 = poly[i], p2 = poly[(i + 1) % n], len = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+            if (len < 1) continue;
+            const mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+            let nx = (p2.y - p1.y) / len, ny = -(p2.x - p1.x) / len;
+            if (nx * (cx - mid.x) + ny * (cy - mid.y) > 0) { nx = -nx; ny = -ny; }
+            edges.push({ mid, len, d: { x: nx, y: ny } });
+        }
+        edges.sort((a, b) => b.len - a.len);
+        for (const e of edges) { const h = rayHit(e.mid, e.d, obstacles); if (h) return { E: e.mid, J: h.J, seg: h.idx }; }
+        return null;
+    };
+    const e1 = entrance(fromPoly, otherPolys.concat([toPoly])), e2 = entrance(toPoly, otherPolys.concat([fromPoly]));
+    if (!e1 || !e2) return { ok: false, error: (!e1 ? '출발' : '도착') + ' 매장에서 복도로 이어지는 곳을 찾지 못했습니다.' };
+    segs[e1.seg].pts.push(e1.J); segs[e2.seg].pts.push(e2.J);
+    const onSeg = (s, p) => {                            // p 가 선분 s 위(허용 오차 안)인가
+        const rx = s.Q.x - s.P.x, ry = s.Q.y - s.P.y, u = Math.max(0, Math.min(1, ((p.x - s.P.x) * rx + (p.y - s.P.y) * ry) / (rx * rx + ry * ry)));
+        return Math.hypot(s.P.x + rx * u - p.x, s.P.y + ry * u - p.y) <= T;
+    };
+    segs.forEach((a, i) => segs.forEach((b, j) => {
+        if (j <= i) return;
+        [a.P, a.Q].forEach(p => { if (onSeg(b, p)) b.pts.push(p); });      // 끝이 다른 선 위에 닿음
+        [b.P, b.Q].forEach(p => { if (onSeg(a, p)) a.pts.push(p); });
+        const ax = a.Q.x - a.P.x, ay = a.Q.y - a.P.y, bx = b.Q.x - b.P.x, by = b.Q.y - b.P.y, den = cr(ax, ay, bx, by);
+        if (Math.abs(den) < 1e-9) return;                // 나란함
+        const t = cr(b.P.x - a.P.x, b.P.y - a.P.y, bx, by) / den, u = cr(b.P.x - a.P.x, b.P.y - a.P.y, ax, ay) / den;
+        if (t < 0 || t > 1 || u < 0 || u > 1) return;
+        const X = { x: a.P.x + ax * t, y: a.P.y + ay * t }; a.pts.push(X); b.pts.push(X);
+    }));
+    const key = p => (Math.round(p.x * 10) / 10) + ',' + (Math.round(p.y * 10) / 10), adj = new Map(), pos = new Map();
+    segs.forEach(s => {
+        const L = Math.hypot(s.Q.x - s.P.x, s.Q.y - s.P.y), tp = p => ((p.x - s.P.x) * (s.Q.x - s.P.x) + (p.y - s.P.y) * (s.Q.y - s.P.y)) / L;
+        const pts = s.pts.concat([s.P, s.Q]).sort((p, q) => tp(p) - tp(q));
+        for (let k = 0; k < pts.length - 1; k++) {
+            const kp = key(pts[k]), kq = key(pts[k + 1]); if (kp === kq) continue;
+            pos.set(kp, pts[k]); pos.set(kq, pts[k + 1]);
+            const w = Math.hypot(pts[k].x - pts[k + 1].x, pts[k].y - pts[k + 1].y);
+            if (!adj.has(kp)) adj.set(kp, []); if (!adj.has(kq)) adj.set(kq, []);
+            adj.get(kp).push([kq, w]); adj.get(kq).push([kp, w]);
+        }
+    });
+    const from = key(e1.J), to = key(e2.J), noWay = { ok: false, error: '두 매장 사이를 잇는 복도가 끊겨 있습니다.' };
+    let mid;
+    if (from === to) mid = [e1.J];
+    else {
+        if (!adj.has(from) || !adj.has(to)) return noWay;
+        const dist = new Map([[from, 0]]), prev = new Map(), todo = new Set([from]);
+        while (todo.size) {
+            let u = null; todo.forEach(k => { if (u === null || dist.get(k) < dist.get(u)) u = k; });
+            todo.delete(u); if (u === to) break;
+            adj.get(u).forEach(([v, w]) => { const nd = dist.get(u) + w; if (!dist.has(v) || nd < dist.get(v)) { dist.set(v, nd); prev.set(v, u); todo.add(v); } });
+        }
+        if (!prev.has(to)) return noWay;
+        mid = []; for (let k = to; k !== undefined; k = prev.get(k)) mid.unshift(pos.get(k));
+    }
+    const pts = [];
+    [e1.E, ...mid, e2.E].forEach(p => {                  // 겹친 점·일직선 가운데 점 정리
+        const last = pts[pts.length - 1];
+        if (last && Math.hypot(last.x - p.x, last.y - p.y) < 0.05) return;
+        if (pts.length >= 2) { const a = pts[pts.length - 2]; if (Math.abs(cr(last.x - a.x, last.y - a.y, p.x - last.x, p.y - last.y)) < 0.05 * Math.hypot(p.x - a.x, p.y - a.y)) pts.pop(); }
+        pts.push({ x: p.x, y: p.y });
+    });
+    return { ok: true, points: pts };
+}
+
+// 계산 본체: 시작·도착 매장 모양(점 목록), 다른 매장들, 복도(바닥) 면들, (선택) 복도 중심선 선분들 → { ok, points } 또는 { ok:false, error }
+function routeCompute(fromPoly, toPoly, otherPolys, corridorPolys, corridorCls) {
     if (!corridorPolys.length) return { ok: false, error: '이 층에 복도(바닥)가 없습니다. 구역 추가/편집에서 「바닥」으로 복도를 먼저 그려 주세요.' };
+    if (corridorCls && rtHasDiag(corridorCls)) return rtRouteGeneral(fromPoly, toPoly, otherPolys, corridorCls);   // 대각선 복도
     const segs = rtCenterlines(corridorPolys);
     const e1 = rtEntrance(fromPoly, segs, otherPolys.concat([toPoly]));
     const e2 = rtEntrance(toPoly, segs, otherPolys.concat([fromPoly]));
@@ -245,8 +335,10 @@ function rtPathPoints(path) {                          // 매장 path 의 d → 
 function routeBetweenStores(a, b) {
     const svgEl = mapContainer.querySelector('svg');
     const floor = FLOORS[currentFloorIdx];
-    const corridors = (getFloorZones(floor.code) || []).filter(z => z.category === 'floor' && z.points && z.points.length >= 3).map(z => z.points);
+    const fz = (getFloorZones(floor.code) || []).filter(z => z.category === 'floor' && z.points && z.points.length >= 3);
+    const corridors = fz.map(z => z.points);
+    const cls = []; fz.forEach(z => (z.cl && z.cl.length ? z.cl : rtCenterlines([z.points]).map(g => g.h ? [g.a, g.c, g.b, g.c] : [g.c, g.a, g.c, g.b])).forEach(c => cls.push(c)));   // 중심선이 없는 바닥은 가로·세로 계산으로 만든 중앙선
     if (!corridors.length) return { ok: false, error: '바닥면 작성 필요' };
     const others = [...svgEl.querySelectorAll('.store-polygon')].filter(p => p !== a.polygonElement && p !== b.polygonElement).map(rtPathPoints);
-    return routeCompute(rtPathPoints(a.polygonElement), rtPathPoints(b.polygonElement), others, corridors);
+    return routeCompute(rtPathPoints(a.polygonElement), rtPathPoints(b.polygonElement), others, corridors, cls);
 }
