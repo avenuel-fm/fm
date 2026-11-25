@@ -839,3 +839,26 @@ textarea:focus {
     page-break-after: always;
   }
 }
+
+/* 보안 비밀번호 인증 모달 */
+.auth-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
+}
+.auth-card {
+  width: 90%;
+  max-width: 380px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: var(--sp-6);
+  box-sizing: border-box;
+}

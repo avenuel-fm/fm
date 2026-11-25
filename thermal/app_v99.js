@@ -52,6 +52,11 @@
         inpTitle: document.getElementById('inpTitle'),
         inpInspector: document.getElementById('inpInspector'),
         inpDate: document.getElementById('inpDate'),
+        authOverlay: document.getElementById('authOverlay'),
+        authForm: document.getElementById('authForm'),
+        authPasswordInput: document.getElementById('authPasswordInput'),
+        authErrorMsg: document.getElementById('authErrorMsg'),
+        btnSubmitAuth: document.getElementById('btnSubmitAuth'),
         dropZone: document.getElementById('dropZone'),
         fileInput: document.getElementById('fileInput'),
         btnReset: document.getElementById('btnReset'),
@@ -133,11 +138,75 @@
         }
     }
 
+    // 암호화된 비밀번호 SHA-256 해시 (소스보기로 쉽게 찾지 못하도록 단방향 암호화)
+    const AUTH_HASH = '9562f4870effc101cf5d2152b4775e86a06bf54593aba697a5860d70e266dafd';
+
+    async function sha256(str) {
+        const buf = new TextEncoder().encode(str);
+        const digest = await crypto.subtle.digest('SHA-256', buf);
+        return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function setupAuthSecurity() {
+        if (!DOM.authOverlay) return;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryAuth = urlParams.get('auth');
+        const sessionAuth = sessionStorage.getItem('fm_thermal_auth');
+
+        // 이미 인증되었거나 실행 스크립트에서 토큰을 전달받은 경우
+        if (queryAuth === AUTH_HASH || sessionAuth === AUTH_HASH) {
+            sessionStorage.setItem('fm_thermal_auth', AUTH_HASH);
+            DOM.authOverlay.style.display = 'none';
+            return;
+        }
+
+        // 미인증 시 입력 폼 표시
+        DOM.authOverlay.style.display = 'flex';
+        setTimeout(() => {
+            if (DOM.authPasswordInput) DOM.authPasswordInput.focus();
+        }, 100);
+
+        const handleAuth = async () => {
+            const inputVal = (DOM.authPasswordInput.value || '').trim();
+            if (!inputVal) {
+                DOM.authErrorMsg.textContent = '비밀번호를 입력해 주세요.';
+                DOM.authErrorMsg.style.display = 'block';
+                return;
+            }
+
+            const hash = await sha256(inputVal);
+            if (hash === AUTH_HASH) {
+                sessionStorage.setItem('fm_thermal_auth', AUTH_HASH);
+                DOM.authOverlay.style.display = 'none';
+                DOM.authErrorMsg.style.display = 'none';
+            } else {
+                DOM.authErrorMsg.textContent = '비밀번호가 올바르지 않습니다. 다시 입력해 주세요.';
+                DOM.authErrorMsg.style.display = 'block';
+                DOM.authPasswordInput.value = '';
+                DOM.authPasswordInput.focus();
+            }
+        };
+
+        if (DOM.authForm) {
+            DOM.authForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                handleAuth();
+            });
+        }
+        if (DOM.btnSubmitAuth) {
+            DOM.btnSubmitAuth.addEventListener('click', handleAuth);
+        }
+    }
+
     /**
      * 앱 초기화 (100% 로컬 오프라인 단독 구동)
      */
     async function init() {
         console.log('[FM Thermal] 오프라인 단독 실행 모드: 외부 서버 연동 없이 로컬 자원으로만 구동');
+
+        // 보안 비밀번호 인증 (소스보기로 비밀번호 노출 방지 - SHA-256 단방향 암호화)
+        setupAuthSecurity();
 
         // 점검일자 기본값: 오늘
         const today = new Date().toISOString().split('T')[0];

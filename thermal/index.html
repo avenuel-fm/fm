@@ -19,6 +19,26 @@
 </head>
 <body>
 
+  <!-- 보안 비밀번호 인증 모달 (SHA-256 암호화 보호) -->
+  <div id="authOverlay" class="auth-overlay" style="display: none;">
+    <div class="auth-card">
+      <div style="border-bottom: 1px solid var(--line); padding-bottom: 14px; margin-bottom: 16px;">
+        <h2 style="font-size: var(--size-l); font-weight: 600; margin: 0; color: var(--navy);">열화상 리포트 보안 인증</h2>
+        <p style="font-size: var(--size-s); color: var(--text-sub); margin: 6px 0 0 0;">열화상 리포트 작성을 위해 접근 비밀번호를 입력해 주세요.</p>
+      </div>
+      <form id="authForm" onsubmit="return false;">
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: var(--size-s); font-weight: 500; margin-bottom: 6px;" for="authPasswordInput">접속 비밀번호</label>
+          <input type="password" id="authPasswordInput" placeholder="비밀번호 입력 (이메일)" autocomplete="current-password" style="width: 100%; height: var(--control-h); border: 1px solid var(--line); border-radius: var(--radius); padding: 0 12px; font-size: var(--size-m); box-sizing: border-box;">
+        </div>
+        <div id="authErrorMsg" style="display: none; color: var(--error); font-size: var(--size-s); margin-bottom: 12px; font-weight: 500;">
+          비밀번호가 올바르지 않습니다. 다시 입력해 주세요.
+        </div>
+        <button type="submit" id="btnSubmitAuth" class="btn btn-primary" style="width: 100%; height: var(--control-h);">인증 및 작성 시작</button>
+      </form>
+    </div>
+  </div>
+
   <!-- 페이지 헤더 -->
   <header class="page-header">
     <h1 class="page-title">열화상 리포트 자동 작성 <span style="font-size: 13px; font-weight: normal; color: var(--text-sub); margin-left: 8px;">(오프라인 단독엔진 v99.6)</span></h1>

@@ -289,6 +289,125 @@ class AtrGenerator {
     }
 
     /**
+     * 서식 내 공통 텍스트 필드 일괄 치환 헬퍼 (측정대상, 사용전압, 측정자, 점검일자)
+     */
+    static patchTextFields(buf, { inspectorName, inspectDate, voltage = "380V", targetName = "" }) {
+        const enc = new TextEncoder();
+        const VAL_HDR = new Uint8Array([0xe4, 0xd5, 0x62, 0xd4, 0x04]);
+
+        const replaceFieldAfterKeyword = (b, keywordBytes, newTextBytes) => {
+            const kPos = AtrGenerator.findSub(b, keywordBytes);
+            if (kPos === -1) return b;
+            const vPos = AtrGenerator.findSub(b, VAL_HDR, kPos);
+            if (vPos === -1 || vPos > kPos + 400) return b;
+
+            const oldLen = b[vPos + 5] | (b[vPos + 6] << 8);
+            const oldBlockEnd = vPos + 7 + oldLen;
+
+            const newLen = newTextBytes.length;
+            const newHeader = new Uint8Array([0xe4, 0xd5, 0x62, 0xd4, 0x04, newLen & 0xff, (newLen >> 8) & 0xff, ...newTextBytes]);
+
+            const nextBuf = new Uint8Array(b.length + (newHeader.length - (oldBlockEnd - vPos)));
+            nextBuf.set(b.subarray(0, vPos), 0);
+            nextBuf.set(newHeader, vPos);
+            nextBuf.set(b.subarray(oldBlockEnd), vPos + newHeader.length);
+            return nextBuf;
+        };
+
+        let result = buf;
+
+        // 1. 측정대상
+        if (targetName) {
+            const targetKeyword = enc.encode("측정대상");
+            const targetVal = enc.encode(targetName);
+            result = replaceFieldAfterKeyword(result, targetKeyword, targetVal);
+        }
+
+        // 2. 사용전압
+        if (voltage) {
+            const voltKeyword = enc.encode("사용전압");
+            const voltVal = enc.encode(voltage);
+            result = replaceFieldAfterKeyword(result, voltKeyword, voltVal);
+        }
+
+        // 3. 측정자 : [이름] (서명 문구 삭제)
+        const inspKeyword = enc.encode("측정자");
+        const inspPos = AtrGenerator.findSub(result, inspKeyword);
+        if (inspPos !== -1) {
+            let vPos = -1;
+            for (let o = -15; o <= 0; o++) {
+                if (inspPos + o >= 0 && inspPos + o + 5 <= result.length) {
+                    let match = true;
+                    for (let b = 0; b < 5; b++) {
+                        if (result[inspPos + o + b] !== VAL_HDR[b]) { match = false; break; }
+                    }
+                    if (match) { vPos = inspPos + o; break; }
+                }
+            }
+            if (vPos !== -1) {
+                const oldLen = result[vPos + 5] | (result[vPos + 6] << 8);
+                const oldBlockEnd = vPos + 7 + oldLen;
+
+                const inspector = (inspectorName || "").trim();
+                const inspStr = inspector ? `측정자 :        ${inspector}` : `측정자 :`;
+                const newInspBytes = enc.encode(inspStr);
+                const newInspHeader = new Uint8Array([0xe4, 0xd5, 0x62, 0xd4, 0x04, newInspBytes.length & 0xff, (newInspBytes.length >> 8) & 0xff, ...newInspBytes]);
+
+                const nextBuf = new Uint8Array(result.length + (newInspHeader.length - (oldBlockEnd - vPos)));
+                nextBuf.set(result.subarray(0, vPos), 0);
+                nextBuf.set(newInspHeader, vPos);
+                nextBuf.set(result.subarray(oldBlockEnd), vPos + newInspHeader.length);
+                result = nextBuf;
+            }
+        }
+
+        // 4. 점검일자
+        if (inspectDate) {
+            let dStr = inspectDate.trim();
+            const dMatch = dStr.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+            if (dMatch) {
+                const yyyy = dMatch[1];
+                const mm = dMatch[2].padStart(2, '0');
+                const dd = dMatch[3].padStart(2, '0');
+                dStr = `${yyyy}년 ${mm}월 ${dd}일`;
+            }
+
+            const datePat1 = enc.encode("0000년 00월 00일");
+            const datePat2 = enc.encode("2026년10월16일");
+            let targetDPos = AtrGenerator.findSub(result, datePat1);
+            if (targetDPos === -1) {
+                targetDPos = AtrGenerator.findSub(result, datePat2);
+            }
+
+            if (targetDPos !== -1) {
+                let vPos = -1;
+                for (let o = -15; o <= 0; o++) {
+                    if (targetDPos + o >= 0 && targetDPos + o + 5 <= result.length) {
+                        let match = true;
+                        for (let b = 0; b < 5; b++) {
+                            if (result[targetDPos + o + b] !== VAL_HDR[b]) { match = false; break; }
+                        }
+                        if (match) { vPos = targetDPos + o; break; }
+                    }
+                }
+                if (vPos !== -1) {
+                    const oldLen = result[vPos + 5] | (result[vPos + 6] << 8);
+                    const oldBlockEnd = vPos + 7 + oldLen;
+                    const newDBytes = enc.encode(dStr);
+                    const newDHdr = new Uint8Array([0xe4, 0xd5, 0x62, 0xd4, 0x04, newDBytes.length & 0xff, (newDBytes.length >> 8) & 0xff, ...newDBytes]);
+                    const nextBuf = new Uint8Array(result.length + (newDHdr.length - (oldBlockEnd - vPos)));
+                    nextBuf.set(result.subarray(0, vPos), 0);
+                    nextBuf.set(newDHdr, vPos);
+                    nextBuf.set(result.subarray(oldBlockEnd), vPos + newDHdr.length);
+                    result = nextBuf;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * 1개 공식 슬롯 내부의 이미지와 텍스트(온도, 회로명, 파일명, 판정) 치환
      */
     static async transformSlot(slotBytes, pIdx, slotInfo, item) {
@@ -431,95 +550,13 @@ class AtrGenerator {
         const newTcPat = new Uint8Array([0x04, newTitleB.length & 0xff, (newTitleB.length >> 8) & 0xff, ...newTitleB]);
         c8 = AtrGenerator.replaceBytes(c8, origTcPat, newTcPat, 1);
 
-        // 6-1. c8에서 양식 내 텍스트 필드 치환 (측정대상, 사용전압, 측정자, 점검일자)
-        const VAL_HDR = new Uint8Array([0xe4, 0xd5, 0x62, 0xd4, 0x04]);
-
-        const replaceFieldAfterKeyword = (buf, keywordBytes, newTextBytes) => {
-            const kPos = AtrGenerator.findSub(buf, keywordBytes);
-            if (kPos === -1) return buf;
-            const vPos = AtrGenerator.findSub(buf, VAL_HDR, kPos);
-            if (vPos === -1 || vPos > kPos + 400) return buf;
-
-            const oldLen = buf[vPos + 5] | (buf[vPos + 6] << 8);
-            const oldBlockEnd = vPos + 7 + oldLen;
-
-            const newLen = newTextBytes.length;
-            const newHeader = new Uint8Array([0xe4, 0xd5, 0x62, 0xd4, 0x04, newLen & 0xff, (newLen >> 8) & 0xff, ...newTextBytes]);
-
-            const nextBuf = new Uint8Array(buf.length + (newHeader.length - (oldBlockEnd - vPos)));
-            nextBuf.set(buf.subarray(0, vPos), 0);
-            nextBuf.set(newHeader, vPos);
-            nextBuf.set(buf.subarray(oldBlockEnd), vPos + newHeader.length);
-            return nextBuf;
-        };
-
-        // (1) 측정대상 -> 사용자가 입력한 회로명/측정위치 (circuitName)
-        const targetKeyword = enc.encode("측정대상");
-        const targetVal = enc.encode(circuitName);
-        c8 = replaceFieldAfterKeyword(c8, targetKeyword, targetVal);
-
-        // (2) 사용전압 -> "380V"
-        const voltKeyword = enc.encode("사용전압");
-        const voltVal = enc.encode("380V");
-        c8 = replaceFieldAfterKeyword(c8, voltKeyword, voltVal);
-
-        // (3) 측정자 : [이름] (서명)
-        const inspKeyword = enc.encode("측정자");
-        const inspPos = AtrGenerator.findSub(c8, inspKeyword);
-        if (inspPos !== -1) {
-            let vPos = -1;
-            for (let o = -15; o <= 0; o++) {
-                if (inspPos + o >= 0 && inspPos + o + 5 <= c8.length) {
-                    let match = true;
-                    for (let b = 0; b < 5; b++) {
-                        if (c8[inspPos + o + b] !== VAL_HDR[b]) { match = false; break; }
-                    }
-                    if (match) { vPos = inspPos + o; break; }
-                }
-            }
-            if (vPos !== -1) {
-                const oldLen = c8[vPos + 5] | (c8[vPos + 6] << 8);
-                const oldBlockEnd = vPos + 7 + oldLen;
-
-                const inspector = (slotInfo.inspector_name || "").trim();
-                const inspStr = inspector
-                    ? `측정자 :        ${inspector}     (서명)`
-                    : `측정자 :                (서명)`;
-                const newInspBytes = enc.encode(inspStr);
-                const newInspHeader = new Uint8Array([0xe4, 0xd5, 0x62, 0xd4, 0x04, newInspBytes.length & 0xff, (newInspBytes.length >> 8) & 0xff, ...newInspBytes]);
-
-                const nextC8 = new Uint8Array(c8.length + (newInspHeader.length - (oldBlockEnd - vPos)));
-                nextC8.set(c8.subarray(0, vPos), 0);
-                nextC8.set(newInspHeader, vPos);
-                nextC8.set(c8.subarray(oldBlockEnd), vPos + newInspHeader.length);
-                c8 = nextC8;
-            }
-        }
-
-        // (4) 점검일자 (슬롯 0 또는 양식에 날짜가 있는 경우)
-        if (slotInfo.inspect_date) {
-            let dStr = slotInfo.inspect_date;
-            const dMatch = dStr.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-            if (dMatch) {
-                dStr = `${dMatch[1]}년${parseInt(dMatch[2], 10)}월${parseInt(dMatch[3], 10)}일`;
-            }
-            const dateOldPattern = enc.encode("2026년10월16일");
-            const dPos = AtrGenerator.findSub(c8, dateOldPattern);
-            if (dPos !== -1) {
-                let vPos = dPos - 7;
-                if (vPos >= 0 && c8[vPos] === 0xe4 && c8[vPos + 1] === 0xd5 && c8[vPos + 2] === 0x62 && c8[vPos + 3] === 0xd4 && c8[vPos + 4] === 0x04) {
-                    const oldLen = c8[vPos + 5] | (c8[vPos + 6] << 8);
-                    const oldBlockEnd = vPos + 7 + oldLen;
-                    const newDBytes = enc.encode(dStr);
-                    const newDHdr = new Uint8Array([0xe4, 0xd5, 0x62, 0xd4, 0x04, newDBytes.length & 0xff, (newDBytes.length >> 8) & 0xff, ...newDBytes]);
-                    const nextC8 = new Uint8Array(c8.length + (newDHdr.length - (oldBlockEnd - vPos)));
-                    nextC8.set(c8.subarray(0, vPos), 0);
-                    nextC8.set(newDHdr, vPos);
-                    nextC8.set(c8.subarray(oldBlockEnd), vPos + newDHdr.length);
-                    c8 = nextC8;
-                }
-            }
-        }
+        // 6-1. c8에서 양식 내 공통 텍스트 필드 일괄 치환 (측정대상, 사용전압, 측정자, 점검일자)
+        c8 = AtrGenerator.patchTextFields(c8, {
+            inspectorName: slotInfo.inspector_name,
+            inspectDate: slotInfo.inspect_date,
+            voltage: "380V",
+            targetName: circuitName
+        });
 
         // 7. 청크 재결합
         return AtrGenerator.concat([
@@ -730,7 +767,14 @@ class AtrGenerator {
         }
 
         // 3. 새 문서 결합 (Header + 정확히 N개 슬롯 + Footer)
-        let docBytes = AtrGenerator.concat([docHeader, ...transformedSlots, docFooter]);
+        // FLIR 보고서 서식 보존을 위해 Footer 영역의 텍스트 필드(날짜, 측정자, 전압)도 일괄 동기화
+        const patchedFooter = AtrGenerator.patchTextFields(docFooter, {
+            inspectorName: inspectorName,
+            inspectDate: inspectDate,
+            voltage: "380V",
+            targetName: circuitItems[0] ? circuitItems[0].circuit_name : ""
+        });
+        let docBytes = AtrGenerator.concat([docHeader, ...transformedSlots, patchedFooter]);
 
         // 문서 맨 앞 4바이트 길이 필드 동기화 (\t [totalLen - 5 4B LE])
         const totalDocLen = docBytes.length;
