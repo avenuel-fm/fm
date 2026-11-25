@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>열화상 리포트 자동 작성기</title>
   <link rel="stylesheet" href="./styles.css?v=20261124_08">
-  <!-- 고정 버전 CDN 의존성 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- 로컬 오프라인 의존성 (인터넷 없이 100% 동작) -->
+  <script src="./vendor/pako.min.js"></script>
+  <script src="./vendor/jszip.min.js"></script>
 </head>
 <body>
 
   <!-- 페이지 헤더 -->
   <header class="page-header">
-    <h1 class="page-title">열화상 리포트 자동 작성 <span style="font-size: 13px; font-weight: normal; color: var(--text-sub); margin-left: 8px;">(v99.5 배포엔진)</span></h1>
+    <h1 class="page-title">열화상 리포트 자동 작성 <span style="font-size: 13px; font-weight: normal; color: var(--text-sub); margin-left: 8px;">(오프라인 단독엔진 v99.6)</span></h1>
     <div class="header-actions">
       <button type="button" id="btnReset" class="btn btn-secondary">새 문서 (초기화)</button>
       <button type="button" id="btnModelModal" class="btn btn-secondary">스팟 위치 학습 관리</button>
@@ -260,11 +260,10 @@
     </div>
   </div>
 
-  <!-- 스크립트 연결 (CDN 캐시 완전 우회 버전 파라미터 적용) -->
-  <script src="./mock_bridge.js?v=99.5"></script>
-  <script src="./flir_parser.js?v=99.5"></script>
-  <script src="./atr_generator_v99.js?v=99.5"></script>
-  <script src="./spot_model.js?v=99.5"></script>
-  <script src="./app_v99.js?v=99.5"></script>
+  <!-- 스크립트 연결 (오프라인 단독 엔진 v99.6) -->
+  <script src="./flir_parser.js?v=99.6"></script>
+  <script src="./atr_generator_v99.js?v=99.6"></script>
+  <script src="./spot_model.js?v=99.6"></script>
+  <script src="./app_v99.js?v=99.6"></script>
 </body>
 </html>

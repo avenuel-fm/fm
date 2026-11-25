@@ -116,9 +116,6 @@
         try {
             const exported = state.spotModel.export();
             localStorage.setItem(STORAGE_KEY_SPOT_MODEL, JSON.stringify(exported));
-            if (state.bridge && state.bridge.saveModel) {
-                state.bridge.saveModel(exported).catch(e => console.warn('Bridge saveModel error:', e));
-            }
         } catch (e) {
             console.warn('Spot model save error:', e);
         }
@@ -137,11 +134,10 @@
     }
 
     /**
-     * 앱 초기화
+     * 앱 초기화 (100% 로컬 오프라인 단독 구동)
      */
     async function init() {
-        console.log('[FM Thermal] 99쪽 동적 복제 & 직무고시 3상 스팟 자동 이동 엔진 로드 완료');
-        state.bridge = (window.parent && window.parent.WS_THERMAL) || window.WS_THERMAL;
+        console.log('[FM Thermal] 오프라인 단독 실행 모드: 외부 서버 연동 없이 로컬 자원으로만 구동');
 
         // 점검일자 기본값: 오늘
         const today = new Date().toISOString().split('T')[0];
@@ -156,26 +152,6 @@
 
         // 로컬에 기억된 스팟 학습 모델 복원
         loadSpotModel();
-
-        if (state.bridge) {
-            try {
-                const me = await state.bridge.me();
-                if (me && me.name && !savedInspector) {
-                    DOM.inpInspector.value = me.name;
-                }
-
-                const bootInfo = await state.bridge.boot();
-                if (bootInfo) {
-                    if (bootInfo.template_url) state.templateUrl = bootInfo.template_url;
-                    if (bootInfo.model) {
-                        state.spotModel.load(bootInfo.model);
-                        saveSpotModel();
-                    }
-                }
-            } catch (e) {
-                console.warn('Bridge init error:', e);
-            }
-        }
 
         // 템플릿 로드 & IndexedDB 캐시 시도
         await loadTemplateWithFallback();
@@ -318,16 +294,7 @@
                 state.templateBuffer = buf;
                 await saveTemplateToDb(buf);
                 DOM.templateFallbackBanner.classList.remove('active');
-                // 업무지원 통로가 있으면 양식을 서버에도 올려 다른 기기에서도 쓰게 함 (결정 168). 공개 저장소에는 양식 파일을 두지 않음
-                let shared = '';
-                if (state.bridge && state.bridge.upload && state.bridge.saveTemplate) {
-                    try {
-                        const up = await state.bridge.upload(file, file.name);
-                        await state.bridge.saveTemplate({ path: up.path, url: up.url, name: file.name });
-                        shared = ' 다른 기기에서도 쓸 수 있게 서버에 올렸습니다.';
-                    } catch (err) { shared = ' (서버에는 올리지 못했습니다: ' + err.message + ')'; }
-                }
-                alert('양식 파일이 성공적으로 등록되었습니다.' + shared);
+                alert('양식 파일이 성공적으로 등록되어 브라우저에 영구 저장되었습니다. 다음부터는 자동으로 로드됩니다.');
             }
         });
 
@@ -1042,45 +1009,12 @@
             a.click();
             document.body.removeChild(a);
 
-            // 2. 업무지원 상위 앱에 통로를 통해 보고서 기록 남김
-            if (state.bridge) {
-                try {
-                    let uploadRes = { path: `local://${fileName}` };
-                    if (state.bridge.upload) {
-                        uploadRes = await state.bridge.upload(downloadBlob, fileName);
-                    }
-                    state.lastAtrPath = uploadRes.path;
-
-                    let maxDt = 0;
-                    for (const p of state.pages) {
-                        const dt = Math.max(p.spots[0].temp, p.spots[1].temp, p.spots[2].temp) -
-                                   Math.min(p.spots[0].temp, p.spots[1].temp, p.spots[2].temp);
-                        if (dt > maxDt) maxDt = dt;
-                    }
-                    maxDt = Math.round(maxDt * 10) / 10;
-
-                    const pagesCount = result.pageCount || state.pages.length;
-                    if (state.bridge.saveReport) {
-                        await state.bridge.saveReport({
-                            title: title,
-                            inspector: inspector,
-                            date: date,
-                            path: uploadRes.path || '',
-                            pages: pagesCount,
-                            max_dt: maxDt
-                        });
-                    }
-                } catch (bridgeErr) {
-                    console.warn('Bridge report logging error:', bridgeErr);
-                }
-            }
-
             const totalPages = result.pageCount || state.pages.length;
             const patchMsg = (totalPatched === totalSpots)
                 ? `스팟 위치 기록: 모든 사진(총 ${totalSpots}개 스팟)의 위치가 바이너리에 정상 반영되었습니다.`
                 : `스팟 위치 기록: 총 ${totalSpots}개 중 ${totalPatched}개 스팟 위치 갱신 완료.`;
 
-            alert(`리포트(${result.fileName})가 성공적으로 생성되어 내려받았습니다! (총 ${totalPages}쪽 작성 완료)\n\n${patchMsg}\n\n※ FLIR Thermal Studio 공식 양식 트리가 100% 보존되어 서멀스튜디오에서 오류 없이 완벽하게 열립니다.`);
+            alert(`리포트(${result.fileName}) 작성이 완료되어 PC에 즉시 저장되었습니다! (총 ${totalPages}쪽)\n\n${patchMsg}\n\n※ 오프라인 단독 구동: 외부 서버 전송 없이 로컬에서 초고속으로 생성되었습니다.\nFLIR Thermal Studio에서 오류 없이 완벽하게 열립니다.`);
         } catch (err) {
             console.error('Report build error:', err);
             alert(`리포트 내려받기 중 오류: ${err.message}`);
