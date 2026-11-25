@@ -182,9 +182,12 @@ function setFloorRibbonWidth(v) {
     const i = document.getElementById('input-floor-width-px'); if (i) i.value = w;
     if (typeof updateZoneDrawingPreview === 'function') updateZoneDrawingPreview();
 }
+var fclWasFloor = false;
 function syncCenterlineUI() {
     const isFloor = typeof currentZoneCategory !== 'undefined' && currentZoneCategory === 'floor';
     if (!isFloor) floorCenterlineOn = false;
+    else if (!fclWasFloor) floorCenterlineOn = true;   // 바닥을 새로 고르면 중심선 모드가 자동으로 켜짐 (끄려면 버튼, 결정 282)
+    fclWasFloor = isFloor;
     const box = document.getElementById('floor-cl-controls'); if (box) box.style.display = isFloor ? 'inline-flex' : 'none';
     document.getElementById('btn-centerline-floor')?.classList.toggle('active', floorCenterlineOn);
 }
