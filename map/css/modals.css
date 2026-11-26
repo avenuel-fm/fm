@@ -478,3 +478,8 @@
 .xl-foot button:disabled { opacity: .4; cursor: not-allowed; }
 @media (max-width: 560px) { .xl-sum { grid-template-columns: repeat(2, minmax(0, 1fr)); } .xl-foot span { display: none; } }
 .modal-overlay:not(.as-toast-overlay) { z-index: 1001; }   /* 길어진 수정 창이 윗줄에 가리지 않게 */
+/* 매장 수정 창: 지도를 가리지 않게 오른쪽 아래, 지도는 그대로 만질 수 있음 (도형 크기·자리 바꾸기, 결정 308) */
+.modal-overlay.as-side-overlay { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; pointer-events: none; align-items: flex-end; justify-content: flex-end; animation: none; }
+.modal-overlay.as-side-overlay #edit-modal { pointer-events: auto; max-height: calc(100vh - 2 * var(--sp-4)); overflow-y: auto; box-shadow: 0 8px 24px rgba(15, 23, 42, .18); }
+#shape-edit-handles .shape-handle { fill: #fff; stroke: #2563eb; }
+.store-polygon.shape-editing { cursor: move !important; }   /* 가운데는 십자(이동) 커서 */

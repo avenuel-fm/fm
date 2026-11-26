@@ -477,6 +477,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                 } else {
                     pathEl = existingGroup.querySelector('path');
                     textEl = existingGroup.querySelector('text');
+                    if (pathEl && cs.pathData) pathEl.setAttribute('d', cs.pathData);   // 옮기거나 키운 모양은 저장값이 기준
                 }
                 layoutStoreLabel(textEl, cs.name, pathEl);
 
@@ -489,7 +490,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                     fields: spec.fields || cs.fields || [],
                     x: cs.x,
                     y: cs.y,
-                    pathData: cs.pathData,
+                    pathData: (pathEl && pathEl.getAttribute('d')) || cs.pathData,
                     isCustom: true,
                     textElement: textEl,
                     polygonElement: pathEl,
@@ -648,13 +649,15 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
             if (!best) return whole;
             return (best.w >= needW && best.h >= needH) || !fit ? best : fit;
         }
-        function layoutStoreLabel(textEl, name, pathEl) {
+        // noGrow: 끌어 크기·자리 바꾸는 중엔 넘쳐도 도형을 키우지 않음
+        function layoutStoreLabel(textEl, name, pathEl, noGrow) {
             if (!textEl) return;
             const ns = 'http://www.w3.org/2000/svg';
             textEl.setAttribute('font-size', String(STORE_LABEL_SIZE));
             textEl.setAttribute('font-weight', '400');
             textEl.setAttribute('fill', '#000000');
             textEl.setAttribute('text-anchor', 'middle');
+            textEl.removeAttribute('transform');
             textEl.textContent = '';
             const one = document.createElementNS(ns, 'tspan');
             one.textContent = name;
@@ -663,6 +666,22 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
             try { bb = pathEl && pathEl.getBBox(); } catch (e) { /* 화면에 없으면 그대로 한 줄 */ }
             if (!bb || !bb.width) return;
             const width = t => { one.textContent = t; return one.getComputedTextLength(); };
+            // 기운 도형: 글자도 긴 변 따라 기울여 한 줄로 가운데. 넘치면 가운데·기울기 그대로 도형을 키움 (결정 308)
+            const pts = typeof rtPathPoints === 'function' ? rtPathPoints(pathEl) : parseSvgPathPoints(pathEl.getAttribute('d'));
+            const tilt = storeTilt(pts);
+            if (tilt) {
+                one.textContent = name;
+                const needL = width(name) + STORE_LABEL_PAD * 2, needS = STORE_LABEL_LINE + STORE_LABEL_PAD;
+                if (!noGrow && (needL > tilt.L + 0.5 || needS > tilt.S + 0.5)) {
+                    const grown = growAlongTilt(pts, tilt, Math.max(1, needL / tilt.L), Math.max(1, needS / tilt.S));
+                    pathEl.setAttribute('d', pointsToPathD(grown));
+                    if (typeof persistCustomShape === 'function') persistCustomShape(pathEl);
+                }
+                textEl.setAttribute('x', tilt.cx.toFixed(2));
+                textEl.setAttribute('y', (tilt.cy + STORE_LABEL_SIZE / 3).toFixed(2));
+                textEl.setAttribute('transform', `rotate(${tilt.deg.toFixed(2)} ${tilt.cx.toFixed(2)} ${tilt.cy.toFixed(2)})`);
+                return;
+            }
             const box = storeLabelBox(pathEl, width(name) + STORE_LABEL_PAD * 2, STORE_LABEL_LINE + STORE_LABEL_PAD);
             const cx = box.x + box.w / 2, cy = box.y + box.h / 2;
             const room = box.w - STORE_LABEL_PAD * 2;

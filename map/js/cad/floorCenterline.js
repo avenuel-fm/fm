@@ -140,12 +140,14 @@ function finishCenterlineFloor() {
     if (typeof isLayerLocked === 'function' && isLayerLocked('floor')) { warnLayerLocked(); return; }
     const pts = fclDedupe(drawingZonePoints);
     if (pts.length < 2) { showToast('중심선은 2개 이상의 점이 필요합니다.', 1500); return; }
+    let parts = fclRibbonParts(pts, floorRibbonW / 2);
+    try { parts = floorAvoidStores(parts); } catch (err) { console.warn('매장 피하기 실패, 그린 그대로', err); }   // 매장 침범 → 둘레 2px 밖으로 (결정 308)
+    if (!parts.length) { showToast('그린 바닥이 모두 매장 안이라 남는 곳이 없습니다.', 2000); return; }
     pushUndoState('바닥 중심선 추가');
     const floor = FLOORS[currentFloorIdx];
     const zones = getFloorZones(floor.code);
     const existing = zones.filter(z => z.category === 'floor' && z.geometry === 'polygon' && z.points && z.points.length >= 3);
     const newSegs = []; for (let i = 0; i < pts.length - 1; i++) newSegs.push([pts[i].x, pts[i].y, pts[i + 1].x, pts[i + 1].y]);
-    const parts = fclRibbonParts(pts, floorRibbonW / 2);
     let res;
     try { res = fclMerge(parts, existing, newSegs); }
     catch (err) { console.warn('바닥 합치기 실패, 조각 그대로 저장', err); res = { rings: parts.map(fclCleanRing), removeIds: [], segs: newSegs }; }

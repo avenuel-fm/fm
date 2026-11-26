@@ -711,6 +711,14 @@ function bringZoneLayersToFront() {
                 return;
             }
 
+            // 바닥이 매장·기능실을 침범하면 그 자리를 빼고 둘레 2px 밖으로 (결정 308). 여러 조각이 되면 조각마다 바닥 하나
+            let floorRings = null;
+            if (currentZoneCategory === 'floor' && currentZoneGeometry === 'polygon') {
+                try { floorRings = floorAvoidStores([drawingZonePoints.map(p => [p.x, p.y])]).map(r => r.map(q => ({ x: Math.round(q[0] * 10) / 10, y: Math.round(q[1] * 10) / 10 }))); }
+                catch (err) { console.warn('매장 피하기 실패, 그린 그대로', err); }
+                if (floorRings && !floorRings.length) { showToast('그린 바닥이 모두 매장 안이라 남는 곳이 없습니다.', 2000); return; }
+            }
+
             pushUndoState('구역 추가');
 
             const floor = FLOORS[currentFloorIdx];
@@ -735,7 +743,8 @@ function bringZoneLayersToFront() {
                 createdAt: Date.now()
             };
 
-            zones.push(newZone);
+            if (floorRings) floorRings.forEach((ring, i) => zones.push(Object.assign({}, newZone, { id: newZone.id + (i ? '_' + i : ''), name: i ? `바닥 ${zones.filter(z => z.category === 'floor').length + 1}` : zoneName, points: ring })));
+            else zones.push(newZone);
             saveFloorZones(floor.code, zones);
 
             cleanupTempZoneDrawingGroup();

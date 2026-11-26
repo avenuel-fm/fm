@@ -193,14 +193,16 @@ function renderFloorUtilityLines() {
             labelGroup.setAttribute('class', 'util-spec-badge-group');
             labelGroup.style.cursor = 'pointer';
 
-            const specStr = line.specText ? `${line.subTypeLabel || ''} (${line.specText})` : (line.subTypeLabel || '설비');
-            const approxWidth = Math.max(specStr.length * 9 + 16, 54);
+            // 이름표 글자: 고친 글자(labelText, 여러 줄)가 있으면 그것, 없으면 「전기 (50A)」 (결정 308)
+            const textLines = utilLabelLines(line);
+            const approxWidth = Math.max(Math.max(...textLines.map(utilTextWidth)) + 16, 54);
+            const boxH = 22 + (textLines.length - 1) * UTIL_LABEL_LINE;
 
             const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
             rect.setAttribute('x', -approxWidth / 2);
-            rect.setAttribute('y', -11);
+            rect.setAttribute('y', -boxH / 2);
             rect.setAttribute('width', approxWidth);
-            rect.setAttribute('height', 22);
+            rect.setAttribute('height', boxH);
             rect.setAttribute('rx', 5);
             rect.setAttribute('fill', isSelected ? '#ef4444' : 'rgba(15, 23, 42, 0.9)');
             rect.setAttribute('stroke', isSelected ? '#ffffff' : (line.color || '#2563eb'));
@@ -208,18 +210,28 @@ function renderFloorUtilityLines() {
 
             const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             text.setAttribute('x', 0);
-            text.setAttribute('y', 4);
+            text.setAttribute('y', 4 - (textLines.length - 1) * UTIL_LABEL_LINE / 2);
             text.setAttribute('fill', '#ffffff');
             text.setAttribute('font-size', '11');
             text.setAttribute('font-weight', '700');
             text.setAttribute('text-anchor', 'middle');
-            text.textContent = specStr;
+            textLines.forEach((t, i) => {
+                const ts = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+                ts.setAttribute('x', 0);
+                if (i) ts.setAttribute('dy', String(UTIL_LABEL_LINE));
+                ts.textContent = t;
+                text.appendChild(ts);
+            });
 
             labelGroup.appendChild(rect);
             labelGroup.appendChild(text);
             labelGroup.setAttribute('transform', `translate(${midPt.x},${midPt.y})`);   // 실제 자리는 layoutUtilLabels 가 겹치지 않게 다시 정함 (결정 258)
             labelGroup._w = approxWidth;
+            labelGroup._h = boxH;
             g._pts = drawPts;
+            g._line = line;
+            bindUtilLabelEdit(labelGroup, line, g);
+            labelGroup.style.cursor = utilLabelEditable(line) ? 'move' : 'default';
             const link = document.createElementNS('http://www.w3.org/2000/svg', 'line');   // 이름표가 선에서 떨어졌을 때 잇는 가는 선
             link.setAttribute('class', 'util-label-link');
             link.setAttribute('stroke', line.color || '#2563eb'); link.setAttribute('stroke-width', '1'); link.setAttribute('pointer-events', 'none');
@@ -256,7 +268,7 @@ function renderFloorUtilityLines() {
         };
 
         polyline.addEventListener('click', clickHandler);
-        if (labelGroup) labelGroup.addEventListener('click', clickHandler);
+        if (labelGroup) labelGroup.addEventListener('click', e => e.stopPropagation());   // 이름표 한 번 누름은 아무것도 안 함 (더블클릭 고치기와 안 부딪히게, 결정 308)
 
         // 마우스 호버 시 라벨 노출
         polyline.addEventListener('mouseenter', () => {
@@ -289,23 +301,30 @@ function utilPointAt(pts, f) {
 function layoutUtilLabels() {
     const layer = mapContainer?.querySelector('#utility-lines-layer');
     if (!layer) return;
-    const placed = [], H = 22, PAD = 2;
-    const hit = (x, y, w) => placed.some(r => Math.abs(x - r.x) < (w + r.w) / 2 + PAD && Math.abs(y - r.y) < H + PAD);
-    layer.querySelectorAll('.util-line-item-group').forEach(g => {
+    const placed = [], PAD = 2;
+    const hit = (x, y, w, h) => placed.some(r => Math.abs(x - r.x) < (w + r.w) / 2 + PAD && Math.abs(y - r.y) < (h + r.h) / 2 + PAD);
+    const groups = Array.from(layer.querySelectorAll('.util-line-item-group')).filter(g => {
         const lab = g.querySelector('.util-spec-badge-group');
-        if (!lab || !g._pts || g.style.display === 'none' || lab.style.display === 'none') return;
-        const w = lab._w || 54;
+        return lab && g._pts && g.style.display !== 'none' && lab.style.display !== 'none';
+    });
+    // 손으로 옮긴 이름표(labelPos)는 그 자리에 고정하고 먼저 자리를 차지함 (결정 308)
+    groups.sort((a, b) => (b._line && b._line.labelPos ? 1 : 0) - (a._line && a._line.labelPos ? 1 : 0));
+    groups.forEach(g => {
+        const lab = g.querySelector('.util-spec-badge-group');
+        const w = lab._w || 54, h = lab._h || 22;
         let pos = null, anchor = null;
-        for (const f of [0.5, 0.35, 0.65, 0.2, 0.8]) {
+        const fixed = g._line && g._line.labelPos;
+        if (fixed) { pos = { x: fixed.x, y: fixed.y }; anchor = utilPointAt(g._pts, 0.5); }
+        for (const f of fixed ? [] : [0.5, 0.35, 0.65, 0.2, 0.8]) {
             const p = utilPointAt(g._pts, f);
-            if (!hit(p.x, p.y, w)) { pos = p; anchor = p; break; }
+            if (!hit(p.x, p.y, w, h)) { pos = p; anchor = p; break; }
         }
         if (!pos) {
             const base = utilPointAt(g._pts, 0.5); anchor = base;
-            for (let k = 1; k < 40 && !pos; k++) for (const sg of [1, -1]) { const y = base.y + sg * k * (H + PAD); if (!hit(base.x, y, w)) { pos = { x: base.x, y }; break; } }
+            for (let k = 1; k < 40 && !pos; k++) for (const sg of [1, -1]) { const y = base.y + sg * k * (h + PAD); if (!hit(base.x, y, w, h)) { pos = { x: base.x, y }; break; } }
             pos = pos || base;
         }
-        placed.push({ x: pos.x, y: pos.y, w });
+        placed.push({ x: pos.x, y: pos.y, w, h });
         lab.setAttribute('transform', `translate(${pos.x.toFixed(1)},${pos.y.toFixed(1)})`);
         if (g._link) {
             const moved = Math.hypot(pos.x - anchor.x, pos.y - anchor.y) > 1;
@@ -313,6 +332,101 @@ function layoutUtilLabels() {
             if (moved) { g._link.setAttribute('x1', anchor.x); g._link.setAttribute('y1', anchor.y); g._link.setAttribute('x2', pos.x); g._link.setAttribute('y2', pos.y); }
         }
     });
+}
+
+// ================= 이름표 고치기 · 옮기기 (결정 308) =================
+// 더블클릭 → 그 자리에서 고침(Enter 줄바꿈 · 바깥 누르면 저장 · Esc 취소), 끌면 옮김. 저장: line.labelText(줄은 \n) · line.labelPos({x,y})
+var UTIL_LABEL_LINE = 14;
+function utilDefaultLabel(line) { return line.specText ? `${line.subTypeLabel || ''} (${line.specText})` : (line.subTypeLabel || '설비'); }
+function utilLabelLines(line) { return (line.labelText || utilDefaultLabel(line)).split('\n'); }
+function utilTextWidth(t) {
+    const c = utilTextWidth._c || (utilTextWidth._c = document.createElement('canvas').getContext('2d'));
+    c.font = '700 11px Pretendard, sans-serif';
+    return c.measureText(t).width || t.length * 9;
+}
+function updateUtilityLineLabel(lineId, patch) {
+    const floor = FLOORS[currentFloorIdx];
+    if (typeof pushUndoState === 'function') pushUndoState('설비 연결선 이름표');
+    const lines = getFloorUtilityLines(floor.code), l = lines.find(x => x.id === lineId);
+    if (!l) return;
+    Object.keys(patch).forEach(k => { if (patch[k] === null) delete l[k]; else l[k] = patch[k]; });
+    saveFloorUtilityLines(floor.code, lines);
+}
+function utilLabelEditable(line) { return !mapStore.readOnly() && !isLayerLocked(line.subType || 'power'); }
+function bindUtilLabelEdit(lab, line, g) {
+    lab.addEventListener('mousedown', e => {
+        if (e.button !== 0 || !utilLabelEditable(line)) return;
+        e.stopPropagation();                          // 지도 끌기 대신 이름표 끌기
+        const ctm = lab.parentNode.getScreenCTM(), k = ctm ? ctm.a : 1;
+        const m = /translate\(([-\d.]+),\s*([-\d.]+)\)/.exec(lab.getAttribute('transform') || '');
+        const x0 = m ? +m[1] : 0, y0 = m ? +m[2] : 0, sx = e.clientX, sy = e.clientY;
+        let moved = false, nx = x0, ny = y0;
+        const move = ev => {
+            const dx = ev.clientX - sx, dy = ev.clientY - sy;
+            if (!moved && Math.hypot(dx, dy) < 4) return;
+            moved = true;
+            nx = x0 + dx / k; ny = y0 + dy / k;
+            lab.setAttribute('transform', `translate(${nx.toFixed(1)},${ny.toFixed(1)})`);
+            if (g._link) {
+                const a = utilPointAt(g._pts, 0.5);
+                g._link.style.display = '';
+                g._link.setAttribute('x1', a.x); g._link.setAttribute('y1', a.y); g._link.setAttribute('x2', nx); g._link.setAttribute('y2', ny);
+            }
+        };
+        const up = () => {
+            window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up);
+            if (!moved) return;
+            updateUtilityLineLabel(line.id, { labelPos: { x: Math.round(nx * 10) / 10, y: Math.round(ny * 10) / 10 } });
+            line.labelPos = { x: nx, y: ny };
+            layoutUtilLabels();
+        };
+        window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
+    });
+    lab.addEventListener('dblclick', e => {
+        e.stopPropagation(); e.preventDefault();
+        if (!utilLabelEditable(line)) return;
+        openUtilLabelEditor(lab, line);
+    });
+}
+function openUtilLabelEditor(lab, line) {
+    document.getElementById('util-label-editor')?.remove();
+    const r = lab.querySelector('rect').getBoundingClientRect(), ctm = lab.getScreenCTM(), k = ctm ? ctm.a : 1;
+    const ta = document.createElement('textarea');
+    ta.id = 'util-label-editor';
+    ta.value = utilLabelLines(line).join('\n');
+    ta.spellcheck = false;
+    const fs = Math.max(11 * k, 12), lh = UTIL_LABEL_LINE / 11 * fs;
+    Object.assign(ta.style, {
+        position: 'fixed', zIndex: 3000, resize: 'none', overflow: 'hidden', boxSizing: 'border-box', margin: 0,
+        background: '#1e293b', color: '#fff', border: '2px solid #38bdf8', borderRadius: '6px', boxShadow: '0 0 0 3px rgba(56,189,248,.35)',
+        font: `700 ${fs}px/${lh}px Pretendard, sans-serif`, textAlign: 'center', padding: '3px 8px', outline: 'none', whiteSpace: 'pre'
+    });
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const fit = () => {                               // 줄 수·글자 길이에 맞춰 상자 크기
+        const ls = ta.value.split('\n'), w = Math.max(...ls.map(utilTextWidth)) * fs / 11 + 24, h = ls.length * lh + 10;
+        ta.style.width = Math.max(w, r.width) + 'px'; ta.style.height = h + 'px';
+        ta.style.left = (cx - Math.max(w, r.width) / 2) + 'px'; ta.style.top = (cy - h / 2) + 'px';
+    };
+    let done = false;
+    const finish = save => {
+        if (done) return; done = true;
+        const v = ta.value.replace(/\s+$/, '').split('\n').map(s => s.replace(/\s+$/, '')).join('\n');
+        ta.remove();
+        if (!save) return;
+        const same = !v.trim() || v === utilDefaultLabel(line);
+        if (same ? !line.labelText : v === line.labelText) return;
+        updateUtilityLineLabel(line.id, { labelText: same ? null : v });
+        renderFloorUtilityLines();
+    };
+    ta.addEventListener('input', fit);
+    ta.addEventListener('keydown', e => {
+        e.stopPropagation();                          // 지도 단축키(Delete·Esc·Enter)와 안 부딪히게
+        if (e.key === 'Escape') { e.preventDefault(); finish(false); }
+    });
+    ta.addEventListener('blur', () => finish(true));
+    ['mousedown', 'click', 'dblclick', 'wheel'].forEach(t => ta.addEventListener(t, e => e.stopPropagation()));
+    document.body.appendChild(ta);
+    fit(); ta.focus(); ta.select();
 }
 
 // ================= 선분 선택 및 삭제 기능 =================
@@ -542,6 +656,7 @@ function finishUtilityLine() {
     const res = routeBetweenStores(utilLineTargetStore, utilLineSourceStore);   // 기능실 → 매장 순서의 점
     if (!res.ok) {
         showToast(res.error, 2800);
+        if (res.gap) showRouteGap(res.gap);
         utilLineTargetStore = null; utilLineSourceStore = null;   // 선은 안 그리고 처음부터 다시 고르게
         updateUtilLineGuideUI();
         return;
@@ -570,6 +685,40 @@ function finishUtilityLine() {
     const finalStore = utilLineSourceStore;
     exitUtilityLineDrawingMode();
     highlightUtilityLinesForStore(finalStore);
+}
+
+// 복도가 끊긴 자리를 빨간 점선·동그라미로 8초 보여 줌 (결정 308)
+function showRouteGap(gap) {
+    const svgEl = mapContainer?.querySelector('svg');
+    if (!svgEl || !gap) return;
+    svgEl.querySelector('#route-gap-mark')?.remove();
+    const ns = 'http://www.w3.org/2000/svg', k = 1 / (typeof scale !== 'undefined' && scale ? scale : 1);
+    const g = document.createElementNS(ns, 'g');
+    g.setAttribute('id', 'route-gap-mark');
+    g.style.pointerEvents = 'none';
+    const [a, b] = gap, mk = (tag, at) => { const e = document.createElementNS(ns, tag); Object.entries(at).forEach(([n, v]) => e.setAttribute(n, v)); g.appendChild(e); };
+    mk('line', { x1: a.x, y1: a.y, x2: b.x, y2: b.y, stroke: '#dc2626', 'stroke-width': 3 * k, 'stroke-dasharray': `${8 * k} ${5 * k}` });
+    [a, b].forEach(p => mk('circle', { cx: p.x, cy: p.y, r: 9 * k, fill: 'rgba(220,38,38,.15)', stroke: '#dc2626', 'stroke-width': 2 * k }));
+    svgEl.appendChild(g);
+    setTimeout(() => g.remove(), 8000);
+}
+
+// 매장·기능실 도형을 옮기거나 키운 뒤 붙어 있는 자동 연결선을 다시 그림 (결정 308). 길을 못 찾으면 예전 선 그대로
+function rerouteLinesForStore(store) {
+    if (!store || typeof routeBetweenStores !== 'function') return 0;
+    const floor = FLOORS[currentFloorIdx], id = String(store.id);
+    const lines = getFloorUtilityLines(floor.code), byId = sid => currentStores.find(s => String(s.id) === String(sid));
+    let n = 0, fail = 0, gap = null;
+    lines.forEach(l => {
+        if (!l.auto || (String(l.sourceStoreId) !== id && String(l.targetStoreId) !== id)) return;
+        const src = byId(l.sourceStoreId), tgt = byId(l.targetStoreId);
+        if (!src?.polygonElement || !tgt?.polygonElement) return;
+        const res = routeBetweenStores(tgt, src);
+        if (res.ok) { l.points = res.points; n++; } else { fail++; gap = gap || res.gap; }
+    });
+    if (n) { saveFloorUtilityLines(floor.code, lines); renderFloorUtilityLines(); }
+    if (fail) { showToast(`연결선 ${fail}개는 길을 못 찾아 예전 자리 그대로입니다.`, 2800); if (gap) showRouteGap(gap); }
+    return n;
 }
 
 // ================= UI 가이드 배너 및 라디오 버튼 4종 =================

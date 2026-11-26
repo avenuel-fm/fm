@@ -157,6 +157,13 @@ function getGridCellPixelSize() {
 }
 
 function snapToGrid(curX, curY, threshold = 16) {
+    // 매장·바닥(면) 그리기 중엔 옆 매장 모서리·벽이 격자보다 먼저 (결정 308)
+    const drawingShape = (typeof isDrawingMode !== 'undefined' && isDrawingMode) ||
+        (typeof isZoneDrawingMode !== 'undefined' && isZoneDrawingMode && !(typeof fclActive === 'function' && fclActive()));
+    if (drawingShape && typeof snapToShapes === 'function') {
+        const s = snapToShapes(curX, curY);
+        if (s.isSnapped) return s;
+    }
     const subGridPx = getGridCellPixelSize();
     const snapX = Math.round(curX / subGridPx) * subGridPx;
     const snapY = Math.round(curY / subGridPx) * subGridPx;
