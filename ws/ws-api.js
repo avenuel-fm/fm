@@ -177,6 +177,8 @@
     eqDelete: async (token, ids, kind) => eqPage(await rpc('ws_eq_delete', { p_token: token, p_ids: ids || [], p_kind: kind || 'hyd' })),
     eqStatus: (token, ym) => rpc('ws_eq_status', { p_token: token, p_ym: ym || '' }),
     eqDetail: (token, id) => rpc('ws_eq_detail', { p_token: token, p_check_id: String(id || '') }),
+    eqCheckDelete: (token, id) => rpc('ws_eq_check_delete', { p_token: token, p_check_id: String(id || '') }),   // 점검 기록 삭제 (결정 290)
+    feCheckDelete: (token, id) => rpc('ws_fe_check_delete', { p_token: token, p_check_id: String(id || '') }),
     /** QR 관리 v2 (결정 228): 위치 이름 고치기(QR 그대로) · 인쇄함 표시 — kind: fe 소화기 · hyd 소화전 · air 공기호흡기 */
     qrRename: async (token, kind, floor, oldP, newP) => (kind === 'fe' ? fePage : eqPage)(await rpc('ws_qr_rename', { p_token: token, p_kind: kind, p_floor: floor, p_old: oldP, p_new: newP })),
     qrPrinted: async (token, kind, ids) => (kind === 'fe' ? fePage : eqPage)(await rpc('ws_qr_printed', { p_token: token, p_kind: kind, p_ids: ids || [] })),

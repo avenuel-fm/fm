@@ -9,7 +9,7 @@
 <title>시방서 검색 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.26.30"></script>
+<script src="config.js?v=0.26.31"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
@@ -260,6 +260,15 @@ body:has(.csbar) #app{padding-bottom:calc(120px + env(safe-area-inset-bottom))}
 .fl.on{background:var(--ink);border-color:var(--ink);color:var(--white);font-weight:500}
 .feb{width:100%;background:var(--white);border:none;border-top:1px solid var(--line3);display:flex;align-items:center;gap:var(--sp-2);min-height:56px;padding:var(--sp-1) var(--sp-3);text-align:left;cursor:pointer}
 .feb:disabled{cursor:default}
+/* 점검 내용 팝업 (결정 290): 제목·아래 버튼 줄 고정, 가운데만 스크롤. 휴대폰은 화면에 꽉, PC는 지금 크기(520px) */
+.dsheet{display:flex;flex-direction:column;padding:0!important;overflow:hidden!important}
+.dsheet .dh{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-3) var(--sp-4);border-bottom:1px solid var(--line)}
+.dsheet .db{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 var(--sp-4) var(--sp-3)}
+.dsheet .df{display:flex;gap:var(--sp-2);padding:var(--sp-3) var(--sp-4) calc(var(--sp-3) + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--white)}
+.dsheet .ph43{aspect-ratio:auto;height:min(30vh,260px)}
+@media (max-width:699px){.dsheet{height:100dvh;max-height:100dvh!important;border-radius:0!important}.dsheet .ph43{height:24vh}}
+.btn.del{color:#B3261E;border-color:#B3261E}
+.btn.delpri{background:#B3261E;border-color:#B3261E;color:#fff}
 .ph43{aspect-ratio:4/3;background:var(--tint);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;overflow:hidden}
 .ph43 img{max-width:100%;max-height:100%;object-fit:contain}
 .sig{border:1px solid var(--line2);border-radius:var(--radius);min-height:64px;display:flex;align-items:center;justify-content:center;padding:var(--sp-1);background:var(--white)}

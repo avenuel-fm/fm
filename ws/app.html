@@ -10,10 +10,10 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.26.30"></script>
-<script>window.WS_VERSION = '0.26.30';</script>
-<script src="offline.js?v=0.26.30"></script>
-<script src="ws-api.js?v=0.26.30"></script>
+<script src="config.js?v=0.26.31"></script>
+<script>window.WS_VERSION = '0.26.31';</script>
+<script src="offline.js?v=0.26.31"></script>
+<script src="ws-api.js?v=0.26.31"></script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -267,6 +267,15 @@ body:has(.csbar) #app{padding-bottom:calc(120px + env(safe-area-inset-bottom))}
 .fl.on{background:var(--ink);border-color:var(--ink);color:var(--white);font-weight:500}
 .feb{width:100%;background:var(--white);border:none;border-top:1px solid var(--line3);display:flex;align-items:center;gap:var(--sp-2);min-height:56px;padding:var(--sp-1) var(--sp-3);text-align:left;cursor:pointer}
 .feb:disabled{cursor:default}
+/* 점검 내용 팝업 (결정 290): 제목·아래 버튼 줄 고정, 가운데만 스크롤. 휴대폰은 화면에 꽉, PC는 지금 크기(520px) */
+.dsheet{display:flex;flex-direction:column;padding:0!important;overflow:hidden!important}
+.dsheet .dh{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-3) var(--sp-4);border-bottom:1px solid var(--line)}
+.dsheet .db{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 var(--sp-4) var(--sp-3)}
+.dsheet .df{display:flex;gap:var(--sp-2);padding:var(--sp-3) var(--sp-4) calc(var(--sp-3) + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--white)}
+.dsheet .ph43{aspect-ratio:auto;height:min(30vh,260px)}
+@media (max-width:699px){.dsheet{height:100dvh;max-height:100dvh!important;border-radius:0!important}.dsheet .ph43{height:24vh}}
+.btn.del{color:#B3261E;border-color:#B3261E}
+.btn.delpri{background:#B3261E;border-color:#B3261E;color:#fff}
 .ph43{aspect-ratio:4/3;background:var(--tint);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;overflow:hidden}
 .ph43 img{max-width:100%;max-height:100%;object-fit:contain}
 .sig{border:1px solid var(--line2);border-radius:var(--radius);min-height:64px;display:flex;align-items:center;justify-content:center;padding:var(--sp-1);background:var(--white)}
@@ -800,7 +809,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B3','B2','B1','1F','2F','3F','4F','5F','6F','7F','8F','9F','10F','POPUP'];   // 소화기·소화전·공기호흡기 층 B3~10F · 맨 아래 POPUP (결정 228·260)
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.30' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.31' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -2709,10 +2718,9 @@ async function hydDetail(id) {
   try {
     const r = await call('eqDetail', id);
     if (!r.ok) { closeDialog(); toast(r.error); return; }
-    dialog('<div style="display:flex;align-items:center;margin-bottom:var(--sp-2)"><div class="fname"><b style="font-size:var(--size-l)">' + h(r.name) + '</b><small>' + h(r.floor) + ' · 점검자 ' + h(r.by) + ' · ' + h(r.at) + ' 입력' + (r.late ? ' · 기한 후' : '') + '</small></div><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
-      r.items.map(i => '<div style="display:flex;flex-direction:column;gap:var(--sp-2);padding:var(--sp-3) 0;border-top:1px solid var(--line)"><div style="display:flex;align-items:center;justify-content:space-between"><b style="font-size:var(--size-m)">' + h(i.label) + '</b><span class="chip ' + (i.bad ? 'c-bad' : 'c-ok') + '">' + h(i.text) + '</span></div>' +
-        (i.memo ? '<div style="font-size:var(--size-m)">' + h(i.memo) + '</div>' : '') +
-        '<div class="ph43">' + (i.photo ? '<img src="' + h(i.photo) + '" alt="' + h(i.label) + ' 사진">' : '<small>사진 없음</small>') + '</div></div>').join(''));
+    detSheet(r, r.items.map((i, k) => '<div style="display:flex;flex-direction:column;gap:var(--sp-2);padding:var(--sp-3) 0;' + (k ? 'border-top:1px solid var(--line)' : '') + '"><div style="display:flex;align-items:center;justify-content:space-between"><b style="font-size:var(--size-m)">' + h(i.label) + '</b><span class="chip ' + (i.bad ? 'c-bad' : 'c-ok') + '">' + h(i.text) + '</span></div>' +
+      (i.memo ? '<div style="font-size:var(--size-m)">' + h(i.memo) + '</div>' : '') +
+      '<div class="ph43">' + (i.photo ? '<img src="' + h(i.photo) + '" alt="' + h(i.label) + ' 사진">' : '<small>사진 없음</small>') + '</div></div>').join(''), 'eq', id);
   } catch (e) { closeDialog(); }
 }
 /* 현황 화면을 열어 두면 1분마다, 다른 화면에서 돌아오면 바로 다시 읽음 (QR로 입력한 점검이 곧 보임) */
@@ -3206,17 +3214,42 @@ function renderFloor() {
     '<div style="display:flex;gap:var(--sp-1);overflow-x:auto;padding-bottom:var(--sp-1)">' + chips + '</div>' + (del ? '<div class="banner b-gray">지울 소화기를 눌러 고르세요 (매장 이름 옆 [전체 선택]으로 한 매장 모두 선택)</div><div style="display:flex;gap:var(--sp-2)"><button class="btn big" style="flex:1" onclick="fdelOff()">취소</button><button class="btn big pri" style="flex:2" ' + (fdelIds().length ? '' : 'disabled ') + 'onclick="fdelAsk()">선택 ' + fdelIds().length + '대 삭제</button></div>' : xlBtns(S.floor) + (it.length ? '<button class="btn" style="min-height:52px" onclick="fdelOn()">소화기 삭제</button>' : '')) + body +
     '<small style="text-align:center;color:var(--muted)">점검완료 · 이상 있음을 누르면 매장에서 입력한 내용을 봅니다</small></div>';
 }
+/* 점검 내용 팝업 (②·③ 공통, 결정 290): 제목 줄 · 내용(스크롤) · 아래 [점검 기록 삭제] [닫기]. 앱은 로그인한 직원만 쓰고, 서버도 로그인 표 없으면 거절 */
+function detSheet(r, body, kind, id) {
+  S.det = { kind, id, name: r.name, ym: r.ym, by: r.by || '', at: r.at };
+  dialog('<div class="dh"><div class="fname"><b style="font-size:var(--size-l)">' + h(r.name) + '</b><small>' + h(r.floor) + (r.by ? ' · 점검자 ' + h(r.by) : '') + ' · ' + h(r.at) + ' 입력' + (r.late ? ' · 기한 후' : '') + '</small></div><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
+    '<div class="db">' + body + '</div>' +
+    '<div class="df"><button class="btn big del" style="flex:1" onclick="detDelAsk()">점검 기록 삭제</button><button class="btn big pri" style="flex:1" onclick="closeDialog()">닫기</button></div>');
+  document.querySelector('#layer .dialog').classList.add('dsheet');
+}
+function detDelAsk() {
+  const d = S.det, m = Number(String(d.ym).slice(5, 7)), what = d.kind === 'fe' ? '소화기' : '장비';
+  dialog('<h2 style="margin:0 0 var(--sp-2);font-size:var(--size-l)">점검 기록 삭제</h2>' +
+    '<div style="font-size:var(--size-m);margin-bottom:var(--sp-2)"><b>' + h(d.name) + '</b> · ' + m + '월 점검 (' + (d.by ? h(d.by) + ' · ' : '') + h(d.at) + ')</div>' +
+    '<div class="banner b-gray">삭제하면 이 ' + what + '는 ' + m + '월 「미입력」으로 돌아가고, QR을 찍어 다시 입력할 수 있습니다. 사진도 목록에서 빠집니다.</div>' +
+    '<div style="display:flex;gap:var(--sp-2);margin-top:var(--sp-3)"><button class="btn big" style="flex:1" onclick="detBack()">취소</button><button id="ddBtn" class="btn big delpri" style="flex:2" onclick="detDel()">삭제</button></div>');
+}
+function detBack() { const d = S.det; if (d.kind === 'fe') detail(d.id); else hydDetail(d.id); }
+async function detDel() {
+  const d = S.det, b = $('ddBtn'); if (b) b.disabled = true;
+  try {
+    const r = await call(d.kind === 'fe' ? 'feCheckDelete' : 'eqCheckDelete', d.id);
+    if (!r || !r.ok) throw new Error((r && r.error) || '삭제하지 못했습니다');
+    closeDialog(); toast(d.name + ' 점검 기록을 삭제했습니다');
+    if (d.kind === 'fe') await stRefresh();
+    else if (S.hq) { const s = await call('eqStatus', S.hq.ym); if (s && s.ok) { S.hq = s; render(); } }
+  } catch (e) { if (b) b.disabled = false; toast(e && e.message ? e.message : '삭제하지 못했습니다'); }
+}
 async function detail(id) {
   dialog('<div style="display:flex;justify-content:center;padding:var(--sp-8)"><span class="spin" style="color:var(--blue);width:28px;height:28px"></span></div>');
   try {
     const r = await call('feDetail', id);
     if (!r.ok) { closeDialog(); toast(r.error); return; }
     const bad = r.state === '이상있음';
-    dialog('<div style="display:flex;align-items:center;margin-bottom:var(--sp-2)"><div class="fname"><b style="font-size:var(--size-l)">' + h(r.name) + '</b><small>' + h(r.floor) + ' · ' + h(r.at) + ' 입력' + (r.late ? ' · 기한 후' : '') + '</small></div><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
-      '<div class="ph43">' + (r.photo ? '<img src="' + r.photo + '" alt="압력계 사진">' : '<small>사진 없음</small>') + '</div>' +
+    detSheet(r, '<div class="ph43" style="margin-top:var(--sp-3)">' + (r.photo ? '<img src="' + r.photo + '" alt="압력계 사진">' : '<small>사진 없음</small>') + '</div>' +
       '<div style="margin:var(--sp-2) 0"><span class="chip ' + (bad ? 'c-bad' : 'c-ok') + '">' + (bad ? '이상 있음' : '이상 없음') + '</span></div>' +
       '<div style="display:flex;flex-direction:column;gap:var(--sp-2)"><small style="color:var(--muted)">' + (bad ? '이상 내용' : '외관·압력 이상무') + ' (손글씨)</small><div class="sig">' + (r.signA ? '<img src="' + r.signA + '" alt="문구 손글씨">' : '') + '</div>' +
-      '<small style="color:var(--muted)">이름 (손글씨)</small><div class="sig">' + (r.signB ? '<img src="' + r.signB + '" alt="이름 손글씨">' : '') + '</div></div>');
+      '<small style="color:var(--muted)">이름 (손글씨)</small><div class="sig">' + (r.signB ? '<img src="' + r.signB + '" alt="이름 손글씨">' : '') + '</div></div>', 'fe', id);
   } catch (e) { closeDialog(); }
 }
 
