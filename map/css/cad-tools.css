@@ -757,3 +757,26 @@
             .zone-guide-banner .zone-banner-controls { flex-wrap: wrap; white-space: normal; row-gap: var(--sp-2); justify-content: center; }
         }
 
+
+        /* 심벌 위치 창 · 이름 말풍선 (결정 292) */
+        .symbol-place-dialog {
+            position: fixed; left: 50%; top: 110px; transform: translateX(-50%); z-index: 3000;
+            width: min(340px, calc(100vw - 32px)); background: #fff; color: var(--navy, #0f172a);
+            border: 1px solid #cbd5e1; border-radius: 12px; padding: 14px; box-shadow: 0 8px 24px rgba(15, 23, 42, .18);
+            display: flex; flex-direction: column; gap: 8px; font-size: 14px;
+        }
+        .symbol-place-dialog .spd-title { font-weight: 700; }
+        .symbol-place-dialog input { height: 38px; padding: 0 10px; border: 1px solid #94a3b8; border-radius: 8px; font-size: 15px; }
+        .symbol-place-dialog .spd-hint { font-size: 12px; color: #64748b; }
+        .symbol-place-dialog .spd-name { background: #e0f2fe; color: #075985; border-radius: 8px; padding: 6px 10px; }
+        .symbol-place-dialog .spd-btns { display: flex; gap: 6px; }
+        .symbol-place-dialog .spd-btns button { flex: 1; height: 36px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #0f172a; font-size: 14px; cursor: pointer; }
+        .symbol-place-dialog .spd-btns .spd-ok { background: #0f172a; color: #fff; border-color: #0f172a; }
+        .symbol-place-dialog .spd-btns .spd-del { color: #dc2626; border-color: #fca5a5; }
+        .symbol-name-bubble {
+            position: fixed; z-index: 3000; transform: translate(-50%, -100%); pointer-events: none;
+            background: #0f172a; color: #fff; font-size: 14px; font-weight: 600; padding: 6px 10px; border-radius: 8px; white-space: nowrap;
+        }
+        /* 이름표는 편집 중에만 */
+        .cad-symbol-label { display: none; pointer-events: none; }
+        body.symbol-mode .cad-symbol-label { display: inline; }

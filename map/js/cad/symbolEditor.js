@@ -6,36 +6,90 @@ var SYMBOL_DEFINITIONS = {
     clean_extinguisher: {
         id: 'clean_extinguisher',
         name: '청정소화기',
-        color: '#94a3b8', // 연회색
-        emoji: '🧯',
-        diameter: 10,
-        radius: 5
+        color: '#475569', // 진한 회색 (결정 292)
+        kind: '소화기',
+        icon: 'ext'
     },
     powder_extinguisher: {
         id: 'powder_extinguisher',
         name: '분말소화기',
         color: '#f97316', // 주황색
-        emoji: '🧯',
-        diameter: 10,
-        radius: 5
+        kind: '소화기',
+        icon: 'ext'
     },
     fire_hydrant: {
         id: 'fire_hydrant',
         name: '소화전',
         color: '#1e293b', // 검은색
-        emoji: '🚒',
-        diameter: 10,
-        radius: 5
+        kind: '소화전',
+        icon: 'hyd'
     },
     air_respirator: {
         id: 'air_respirator',
         name: '공기호흡기',
         color: '#2563eb', // 파란색
-        emoji: '🤿',
-        diameter: 10,
-        radius: 5
+        kind: '공기호흡기',
+        icon: 'tank'
     }
 };
+
+// 심벌 반지름: 옛 5 → 면적 7배 = 5 × √7 (결정 292)
+var SYMBOL_R = 13.2;
+// 흰 그림 (반지름 13.2 원 안, 가운데 0,0) — ext 소화기 · hyd 소화전 · tank 산소통(공기호흡기)
+var SYMBOL_ICONS = {
+    ext: '<rect x="-3.6" y="-4" width="7.2" height="11" rx="2" fill="#fff"/><rect x="-1.5" y="-7" width="3" height="3.4" fill="#fff"/><path d="M1.5 -6 L5 -7.5" stroke="#fff" stroke-width="1.4" fill="none"/>',
+    hyd: '<rect x="-6.5" y="-5.5" width="13" height="11" rx="1.5" fill="none" stroke="#fff" stroke-width="1.8"/><circle r="2.8" fill="#fff"/>',
+    tank: '<rect x="-3.8" y="-4.5" width="7.6" height="12.5" rx="3.8" fill="#fff"/><rect x="-1.4" y="-7.5" width="2.8" height="3.4" fill="#fff"/><rect x="-3.4" y="-9.2" width="6.8" height="1.8" rx="0.9" fill="#fff"/>'
+};
+function symbolSvgInner(def, r) {
+    const k = r / SYMBOL_R;
+    return `<circle r="${r}" fill="${def.color}" stroke="#ffffff" stroke-width="${(2 * k).toFixed(2)}"/><g transform="scale(${k.toFixed(3)})">${SYMBOL_ICONS[def.icon]}</g>`;
+}
+
+// ================= 이름 규칙 (점검 QR과 같음, 결정 292) =================
+// 「위치-소화기1」·「위치-소화전1」·「위치-공기호흡기1」 — 청정·분말은 둘 다 「소화기」. 번호는 같은 위치·같은 종류 안에서 이어서
+// shortcut: 번호는 이 층 지도 안에서만 셈 (점검 QR 은 모든 층의 같은 위치를 셈), 같은 위치 이름을 여러 층에 쓰게 되면 그때 맞출 것
+function symbolNameOf(place, kind, no) { return `${place}-${kind}${no}`; }
+function nextSymbolNo(symbols, place, kind, exceptId) {
+    let max = 0;
+    symbols.forEach(s => {
+        const d = SYMBOL_DEFINITIONS[s.type];
+        if (s.id !== exceptId && d && d.kind === kind && s.place === place) max = Math.max(max, s.no || 0);
+    });
+    return max + 1;
+}
+// 찍은 자리의 매장 이름 → 없으면 구역(바닥·지우개 제외) 이름 → 없으면 층 이름
+function suggestSymbolPlace(x, y) {
+    const svgEl = mapContainer ? mapContainer.querySelector('svg') : document.querySelector('#map-container svg');
+    const pt = { x, y };
+    if (svgEl && typeof rtPathPoints === 'function') {
+        for (const p of svgEl.querySelectorAll('.store-polygon')) {
+            const g = p.closest('[data-store-name]');
+            const name = g && g.getAttribute('data-store-name');
+            if (name && isPointInsidePolygon(pt, rtPathPoints(p))) return name;
+        }
+    }
+    const floor = FLOORS[currentFloorIdx];
+    if (typeof getFloorZones === 'function') {
+        const z = (getFloorZones(floor.code) || []).find(z => z.category !== 'floor' && z.category !== 'erase' && z.name && z.points && z.points.length >= 3 && isPointInsidePolygon(pt, z.points));
+        if (z) return z.name;
+    }
+    return floor.name || floor.code;
+}
+// 이름 없는 옛 심벌: 찍은 순서대로 이름을 붙임 (고칠 수 있는 사람이 열면 저장)
+function ensureSymbolNames(floorCode, symbols) {
+    let changed = false;
+    symbols.slice().sort((a, b) => String(a.createdAt || '').localeCompare(String(b.createdAt || ''))).forEach(s => {
+        const d = SYMBOL_DEFINITIONS[s.type];
+        if (!d || s.name) return;
+        s.place = s.place || suggestSymbolPlace(s.x, s.y);
+        s.no = nextSymbolNo(symbols, s.place, d.kind, s.id);
+        s.name = symbolNameOf(s.place, d.kind, s.no);
+        changed = true;
+    });
+    if (changed && !(mapStore.readOnly && mapStore.readOnly())) saveFloorSymbols(floorCode, symbols);
+    return symbols;
+}
 
 var symbolFilterState = {
     clean_extinguisher: true,
@@ -83,6 +137,24 @@ function ensureSymbolsLayer(svgEl) {
     return layer;
 }
 
+function escSymbolText(t) { return String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+function showSymbolBubble(text, cx, cy) {
+    let b = document.getElementById('symbol-name-bubble');
+    if (!b) {
+        b = document.createElement('div');
+        b.id = 'symbol-name-bubble';
+        b.className = 'symbol-name-bubble';
+        document.body.appendChild(b);
+    }
+    b.textContent = text;
+    b.style.left = cx + 'px';
+    b.style.top = (cy - 14) + 'px';
+    b.style.display = 'block';
+    clearTimeout(b._t);
+    b._t = setTimeout(() => { b.style.display = 'none'; }, 3000);
+}
+
 function renderFloorSymbols() {
     const svgEl = mapContainer ? mapContainer.querySelector('svg') : document.querySelector('#map-container svg');
     if (!svgEl) return;
@@ -93,7 +165,7 @@ function renderFloorSymbols() {
     const floor = FLOORS[currentFloorIdx];
     if (!floor) return;
 
-    const symbols = loadFloorSymbols(floor.code);
+    const symbols = ensureSymbolNames(floor.code, loadFloorSymbols(floor.code));
     symbols.forEach(sym => {
         const def = SYMBOL_DEFINITIONS[sym.type];
         if (!def) return;
@@ -105,36 +177,14 @@ function renderFloorSymbols() {
         g.setAttribute('transform', `translate(${sym.x}, ${sym.y})`);
         g.style.display = symbolFilterState[sym.type] ? 'inline' : 'none';
 
-        // 지름 10px (반경 5px) 원형
-        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        circle.setAttribute('r', '5');
-        circle.setAttribute('fill', def.color);
-        circle.setAttribute('stroke', '#ffffff');
-        circle.setAttribute('stroke-width', '1.2');
-        g.appendChild(circle);
+        g.innerHTML = symbolSvgInner(def, SYMBOL_R) +
+            `<text class="cad-symbol-label" x="${SYMBOL_R + 3}" y="0" dominant-baseline="central" font-size="10" fill="#0f172a" stroke="#ffffff" stroke-width="3" paint-order="stroke">${escSymbolText(sym.name || def.name)}</text>`;
 
-        // 중앙 이모티콘 텍스트
-        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.setAttribute('font-size', '6.5');
-        text.setAttribute('text-anchor', 'middle');
-        text.setAttribute('dominant-baseline', 'central');
-        text.setAttribute('y', '-0.2');
-        text.textContent = def.emoji;
-        g.appendChild(text);
-
-        // 툴팁
-        const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-        title.textContent = `${def.name} (${sym.x.toFixed(0)}, ${sym.y.toFixed(0)}) - 클릭하여 삭제`;
-        g.appendChild(title);
-
-        // 클릭 이벤트 (심벌 모드일 때 클릭 시 삭제)
+        // 편집 중: 눌러서 위치 고치기·삭제 / 평소: 이름 말풍선
         g.onclick = (e) => {
             e.stopPropagation();
-            if (isSymbolMode) {
-                deleteSymbol(sym.id);
-            } else {
-                showToast(`${def.name} (${def.emoji})`, 1000);
-            }
+            if (isSymbolMode) openSymbolDialog(sym);
+            else showSymbolBubble(sym.name || def.name, e.clientX, e.clientY);
         };
 
         layer.appendChild(g);
@@ -192,12 +242,15 @@ function startSymbolEditMode() {
     if (banner) banner.style.display = 'flex';
     updateSymbolChipsUI();
 
+    document.body.classList.add('symbol-mode');
     showToast('도면을 클릭하여 심벌을 배치하세요. (종료: ESC)', 1500);
 }
 
 function exitSymbolEditMode() {
     isSymbolMode = false;
     viewport.style.cursor = 'grab';
+    closeSymbolDialog();
+    document.body.classList.remove('symbol-mode');
 
     if (tempSymbolPreviewNode) {
         tempSymbolPreviewNode.remove();
@@ -263,11 +316,7 @@ function updateSymbolPreview(svgX, svgY) {
 
     const def = SYMBOL_DEFINITIONS[activeSymbolType];
     tempSymbolPreviewNode.setAttribute('transform', `translate(${targetX}, ${targetY})`);
-    tempSymbolPreviewNode.innerHTML = `
-        <circle r="6" fill="${def.color}" opacity="0.4" stroke="${def.color}" stroke-width="1.5" stroke-dasharray="3 2"/>
-        <circle r="5" fill="${def.color}" stroke="#ffffff" stroke-width="1.2"/>
-        <text font-size="6.5" text-anchor="middle" dominant-baseline="central" y="-0.2">${def.emoji}</text>
-    `;
+    tempSymbolPreviewNode.innerHTML = `<circle r="${SYMBOL_R + 3}" fill="${def.color}" opacity="0.3" stroke="${def.color}" stroke-width="1.5" stroke-dasharray="3 2"/>` + symbolSvgInner(def, SYMBOL_R);
 }
 
 function addSymbolAt(svgX, svgY) {
@@ -283,15 +332,74 @@ function addSymbolAt(svgX, svgY) {
             targetY = gSnap.y;
         }
     }
+    openSymbolDialog(null, parseFloat(targetX.toFixed(2)), parseFloat(targetY.toFixed(2)));
+}
 
+// 위치 창: sym 이 없으면 새로 배치, 있으면 위치 고치기·삭제 (결정 292)
+function openSymbolDialog(sym, x, y) {
+    closeSymbolDialog();
+    const floor = FLOORS[currentFloorIdx];
+    const type = sym ? sym.type : activeSymbolType;
+    const def = SYMBOL_DEFINITIONS[type];
+    const box = document.createElement('div');
+    box.id = 'symbol-place-dialog';
+    box.className = 'symbol-place-dialog';
+    box.innerHTML = `<div class="spd-title">${def.name} 위치 · ${escSymbolText(floor.name || floor.code)}</div>
+        <input id="symbol-place-input" type="text" maxlength="30" autocomplete="off" aria-label="위치">
+        <div class="spd-hint">찍은 자리의 매장·구역 이름을 미리 넣었습니다. 점검 QR에 적은 위치와 같게 적어 주세요.</div>
+        <div class="spd-name">이름: <b id="symbol-name-preview"></b></div>
+        <div class="spd-btns">
+            <button type="button" class="spd-ok" id="symbol-place-ok">${sym ? '저장' : '배치'}</button>
+            ${sym ? '<button type="button" class="spd-del" id="symbol-place-del">삭제</button>' : ''}
+            <button type="button" id="symbol-place-cancel">취소</button>
+        </div>`;
+    document.body.appendChild(box);
+    const input = box.querySelector('#symbol-place-input');
+    input.value = sym ? (sym.place || '') : suggestSymbolPlace(x, y);
+    const preview = () => {
+        const place = input.value.trim();
+        const no = (sym && place === sym.place) ? sym.no : nextSymbolNo(loadFloorSymbols(floor.code), place, def.kind, sym && sym.id);
+        box.querySelector('#symbol-name-preview').textContent = place ? symbolNameOf(place, def.kind, no) : '(위치를 적어 주세요)';
+    };
+    const ok = () => {
+        const place = input.value.trim();
+        if (!place) { input.focus(); showToast('위치를 적어 주세요. (예: 동측 계단 앞)', 1500); return; }
+        closeSymbolDialog();
+        if (sym) renameSymbol(sym.id, place); else saveNewSymbol(type, x, y, place);
+    };
+    input.addEventListener('input', preview);
+    input.addEventListener('keydown', e => {
+        e.stopPropagation();   // 지도 단축키(ESC 로 배치 끝내기 등)가 먼저 돌지 않게
+        if (e.key === 'Enter') ok();
+        else if (e.key === 'Escape') closeSymbolDialog();
+    });
+    box.querySelector('#symbol-place-ok').onclick = ok;
+    box.querySelector('#symbol-place-cancel').onclick = closeSymbolDialog;
+    if (sym) box.querySelector('#symbol-place-del').onclick = () => { closeSymbolDialog(); deleteSymbol(sym.id); };
+    preview();
+    input.focus();
+    input.select();
+}
+
+function closeSymbolDialog() {
+    const box = document.getElementById('symbol-place-dialog');
+    if (box) box.remove();
+}
+
+function saveNewSymbol(type, x, y, place) {
+    const floor = FLOORS[currentFloorIdx];
     const symbols = loadFloorSymbols(floor.code);
-    const def = SYMBOL_DEFINITIONS[activeSymbolType];
+    const def = SYMBOL_DEFINITIONS[type];
+    const no = nextSymbolNo(symbols, place, def.kind);
     const newSym = {
         id: `sym_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-        type: activeSymbolType,
+        type,
         typeName: def.name,
-        x: parseFloat(targetX.toFixed(2)),
-        y: parseFloat(targetY.toFixed(2)),
+        place,
+        no,
+        name: symbolNameOf(place, def.kind, no),
+        x,
+        y,
         floorCode: floor.code,
         createdAt: new Date().toISOString()
     };
@@ -304,7 +412,22 @@ function addSymbolAt(svgX, svgY) {
     saveFloorSymbols(floor.code, symbols);
 
     renderFloorSymbols();
-    showToast(`${def.name} 배치 완료`, 1000);
+    showToast(`${newSym.name} 배치 완료`, 1200);
+}
+
+function renameSymbol(symId, place) {
+    const floor = FLOORS[currentFloorIdx];
+    const symbols = loadFloorSymbols(floor.code);
+    const sym = symbols.find(s => s.id === symId);
+    if (!sym || sym.place === place) return;
+    const def = SYMBOL_DEFINITIONS[sym.type];
+    if (typeof pushUndoState === 'function') pushUndoState(`${sym.name || def.name} 위치 고침`);
+    sym.place = place;
+    sym.no = nextSymbolNo(symbols, place, def.kind, sym.id);
+    sym.name = symbolNameOf(place, def.kind, sym.no);
+    saveFloorSymbols(floor.code, symbols);
+    renderFloorSymbols();
+    showToast(`${sym.name}(으)로 바꿈`, 1200);
 }
 
 function deleteSymbol(symId) {
@@ -317,12 +440,12 @@ function deleteSymbol(symId) {
 
     const deletedSym = symbols[targetIdx];
     if (typeof pushUndoState === 'function') {
-        pushUndoState(`${deletedSym.typeName || '항목'} 삭제`);
+        pushUndoState(`${deletedSym.name || deletedSym.typeName || '항목'} 삭제`);
     }
 
     symbols.splice(targetIdx, 1);
     saveFloorSymbols(floor.code, symbols);
 
     renderFloorSymbols();
-    showToast(`${deletedSym.typeName || '항목'} 삭제 완료`, 1000);
+    showToast(`${deletedSym.name || deletedSym.typeName || '항목'} 삭제 완료`, 1000);
 }
