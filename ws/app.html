@@ -10,10 +10,10 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.26.33"></script>
-<script>window.WS_VERSION = '0.26.33';</script>
-<script src="offline.js?v=0.26.33"></script>
-<script src="ws-api.js?v=0.26.33"></script>
+<script src="config.js?v=0.26.34"></script>
+<script>window.WS_VERSION = '0.26.34';</script>
+<script src="offline.js?v=0.26.34"></script>
+<script src="ws-api.js?v=0.26.34"></script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -809,7 +809,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B3','B2','B1','1F','2F','3F','4F','5F','6F','7F','8F','9F','10F','POPUP'];   // 소화기·소화전·공기호흡기 층 B3~10F · 맨 아래 POPUP (결정 228·260)
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.33' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.34' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -2804,7 +2804,7 @@ function renderQr() {
   if (r) {
     const q = S.q.trim().toLowerCase().replace(/\s+/g, '');
     const items = r.items.filter(i => !q || (i.store + i.name + i.floor).toLowerCase().replace(/\s+/g, '').indexOf(q) !== -1);
-    if (!items.length) body = '<div class="banner b-gray">' + (r.items.length ? '검색 결과가 없습니다.' : '등록된 ' + kn + '이(가) 없습니다. [+ 등록]으로 추가하세요.') + '</div>';
+    if (!items.length) body = '<div class="banner b-gray">' + (r.items.length ? '검색 결과가 없습니다.' : '등록된 ' + kn + '이(가) 없습니다. [엑셀 올리기]로 등록하세요.') + '</div>';
     else {
       expandBar = '<div style="display:flex;gap:var(--sp-2);justify-content:flex-end"><button class="btn sm" onclick="qrOpenAll(true)">모두 펼치기</button><button class="btn sm" onclick="qrOpenAll(false)">모두 접기</button></div>';
       body = qrGroups(items).map(g => {
@@ -2821,9 +2821,9 @@ function renderQr() {
   const tabs = '<div class="seg" role="group" aria-label="종류">' + ['fe', 'hyd', 'air'].map(k => '<button class="' + (k === kind ? 'on' : '') + '" aria-pressed="' + (k === kind) + '" onclick="qrTab(\'' + k + '\')">' + QR_KIND[k] + '</button>').join('') + '</div>';
   return topbar('소화기/소화전/공기호흡기 점검 ›', '소화기/소화전/공기호흡기 QR 관리') + '<div class="wrap list">' + tabs +
     '<div class="tools"><input class="inp" type="search" placeholder="위치 · 이름 · 층 검색" aria-label="검색" value="' + h(S.q) + '" oninput="S.q=this.value;S.qrSc={};renderKeepFocus(this)">' +
-    '<button class="btn pri" onclick="addDialog()">+ 등록</button>' +
     (CAN_PRINT ? '<button class="btn" onclick="printLabels()" ' + (selN ? '' : 'disabled') + '>' + ICON.print + ' 출력 (' + selN + ')</button>' : '') +
     '<button class="btn warn" onclick="delDialog()" ' + (selN ? '' : 'disabled') + '>삭제 (' + selN + ')</button></div>' +
+    (kind === 'fe' ? xlBtns('') : eqXlBtns(kind)) +   // 엑셀 올리기·내려받기 (결정 296, 전: ② 현황)
     (CAN_PRINT ? '' : '<div class="banner b-gray">QR 출력은 PC 화면에서 합니다. 휴대폰에서는 등록과 삭제만 됩니다.</div>') +
     expandBar + body + '</div>';
 }
@@ -3061,7 +3061,6 @@ function renderStatus() {
   }).join('');
   return topbar('소화기/소화전/공기호흡기 점검 ›', '월별 점검 현황') + '<div class="wrap list">' +
     '<div class="mnav"><button class="btn" aria-label="이전 달" ' + (prev ? 'onclick="loadStatus(\'' + prev + '\')"' : 'disabled') + '>‹</button><div><b style="font-size:var(--size-l)">' + ymLabel(st.ym) + '</b><small style="color:var(--muted)">입력 기간 ' + Number(st.ym.slice(5, 7)) + '/' + st.window.start + ' ~ ' + Number(st.ym.slice(5, 7)) + '/' + st.window.end + '</small></div><button class="btn" aria-label="다음 달" ' + (next ? 'onclick="loadStatus(\'' + next + '\')"' : 'disabled') + '>›</button></div>' +
-    xlBtns('') +
     periodBanner(st, c) +
     '<div class="card legend"><span><span class="dot" style="background:var(--green)"></span>점검완료 <b>' + c.ok + '</b></span><span><span class="dot" style="background:var(--orange)"></span>이상 있음 <b>' + c.bad + '</b></span><span><span class="dot" style="background:var(--line)"></span>점검 전 <b>' + c.wait + '</b></span><span><span class="dot" style="background:var(--navy)"></span>미입력 <b>' + c.miss + '</b></span></div>' +
     '<div class="card tree"><div class="tree-root">' + ymLabel(st.ym) + ' · 전체 ' + c.total + '대</div>' + (floors || '<div style="padding:var(--sp-3) 0;color:var(--muted);font-size:var(--size-m)">이 달에 등록된 소화기가 없습니다.</div>') + '</div>' +
@@ -3146,7 +3145,7 @@ async function xlSave() {
     closeDialog(); toast('소화기 ' + done + '대를 등록했습니다');
   } catch (e) { closeDialog(); toast((done ? done + '대까지 등록했고 ' : '') + (e && e.message ? e.message : '중간에 멈췄습니다') + ' — 같은 파일을 다시 올리면 남은 것만 등록합니다'); }
   S.xlPlan = null;
-  await stRefresh();
+  if (S.view === 'qr') await loadQr(); else await stRefresh();
 }
 async function xlDown(fl) {
   try {
@@ -3161,6 +3160,77 @@ async function xlDown(fl) {
     });
     if (!wb.SheetNames.length) { toast((fl ? fl + '에 ' : '') + '등록된 소화기가 없습니다'); return; }
     XLSX.writeFile(wb, '소화기 현황_' + (fl || '전체') + '.xlsx');
+  } catch (e) { toast(e && e.message ? e.message : '엑셀을 만들지 못했습니다'); }
+}
+/* ── 소화전·공기호흡기 개수 엑셀 올리기·내려받기 (QR 관리 › 소화전·공기호흡기 탭, 결정 296)
+   양식: 시트 이름 = 층, 칸 NO · 소화전 개수 · 공기호흡기 개수. 탭마다 그 종류 칸만 읽음.
+   부족한 만큼 위치 없이 「층+종류+두 자리 번호」(1F소화전01)로 등록 — 지도 심벌 이름과 같은 규칙 */
+function eqXlBtns(kind) {
+  return '<div style="display:flex;gap:var(--sp-2)"><label class="btn" style="flex:1;min-height:52px;position:relative">' + ICON.clip + ' 엑셀 올리기<input type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onchange="eqXlFile(this,\'' + kind + '\')" style="position:absolute;width:1px;height:1px;opacity:0"></label>' +
+    '<button class="btn" style="flex:1;min-height:52px" onclick="eqXlDown()">⬇ 엑셀 내려받기</button></div>';
+}
+/** 시트 표 → 그 종류 개수 (제목 줄에서 「소화전」·「공기호흡기」 칸을 찾고 아래 숫자를 더함). 칸이 없으면 -1 */
+function eqXlCount(aoa, kind) {
+  const c = v => String(v == null ? '' : v).trim(), word = QR_KIND[kind];
+  for (let r = 0; r < Math.min(aoa.length, 10); r++) {
+    const col = (aoa[r] || []).findIndex(v => c(v).indexOf(word) !== -1);
+    if (col < 0) continue;
+    let n = 0;
+    for (let k = r + 1; k < aoa.length; k++) { const x = parseInt(c((aoa[k] || [])[col]).replace(/,/g, ''), 10); if (x > 0) n += x; }
+    return n;
+  }
+  return -1;
+}
+async function eqXlFile(el, kind) {
+  const f = el.files && el.files[0]; el.value = ''; if (!f) return;
+  dialog('<div style="display:flex;justify-content:center;padding:var(--sp-8)"><span class="spin" style="color:var(--blue);width:28px;height:28px"></span></div>');
+  try {
+    await loadXlsx();
+    const wb = XLSX.read(await f.arrayBuffer(), { type: 'array' }), kn = QR_KIND[kind], got = {};
+    wb.SheetNames.forEach(n => { const fl = xlFloor(n); if (!fl) return; const v = eqXlCount(XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: false, defval: '' }), kind); if (v >= 0) got[fl] = (got[fl] || 0) + v; });
+    if (!Object.keys(got).length) { dialog('<h2 style="margin:0 0 var(--sp-2);font-size:var(--size-l)">엑셀 올리기</h2><div class="banner b-red">층 이름(B1F·1F 등) 시트에서 「' + kn + ' 개수」 칸을 찾지 못했습니다.</div><div style="margin-top:var(--sp-3)"><button class="btn big" style="width:100%" onclick="closeDialog()">닫기</button></div>'); return; }
+    const cur = await call('eqList', kind);
+    S.eqx = { kind, name: f.name, plan: FLOORS.filter(fl => fl in got).map(fl => ({ floor: fl, xl: got[fl], cur: cur.items.filter(i => i.floor === fl).length })) };
+    const plan = S.eqx.plan, add = plan.reduce((s, p) => s + Math.max(p.xl - p.cur, 0), 0);
+    const tag = p => p.xl > p.cur ? '<span class="chip blue">+' + (p.xl - p.cur) + ' 등록</span>' : p.xl < p.cur ? '<span class="chip c-miss">' + (p.cur - p.xl) + '개 초과</span>' : '<span class="chip green">그대로</span>';
+    const ex = plan.find(p => p.xl > p.cur);
+    dialog('<h2 style="margin:0 0 var(--sp-1);font-size:var(--size-l)">엑셀 올리기 — ' + kn + '</h2>' +
+      '<small style="color:var(--muted)">「' + h(f.name) + '」 · ' + plan.length + '개 층 · ' + kn + ' ' + plan.reduce((s, p) => s + p.xl, 0) + '개</small>' +
+      '<div class="banner b-gray" style="margin:var(--sp-2) 0">아직 저장하지 않았습니다. [등록하기]를 누르면 <b>부족한 만큼만</b> 「층+종류+번호」 이름으로 새로 등록됩니다' + (ex ? ' (예: ' + ex.floor + kn + '01)' : '') + '. 지도의 심벌 이름과 같습니다.</div>' +
+      '<table style="width:100%;border-collapse:collapse;font-size:var(--size-m)"><thead><tr style="color:var(--muted);font-size:var(--size-s);text-align:left"><th style="padding:4px">층</th><th style="padding:4px;text-align:right">엑셀</th><th style="padding:4px;text-align:right">지금</th><th></th></tr></thead><tbody>' +
+      plan.map(p => '<tr style="border-top:1px solid var(--line)"><td style="padding:6px 4px"><b>' + p.floor + '</b></td><td style="padding:6px 4px;text-align:right">' + p.xl + '개</td><td style="padding:6px 4px;text-align:right">' + p.cur + '개</td><td style="padding:6px 0 6px 6px;text-align:right">' + tag(p) + '</td></tr>').join('') + '</tbody></table>' +
+      '<small style="display:block;margin:var(--sp-2) 0;color:var(--muted)">초과한 것은 자동으로 지우지 않습니다. 지울 것을 골라 [삭제]하세요. 엑셀에 없는 층은 그대로 둡니다.</small>' +
+      '<div style="display:flex;gap:var(--sp-2)"><button class="btn big" style="flex:1" onclick="closeDialog()">취소</button><button id="eqxGo" class="btn big pri" style="flex:2" ' + (add ? '' : 'disabled ') + 'onclick="eqXlSave()">' + (add ? '등록하기 (+' + add + '개)' : '등록할 것 없음') + '</button></div>');
+  } catch (e) { closeDialog(); toast(e && e.message ? e.message : '엑셀을 읽지 못했습니다'); }
+}
+async function eqXlSave() {
+  const x = S.eqx, b = $('eqxGo'); if (b) b.disabled = true;
+  let done = 0;
+  try {
+    for (const p of x.plan) {
+      for (let left = p.xl - p.cur; left > 0; left -= 20) {   // 한 번에 20개까지
+        if (b) b.textContent = '등록 중… ' + done + '개';
+        const r = await call('eqAdd', { kind: x.kind, floor: p.floor, auto: true, count: Math.min(left, 20) });
+        if (!r.ok) throw new Error(r.error || '등록하지 못했습니다');
+        done += Math.min(left, 20);
+      }
+    }
+    closeDialog(); toast(QR_KIND[x.kind] + ' ' + done + '개를 등록했습니다');
+  } catch (e) { closeDialog(); toast((done ? done + '개까지 등록했고 ' : '') + (e && e.message ? e.message : '중간에 멈췄습니다') + ' — 같은 파일을 다시 올리면 남은 것만 등록합니다'); }
+  S.eqx = null;
+  if (S.view === 'qr') await loadQr();
+}
+async function eqXlDown() {
+  try {
+    await loadXlsx();
+    const [hy, ai] = [await call('eqList', 'hyd'), await call('eqList', 'air')], wb = XLSX.utils.book_new();
+    FLOORS.filter(f => hy.items.some(i => i.floor === f) || ai.items.some(i => i.floor === f)).forEach(f => {
+      const ws = XLSX.utils.aoa_to_sheet([[], ['NO.', '소화전 개수', '공기호흡기 개수'], [1, hy.items.filter(i => i.floor === f).length, ai.items.filter(i => i.floor === f).length]]);
+      ws['!cols'] = [{ wch: 6 }, { wch: 14 }, { wch: 16 }];
+      XLSX.utils.book_append_sheet(wb, ws, /^B\d$/.test(f) ? f + 'F' : f);   // 올려 주신 양식처럼 지하는 B1F
+    });
+    if (!wb.SheetNames.length) { toast('등록된 소화전·공기호흡기가 없습니다'); return; }
+    XLSX.writeFile(wb, '소화전공기호흡기 현황_전체.xlsx');
   } catch (e) { toast(e && e.message ? e.message : '엑셀을 만들지 못했습니다'); }
 }
 /* ── 층 화면에서 소화기 삭제 (결정 250) — QR 관리와 같은 feDelete. 점검 기록은 남고 지운 달부터 목록에서 빠짐 ── */
@@ -3211,7 +3281,7 @@ function renderFloor() {
       }).join('') + '</div>';
   }).join('') : '<div class="banner b-gray">' + S.floor + '에 등록된 소화기가 없습니다.</div>';
   return topbar('월별 점검 현황 › ' + ymLabel(st.ym) + ' ›', S.floor + ' · 소화기 ' + it.length + '대') + '<div class="wrap list">' +
-    '<div style="display:flex;gap:var(--sp-1);overflow-x:auto;padding-bottom:var(--sp-1)">' + chips + '</div>' + (del ? '<div class="banner b-gray">지울 소화기를 눌러 고르세요 (매장 이름 옆 [전체 선택]으로 한 매장 모두 선택)</div><div style="display:flex;gap:var(--sp-2)"><button class="btn big" style="flex:1" onclick="fdelOff()">취소</button><button class="btn big pri" style="flex:2" ' + (fdelIds().length ? '' : 'disabled ') + 'onclick="fdelAsk()">선택 ' + fdelIds().length + '대 삭제</button></div>' : xlBtns(S.floor) + (it.length ? '<button class="btn" style="min-height:52px" onclick="fdelOn()">소화기 삭제</button>' : '')) + body +
+    '<div style="display:flex;gap:var(--sp-1);overflow-x:auto;padding-bottom:var(--sp-1)">' + chips + '</div>' + (del ? '<div class="banner b-gray">지울 소화기를 눌러 고르세요 (매장 이름 옆 [전체 선택]으로 한 매장 모두 선택)</div><div style="display:flex;gap:var(--sp-2)"><button class="btn big" style="flex:1" onclick="fdelOff()">취소</button><button class="btn big pri" style="flex:2" ' + (fdelIds().length ? '' : 'disabled ') + 'onclick="fdelAsk()">선택 ' + fdelIds().length + '대 삭제</button></div>' : (it.length ? '<button class="btn" style="min-height:52px" onclick="fdelOn()">소화기 삭제</button>' : '')) + body +
     '<small style="text-align:center;color:var(--muted)">점검완료 · 이상 있음을 누르면 매장에서 입력한 내용을 봅니다</small></div>';
 }
 /* 점검 내용 팝업 (②·③ 공통, 결정 290): 제목 줄 · 내용(스크롤) · 아래 [점검 기록 삭제] [닫기]. 앱은 로그인한 직원만 쓰고, 서버도 로그인 표 없으면 거절 */
