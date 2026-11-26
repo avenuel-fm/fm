@@ -10,10 +10,10 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.26.37"></script>
-<script>window.WS_VERSION = '0.26.37';</script>
-<script src="offline.js?v=0.26.37"></script>
-<script src="ws-api.js?v=0.26.37"></script>
+<script src="config.js?v=0.26.38"></script>
+<script>window.WS_VERSION = '0.26.38';</script>
+<script src="offline.js?v=0.26.38"></script>
+<script src="ws-api.js?v=0.26.38"></script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -809,7 +809,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B3','B2','B1','1F','2F','3F','4F','5F','6F','7F','8F','9F','10F','POPUP'];   // 소화기·소화전·공기호흡기 층 B3~10F · 맨 아래 POPUP (결정 228·260)
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.37' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.38' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -1674,7 +1674,7 @@ function renderTbm() {
     '<div class="card tbck">' + TBM_CHECKS.map(k => '<button type="button" class="' + (r.checks[k] ? 'on' : '') + '" aria-pressed="' + !!r.checks[k] + '" onclick="tbmCheck(\'' + k + '\')">' + k + (r.checks[k] ? ' ○' : '') + '</button>').join('') + '</div>' +
     '<div class="sec">사진</div>' +
     '<div class="card tbphs">' + tbmPhotoCell('meet', '회의 사진') + tbmPhotoCell('chant', '구호 사진') + '</div>' +
-    '<div class="nwbar">' + docBar(tbmDoc()) +
+    '<div class="nwbar">' + docBar(tbmDoc()) + '<button class="btn" onclick="tbmPrint()">' + ICON.print + '인쇄 (A4)</button>' +
     '</div></div>';
 }
 function tbmPv(r) { return { name: r.day + '_TBM.pdf', sub: '서류작업 › TBM ›', meta: '서명 ' + r.pdf.signs + '명 · ' + String(r.pdf.at).slice(11, 16) + ' 만듦' }; }
@@ -1798,6 +1798,11 @@ function tbmPdfHtml() {
     '<div class="pg"><div class="fr"><div class="t1">■ &nbsp;「TBM 실시 사진」</div><div class="t2">' + y + '년 &nbsp;' + Number(m) + ' 월 &nbsp;' + Number(d) + ' 일</div>' +
     '<div class="photos"><div class="cell">' + img(r.up.meet || r.photos.meet, '회의 사진') + '</div><div class="cell">' + img(r.up.chant || r.photos.chant, '구호 사진') + '</div></div>' +
     '<div class="pn">- 2 / 2 -</div></div></div></div>';
+}
+/* 인쇄 = PDF와 같은 양식을 A4 가로로 (1123×794px = 297×210mm), 저장 안 한 내용도 지금 화면 그대로 (결정 304) */
+function tbmPrint() {
+  $('print').innerHTML = '<style>@page{size:A4 landscape;margin:0}#print .tbp .pg{break-after:page}#print .tbp .pg:last-child{break-after:auto}#print .tbp .cell img{max-width:100%;max-height:100%;object-fit:contain}</style>' + tbmPdfHtml();
+  setTimeout(() => window.print(), 300);
 }
 async function tbmMakePdf() {
   const wrap = document.createElement('div'); wrap.style.cssText = 'position:fixed;left:0;top:0;width:0;height:0;overflow:hidden;z-index:-1';
