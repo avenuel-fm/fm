@@ -12,7 +12,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
   <script src="../apps.js"></script>
   <script src="config.js"></script>
-  <script>window.DW_VERSION = '1.9.6';</script>
+  <script>window.DW_VERSION = '1.9.7';</script>
   <script src="dw-api.js"></script>
   <title>잠실점 에비뉴엘 도면협의</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -249,7 +249,7 @@ canvas.pen-on{cursor:crosshair}
 .tbl td.c-doc{white-space:nowrap}
 .tbl td.c-act .btn.sm{padding:0 var(--sp-2)}
 /* DW-2: 표 화면(PC·태블릿)에서 「최근 검토일」·「오픈 예정일」 제목·날짜·D-배지를 칸 가운데로 (카드 화면은 그대로) */
-@media (min-width:1101px){.tbl th.c-last,.tbl th.c-open,.tbl td.c-last,.tbl td.c-open{text-align:center;font-variant-numeric:tabular-nums}.tbl td.c-open .dday{margin:0 0 0 var(--sp-1)}}
+@media (min-width:1101px){.tbl th.c-last,.tbl th.c-open,.tbl th.c-exit,.tbl td.c-last,.tbl td.c-open,.tbl td.c-exit{text-align:center;font-variant-numeric:tabular-nums}.tbl td.c-open .dday{margin:0 0 0 var(--sp-1)}}
 @media (min-width:1101px){.tbl td.c-doc{white-space:normal!important;overflow-wrap:anywhere;max-width:128px}.tbl td.c-act{font-size:0;min-width:306px}.tbl td.c-act .btn{margin-left:var(--sp-1);white-space:nowrap}.tbl .stepsrow .cf,.tbl .st{white-space:nowrap}}
 .store-link{font-weight:500;text-decoration:none;color:var(--blue);background:none;border:0;padding:0;cursor:pointer;font-size:var(--size-m);text-align:left}
 .steps{display:inline-flex;align-items:center}
@@ -1428,7 +1428,7 @@ var GuideIndexer = (function () {
       $('#dashBody').innerHTML = '<div class="empty">' + (total ? '조건에 맞는 매장이 없습니다.' : S.stores.length ? '고른 연도에 등록된 매장이 없습니다. 위 <b>기준 연도</b>에서 다른 해를 골라 보세요.' : '아직 등록된 도면협의가 없습니다. 오른쪽 위 <b>+ 새 도면협의</b>로 시작하세요.') + '</div>';
       return;
     }
-    var tableHtml = function (list) { return '<table class="tbl"><thead><tr><th>매장</th><th>문서번호</th><th>공사위치</th><th>도면협의 차수 · 컨펌</th><th class="c-last">최근 검토일</th><th class="c-open">오픈 예정일</th><th style="text-align:right">검토서</th></tr></thead><tbody>' +
+    var tableHtml = function (list) { return '<table class="tbl"><thead><tr><th>매장</th><th>문서번호</th><th>공사위치</th><th>도면협의 차수 · 컨펌</th><th class="c-last">최근 검토일</th><th class="c-open">오픈 예정일</th><th class="c-exit">퇴점일</th><th style="text-align:right">검토서</th></tr></thead><tbody>' +
       list.map(function (s) {
         var confirmed = s.status === '컨펌완료';
         return '<tr>' +
@@ -1444,6 +1444,7 @@ var GuideIndexer = (function () {
           '</div></td>' +
           '<td class="c-last" data-label="최근 검토일" style="white-space:nowrap">' + yymmdd(s.lastReviewDate) + '</td>' +
           '<td class="c-open" data-label="오픈 예정일" style="white-space:nowrap">' + (s.openDate ? yymmdd(s.openDate) : '—') + ddayHtml(s) + '</td>' +
+          '<td class="c-exit" data-label="퇴점일" style="white-space:nowrap">' + (s.exitDate ? yymmdd(s.exitDate) : '—') + '</td>' +
           '<td class="c-act" style="text-align:right;white-space:nowrap">' +
           '<button type="button" class="btn sm" data-act="open" data-id="' + esc(s.id) + '">열기</button> ' +
           '<button type="button" class="btn sm" data-act="printFromDash" data-id="' + esc(s.id) + '">PDF · 인쇄</button>' +
