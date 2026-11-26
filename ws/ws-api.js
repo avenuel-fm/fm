@@ -162,6 +162,8 @@
     },
     attFix: (token, date, name, value) => rpc('ws_att_fix', { p_token: token, p_date: date, p_name: name, p_value: value }),
     attHoliday: (token, name, days, date) => rpc('ws_att_holiday', { p_token: token, p_name: name, p_days: days || [], p_date: date || '' }),
+    attPart: (token, name, part, date) => rpc('ws_att_part', { p_token: token, p_name: name, p_part: part, p_date: date || '' }),
+    attRemove: (token, name, date) => rpc('ws_att_remove', { p_token: token, p_name: name, p_date: date || '' }),
 
     /* ── 3-4 소화기 (supabase/05_fire.sql). QR 점검 입력은 check-sb.html 이 따로 부름 ── */
     feList: async token => fePage(await rpc('ws_fe_list', { p_token: token })),

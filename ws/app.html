@@ -10,10 +10,10 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.26.38"></script>
-<script>window.WS_VERSION = '0.26.38';</script>
-<script src="offline.js?v=0.26.38"></script>
-<script src="ws-api.js?v=0.26.38"></script>
+<script src="config.js?v=0.26.39"></script>
+<script>window.WS_VERSION = '0.26.39';</script>
+<script src="offline.js?v=0.26.39"></script>
+<script src="ws-api.js?v=0.26.39"></script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -401,6 +401,13 @@ button.attag{cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:n
 .atwk button{height:var(--control-h);border-radius:var(--radius);border:1px solid var(--line);background:var(--white);font-size:var(--size-m);font-weight:500;cursor:pointer}
 .atwk button.sel{background:var(--tint);border-color:var(--navy);color:var(--navy)}
 .atwk button:disabled{cursor:default;opacity:1}
+.atpth{margin-top:var(--sp-4);font-size:var(--size-m);font-weight:700}.atptn{font-size:var(--size-s);color:var(--muted);margin-top:2px}
+.atpts{display:flex;gap:var(--sp-2);margin-top:var(--sp-2)}
+.atpt{display:flex;align-items:center;gap:var(--sp-2);flex:1;min-width:0;min-height:var(--control-h);padding:0 var(--sp-3);border-radius:var(--radius);border:1px solid var(--line);background:var(--white);cursor:pointer}
+.atpt.on{border-color:var(--navy);background:var(--tint)}.atpt.on b{color:var(--navy)}
+.atpt input{width:20px;height:20px;margin:0;flex:none;accent-color:var(--navy)}.atpt span{display:flex;flex-direction:column;line-height:1.3}
+.atpt b{font-size:var(--size-m)}.atpt small{font-size:var(--size-s);color:var(--muted)}
+.atdel{border-top:1px solid var(--line);margin-top:var(--sp-4);padding-top:var(--sp-3);text-align:center}.atdel .btn{width:100%}.atdel small{display:block;font-size:var(--size-s);color:var(--muted);margin-top:var(--sp-1)}
 .atcal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:var(--sp-1)}
 .atcal .w{font-size:var(--size-s);text-align:center;color:var(--muted)}
 .atcal button{min-height:var(--control-h);border:1px solid var(--line3);border-radius:var(--radius);background:var(--white);padding:var(--sp-1) var(--sp-1);cursor:pointer;display:flex;flex-direction:column;align-items:center}
@@ -809,7 +816,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B3','B2','B1','1F','2F','3F','4F','5F','6F','7F','8F','9F','10F','POPUP'];   // 소화기·소화전·공기호흡기 층 B3~10F · 맨 아래 POPUP (결정 228·260)
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.38' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.39' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -1995,12 +2002,14 @@ function atGrp(v) { return atIsDay(v) ? '주' : v === '야' ? '야' : v === '비
 function atWd(d) { return WEEK[new Date(d + 'T12:00:00+09:00').getDay()]; }
 function atKo(d) { return Number(d.slice(0, 4)) + '년 ' + Number(d.slice(5, 7)) + '월 ' + Number(d.slice(8, 10)) + '일 (' + atWd(d) + ')'; }
 function atTitle(sec) { return sec.indexOf('관') === 0 ? '관리파트' : /^공사장/.test(sec) ? sec.replace(/^공사장(?=\S)/, '공사장 ') : /^[가-힣]{4}$/.test(sec) ? sec.slice(0, 2) + '·' + sec.slice(2) : sec; }
+const AT_PART = { '전방파트': '전기·방재', '기건파트': '기계·건축' };   // 직원 파트가 엑셀 구역보다 먼저 (사용자 11-26)
 /* 엑셀 줄 → 조직도 구역: 소장 = 사업소장, 나머지는 엑셀 구역 순서대로 (5장) */
 function atGroups(people) {
   const out = [{ t: '사업소장', p: [] }];
+  people.forEach(x => { const t = atTitle(x.sec); if (x.role !== '소장' && !out.some(o => o.t === t)) out.push({ t, p: [] }); });   // 구역 순서는 엑셀 순서 (파트로 옮겨도)
   people.forEach((x, i) => {
     if (x.role === '소장') return out[0].p.push(Object.assign({ i }, x));
-    const t = atTitle(x.sec); let g = out.find(o => o.t === t);
+    const t0 = atTitle(x.sec), t = (!/^관리파트$|^공사장/.test(t0) && AT_PART[x.part]) || t0; let g = out.find(o => o.t === t);
     if (!g) { g = { t, p: [] }; out.push(g); }
     g.p.push(Object.assign({ i }, x));
   });
@@ -2431,19 +2440,38 @@ async function atFixSave(i, v) {
   const x = S.at.r.people[i]; closeDialog();
   try { const r = await call('attFix', S.at.r.date, x.name, v); if (!r.ok) return toast(r.error); S.at = { r }; render(); toast(x.name + ' → ' + (v === '(되돌림)' ? '엑셀 값' : atLbl(v))); } catch (e) {}
 }
-/* 기본 휴일 (6장): 소장·부소장·총무만 고침, 다른 사람은 보기만 */
-function atHolOpen(i, sel) {
-  const r = S.at.r, x = r.people[i], cur = sel || (x.hol ? x.hol.split(',') : []), ed = r.canBoss;
-  S.at.hol = cur;
+/* 기본 휴일 (6장): 소장·부소장·총무만 고침, 다른 사람은 보기만. 파트·직원 삭제는 소장·관리파트만 (사용자 11-26) */
+function atHolOpen(i, sel, part) {
+  const r = S.at.r, x = r.people[i], cur = sel || (x.hol ? x.hol.split(',') : []), ed = r.canBoss, st = r.canStaff && x.part != null;
+  S.at.hol = cur; S.at.part = part !== undefined ? part : x.part;
+  const ck = (v, t, s) => { const on = S.at.part === v; return '<label class="atpt' + (on ? ' on' : '') + '"><input type="checkbox"' + (on ? ' checked' : '') + ' onchange="atHolOpen(' + i + ',S.at.hol,\'' + v + '\')"><span><b>' + t + '</b><small>' + s + '</small></span></label>'; };
   dialog('<div style="display:flex;align-items:center;margin-bottom:var(--sp-1)"><div class="fname"><b style="font-size:var(--size-l)">' + h(x.name) + ' · ' + h(atRole(x.role)) + ' — 기본 휴일</b><small>' + (ed ? '매주 쉬는 요일을 고르세요 (여러 개)' : '소장·부소장·총무만 고칠 수 있습니다') + '</small></div><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
     '<div class="atwk" style="margin-top:var(--sp-2)">' + WEEK.map(w => '<button class="' + (cur.indexOf(w) !== -1 ? 'sel' : '') + '" aria-pressed="' + (cur.indexOf(w) !== -1) + '"' + (ed ? ' onclick="atHolTog(' + i + ',\'' + w + '\')"' : ' disabled') + ' style="' + (w === '일' ? 'color:var(--red)' : w === '토' ? 'color:var(--blue)' : '') + '">' + w + '</button>').join('') + '</div>' +
     '<div class="atchk" style="margin-top:var(--sp-2)">지금: <b>' + (cur.length ? cur.join(' · ') : '없음') + '</b><br>엑셀에서 이 요일이 빈 칸(출근)이면 「휴」로 봅니다. 엑셀에 다른 값(연·9-7 등)이 있으면 엑셀 값이 먼저입니다.</div>' +
-    '<div style="display:flex;gap:var(--sp-2);margin-top:var(--sp-3)"><button class="btn" style="flex:1" onclick="closeDialog()">닫기</button>' + (ed ? '<button class="btn pri" style="flex:1" onclick="atHolSave(' + i + ')">저장</button>' : '') + '</div>');
+    (st ? '<div class="atpth">파트</div><div class="atptn">고른 파트 쪽 인원으로 보입니다 (하나만)</div><div class="atpts">' + ck('전방파트', '전방파트', '전기·방재') + ck('기건파트', '기건파트', '기계·건축') + '</div>' : '') +
+    '<div style="display:flex;gap:var(--sp-2);margin-top:var(--sp-4)"><button class="btn" style="flex:1" onclick="closeDialog()">닫기</button>' + (ed || st ? '<button class="btn pri" style="flex:1" onclick="atHolSave(' + i + ')">저장</button>' : '') + '</div>' +
+    (r.canStaff ? '<div class="atdel"><button class="btn del" onclick="atDelAsk(' + i + ')">직원 삭제</button><small>소장·관리파트만 보입니다</small></div>' : ''));
 }
-function atHolTog(i, w) { const c = S.at.hol.slice(), k = c.indexOf(w); if (k === -1) c.push(w); else c.splice(k, 1); atHolOpen(i, c); }
+function atHolTog(i, w) { const c = S.at.hol.slice(), k = c.indexOf(w); if (k === -1) c.push(w); else c.splice(k, 1); atHolOpen(i, c, S.at.part); }
 async function atHolSave(i) {
+  const r0 = S.at.r, x = r0.people[i], hol = S.at.hol, part = S.at.part; closeDialog();
+  try {
+    let r = r0;
+    if (r0.canBoss && hol.join(',') !== x.hol) { r = await call('attHoliday', x.name, hol, r0.date); if (!r.ok) return toast(r.error); }
+    if (r0.canStaff && x.part != null && part !== x.part) { r = await call('attPart', x.name, part, r0.date); if (!r.ok) return toast(r.error); }
+    S.at = { r }; render(); toast(x.name + ' 저장');
+  } catch (e) {}
+}
+function atDelAsk(i) {
+  const x = S.at.r.people[i];
+  dialog('<div class="fname"><b style="font-size:var(--size-l)">' + h(x.name) + ' 직원을 삭제할까요?</b></div>' +
+    '<div class="atchk" style="margin-top:var(--sp-3);line-height:1.8">• 출근현황에서 빠집니다<br>• PIN이 지워져 다시 로그인할 수 없습니다<br>• 기기 로그인 인증이 모두 끊깁니다<br><span style="color:var(--muted)">지난 서명·점검 기록은 그대로 남습니다</span></div>' +
+    '<div style="margin-top:var(--sp-2);font-size:var(--size-s);color:#B3261E;font-weight:500">되돌릴 수 없습니다</div>' +
+    '<div style="display:flex;gap:var(--sp-2);margin-top:var(--sp-4)"><button class="btn" style="flex:1" onclick="atHolOpen(' + i + ')">취소</button><button class="btn delpri" style="flex:1" onclick="atDel(' + i + ')">삭제</button></div>');
+}
+async function atDel(i) {
   const x = S.at.r.people[i]; closeDialog();
-  try { const r = await call('attHoliday', x.name, S.at.hol, S.at.r.date); if (!r.ok) return toast(r.error); S.at = { r }; render(); toast(x.name + ' 기본 휴일 저장'); } catch (e) {}
+  try { const r = await call('attRemove', x.name, S.at.r.date); if (!r.ok) return toast(r.error); S.at = { r }; render(); toast(x.name + ' 직원 삭제'); } catch (e) {}
 }
 /* 그림 (5장): 가로 1200px 판을 2배로 그려 PNG — 명일 작업처럼 내려받고 그림도 보여 줌 */
 function atImgHtml(r) {
