@@ -683,8 +683,8 @@ var lastCreatedStoreId = null;
             const newText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             newText.setAttribute('font-family', 'Pretendard, sans-serif');
             newText.setAttribute('font-size', String(STORE_LABEL_SIZE));
-            newText.setAttribute('font-weight', '600');
-            newText.setAttribute('fill', '#0f172a');
+            newText.setAttribute('font-weight', '400');
+            newText.setAttribute('fill', '#000000');
             newText.setAttribute('text-anchor', 'middle');
             newText.setAttribute('x', centroidX.toFixed(2));
             newText.setAttribute('y', (centroidY + 6).toFixed(2)); // 살짝 텍스트 베이스라인 보정
