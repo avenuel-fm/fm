@@ -22,6 +22,7 @@ var SYMBOL_DEFINITIONS = {
         name: '소화전',
         color: '#1e293b', // 검은색
         kind: '소화전',
+        auto: true,
         icon: 'hyd'
     },
     air_respirator: {
@@ -29,6 +30,7 @@ var SYMBOL_DEFINITIONS = {
         name: '공기호흡기',
         color: '#2563eb', // 파란색
         kind: '공기호흡기',
+        auto: true,
         icon: 'tank'
     }
 };
@@ -46,8 +48,9 @@ function symbolSvgInner(def, r) {
     return `<circle r="${r}" fill="${def.color}" stroke="#ffffff" stroke-width="${(2 * k).toFixed(2)}"/><g transform="scale(${k.toFixed(3)})">${SYMBOL_ICONS[def.icon]}</g>`;
 }
 
-// ================= 이름 규칙 (점검 QR과 같음, 결정 292) =================
-// 「위치-소화기1」·「위치-소화전1」·「위치-공기호흡기1」 — 청정·분말은 둘 다 「소화기」. 번호는 같은 위치·같은 종류 안에서 이어서
+// ================= 이름 규칙 (점검 QR과 같음) =================
+// 소화전·공기호흡기(auto): 「1F소화전01」 = 층 + 종류 + 두 자리 번호, 그 층·종류에서 비어 있는 가장 작은 번호 (지운 번호 다시 씀) — 점검 엑셀 등록과 같음 (결정 298, SQL ws_eq_add auto)
+// 청정·분말 소화기: 「위치-소화기1」 (둘 다 「소화기」), 번호는 같은 위치·같은 종류 안에서 이어서 (결정 292)
 // shortcut: 번호는 이 층 지도 안에서만 셈 (점검 QR 은 모든 층의 같은 위치를 셈), 같은 위치 이름을 여러 층에 쓰게 되면 그때 맞출 것
 function symbolNameOf(place, kind, no) { return `${place}-${kind}${no}`; }
 function nextSymbolNo(symbols, place, kind, exceptId) {
@@ -57,6 +60,23 @@ function nextSymbolNo(symbols, place, kind, exceptId) {
         if (s.id !== exceptId && d && d.kind === kind && s.place === place) max = Math.max(max, s.no || 0);
     });
     return max + 1;
+}
+function autoSymbolPrefix(def) {
+    const floor = FLOORS[currentFloorIdx];
+    return (floor.name || floor.code) + def.kind;
+}
+function isAutoSymbolName(name, prefix) {
+    return typeof name === 'string' && name.indexOf(prefix) === 0 && /^\d{2,}$/.test(name.slice(prefix.length));
+}
+function autoSymbolName(symbols, def, exceptId) {
+    const prefix = autoSymbolPrefix(def), used = {};
+    symbols.forEach(s => {
+        const d = SYMBOL_DEFINITIONS[s.type];
+        if (s.id !== exceptId && d && d.kind === def.kind && isAutoSymbolName(s.name, prefix)) used[Number(s.name.slice(prefix.length))] = true;
+    });
+    let n = 1;
+    while (used[n]) n++;
+    return prefix + String(n).padStart(2, '0');
 }
 // 찍은 자리의 매장 이름 → 없으면 구역(바닥·지우개 제외) 이름 → 없으면 층 이름
 function suggestSymbolPlace(x, y) {
@@ -76,11 +96,18 @@ function suggestSymbolPlace(x, y) {
     }
     return floor.name || floor.code;
 }
-// 이름 없는 옛 심벌: 찍은 순서대로 이름을 붙임 (고칠 수 있는 사람이 열면 저장)
+// 이름 없는 옛 심벌(소화전·공기호흡기는 옛 「위치-소화전1」도): 찍은 순서대로 이름을 붙임 (고칠 수 있는 사람이 열면 저장)
 function ensureSymbolNames(floorCode, symbols) {
     let changed = false;
     symbols.slice().sort((a, b) => String(a.createdAt || '').localeCompare(String(b.createdAt || ''))).forEach(s => {
         const d = SYMBOL_DEFINITIONS[s.type];
+        if (d && d.auto) {
+            if (isAutoSymbolName(s.name, autoSymbolPrefix(d))) return;
+            s.name = autoSymbolName(symbols, d, s.id);
+            delete s.place; delete s.no;
+            changed = true;
+            return;
+        }
         if (!d || s.name) return;
         s.place = s.place || suggestSymbolPlace(s.x, s.y);
         s.no = nextSymbolNo(symbols, s.place, d.kind, s.id);
@@ -332,7 +359,9 @@ function addSymbolAt(svgX, svgY) {
             targetY = gSnap.y;
         }
     }
-    openSymbolDialog(null, parseFloat(targetX.toFixed(2)), parseFloat(targetY.toFixed(2)));
+    const x = parseFloat(targetX.toFixed(2)), y = parseFloat(targetY.toFixed(2));
+    if (SYMBOL_DEFINITIONS[activeSymbolType].auto) saveNewSymbol(activeSymbolType, x, y);   // 이름이 자동이라 묻지 않음
+    else openSymbolDialog(null, x, y);
 }
 
 // 위치 창: sym 이 없으면 새로 배치, 있으면 위치 고치기·삭제 (결정 292)
@@ -353,6 +382,19 @@ function openSymbolDialog(sym, x, y) {
             ${sym ? '<button type="button" class="spd-del" id="symbol-place-del">삭제</button>' : ''}
             <button type="button" id="symbol-place-cancel">취소</button>
         </div>`;
+    if (def.auto) {
+        box.innerHTML = `<div class="spd-title">${def.name} · ${escSymbolText(floor.name || floor.code)}</div>
+            <div class="spd-name">이름: <b id="symbol-name-preview">${escSymbolText(sym.name || '')}</b></div>
+            <div class="spd-hint">이름은 자동(층 + 종류 + 번호)입니다. 점검 QR 이름과 같습니다.</div>
+            <div class="spd-btns">
+                <button type="button" class="spd-del" id="symbol-place-del">삭제</button>
+                <button type="button" id="symbol-place-cancel">닫기</button>
+            </div>`;
+        document.body.appendChild(box);
+        box.querySelector('#symbol-place-cancel').onclick = closeSymbolDialog;
+        box.querySelector('#symbol-place-del').onclick = () => { closeSymbolDialog(); deleteSymbol(sym.id); };
+        return;
+    }
     document.body.appendChild(box);
     const input = box.querySelector('#symbol-place-input');
     input.value = sym ? (sym.place || '') : suggestSymbolPlace(x, y);
@@ -390,14 +432,14 @@ function saveNewSymbol(type, x, y, place) {
     const floor = FLOORS[currentFloorIdx];
     const symbols = loadFloorSymbols(floor.code);
     const def = SYMBOL_DEFINITIONS[type];
-    const no = nextSymbolNo(symbols, place, def.kind);
+    const no = def.auto ? undefined : nextSymbolNo(symbols, place, def.kind);
     const newSym = {
         id: `sym_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
         type,
         typeName: def.name,
         place,
         no,
-        name: symbolNameOf(place, def.kind, no),
+        name: def.auto ? autoSymbolName(symbols, def) : symbolNameOf(place, def.kind, no),
         x,
         y,
         floorCode: floor.code,
