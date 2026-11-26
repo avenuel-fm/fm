@@ -35,10 +35,10 @@ var SYMBOL_DEFINITIONS = {
 
 // 심벌 반지름: 옛 5 → 면적 7배 = 5 × √7 (결정 292)
 var SYMBOL_R = 13.2;
-// 흰 그림 (반지름 13.2 원 안, 가운데 0,0) — ext 소화기 · hyd 소화전 · tank 산소통(공기호흡기)
+// 흰 그림 (반지름 13.2 원 안, 가운데 0,0) — ext 소화기 · hyd 소화전(호스 릴) · tank 산소통(공기호흡기)
 var SYMBOL_ICONS = {
     ext: '<rect x="-3.6" y="-4" width="7.2" height="11" rx="2" fill="#fff"/><rect x="-1.5" y="-7" width="3" height="3.4" fill="#fff"/><path d="M1.5 -6 L5 -7.5" stroke="#fff" stroke-width="1.4" fill="none"/>',
-    hyd: '<rect x="-6.5" y="-5.5" width="13" height="11" rx="1.5" fill="none" stroke="#fff" stroke-width="1.8"/><circle r="2.8" fill="#fff"/>',
+    hyd: '<g fill="none" stroke="#fff" stroke-linecap="round"><circle cy="-2" r="6.6" stroke-width="1.6"/><circle cy="-2" r="3.8" stroke-width="1.4"/><path d="M-6.6 -2 V5.2" stroke-width="1.6"/><path d="M6.6 -2 V8.6" stroke-width="1.6"/></g><circle cy="-2" r="1.3" fill="#fff"/><path d="M-8.4 5 H-4.8 L-5.6 9 H-7.6 Z" fill="#fff"/>',
     tank: '<rect x="-3.8" y="-4.5" width="7.6" height="12.5" rx="3.8" fill="#fff"/><rect x="-1.4" y="-7.5" width="2.8" height="3.4" fill="#fff"/><rect x="-3.4" y="-9.2" width="6.8" height="1.8" rx="0.9" fill="#fff"/>'
 };
 function symbolSvgInner(def, r) {
