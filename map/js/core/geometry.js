@@ -37,33 +37,6 @@
             return minDist;
         }
 
-        function getClosestEdgeOfPolygon(pt, poly) {
-            let minDist = Infinity;
-            let bestEdge = null;
-            for (let i = 0; i < poly.length; i++) {
-                const p1 = poly[i];
-                const p2 = poly[(i + 1) % poly.length];
-                const proj = projectPointToSegment(pt, p1, p2);
-                const dist = Math.hypot(pt.x - proj.x, pt.y - proj.y);
-                if (dist < minDist) {
-                    minDist = dist;
-                    bestEdge = { p1, p2 };
-                }
-            }
-            return bestEdge;
-        }
-
-        function getOutwardNormal(edge, poly) {
-            const dx = edge.p2.x - edge.p1.x;
-            const dy = edge.p2.y - edge.p1.y;
-            const len = Math.hypot(dx, dy) || 1;
-            const n1 = { x: -dy / len, y: dx / len };
-            const n2 = { x: dy / len, y: -dx / len };
-            const mid = { x: (edge.p1.x + edge.p2.x) / 2, y: (edge.p1.y + edge.p2.y) / 2 };
-            const test1 = { x: mid.x + n1.x * 2, y: mid.y + n1.y * 2 };
-            return isPointInsidePolygon(test1, poly) ? n2 : n1;
-        }
-
         function parseSvgPathPoints(d) {
             if (!d) return [];
             const nums = d.match(/[-+]?[0-9]*\.?[0-9]+/g);
@@ -77,47 +50,6 @@
                 }
             }
             return pts;
-        }
-
-        function adjustStorePolygonClearance(points) {
-            if (!points || points.length < 3) return points;
-            const GAP = 1; // 평행 간격 1px (결정 160, 전: 8px)
-            const existingPolys = [];
-
-            currentStores.forEach(s => {
-                if (!s.polygonElement) return;
-                const d = s.polygonElement.getAttribute('d') || s.pathData;
-                if (!d) return;
-                const polyPts = parseSvgPathPoints(d);
-                if (polyPts.length >= 3) {
-                    existingPolys.push(polyPts);
-                }
-            });
-
-            if (existingPolys.length === 0) return points;
-
-            let adjusted = points.map(p => ({ x: p.x, y: p.y }));
-            let hadCollision = false;
-
-            adjusted.forEach((pt) => {
-                for (const poly of existingPolys) {
-                    if (isPointInsidePolygon(pt, poly) || distancePointToPolygon(pt, poly) < GAP) {
-                        hadCollision = true;
-                        const closestEdge = getClosestEdgeOfPolygon(pt, poly);
-                        if (closestEdge) {
-                            const norm = getOutwardNormal(closestEdge, poly);
-                            const proj = projectPointToSegment(pt, closestEdge.p1, closestEdge.p2);
-                            pt.x = proj.x + norm.x * GAP;
-                            pt.y = proj.y + norm.y * GAP;
-                        }
-                    }
-                }
-            });
-
-            if (hadCollision) {
-                showToast('기존 도형과 겹치지 않도록 외곽선을 따라 8px 간격으로 평행 조정되었습니다.', 1500);
-            }
-            return adjusted;
         }
 
         // ================= 매장 도형 도우미 (결정 308) =================
@@ -176,7 +108,7 @@
                     const pts = typeof rtPathPoints === 'function' ? rtPathPoints(el) : parseSvgPathPoints(d);
                     let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
                     pts.forEach(p => { x0 = Math.min(x0, p.x); y0 = Math.min(y0, p.y); x1 = Math.max(x1, p.x); y1 = Math.max(y1, p.y); });
-                    c = { d, pts, x0, y0, x1, y1 };
+                    c = { d, pts, x0, y0, x1, y1, el };
                     shapeSnapCache.set(el, c);
                 }
                 return c;
@@ -196,15 +128,20 @@
             return best || { x, y, isSnapped: false };
         }
 
-        // 바닥 면에서 매장·기능실 자리를 빼고 둘레 2px 띄움 (결정 308). rings: [[x,y],...] 목록 → 남은 바깥 고리 목록
+        // 그린 면에서 매장·기능실 자리를 빼고 둘레 2px 띄움 (결정 308·314). rings: [[x,y],...] 목록 → 남은 바깥 고리 목록
+        // passStores: 바닥이면 true → 매장을 꿰뚫어 지나가면 그 매장은 자르지 않음(기능실은 늘 자름). 매장 그리기는 false
         var FLOOR_STORE_GAP = 2;
-        function floorAvoidStores(rings) {
+        function floorAvoidStores(rings) { return avoidStoreShapes(rings, true); }
+        function avoidStoreShapes(rings, passStores) {
             if (typeof polygonClipping === 'undefined' || !rings.length) return rings;
             let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
             rings.forEach(r => r.forEach(([x, y]) => { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }));
-            const g = FLOOR_STORE_GAP, cut = [];
+            const g = FLOOR_STORE_GAP, cut = [], drawn = rings.map(r => [r]);
             shapeSnapPolys().forEach(c => {
                 if (c.pts.length < 3 || c.x1 < x0 - g || c.x0 > x1 + g || c.y1 < y0 - g || c.y0 > y1 + g) return;
+                // 바닥이 매장을 꿰뚫어(매장이 둘 이상으로 나뉨) 지나가면 자르지 않고 그린 대로. 기능실은 꿰뚫을 수 없음 (결정 314)
+                const isUtil = (currentStores.find(s => s.polygonElement === c.el) || {}).type === 'utility';
+                if (passStores && !isUtil && polygonClipping.difference([[c.pts.map(p => [p.x, p.y])]], drawn).length >= 2) return;
                 cut.push([c.pts.map(p => [p.x, p.y])]);
                 c.pts.forEach((p, i) => {           // 변 양쪽 2px 띠 + 꼭짓점 네모 = 2px 키운 모양
                     const q = c.pts[(i + 1) % c.pts.length], L = Math.hypot(q.x - p.x, q.y - p.y);

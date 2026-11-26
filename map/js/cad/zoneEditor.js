@@ -700,7 +700,17 @@ function bringZoneLayersToFront() {
                 finishDrawingZone();
                 return;
             }
+            // 찍던 점이 있으면 점만 지우고 그리기 상태 그대로. 점이 없을 때만 보기 상태로 (결정 314)
+            if (isZoneDrawingMode && drawingZonePoints.length) { continueZoneDrawing(); return; }
             exitAddZoneMode();
+        }
+
+        // 완료·취소 뒤 같은 종류로 다음 도형을 바로 그림 (결정 314)
+        function continueZoneDrawing() {
+            drawingZonePoints = [];
+            createTempZoneDrawingGroup();
+            updateZoneGuideUI();
+            updateZoneDrawingPreview();
         }
 
         function finishDrawingZone() {
@@ -750,7 +760,7 @@ function bringZoneLayersToFront() {
             cleanupTempZoneDrawingGroup();
             renderFloorZones(floor.code);
             syncSvgCache();
-            exitAddZoneMode();
+            continueZoneDrawing();   // 그리기 상태 그대로 (결정 314)
 
             showToast(isWall ? '외벽이 추가되었습니다.' : `'${zoneName}'이 추가되었습니다.`, 1500);
         }

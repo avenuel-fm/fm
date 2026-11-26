@@ -241,7 +241,8 @@ var lastCreatedStoreId = null;
 
             if (editNameInput) editNameInput.value = store.name || '';
 
-            const currentColor = store.fillColor || store.polygonElement?.getAttribute('fill') || (type === 'utility' ? '#cbdbe9' : '#e6f0fc');
+            let currentColor = store.fillColor || store.polygonElement?.getAttribute('fill') || (type === 'utility' ? '#cbdbe9' : '#e6f0fc');
+            if (type !== 'utility' && currentColor.toLowerCase() === '#cbdbe9') currentColor = '#e6f0fc';   // 매장명 탭 기본은 첫 번째 색 (결정 314)
             selectEditColor(currentColor);
 
             // 기능실 라디오 버튼 상태 동기화
@@ -759,7 +760,16 @@ var lastCreatedStoreId = null;
             }
 
             // 기존 도형과 겹침 방지 및 8px 평행 간격 자동 보정
-            drawingPoints = adjustStorePolygonClearance(drawingPoints);
+            // 기존 매장·기능실과 겹친 부분을 빼고 둘레 2px 띄움. 둘로 나뉘면 큰 쪽만 (결정 314)
+            try {
+                const rings = avoidStoreShapes([drawingPoints.map(p => [p.x, p.y])], false);
+                if (!rings.length) { showToast('그린 도형이 모두 기존 매장 안이라 남는 곳이 없습니다.', 2000); return; }
+                const area = r => Math.abs(r.reduce((a, p, i) => { const q = r[(i + 1) % r.length]; return a + p[0] * q[1] - q[0] * p[1]; }, 0));
+                const big = rings.reduce((a, r) => area(r) > area(a) ? r : a);
+                const moved = rings.length > 1 || Math.abs(area(big) - area(drawingPoints.map(p => [p.x, p.y]))) > 1;
+                if (moved) drawingPoints = big.map(q => ({ x: Math.round(q[0] * 10) / 10, y: Math.round(q[1] * 10) / 10 }));
+                if (moved) showToast('기존 도형과 겹치지 않게 2px 띄워 그렸습니다.', 1500);
+            } catch (err) { console.warn('매장 피하기 실패, 그린 그대로', err); }
 
             pushUndoState('매장 추가');
 

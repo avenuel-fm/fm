@@ -164,7 +164,7 @@ function finishCenterlineFloor() {
     cleanupTempZoneDrawingGroup();
     renderFloorZones(floor.code);
     syncSvgCache();
-    exitAddZoneMode();
+    continueZoneDrawing();   // 그리기 상태 그대로 (결정 314)
     showToast(`바닥이 추가되었습니다.${res.removeIds.length ? ` (기존 바닥 ${res.removeIds.length}개와 합쳐짐)` : ''}`, 1800);
 }
 
