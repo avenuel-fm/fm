@@ -252,8 +252,8 @@
     hjList: (token, q, from, to) => rpc('ws_hj_list', { p_token: token, p_q: q || '', p_from: from || '', p_to: to || '' }),
     async hjSave(token, d) {
       const one = async (p, ext) => p && p.data ? { file: await upload('dw_photo', dataUrlToBlob(p.data), ext) } : p && p.id ? { id: p.id } : null;
-      const items = []; for (const it of d.items || []) items.push({ n: it.n, t: it.t, photo: await one(it.photo, 'jpg') });
-      return rpc('ws_hj_save', { p_token: token, p_d: { id: d.id, day: d.day, items, signSite: await one(d.signSite, 'png'), signFm: await one(d.signFm, 'png') } });
+      const items = []; for (const it of d.items || []) items.push({ k: it.k, n: it.n, t: it.t, photo: await one(it.photo, 'jpg') });
+      return rpc('ws_hj_save', { p_token: token, p_d: { id: d.id, day: d.day, removed: d.removed || [], items, signSite: await one(d.signSite, 'png') } });
     },
     hjDelete: (token, id) => rpc('ws_hj_delete', { p_token: token, p_id: String(id || '') }),
 
