@@ -131,30 +131,76 @@
         // 그린 면에서 매장·기능실 자리를 빼고 둘레 2px 띄움 (결정 308·314). rings: [[x,y],...] 목록 → 남은 바깥 고리 목록
         // passStores: 바닥이면 true → 매장을 꿰뚫어 지나가면 그 매장은 자르지 않음(기능실은 늘 자름). 매장 그리기는 false
         var FLOOR_STORE_GAP = 2;
+        function ringArea(r) { return Math.abs(r.reduce((a, p, i) => { const q = r[(i + 1) % r.length]; return a + p[0] * q[1] - q[0] * p[1]; }, 0)) / 2; }
+        // polygonClipping 결과 → 바깥 고리 목록 (구멍은 버림)
+        function outerRings(res) { return res.map(poly => poly[0].slice(0, -1)).filter(r => r.length >= 3 && ringArea(r) > 2); }
+        // 선 둘레 g 만큼의 띠(변마다 네모 + 꼭짓점 네모) — 모양을 g 키우거나 줄일 때 빼는 조각
+        function edgeBands(pts, g, closed = true) {
+            const out = [];
+            pts.forEach((p, i) => {
+                out.push([[[p.x - g, p.y - g], [p.x + g, p.y - g], [p.x + g, p.y + g], [p.x - g, p.y + g]]]);
+                if (!closed && i === pts.length - 1) return;
+                const q = pts[(i + 1) % pts.length], L = Math.hypot(q.x - p.x, q.y - p.y);
+                if (L < 1e-6) return;
+                const nx = -(q.y - p.y) / L * g, ny = (q.x - p.x) / L * g;
+                out.push([[[p.x + nx, p.y + ny], [q.x + nx, q.y + ny], [q.x - nx, q.y - ny], [p.x - nx, p.y - ny]]]);
+            });
+            return out;
+        }
+        function isUtilEl(el) { return (currentStores.find(s => s.polygonElement === el) || {}).type === 'utility'; }
         function floorAvoidStores(rings) { return avoidStoreShapes(rings, true); }
-        function avoidStoreShapes(rings, passStores) {
+        // only: 'utility' 면 기능실만 피함. skipEl: 자기 자신(고치는 중인 도형)은 빼고
+        function avoidStoreShapes(rings, passStores, only, skipEl) {
             if (typeof polygonClipping === 'undefined' || !rings.length) return rings;
             let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
             rings.forEach(r => r.forEach(([x, y]) => { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }));
             const g = FLOOR_STORE_GAP, cut = [], drawn = rings.map(r => [r]);
             shapeSnapPolys().forEach(c => {
-                if (c.pts.length < 3 || c.x1 < x0 - g || c.x0 > x1 + g || c.y1 < y0 - g || c.y0 > y1 + g) return;
+                if (c.el === skipEl || c.pts.length < 3 || c.x1 < x0 - g || c.x0 > x1 + g || c.y1 < y0 - g || c.y0 > y1 + g) return;
                 // 바닥이 매장을 꿰뚫어(매장이 둘 이상으로 나뉨) 지나가면 자르지 않고 그린 대로. 기능실은 꿰뚫을 수 없음 (결정 314)
-                const isUtil = (currentStores.find(s => s.polygonElement === c.el) || {}).type === 'utility';
+                const isUtil = isUtilEl(c.el);
+                if (only === 'utility' && !isUtil) return;
                 if (passStores && !isUtil && polygonClipping.difference([[c.pts.map(p => [p.x, p.y])]], drawn).length >= 2) return;
-                cut.push([c.pts.map(p => [p.x, p.y])]);
-                c.pts.forEach((p, i) => {           // 변 양쪽 2px 띠 + 꼭짓점 네모 = 2px 키운 모양
-                    const q = c.pts[(i + 1) % c.pts.length], L = Math.hypot(q.x - p.x, q.y - p.y);
-                    cut.push([[[p.x - g, p.y - g], [p.x + g, p.y - g], [p.x + g, p.y + g], [p.x - g, p.y + g]]]);
-                    if (L < 1e-6) return;
-                    const nx = -(q.y - p.y) / L * g, ny = (q.x - p.x) / L * g;
-                    cut.push([[[p.x + nx, p.y + ny], [q.x + nx, q.y + ny], [q.x - nx, q.y - ny], [p.x - nx, p.y - ny]]]);
-                });
+                cut.push([c.pts.map(p => [p.x, p.y])], ...edgeBands(c.pts, g));   // 둘레 2px 키운 모양
             });
             if (!cut.length) return rings;
-            const res = polygonClipping.difference(rings.map(r => [r]), ...cut);
             // 구멍(바닥 한가운데 매장)은 바깥 고리만 남김: 길찾기는 매장 칸을 따로 빼므로 상관없음
-            return res.map(poly => poly[0].slice(0, -1)).filter(r => r.length >= 3 && Math.abs(r.reduce((a, p, i) => { const q = r[(i + 1) % r.length]; return a + p[0] * q[1] - q[0] * p[1]; }, 0)) > 4);
+            return outerRings(polygonClipping.difference(rings.map(r => [r]), ...cut));
+        }
+
+        // 기능실 모양 (결정 316): 매장을 침범하면 그린 대로. 아니면 매장 변 가까이(화면 12px) 꼭짓점을 매장 쪽으로 붙이고 3px 띄움. 기능실끼리는 2px
+        var UTIL_STORE_GAP = 3;
+        function utilityShapeFor(raw, skipEl) {
+            if (typeof polygonClipping === 'undefined' || raw.length < 3) return raw;
+            const R = SHAPE_SNAP_PX / (typeof scale !== 'undefined' && scale ? scale : 1), g = UTIL_STORE_GAP;
+            const ring = raw.map(p => [p.x, p.y]);
+            const stores = shapeSnapPolys().filter(c => c.el !== skipEl && c.pts.length >= 3 && !isUtilEl(c.el));
+            const sq = c => [c.pts.map(p => [p.x, p.y])];
+            const overlaps = stores.some(c => polygonClipping.intersection([ring], sq(c)).some(p => ringArea(p[0]) > 1));
+            let pts = raw;
+            if (!overlaps) {
+                const near = stores.filter(c => raw.some(p => p.x >= c.x0 - R && p.x <= c.x1 + R && p.y >= c.y0 - R && p.y <= c.y1 + R));
+                pts = raw.map(p => {
+                    let best = null;
+                    near.forEach(c => c.pts.forEach((a, i) => {
+                        const b = c.pts[(i + 1) % c.pts.length], q = projectPointToSegment(p, a, b), d = Math.hypot(q.x - p.x, q.y - p.y);
+                        if (d > R || (best && d >= best.d)) return;
+                        const L = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+                        let nx = -(b.y - a.y) / L, ny = (b.x - a.x) / L;
+                        if (isPointInsidePolygon({ x: q.x + nx, y: q.y + ny }, c.pts)) { nx = -nx; ny = -ny; }   // 매장 밖 쪽으로
+                        best = { d, x: q.x + nx * g, y: q.y + ny * g };
+                    }));
+                    return best ? { x: best.x, y: best.y } : p;
+                });
+                if (near.length) {   // 모서리 어긋남 정리: 매장 둘레 3px 안은 비움
+                    const cut = []; near.forEach(c => cut.push(sq(c), ...edgeBands(c.pts, g - 0.01)));
+                    const rs = outerRings(polygonClipping.difference([pts.map(p => [p.x, p.y])], ...cut));
+                    if (rs.length) pts = rs.reduce((a, r) => ringArea(r) > ringArea(a) ? r : a).map(q => ({ x: q[0], y: q[1] }));
+                }
+            }
+            const rs = avoidStoreShapes([pts.map(p => [p.x, p.y])], false, 'utility', skipEl);   // 기능실끼리 2px
+            if (!rs.length) return pts;
+            return rs.reduce((a, r) => ringArea(r) > ringArea(a) ? r : a).map(q => ({ x: Math.round(q[0] * 10) / 10, y: Math.round(q[1] * 10) / 10 }));
         }
 
         // ================= 직각(Orthogonal / 수평·수직) CAD 스냅 엔진 =================

@@ -483,3 +483,12 @@
 .modal-overlay.as-side-overlay #edit-modal { pointer-events: auto; max-height: calc(100vh - 2 * var(--sp-4)); overflow-y: auto; box-shadow: 0 8px 24px rgba(15, 23, 42, .18); }
 #shape-edit-handles .shape-handle { fill: #fff; stroke: #2563eb; }
 .store-polygon.shape-editing { cursor: move !important; }   /* 가운데는 십자(이동) 커서 */
+
+/* 외벽 경계 (결정 316) */
+body:not(.zone-cat-wall) .safety-zone-item[data-zone-category="wall"] .user-drawn-wall { pointer-events: none !important; }   /* 외벽은 외벽을 고를 때만 눌림 */
+#wall-check-bar { position: fixed; top: 110px; left: 50%; transform: translateX(-50%); z-index: 3000; display: none; align-items: center; flex-wrap: wrap; gap: 8px; max-width: calc(100vw - 32px); padding: 8px 12px; background: #fff; border: 1px solid #fca5a5; border-radius: 8px; box-shadow: 0 4px 14px rgba(0,0,0,.15); font-size: 13px; color: #334155; }
+#wall-check-bar .wall-bar-btn { height: 30px; padding: 0 12px; border: none; border-radius: 6px; background: #dc2626; color: #fff; font-weight: 700; cursor: pointer; }
+#wall-check-bar .wall-bar-x { width: 28px; height: 28px; border: none; background: none; color: #64748b; cursor: pointer; font-size: 14px; }
+#wall-check-bar .wall-copy-opt { display: inline-flex; align-items: center; gap: 3px; }
+.wall-outside-flash, .wall-outside-flash > polygon, .wall-outside-flash > polyline { animation: wallOutFlash 0.8s ease-in-out 10; }
+@keyframes wallOutFlash { 50% { stroke: #f59e0b; stroke-width: 6px; stroke-opacity: 1; } }

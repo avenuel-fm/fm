@@ -123,6 +123,9 @@ function bringZoneLayersToFront() {
                 b.disabled = isErase;   // 지우개를 켜면 구역 종류는 잠김
             });
             document.getElementById('btn-zone-eraser')?.classList.toggle('on', isErase);
+            document.body.classList.toggle('zone-cat-wall', cat === 'wall');   // 외벽은 외벽을 고를 때만 눌림 (결정 316)
+            const wc = document.getElementById('btn-wall-copy');
+            if (wc) wc.style.display = cat === 'wall' ? '' : 'none';
 
             // 방화구역·바닥·지우개는 면(영역)만, 제연구획·외벽은 선(경계)만
             const polyOnly = cat === 'fire' || cat === 'floor' || cat === 'erase';
@@ -211,6 +214,8 @@ function bringZoneLayersToFront() {
             if (zoneGuideBanner) zoneGuideBanner.style.display = 'none';
             cleanupTempZoneDrawingGroup();
             drawingZonePoints = [];
+            lastWallSnap = null;
+            document.body.classList.remove('zone-cat-wall');
             hideFloorGrid();
         }
 
@@ -425,13 +430,13 @@ function bringZoneLayersToFront() {
 
             if (currentMouseSvgX !== null && currentMouseSvgY !== null) {
                 if (isWall) {
-                    snapInfo = snapToExteriorWall(currentMouseSvgX, currentMouseSvgY);
-                    if (snapInfo.isSnapped) {
+                    snapInfo = wallSnap(currentMouseSvgX, currentMouseSvgY) || (window.isShiftKeyPressed ? null : snapToExteriorWall(currentMouseSvgX, currentMouseSvgY));
+                    if (snapInfo && snapInfo.isSnapped) {
                         targetX = snapInfo.x;
                         targetY = snapInfo.y;
                     }
                 }
-                if ((!snapInfo || !snapInfo.isSnapped) && typeof snapToGrid === 'function') {
+                if ((!snapInfo || !snapInfo.isSnapped) && !(isWall && window.isShiftKeyPressed) && typeof snapToGrid === 'function') {
                     const gSnap = snapToGrid(currentMouseSvgX, currentMouseSvgY);
                     if (gSnap.isSnapped) {
                         snapInfo = { x: gSnap.x, y: gSnap.y, isSnapped: true, isGrid: true };
@@ -440,8 +445,8 @@ function bringZoneLayersToFront() {
                     }
                 }
 
-                // 직각 체크(또는 Shift): 미리보기도 수평·수직으로
-                if (drawingZonePoints.length > 0 && typeof snapToOrtho === 'function') {
+                // 직각 체크(또는 Shift): 미리보기도 수평·수직으로 (외벽이 테두리에 붙었으면 붙은 자리 그대로)
+                if (drawingZonePoints.length > 0 && typeof snapToOrtho === 'function' && !(isWall && snapInfo && snapInfo.key)) {
                     const o = snapToOrtho({ x: targetX, y: targetY }, drawingZonePoints[drawingZonePoints.length - 1]);
                     targetX = o.x;
                     targetY = o.y;
@@ -450,7 +455,9 @@ function bringZoneLayersToFront() {
                 // 2. 마우스 커서로 이어지는 실시간 러버밴드 가이드 선
                 if (drawingZonePoints.length > 0) {
                     const lastPt = drawingZonePoints[drawingZonePoints.length - 1];
-                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    const via = isWall && snapInfo && snapInfo.key ? wallTraceBetween(lastWallSnap, snapInfo) : [];   // 같은 테두리면 따라감
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', via.length ? 'polyline' : 'line');
+                    if (via.length) { line.setAttribute('points', [lastPt].concat(via, [{ x: targetX, y: targetY }]).map(p => `${p.x},${p.y}`).join(' ')); line.setAttribute('fill', 'none'); }
                     line.setAttribute('x1', lastPt.x);
                     line.setAttribute('y1', lastPt.y);
                     line.setAttribute('x2', targetX);
@@ -557,6 +564,7 @@ function bringZoneLayersToFront() {
         }
 
         function selectAndEditWallZone(zone) {
+            if (isLayerLocked('wall')) { warnLayerLocked(); return; }
             closeAllPopovers();
             // 기존 작성 중이던 임시 드로잉 점 초기화
             if (drawingZonePoints.length > 0) {
@@ -674,6 +682,7 @@ function bringZoneLayersToFront() {
                                 syncSvgCache();
                             }
                             showToast('외벽 선분이 수정되었습니다.', 1200);
+                            afterWallChange();
                         }
                     };
 
@@ -708,6 +717,7 @@ function bringZoneLayersToFront() {
         // 완료·취소 뒤 같은 종류로 다음 도형을 바로 그림 (결정 314)
         function continueZoneDrawing() {
             drawingZonePoints = [];
+            lastWallSnap = null;
             createTempZoneDrawingGroup();
             updateZoneGuideUI();
             updateZoneDrawingPreview();
@@ -721,12 +731,23 @@ function bringZoneLayersToFront() {
                 return;
             }
 
+            if (currentZoneCategory === 'wall' && isLayerLocked('wall')) { warnLayerLocked(); return; }
             // 바닥이 매장·기능실을 침범하면 그 자리를 빼고 둘레 2px 밖으로 (결정 308). 여러 조각이 되면 조각마다 바닥 하나
+            // 닫힌 외벽이 있으면 바닥은 외벽선 안쪽 5px 까지, 방화구역 면·제연구획 선은 외벽선까지 (결정 316)
             let floorRings = null;
+            const toPts = r => r.map(q => ({ x: Math.round(q[0] * 10) / 10, y: Math.round(q[1] * 10) / 10 }));
             if (currentZoneCategory === 'floor' && currentZoneGeometry === 'polygon') {
-                try { floorRings = floorAvoidStores([drawingZonePoints.map(p => [p.x, p.y])]).map(r => r.map(q => ({ x: Math.round(q[0] * 10) / 10, y: Math.round(q[1] * 10) / 10 }))); }
+                try { floorRings = floorAvoidStores(clipRingsToWall([drawingZonePoints.map(p => [p.x, p.y])], FLOOR_WALL_GAP)).map(toPts); }
                 catch (err) { console.warn('매장 피하기 실패, 그린 그대로', err); }
-                if (floorRings && !floorRings.length) { showToast('그린 바닥이 모두 매장 안이라 남는 곳이 없습니다.', 2000); return; }
+                if (floorRings && !floorRings.length) { showToast('그린 바닥이 모두 매장 안이거나 외벽 밖이라 남는 곳이 없습니다.', 2000); return; }
+            } else if (currentZoneCategory === 'fire' && currentZoneGeometry === 'polygon') {
+                try { floorRings = clipRingsToWall([drawingZonePoints.map(p => [p.x, p.y])], 0).map(toPts); }
+                catch (err) { console.warn('외벽 자르기 실패, 그린 그대로', err); }
+                if (floorRings && !floorRings.length) { showToast('그린 구역이 모두 외벽 밖입니다.', 2000); return; }
+            } else if (currentZoneCategory === 'smoke' || (currentZoneCategory === 'fire' && currentZoneGeometry !== 'polygon')) {
+                const c = clipPolylineToWall(drawingZonePoints);
+                if (c.length < 2) { showToast('그린 선이 모두 외벽 밖입니다.', 2000); return; }
+                drawingZonePoints = c;
             }
 
             pushUndoState('구역 추가');
@@ -753,16 +774,18 @@ function bringZoneLayersToFront() {
                 createdAt: Date.now()
             };
 
-            if (floorRings) floorRings.forEach((ring, i) => zones.push(Object.assign({}, newZone, { id: newZone.id + (i ? '_' + i : ''), name: i ? `바닥 ${zones.filter(z => z.category === 'floor').length + 1}` : zoneName, points: ring })));
+            if (floorRings) floorRings.forEach((ring, i) => zones.push(Object.assign({}, newZone, { id: newZone.id + (i ? '_' + i : ''), name: i ? `${zoneName.replace(/ \d+$/, '')} ${zones.filter(z => z.category === currentZoneCategory).length + 1}` : zoneName, points: ring })));
             else zones.push(newZone);
             saveFloorZones(floor.code, zones);
 
             cleanupTempZoneDrawingGroup();
             renderFloorZones(floor.code);
             syncSvgCache();
+            if (isWall) currentZoneGeometry = 'line';   // 시작점을 눌러 닫은 외벽도 다음은 선으로
             continueZoneDrawing();   // 그리기 상태 그대로 (결정 314)
 
             showToast(isWall ? '외벽이 추가되었습니다.' : `'${zoneName}'이 추가되었습니다.`, 1500);
+            if (isWall) afterWallChange();   // 끊긴 곳 · 밖으로 나간 도형 알림 (결정 316)
         }
 
         // 도면 상의 구역(방화구역/제연구획/외벽) SVG 레이어 렌더링
@@ -825,7 +848,7 @@ function bringZoneLayersToFront() {
                 const strokeColor = isWall ? '#334155' : (isSmoke ? '#0284c7' : '#dc2626');
                 const strokeDash = isWall ? '' : '8 5';
                 const strokeWidth = isWall ? '4' : (isPoly ? '3' : '3.5');
-                const fillColor = isWall ? (isPoly ? 'rgba(51, 65, 85, 0.12)' : 'none') : (isPoly ? 'rgba(220, 38, 38, 0.18)' : 'none');
+                const fillColor = isWall ? 'none' : (isPoly ? 'rgba(220, 38, 38, 0.18)' : 'none');   // 외벽은 다른 레이어를 덮지 않음 (결정 316)
 
                 const pointsStr = zone.points.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
 

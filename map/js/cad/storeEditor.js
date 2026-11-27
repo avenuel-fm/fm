@@ -35,6 +35,28 @@ var lastCreatedStoreId = null;
                     selectEditColor('#e6f0fc');
                 }
             }
+            applyTypeShape(type);
+        }
+
+        // 탭을 바꾸면 모양도 그 종류 규칙으로 (결정 316): 기능실 = 매장 옆이면 붙고 3px · 매장 침범은 그린 대로, 매장 = 기존 도형과 2px.
+        // 수정 창이 열린 직접 그린 도형만, 저장 때 남음(닫으면 되돌림)
+        function applyTypeShape(type) {
+            const se = typeof shapeEdit !== 'undefined' ? shapeEdit : null;
+            if (!se || se.store !== activeSelectedStore) return;
+            const p = se.store.polygonElement;
+            const raw = se.store.rawPts || parseSvgPathPoints(se.origD);
+            let pts;
+            try {
+                if (type === 'utility') pts = utilityShapeFor(raw, p);
+                else if (se.store.rawPts) {
+                    const rs = avoidStoreShapes([raw.map(q => [q.x, q.y])], false, null, p);
+                    pts = rs.length ? rs.reduce((a, r) => ringArea(r) > ringArea(a) ? r : a).map(q => ({ x: Math.round(q[0] * 10) / 10, y: Math.round(q[1] * 10) / 10 })) : raw;
+                } else pts = parseSvgPathPoints(se.origD);
+            } catch (err) { console.warn('모양 다시 계산 실패', err); return; }
+            if (pts.length < 3) return;
+            p.setAttribute('d', pointsToPathD(pts));
+            shapeRelabel(se.store, true);
+            drawShapeHandles();
         }
 
         function onSelectUtilityRadio(val) {
@@ -761,13 +783,22 @@ var lastCreatedStoreId = null;
 
             // 기존 도형과 겹침 방지 및 8px 평행 간격 자동 보정
             // 기존 매장·기능실과 겹친 부분을 빼고 둘레 2px 띄움. 둘로 나뉘면 큰 쪽만 (결정 314)
+            // 닫힌 외벽 밖은 잘라 냄 (결정 316). 기능실 탭을 고르면 이 모양(rawPts)에서 다시 계산
+            let rawPts = drawingPoints.slice();
             try {
+                const toPts = r => r.map(q => ({ x: Math.round(q[0] * 10) / 10, y: Math.round(q[1] * 10) / 10 }));
+                const inWall = clipRingsToWall([drawingPoints.map(p => [p.x, p.y])], 0);
+                if (!inWall.length) { showToast('그린 도형이 모두 외벽 밖입니다.', 2000); return; }
+                if (inWall.length > 1 || Math.abs(ringArea(inWall[0]) - ringArea(drawingPoints.map(p => [p.x, p.y]))) > 1) {
+                    rawPts = toPts(inWall.reduce((a, r) => ringArea(r) > ringArea(a) ? r : a));
+                    showToast('외벽 밖으로 나간 부분은 잘라 냈습니다.', 1500);
+                }
+                drawingPoints = rawPts;
                 const rings = avoidStoreShapes([drawingPoints.map(p => [p.x, p.y])], false);
                 if (!rings.length) { showToast('그린 도형이 모두 기존 매장 안이라 남는 곳이 없습니다.', 2000); return; }
-                const area = r => Math.abs(r.reduce((a, p, i) => { const q = r[(i + 1) % r.length]; return a + p[0] * q[1] - q[0] * p[1]; }, 0));
-                const big = rings.reduce((a, r) => area(r) > area(a) ? r : a);
-                const moved = rings.length > 1 || Math.abs(area(big) - area(drawingPoints.map(p => [p.x, p.y]))) > 1;
-                if (moved) drawingPoints = big.map(q => ({ x: Math.round(q[0] * 10) / 10, y: Math.round(q[1] * 10) / 10 }));
+                const big = rings.reduce((a, r) => ringArea(r) > ringArea(a) ? r : a);
+                const moved = rings.length > 1 || Math.abs(ringArea(big) - ringArea(drawingPoints.map(p => [p.x, p.y]))) > 0.5;
+                if (moved) drawingPoints = toPts(big);
                 if (moved) showToast('기존 도형과 겹치지 않게 2px 띄워 그렸습니다.', 1500);
             } catch (err) { console.warn('매장 피하기 실패, 그린 그대로', err); }
 
@@ -860,7 +891,8 @@ var lastCreatedStoreId = null;
                 groupElement: newGroup,
                 shapeKey: shapeKey,
                 shapeW: width,
-                shapeH: height
+                shapeH: height,
+                rawPts: rawPts
             };
 
             // 커스텀 생성 매장 목록에 저장 (새로고침 시 복원)
