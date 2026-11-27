@@ -245,8 +245,11 @@
     dwSave: async (token, d) => rpc('ws_dw_save', { p_token: token, p_d: Object.assign({}, d, { before: await dwPics(d.before), after: await dwPics(d.after) }) }),
     dwDelete: (token, id) => rpc('ws_dw_delete', { p_token: token, p_id: String(id || '') }),
     dnList: (token, q, from, to) => rpc('ws_dn_list', { p_token: token, p_q: q || '', p_from: from || '', p_to: to || '' }),
-    dnSave: async (token, d) => rpc('ws_dn_save', { p_token: token, p_d: Object.assign({}, d, { photos: await dwPics(d.photos), fire: await dwPics(d.fire), pledge: await dwPics(d.pledge), rest: await dwRest(d.rest) }) }),
+    dnSave: async (token, d) => rpc('ws_dn_save', { p_token: token, p_d: Object.assign({}, d, { photos: await dwPics(d.photos), fire: await dwPics(d.fire), pledge: await dwPics(d.pledge), rest: Array.isArray(d.rest) ? await dwRest(d.rest) : undefined }) }),   // rest 안 보내면 서버가 옛 식당가 칸 그대로 (결정 358)
     dnDelete: (token, id) => rpc('ws_dn_delete', { p_token: token, p_id: String(id || '') }),
+    drList: (token, q, from, to) => rpc('ws_dr_list', { p_token: token, p_q: q || '', p_from: from || '', p_to: to || '' }),
+    drSave: async (token, d) => rpc('ws_dr_save', { p_token: token, p_d: Object.assign({}, d, { pics: await dwPics(d.pics) }) }),
+    drDelete: (token, id) => rpc('ws_dr_delete', { p_token: token, p_id: String(id || '') }),
 
     /* ── 하자점검 (supabase/27_defect.sql): 사진·서명은 버킷 dw_photo/ 에 먼저 올리고 {file} 로 넘김 ── */
     hjList: (token, q, from, to) => rpc('ws_hj_list', { p_token: token, p_q: q || '', p_from: from || '', p_to: to || '' }),
