@@ -166,6 +166,7 @@ var lastCreatedStoreId = null;
                 if (parentG && parentG.parentNode) {
                     parentG.parentNode.appendChild(parentG);
                 }
+                raiseUtilsOver(storeItem);   // 겹친 기능실은 선택한 매장 위로 (결정 322)
             }
             if (storeItem.groupElement) {
                 storeItem.groupElement.classList.add('selected');
@@ -233,6 +234,22 @@ var lastCreatedStoreId = null;
             }
         }
 
+        // 선택한 매장과 겹친 기능실을 그 매장 위로 올려 다 보이게 (결정 322)
+        function raiseUtilsOver(store) {
+            if (!store || !store.polygonElement || store.type === 'utility' || typeof polygonClipping === 'undefined') return;
+            const polys = new Map(shapeSnapPolys().map(c => [c.el, c]));
+            const me = polys.get(store.polygonElement);
+            if (!me || me.pts.length < 3) return;
+            const ring = [me.pts.map(p => [p.x, p.y])];
+            currentStores.forEach(u => {
+                const c = u !== store && u.type === 'utility' && u.polygonElement && polys.get(u.polygonElement);
+                if (!c || c.pts.length < 3 || c.x1 < me.x0 || c.x0 > me.x1 || c.y1 < me.y0 || c.y0 > me.y1) return;
+                if (!polygonClipping.intersection(ring, [c.pts.map(p => [p.x, p.y])]).some(q => ringArea(q[0]) > 1)) return;
+                const g = u.groupElement || u.polygonElement.parentNode;
+                if (g && g.parentNode) g.parentNode.appendChild(g);
+            });
+        }
+
         function openEditFromCurrentStatus() {
             if (!activeSelectedStore) return;
             openEditModalForStore(activeSelectedStore);
@@ -256,6 +273,7 @@ var lastCreatedStoreId = null;
                 if (parentG && parentG.parentNode) {
                     parentG.parentNode.appendChild(parentG);
                 }
+                raiseUtilsOver(store);
             }
 
             const type = store.type || 'store';

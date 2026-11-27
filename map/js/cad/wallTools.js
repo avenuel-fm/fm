@@ -475,7 +475,8 @@ function flashOutside(outs) {
         else svgEl.querySelectorAll(`.user-floor-line[data-zone-id="${o.id}"], .safety-zone-item[data-zone-id="${o.id}"]`).forEach(e => els.push(e));
     });
     els.forEach(e => e && e.classList.add('wall-outside-flash'));
-    setTimeout(() => els.forEach(e => e && e.classList.remove('wall-outside-flash')), 8000);
+    document.body.classList.add('wall-flashing');   // 알림 순간에만 깜빡임 (저장본에 남은 표시는 안 움직임, 결정 322)
+    setTimeout(() => { els.forEach(e => e && e.classList.remove('wall-outside-flash')); document.body.classList.remove('wall-flashing'); }, 8000);
 }
 
 function fitShapesInsideWall() {

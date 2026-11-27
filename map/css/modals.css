@@ -495,5 +495,5 @@ body:not(.zone-cat-wall) .safety-zone-item[data-zone-category="wall"] .user-draw
 #wall-seg-pop .wall-seg-del { border-color: #dc2626; background: #fef2f2; color: #b91c1c; font-weight: 700; }
 #wall-seg-pop .wall-bar-x { position: absolute; top: 4px; right: 4px; width: 26px; height: 26px; border: none; background: none; color: #64748b; }
 #wall-check-bar .wall-copy-opt { display: inline-flex; align-items: center; gap: 3px; }
-.wall-outside-flash, .wall-outside-flash > polygon, .wall-outside-flash > polyline { animation: wallOutFlash 0.8s ease-in-out 10; }
+body.wall-flashing .wall-outside-flash, body.wall-flashing .wall-outside-flash > polygon, body.wall-flashing .wall-outside-flash > polyline { animation: wallOutFlash 0.8s ease-in-out 10; }
 @keyframes wallOutFlash { 50% { stroke: #f59e0b; stroke-width: 6px; stroke-opacity: 1; } }
