@@ -246,7 +246,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
             const textEls = Array.from(svgEl.querySelectorAll('g[group-type="POI_GROUP"] text, text')).filter(t => {
                 if (t.closest('#custom-stores-top-layer')) return false;
                 const tspan = t.querySelector('tspan') || t;
-                const txt = tspan.textContent.trim();
+                const txt = (t.dataset.lblName || tspan.textContent).trim();   // 줄 나눈 이름은 통째로 (결정 338)
                 if (!txt || txt === 'NaN' || txt.length === 0) return false;
 
                 const x = parseFloat(t.getAttribute('x')) || 0;
@@ -262,7 +262,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
             let storeIdx = 0;
             textEls.forEach(textEl => {
                 const tspan = textEl.querySelector('tspan') || textEl;
-                const rawName = tspan.textContent.trim();
+                const rawName = (textEl.dataset.lblName || tspan.textContent).trim();
                 const x = parseFloat(textEl.getAttribute('x')) || 0;
                 const y = parseFloat(textEl.getAttribute('y')) || 0;
 
@@ -649,6 +649,76 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
             if (!best) return whole;
             return (best.w >= needW && best.h >= needH) || !fit ? best : fit;
         }
+        // 띄어쓰기로 나누고, 한 낱말이 너무 길면 글자 단위로 나눔
+        function splitStoreLabel(name, room, width) {
+            const lines = [];
+            let cur = '';
+            name.split(/(\s+)/).filter(x => x).forEach(piece => {
+                const tryLine = cur + piece;
+                if (!cur || width(tryLine.trim()) <= room) { cur = tryLine; return; }
+                lines.push(cur.trim()); cur = piece.trim();
+            });
+            if (cur.trim()) lines.push(cur.trim());
+            const out = [];
+            lines.forEach(line => {
+                let part = '';
+                Array.from(line).forEach(ch => {
+                    if (part && width(part + ch) > room) { out.push(part); part = ch; } else part += ch;
+                });
+                if (part) out.push(part);
+            });
+            return out;
+        }
+        // 업체 도면 매장 이름: 도형 폭을 넘칠 때만 줄 나눠 도형 가로 가운데. 글자 크기·높이는 도면 그대로, 도형은 안 키움 (결정 338)
+        function fitOrigLabel(textEl, name, pathEl) {
+            if (!textEl) return;
+            const ns = 'http://www.w3.org/2000/svg';
+            textEl.querySelectorAll('tspan.lbl-wrap').forEach(t => t.remove());
+            const first = textEl.querySelector('tspan') || textEl;
+            const o = textEl.dataset.lblOrig ? JSON.parse(textEl.dataset.lblOrig) : null;
+            if (o) {   // 전에 나눴으면 도면 원래 값으로 되돌린 뒤 다시 잼
+                ['x', 'dy'].forEach(a => o[a] === null ? first.removeAttribute(a) : first.setAttribute(a, o[a]));
+                o.anchor === null ? textEl.removeAttribute('text-anchor') : textEl.setAttribute('text-anchor', o.anchor);
+                delete textEl.dataset.lblOrig; delete textEl.dataset.lblName;
+            }
+            first.textContent = name;
+            if (first === textEl || !pathEl) return;
+            let bb, k, full;
+            try {
+                bb = pathEl.getBBox(); full = first.getComputedTextLength();
+                const a = textEl.getCTM(), b = pathEl.getCTM();
+                k = a && b ? Math.hypot(a.a, a.b) / Math.hypot(b.a, b.b) : 1;   // 글자 1 = 도형 k
+            } catch (e) { return; }   // 화면에 없으면 그대로 한 줄
+            if (!bb || !bb.width || !full || !k) return;
+            const room = (bb.width - STORE_LABEL_PAD * 2) / k;
+            if (full <= room) return;
+            const width = t => { first.textContent = t; return first.getComputedTextLength(); };
+            const out = splitStoreLabel(name, room, width);
+            first.textContent = name;
+            if (out.length < 2) return;
+            // 가로 가운데 = 도형 가운데 (글자 좌표로 바꿈)
+            let cx;
+            try {
+                const svg = pathEl.ownerSVGElement, q = svg.createSVGPoint();
+                q.x = bb.x + bb.width / 2; q.y = bb.y + bb.height / 2;
+                cx = q.matrixTransform(pathEl.getCTM()).matrixTransform(textEl.getCTM().inverse()).x;
+            } catch (e) { return; }
+            const lh = (parseFloat(getComputedStyle(first).fontSize) || STORE_LABEL_SIZE) * 1.2;
+            textEl.dataset.lblOrig = JSON.stringify({ x: first.getAttribute('x'), dy: first.getAttribute('dy'), anchor: textEl.getAttribute('text-anchor') });
+            textEl.dataset.lblName = name;
+            textEl.setAttribute('text-anchor', 'middle');
+            first.setAttribute('x', cx.toFixed(2));
+            first.setAttribute('dy', ((parseFloat(first.getAttribute('dy')) || 0) - (out.length - 1) * lh / 2).toFixed(2));
+            first.textContent = out[0];
+            out.slice(1).forEach(line => {
+                const t = document.createElementNS(ns, 'tspan');
+                t.setAttribute('class', 'lbl-wrap');
+                t.setAttribute('x', cx.toFixed(2));
+                t.setAttribute('dy', lh.toFixed(2));
+                t.textContent = line;
+                textEl.appendChild(t);
+            });
+        }
         // noGrow: 끌어 크기·자리 바꾸는 중엔 넘쳐도 도형을 키우지 않음
         function layoutStoreLabel(textEl, name, pathEl, noGrow) {
             if (!textEl) return;
@@ -685,23 +755,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
             const box = storeLabelBox(pathEl, width(name) + STORE_LABEL_PAD * 2, STORE_LABEL_LINE + STORE_LABEL_PAD);
             const cx = box.x + box.w / 2, cy = box.y + box.h / 2;
             const room = box.w - STORE_LABEL_PAD * 2;
-            // 띄어쓰기로 나누고, 한 낱말이 너무 길면 글자 단위로 나눔
-            const lines = [];
-            let cur = '';
-            name.split(/(\s+)/).filter(x => x).forEach(piece => {
-                const tryLine = cur + piece;
-                if (!cur || width(tryLine.trim()) <= room) { cur = tryLine; return; }
-                lines.push(cur.trim()); cur = piece.trim();
-            });
-            if (cur.trim()) lines.push(cur.trim());
-            const out = [];
-            lines.forEach(line => {
-                let part = '';
-                Array.from(line).forEach(ch => {
-                    if (part && width(part + ch) > room) { out.push(part); part = ch; } else part += ch;
-                });
-                if (part) out.push(part);
-            });
+            const out = splitStoreLabel(name, room, width);
             const x = cx.toFixed(2);
             textEl.setAttribute('x', x);
             textEl.setAttribute('y', (cy - (out.length - 1) * STORE_LABEL_LINE / 2 + STORE_LABEL_SIZE / 3).toFixed(2));
@@ -765,10 +819,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                 s.fields = StoreBook.fields(items, it);
                 if (it.color) { s.fillColor = it.color; s.polygonElement?.setAttribute('fill', it.color); }
                 if (s.isCustom) layoutStoreLabel(s.textElement, StoreBook.show(it.name), s.polygonElement);
-                else {
-                    const tspan = s.textElement && (s.textElement.querySelector('tspan') || s.textElement);
-                    if (tspan && tspan.textContent !== StoreBook.show(it.name)) tspan.textContent = StoreBook.show(it.name);
-                }
+                else fitOrigLabel(s.textElement, StoreBook.show(it.name), s.polygonElement);
                 s.groupElement?.setAttribute('data-store-name', it.name);
                 s.groupElement?.setAttribute('data-store-type', s.type);
             });

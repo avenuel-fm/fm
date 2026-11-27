@@ -429,10 +429,7 @@ var lastCreatedStoreId = null;
             // SVG DOM 업데이트
             if (activeSelectedStore.textElement) {
                 if (activeSelectedStore.isCustom) layoutStoreLabel(activeSelectedStore.textElement, StoreBook.show(newName), activeSelectedStore.polygonElement);
-                else {
-                    const tspan = activeSelectedStore.textElement.querySelector('tspan') || activeSelectedStore.textElement;
-                    tspan.textContent = StoreBook.show(newName);
-                }
+                else fitOrigLabel(activeSelectedStore.textElement, StoreBook.show(newName), activeSelectedStore.polygonElement);
             }
             if (activeSelectedStore.groupElement) {
                 activeSelectedStore.groupElement.setAttribute('data-store-name', newName);
