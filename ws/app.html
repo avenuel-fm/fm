@@ -10,10 +10,10 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.26.50"></script>
-<script>window.WS_VERSION = '0.26.50';</script>
-<script src="offline.js?v=0.26.50"></script>
-<script src="ws-api.js?v=0.26.50"></script>
+<script src="config.js?v=0.26.51"></script>
+<script>window.WS_VERSION = '0.26.51';</script>
+<script src="offline.js?v=0.26.51"></script>
+<script src="ws-api.js?v=0.26.51"></script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -697,7 +697,10 @@ select.lgin{text-align:center;padding:0}
 /* 주간/야간 작업내역 (결정 240) */
 .whf{padding:var(--sp-3)}.whpic{min-width:0;margin-top:var(--sp-3)}.whpt{display:flex;align-items:baseline;gap:var(--sp-2);margin-bottom:var(--sp-1)}.whpt b{font-size:var(--size-s);font-weight:600;color:var(--sub)}.whpt small{color:var(--muted);font-size:var(--size-s)}
 .whpc{border:1px solid var(--line2);border-radius:var(--radius);padding:var(--sp-2);margin-top:var(--sp-2);min-width:0}.whpc h4{margin:0 0 var(--sp-1);font-size:var(--size-m);font-weight:600;color:var(--navy)}.whpc h4 small{margin-left:var(--sp-2);font-weight:400;color:var(--muted);font-size:var(--size-s)}
-.whg,.whg2{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-1)}.whg2{margin-top:var(--sp-2)}.whg .whpc{margin-top:0}.whsec{margin-top:var(--sp-2)}.whsec>h4{margin:0 0 var(--sp-1);font-size:var(--size-m);font-weight:600;color:var(--navy)}.whsec>h4 small{margin-left:var(--sp-2);font-weight:400;color:var(--muted);font-size:var(--size-s)}.whfp{margin-top:var(--sp-2)}.whfp:first-of-type{margin-top:0}.whfp>b{display:block;font-size:var(--size-s);color:var(--navy);margin-bottom:2px}.whg.whfg>.whpc{grid-column:span 2}.whfr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-1)}.whfr .whfp{margin-top:0;min-width:0}.whplus{width:100%;margin-top:var(--sp-1);border-style:dashed;color:var(--blue-d)}.whadd{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:150px;border:1.5px dashed var(--blue-d);border-radius:var(--radius);background:transparent;color:var(--blue-d);font:inherit;font-weight:600;cursor:pointer}.whadd small{font-weight:400;font-size:var(--size-s)}.whst{border:1px solid var(--line2);border-radius:var(--radius);padding:var(--sp-2);margin-top:var(--sp-1)}.whsh{display:flex;gap:var(--sp-1);align-items:center;margin-bottom:var(--sp-2)}.whsh b{white-space:nowrap;color:var(--navy)}.whsh .inp{flex:1;min-width:0}.whsx{white-space:nowrap;color:var(--red,#C0392B)}@media (min-width:768px){.whg{grid-template-columns:repeat(4,1fr)}}
+.whg,.whg2{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-1)}.whg2{margin-top:var(--sp-2)}.whg .whpc{margin-top:0}.whsec{margin-top:var(--sp-2)}.whsec>h4{margin:0 0 var(--sp-1);font-size:var(--size-m);font-weight:600;color:var(--navy)}.whsec>h4 small{margin-left:var(--sp-2);font-weight:400;color:var(--muted);font-size:var(--size-s)}.whfp{margin-top:var(--sp-2)}.whfp:first-of-type{margin-top:0}.whfp>b{display:block;font-size:var(--size-s);color:var(--navy);margin-bottom:2px}.whg.whfg>.whpc{grid-column:span 2}.whfr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-1)}.whfr .whfp{margin-top:0;min-width:0}.whplus{width:100%;margin-top:var(--sp-1);border-style:dashed;color:var(--blue-d)}.whadd{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:150px;border:1.5px dashed var(--blue-d);border-radius:var(--radius);background:transparent;color:var(--blue-d);font:inherit;font-weight:600;cursor:pointer}.whadd small{font-weight:400;font-size:var(--size-s)}.whst{border:1px solid var(--line2);border-radius:var(--radius);padding:var(--sp-2);margin-top:var(--sp-1)}.whsh{display:flex;gap:var(--sp-1);align-items:center;margin-bottom:var(--sp-2)}.whsh b{white-space:nowrap;color:var(--navy)}.whsh .inp{flex:1;min-width:0}.whdp{display:grid;grid-template-columns:1fr;gap:var(--sp-2);margin-top:var(--sp-2)}.whdpr,.whdpa{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-1)}.whdpr .whpc{margin-top:0}
+.whdpr+.whdpr{border-top:2px solid var(--navy);padding-top:var(--sp-2)}.whra{margin-top:var(--sp-1)}
+@media (min-width:768px){.whdp{grid-template-columns:1fr 1fr;column-gap:var(--sp-4)}.whdpr+.whdpr{border-top:0;padding-top:0}.whdpr:nth-child(n+3){border-top:2px solid var(--navy);padding-top:var(--sp-2)}.whdpr:nth-child(even){position:relative}.whdpr:nth-child(even)::before{content:'';position:absolute;left:calc(var(--sp-4) / -2 - 1px);top:0;bottom:0;border-left:2px solid var(--navy)}}
+.whsx{white-space:nowrap;color:var(--red,#C0392B)}@media (min-width:768px){.whg{grid-template-columns:repeat(4,1fr)}}
 .wht{position:relative;min-width:0}.whim{display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:4/3;border:1px solid var(--line2);padding:0;background:var(--tint);cursor:pointer;overflow:hidden;color:var(--muted);font-size:var(--size-s)}.whim img{width:100%;height:100%;object-fit:contain}.whim.empty{cursor:default}
 .whx{position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:var(--radius);border:1px solid var(--line);background:var(--white);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
 .whbs{display:flex;gap:var(--sp-1);margin-top:var(--sp-1)}.whbs .btn{flex:1;min-width:0;min-height:var(--control-h);padding:0 var(--sp-1);gap:var(--sp-1)}
@@ -816,7 +819,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B3','B2','B1','1F','2F','3F','4F','5F','6F','7F','8F','9F','10F','POPUP'];   // 소화기·소화전·공기호흡기 층 B3~10F · 맨 아래 POPUP (결정 228·260)
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.50' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.51' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -4738,11 +4741,14 @@ function whTile(k, fld, p, i) {
   return '<div class="wht"><button type="button" class="whim" onclick="whView(\'' + k + '\',\'' + fld + '\',' + i + ')" aria-label="사진 ' + (i + 1) + ' 크게 보기"><img src="' + h(p.src) + '" alt=""></button>' +
     '<button type="button" class="whx" onclick="whRm(\'' + k + '\',\'' + fld + '\',' + i + ')" aria-label="사진 지우기">' + ICON.x + '</button></div>';
 }
-function whSlots(k, fld, title, max) {   // 주간: 칸 하나에 사진 한 장, 칸마다 카메라/파일 (예전에 더 넣어 둔 사진은 칸을 더 보여 줌)
-  const L = S.wh[k].f[fld], n = Math.max(max, L.length);
-  return Array.from({ length: n }, (_, i) => '<div class="whpc"><h4>' + title + ' ' + (i + 1) + '</h4>' + whCell(k, fld, L, i) + '</div>').join('');
+const WH_MAX = 20, WH_DPAIR = 4;   // 주간 사진 짝: 서버가 작업 전·후 각 4장까지 받음
+function whDPairs(k) {   // 주간: 작업 전 N | 작업 후 N 짝, 짝 사이 구분선, 마지막 짝 다음 칸에 ＋ (결정 334)
+  const o = S.wh[k], f = o.f, n = whDN(o);
+  return '<div class="whdp">' + Array.from({ length: n }, (_, i) => '<div class="whdpr">' + ['before', 'after'].map((fld, m) => '<div class="whpc"><h4>' + (m ? '작업 후 ' : '작업 전 ') + (i + 1) + '</h4>' + whCell(k, fld, f[fld], i) + '</div>').join('') + '</div>').join('') +
+    (n < WH_DPAIR ? '<div class="whdpa">' + whAddCell('whDPlus()', n, WH_DPAIR) + '</div>' : '') + '</div>';
 }
-const WH_MAX = 20;
+function whDN(o) { return Math.min(WH_DPAIR, Math.max(2, o.f.before.length, o.f.after.length, (o.sl && o.sl.dp) || 0)); }
+function whDPlus() { const o = S.wh.d; o.sl = o.sl || {}; o.sl.dp = Math.min(WH_DPAIR, whDN(o) + 1); render(); }
 function whMin(fld) { return fld === 'pledge' ? 1 : 2; }
 function whAddCell(fn, n, max, t) { return '<button type="button" class="whadd" onclick="' + fn + '">' + ICON.plus + '<span>' + (t || '사진 칸 추가') + '</span><small>(' + n + ' / ' + max + ')</small></button>'; }
 function whMulti(k, fld, title) {   // 야간: 주간과 같은 칸 모양, ＋로 20칸까지, 휴대폰 2열 · PC 4열. ＋는 마지막 칸 다음 칸(결정 326), 각서는 1칸부터
@@ -4761,14 +4767,14 @@ function whRest(k) {
       '<button type="button" class="btn sm whsx" onclick="whRestRm(' + j + ')">' + ICON.x + ' 매장 빼기</button></div><div class="whg">' +
       Array.from({ length: n }, (_, i) => '<div class="whpc"><h4>' + (WH_RLAB[i] || '사진 ' + (i + 1)) + '</h4>' + whCell(k, fld, L, i) + '</div>').join('') +
       (n < WH_RPIC ? whAddCell('whRestPlus(' + j + ')', n, WH_RPIC) : '') + '</div></div>';
-  }).join('') + '<button type="button" class="btn whplus" onclick="whRestAdd()"' + (R.length >= WH_RMAX ? ' disabled' : '') + '>' + ICON.plus + ' 매장 추가 (' + R.length + '곳)</button></div>';
+  }).join('') + (R.length < WH_RMAX ? '<div class="whg whra">' + whAddCell('whRestAdd()', R.length, WH_RMAX, '매장 추가') + '</div>' : '') + '</div>';   // 매장 추가도 왼쪽 칸 (결정 334)
 }
 function whRestName(j, el) { S.wh.n.f.rest[j].name = el.value; whDirty(); }
 function whRestAdd() { const R = S.wh.n.f.rest; if (R.length >= WH_RMAX) return; R.push({ name: '', pics: [] }); whDirty(); render(); }
 function whRestRm(j) { const x = S.wh.n.f.rest[j]; if ((x.name.trim() || x.pics.some(Boolean)) && !confirm('매장 ' + (j + 1) + '을(를) 뺄까요? 넣은 사진도 빠집니다.')) return; S.wh.n.f.rest.splice(j, 1); whDirty(); render(); }
 function whRestPlus(j) { const x = S.wh.n.f.rest[j]; x.n = Math.min(WH_RPIC, Math.max(2, x.pics.length, x.n || 0) + 1); render(); }
 function whL(k, fld) { const f = S.wh[k].f; return /^r\d+$/.test(fld) ? f.rest[+fld.slice(1)].pics : f[fld]; }
-function whPos(fld) { return fld === 'fire' || /^r\d+$/.test(fld); }   // 칸 자리대로 보관하는 칸 (빈 칸 null)
+function whPos(fld) { return fld === 'fire' || fld === 'before' || fld === 'after' || /^r\d+$/.test(fld); }   // 칸 자리대로 보관하는 칸 (빈 칸 null)
 function whFireN(f, sl) { return Math.min(WH_MAX, Math.max(2, Math.ceil(f.fire.length / 2), sl || 0)); }
 function whFire(k) {   // 방염집기 1곳 = 집기사진 + 방염서류 (각각 카메라/파일). 짝은 저장 순서로 이어 붙여 보관(2칸씩)
   const o = S.wh[k], L = o.f.fire, n = whFireN(o.f, o.sl && o.sl.fire), c = L.filter(Boolean).length;
@@ -4786,7 +4792,7 @@ function whFormD(f) {
     '<label class="rwlb">작업자</label><input class="inp" maxlength="60" placeholder="예: 홍길동, 김철수" value="' + h(f.workers) + '" oninput="whIn(\'workers\',this)">' +
     '<div class="rwlb">작업위치 (버튼으로 선택)</div>' + whFloors(f) +
     '<label class="rwlb">작업내용</label><textarea class="inp" rows="3" maxlength="300" oninput="whIn(\'content\',this)">' + h(f.content) + '</textarea>' +
-    '<div class="whg whg2">' + whSlots('d', 'before', '작업 전', 2) + whSlots('d', 'after', '작업 후', 2) + '</div>' +
+    whDPairs('d') +
     '<div class="rwlb">사용자재 (이름 · 수량 · 단위)</div>' + f.mats.map((m, i) => '<div class="whmat"><input class="inp" maxlength="30" placeholder="자재 이름" value="' + h(m.n) + '" oninput="whMat(' + i + ',\'n\',this)" aria-label="자재 이름">' +
       '<input class="inp" maxlength="10" inputmode="decimal" placeholder="수량" value="' + h(m.q) + '" oninput="whMat(' + i + ',\'q\',this)" aria-label="수량"><input class="inp" maxlength="10" placeholder="단위" value="' + h(m.u) + '" oninput="whMat(' + i + ',\'u\',this)" aria-label="단위">' +
       '<button type="button" class="btn sm" onclick="whMatRm(' + i + ')" aria-label="자재 줄 지우기">' + ICON.x + '</button></div>').join('') +
@@ -4923,7 +4929,7 @@ function whQuality(uri) {
 }
 async function whAdd(k, fld, el, at) {
   const fs = Array.from(el.files || []); el.value = ''; if (!fs.length) return;
-  const o = S.wh[k], L = whL(k, fld), max = k === 'd' ? 2 : WH_MAX, doc = fld === 'pledge' || (fld === 'fire' && at % 2 === 1); let dup = 0, cut = 0, bad = '';
+  const o = S.wh[k], L = whL(k, fld), max = k === 'd' ? WH_DPAIR : WH_MAX, doc = fld === 'pledge' || (fld === 'fire' && at % 2 === 1); let dup = 0, cut = 0, bad = '';
   for (const f of fs) {
     if (!whPos(fld) && L.length >= max && !(at >= 0 && at < L.length)) { cut++; continue; }
     const key = f.name + '|' + f.size + '|' + f.lastModified;
@@ -4973,7 +4979,7 @@ async function whSave() {
       rest.push({ name: nm, pics: whPics4(L) });
     }
   }
-  const d = k === 'd' ? { id: f.id, day: f.day, parts: f.parts, workers: f.workers, floor: f.floor, content: f.content, mats: f.mats, note: f.note, before: whPics4(f.before), after: whPics4(f.after) }
+  const d = k === 'd' ? { id: f.id, day: f.day, parts: f.parts, workers: f.workers, floor: f.floor, content: f.content, mats: f.mats, note: f.note, before: whPics4(f.before.filter(Boolean)), after: whPics4(f.after.filter(Boolean)) }
     : { id: f.id, day: f.day, co: f.co, floor: f.floor, content: f.content, note: f.note, photos: whPics4(f.photos), fire: whPics4(fire), pledge: whPics4(f.pledge), rest };
   o.busy = true; render();
   try {
@@ -5018,7 +5024,7 @@ function whPages(k) {
     return '<div class="pg"><h1>주간 작업내역</h1><div class="sub">에비뉴엘 잠실점 시설팀</div>' +
       '<table><tr><th>일자</th><td>' + h(whDay(f.day)) + '</td><th>파트</th><td>' + h(part) + '</td></tr><tr><th>작업자</th><td>' + h(f.workers) + '</td><th>작업위치</th><td>' + h(f.floor) + '</td></tr></table>' +
       '<div class="bx"><b>작업내용</b>' + h(f.content) + '</div>' +
-      ((f.before.length || f.after.length) ? '<div class="ph"><div class="col"><h4>작업 전</h4>' + whGrid(f.before, 340, 560) + '</div><div class="col"><h4>작업 후</h4>' + whGrid(f.after, 340, 560) + '</div></div>' : '') +
+      ((f.before.some(Boolean) || f.after.some(Boolean)) ? '<div class="ph"><div class="col"><h4>작업 전</h4>' + whGrid(f.before.filter(Boolean), 340, 560) + '</div><div class="col"><h4>작업 후</h4>' + whGrid(f.after.filter(Boolean), 340, 560) + '</div></div>' : '') +
       (mats.length ? '<table style="margin-top:10px"><tr><th>사용자재</th><th style="width:auto">이름</th><th style="width:90px">수량</th><th style="width:90px">단위</th></tr>' + mats.map(m => '<tr><td></td><td>' + h(m.n) + '</td><td>' + h(m.q) + '</td><td>' + h(m.u) + '</td></tr>').join('') + '</table>' : '') +
       (f.note.trim() ? '<div class="bx"><b>비고</b>' + h(f.note) + '</div>' : '') + whFt('주간 작업내역') + '</div>';
   }
