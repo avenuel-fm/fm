@@ -313,6 +313,7 @@
                     return;
                 }
                 if (typeof activeEditingWallZone !== 'undefined' && activeEditingWallZone) {
+                    if (typeof hideWallSegSel === 'function') hideWallSegSel();
                     pushUndoState('외벽 선분 연장');
                     activeEditingWallZone.points.push({ x: ptX, y: ptY });
                     const floor = FLOORS[currentFloorIdx];
@@ -395,6 +396,13 @@
                     handleUndo();
                     return;
                 }
+            }
+
+            // 외벽 구간을 고른 상태에서 Delete = 그 구간 삭제 (결정 318)
+            if ((e.key === 'Delete' || e.code === 'Delete') && typeof wallSel !== 'undefined' && wallSel && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
+                e.preventDefault();
+                deleteWallSegment();
+                return;
             }
 
             // 단축키: 구역 모달 열린 상태에서 Delete 키로 해당 구역 즉시 삭제

@@ -553,6 +553,7 @@ function bringZoneLayersToFront() {
             if (!activeEditingWallZone) return;
             activeEditingWallZone = null;
             cleanupWallVertexHandles();
+            if (typeof hideWallSegSel === 'function') hideWallSegSel();
             const svgEl = mapContainer ? mapContainer.querySelector('svg') : document.querySelector('#map-container svg');
             if (svgEl) {
                 svgEl.querySelectorAll('.safety-zone-item.selected-zone').forEach(el => el.classList.remove('selected-zone'));
@@ -596,7 +597,7 @@ function bringZoneLayersToFront() {
                     titleEl.textContent = '🧱 외벽 수정 모드: 꼭짓점을 드래그하여 모양을 변경하거나 도면을 클릭하여 선을 이어갈 수 있습니다. (ESC: 완료)';
                 }
             }
-            showToast('외벽 선분이 선택되었습니다. 꼭짓점을 드래그하여 수정하세요.', 1500);
+            showToast('외벽 구간을 골랐습니다. Del 로 지우거나 꼭짓점을 끌어 고치세요.', 1500);
         }
 
         function renderWallVertexHandles(zone) {
@@ -609,6 +610,7 @@ function bringZoneLayersToFront() {
             svgEl.appendChild(wallVertexHandlesGroup);
 
             zone.points.forEach((pt, idx) => {
+                if (pt.t) return;   // 따라간 곡선 점에는 손잡이 없음 (직접 찍은 점만)
                 const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                 circle.setAttribute('class', 'wall-vertex-handle');
                 circle.setAttribute('cx', pt.x.toFixed(1));
@@ -1000,6 +1002,10 @@ function bringZoneLayersToFront() {
                         // 외벽인 경우: 기존 그려진 외벽 선분 선택 및 꼭짓점 수정 모드 진입
                         if (zone.category === 'wall') {
                             selectAndEditWallZone(zone);
+                            if (activeEditingWallZone === zone) {   // 누른 구간 고르기 + 삭제 편집창 (결정 318)
+                                const r = mapContainer.getBoundingClientRect(), cr = FLOORS[currentFloorIdx].crop;
+                                selectWallSegment(zone, cr.minX + (e.clientX - r.left) / scale, cr.minY + (e.clientY - r.top) / scale, e.clientX, e.clientY);
+                            }
                             return;
                         }
                         if (drawingZonePoints.length > 0) return;
