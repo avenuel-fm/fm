@@ -67,7 +67,7 @@ var toastTimer = null;
             showToast(msg, duration);
             const b = document.createElement('button');
             b.type = 'button'; b.className = 'toast-btn'; b.textContent = label;
-            b.onclick = () => { toastEl.classList.remove('show', 'has-btn'); fn(); };
+            b.onclick = e => { e.stopPropagation(); toastEl.classList.remove('show', 'has-btn'); fn(); };   // 지도 클릭(점 찍기)으로 번지지 않게
             toastEl.appendChild(b);
             toastEl.classList.add('has-btn');
         }
