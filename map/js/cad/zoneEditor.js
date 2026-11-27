@@ -114,6 +114,10 @@ function bringZoneLayersToFront() {
         // ================= 구역(방화구역/제연구획/외벽) CAD 엔진 =================
         var zoneCatBeforeEraser = 'fire';
         function setZoneCategory(cat) {
+            if (cat !== currentZoneCategory && drawingZonePoints.length) {   // 그리던 점은 다른 종류로 안 넘김 (결정 346)
+                drawingZonePoints = []; lastWallSnap = null;
+                showToast('그리던 선은 지웠습니다.', 1500);
+            }
             currentZoneCategory = cat;   // 'fire' | 'smoke' | 'wall' | 'floor' | 'erase'
             const isErase = cat === 'erase';
             ['fire', 'smoke', 'wall', 'floor'].forEach(c => {
@@ -713,6 +717,8 @@ function bringZoneLayersToFront() {
                 showToast('외벽 수정이 완료되었습니다.', 1200);
                 return;
             }
+            // 잠긴 레이어: 완성하지 않고 찍던 점만 지움 (결정 346)
+            if (isZoneDrawingMode && drawingZonePoints.length && isLayerLocked(currentZoneCategory)) { continueZoneDrawing(); warnLayerLocked(); return; }
             // 제연구획(smoke) 및 외벽(wall) 선분 그리기 진행 시 2점 이상 작성된 상태에서 ESC/취소 시: 그려진 부분 유지 및 완성
             if (isZoneDrawingMode && (currentZoneCategory === 'smoke' || currentZoneCategory === 'wall') && drawingZonePoints.length >= 2) {
                 finishDrawingZone();
@@ -740,7 +746,7 @@ function bringZoneLayersToFront() {
                 return;
             }
 
-            if (currentZoneCategory === 'wall' && isLayerLocked('wall')) { warnLayerLocked(); return; }
+            if (isLayerLocked(currentZoneCategory)) { continueZoneDrawing(); warnLayerLocked(); return; }   // 잠기면 찍던 점 지움 (결정 346)
             // 바닥이 매장·기능실을 침범하면 그 자리를 빼고 둘레 2px 밖으로 (결정 308). 여러 조각이 되면 조각마다 바닥 하나
             // 닫힌 외벽이 있으면 바닥은 외벽선 안쪽 5px 까지, 방화구역 면·제연구획 선은 외벽선까지 (결정 316)
             let floorRings = null;

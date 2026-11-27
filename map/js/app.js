@@ -272,6 +272,7 @@
 
             // 2. 구역(방화구역/제연구획/외벽) 드로잉 모드
             if (isZoneDrawingMode) {
+                if (isLayerLocked(currentZoneCategory)) { warnLayerLocked(); return; }   // 잠긴 레이어는 점부터 안 찍음 (결정 346)
                 let ptX = svgX;
                 let ptY = svgY;
                 // 외벽: 매장·기능실·바닥·외벽 테두리에 자석, 같은 테두리를 연달아 찍으면 따라감 (Shift = 끄고 곧게, 결정 316)
