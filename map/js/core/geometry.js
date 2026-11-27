@@ -149,6 +149,13 @@
         }
         function isUtilEl(el) { return (currentStores.find(s => s.polygonElement === el) || {}).type === 'utility'; }
         function floorAvoidStores(rings) { return avoidStoreShapes(rings, true); }
+        // 매장 자리(둘레 2px 포함)를 빼면 바닥이 끊어지면 = 매장을 지나가는 바닥 → 관통 (결정 320).
+        // 매장 가장자리를 덮고 좌우로 지나가는 띠도 여기 들어감. 넓은 바닥이 매장 변만 덮으면(안 끊어짐) 지금처럼 자름
+        var FLOOR_PASS_MARGIN = 12;   // 매장 둘레 이만큼 안의 가는 바닥 줄기는 이어진 것으로 안 봄 (매장 위를 살짝 넘겨 그린 띠도 관통)
+        function floorSplitByStore(pts, drawn, g) {
+            const big = r => outerRings(r).filter(q => ringArea(q) > 4).length;
+            return big(polygonClipping.difference(drawn, polygonClipping.union([pts.map(p => [p.x, p.y])], ...edgeBands(pts, g)))) >big(polygonClipping.union(...drawn));
+        }
         // only: 'utility' 면 기능실만 피함. skipEl: 자기 자신(고치는 중인 도형)은 빼고
         function avoidStoreShapes(rings, passStores, only, skipEl) {
             if (typeof polygonClipping === 'undefined' || !rings.length) return rings;
@@ -160,7 +167,7 @@
                 // 바닥이 매장을 꿰뚫어(매장이 둘 이상으로 나뉨) 지나가면 자르지 않고 그린 대로. 기능실은 꿰뚫을 수 없음 (결정 314)
                 const isUtil = isUtilEl(c.el);
                 if (only === 'utility' && !isUtil) return;
-                if (passStores && !isUtil && polygonClipping.difference([[c.pts.map(p => [p.x, p.y])]], drawn).length >= 2) return;
+                if (passStores && !isUtil && (polygonClipping.difference([[c.pts.map(p => [p.x, p.y])]], drawn).length >= 2 || floorSplitByStore(c.pts, drawn, FLOOR_PASS_MARGIN))) return;
                 cut.push([c.pts.map(p => [p.x, p.y])], ...edgeBands(c.pts, g));   // 둘레 2px 키운 모양
             });
             if (!cut.length) return rings;

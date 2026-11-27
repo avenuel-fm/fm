@@ -445,6 +445,8 @@ function bringZoneLayersToFront() {
                     }
                 }
 
+                if (isWall && snapInfo && snapInfo.key) wallSnapHighlight(tempZoneDrawingGroup, snapInfo, targetX, targetY);   // 붙은 테두리 초록 + 이름 (결정 320)
+
                 // 직각 체크(또는 Shift): 미리보기도 수평·수직으로 (외벽이 테두리에 붙었으면 붙은 자리 그대로)
                 if (drawingZonePoints.length > 0 && typeof snapToOrtho === 'function' && !(isWall && snapInfo && snapInfo.key)) {
                     const o = snapToOrtho({ x: targetX, y: targetY }, drawingZonePoints[drawingZonePoints.length - 1]);
@@ -457,7 +459,7 @@ function bringZoneLayersToFront() {
                     const lastPt = drawingZonePoints[drawingZonePoints.length - 1];
                     const via = isWall && snapInfo && snapInfo.key ? wallTraceBetween(lastWallSnap, snapInfo) : [];   // 같은 테두리면 따라감
                     const line = document.createElementNS('http://www.w3.org/2000/svg', via.length ? 'polyline' : 'line');
-                    if (via.length) { line.setAttribute('points', [lastPt].concat(via, [{ x: targetX, y: targetY }]).map(p => `${p.x},${p.y}`).join(' ')); line.setAttribute('fill', 'none'); }
+                    if (via.length) { line.setAttribute('points', [lastPt].concat(via, [{ x: targetX, y: targetY }]).map(p => `${p.x},${p.y}`).join(' ')); line.setAttribute('fill', 'none'); line.setAttribute('stroke-dasharray', '6 4'); }   // 따라갈 길 미리 보기 (결정 320)
                     line.setAttribute('x1', lastPt.x);
                     line.setAttribute('y1', lastPt.y);
                     line.setAttribute('x2', targetX);
