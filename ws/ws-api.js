@@ -44,6 +44,11 @@
   }
 
   /** 작업내역 사진 칸: 이미 있는 것은 {id}, 새 것({data})은 버킷에 올려 {file} */
+  async function dwRest(list) {   // 야간 식당가 점검: 매장마다 사진 올리기
+    const out = [];
+    for (const s of Array.isArray(list) ? list : []) out.push({ name: s.name, pics: await dwPics(s.pics) });
+    return out;
+  }
   async function dwPics(list) {
     const out = [];
     for (const p of Array.isArray(list) ? list : []) {
@@ -240,7 +245,7 @@
     dwSave: async (token, d) => rpc('ws_dw_save', { p_token: token, p_d: Object.assign({}, d, { before: await dwPics(d.before), after: await dwPics(d.after) }) }),
     dwDelete: (token, id) => rpc('ws_dw_delete', { p_token: token, p_id: String(id || '') }),
     dnList: (token, q, from, to) => rpc('ws_dn_list', { p_token: token, p_q: q || '', p_from: from || '', p_to: to || '' }),
-    dnSave: async (token, d) => rpc('ws_dn_save', { p_token: token, p_d: Object.assign({}, d, { photos: await dwPics(d.photos), fire: await dwPics(d.fire), pledge: await dwPics(d.pledge) }) }),
+    dnSave: async (token, d) => rpc('ws_dn_save', { p_token: token, p_d: Object.assign({}, d, { photos: await dwPics(d.photos), fire: await dwPics(d.fire), pledge: await dwPics(d.pledge), rest: await dwRest(d.rest) }) }),
     dnDelete: (token, id) => rpc('ws_dn_delete', { p_token: token, p_id: String(id || '') }),
 
     /* ── 하자점검 (supabase/27_defect.sql): 사진·서명은 버킷 dw_photo/ 에 먼저 올리고 {file} 로 넘김 ── */

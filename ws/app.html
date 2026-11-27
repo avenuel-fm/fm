@@ -10,10 +10,10 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.26.45"></script>
-<script>window.WS_VERSION = '0.26.45';</script>
-<script src="offline.js?v=0.26.45"></script>
-<script src="ws-api.js?v=0.26.45"></script>
+<script src="config.js?v=0.26.46"></script>
+<script>window.WS_VERSION = '0.26.46';</script>
+<script src="offline.js?v=0.26.46"></script>
+<script src="ws-api.js?v=0.26.46"></script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -697,7 +697,7 @@ select.lgin{text-align:center;padding:0}
 /* 주간/야간 작업내역 (결정 240) */
 .whf{padding:var(--sp-3)}.whpic{min-width:0;margin-top:var(--sp-3)}.whpt{display:flex;align-items:baseline;gap:var(--sp-2);margin-bottom:var(--sp-1)}.whpt b{font-size:var(--size-s);font-weight:600;color:var(--sub)}.whpt small{color:var(--muted);font-size:var(--size-s)}
 .whpc{border:1px solid var(--line2);border-radius:var(--radius);padding:var(--sp-2);margin-top:var(--sp-2);min-width:0}.whpc h4{margin:0 0 var(--sp-1);font-size:var(--size-m);font-weight:600;color:var(--navy)}.whpc h4 small{margin-left:var(--sp-2);font-weight:400;color:var(--muted);font-size:var(--size-s)}
-.whg,.whg2{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-1)}.whg2{margin-top:var(--sp-2)}.whg .whpc{margin-top:0}.whsec{margin-top:var(--sp-2)}.whsec>h4{margin:0 0 var(--sp-1);font-size:var(--size-m);font-weight:600;color:var(--navy)}.whsec>h4 small{margin-left:var(--sp-2);font-weight:400;color:var(--muted);font-size:var(--size-s)}.whfp{margin-top:var(--sp-2)}.whfp:first-of-type{margin-top:0}.whfp>b{display:block;font-size:var(--size-s);color:var(--navy);margin-bottom:2px}.whg.whfg>.whpc{grid-column:span 2}.whfr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-1)}.whfr .whfp{margin-top:0;min-width:0}.whplus{width:100%;margin-top:var(--sp-1);border-style:dashed;color:var(--blue-d)}@media (min-width:768px){.whg{grid-template-columns:repeat(4,1fr)}}
+.whg,.whg2{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-1)}.whg2{margin-top:var(--sp-2)}.whg .whpc{margin-top:0}.whsec{margin-top:var(--sp-2)}.whsec>h4{margin:0 0 var(--sp-1);font-size:var(--size-m);font-weight:600;color:var(--navy)}.whsec>h4 small{margin-left:var(--sp-2);font-weight:400;color:var(--muted);font-size:var(--size-s)}.whfp{margin-top:var(--sp-2)}.whfp:first-of-type{margin-top:0}.whfp>b{display:block;font-size:var(--size-s);color:var(--navy);margin-bottom:2px}.whg.whfg>.whpc{grid-column:span 2}.whfr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-1)}.whfr .whfp{margin-top:0;min-width:0}.whplus{width:100%;margin-top:var(--sp-1);border-style:dashed;color:var(--blue-d)}.whadd{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:150px;border:1.5px dashed var(--blue-d);border-radius:var(--radius);background:transparent;color:var(--blue-d);font:inherit;font-weight:600;cursor:pointer}.whadd small{font-weight:400;font-size:var(--size-s)}.whst{border:1px solid var(--line2);border-radius:var(--radius);padding:var(--sp-2);margin-top:var(--sp-1)}.whsh{display:flex;gap:var(--sp-1);align-items:center;margin-bottom:var(--sp-2)}.whsh b{white-space:nowrap;color:var(--navy)}.whsh .inp{flex:1;min-width:0}.whsx{white-space:nowrap;color:var(--red,#C0392B)}@media (min-width:768px){.whg{grid-template-columns:repeat(4,1fr)}}
 .wht{position:relative;min-width:0}.whim{display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:4/3;border:1px solid var(--line2);padding:0;background:var(--tint);cursor:pointer;overflow:hidden;color:var(--muted);font-size:var(--size-s)}.whim img{width:100%;height:100%;object-fit:contain}.whim.empty{cursor:default}
 .whx{position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:var(--radius);border:1px solid var(--line);background:var(--white);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
 .whbs{display:flex;gap:var(--sp-1);margin-top:var(--sp-1)}.whbs .btn{flex:1;min-width:0;min-height:var(--control-h);padding:0 var(--sp-1);gap:var(--sp-1)}
@@ -816,7 +816,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B3','B2','B1','1F','2F','3F','4F','5F','6F','7F','8F','9F','10F','POPUP'];   // 소화기·소화전·공기호흡기 층 B3~10F · 맨 아래 POPUP (결정 228·260)
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.45' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.46' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -4698,7 +4698,7 @@ const WH_API = { d: ['dwList', 'dwSave', 'dwDelete'], n: ['dnList', 'dnSave', 'd
 const WH_TITLE = { d: '주간 작업내역', n: '야간 작업내역' };
 function whNew(k) {
   const u = S.user || {}, part = u.part === '전방파트' ? ['전기방재'] : u.part === '기건파트' ? ['기계건축'] : [];
-  return k === 'n' ? { id: '', day: rwToday(), co: '', floor: '', content: '', note: '', photos: [], fire: [], pledge: [] }
+  return k === 'n' ? { id: '', day: rwToday(), co: '', floor: '', content: '', note: '', photos: [], fire: [], pledge: [], rest: [] }
     : { id: '', day: rwToday(), parts: part, workers: u.name || '', floor: '', content: '', mats: [{ n: '', q: '', u: '' }], note: '', before: [], after: [] };
 }
 async function openWh() {
@@ -4717,7 +4717,7 @@ function whNewForm() { const o = S.wh.n; if (o.dirty && !confirm('저장하지 �
 function whEdit(id) {
   const k = S.wh.tab, o = S.wh[k], x = o.list.find(y => y.id === id); if (!x) return;
   if (o.dirty && !confirm('저장하지 않은 내용이 있습니다. 다른 작업을 열까요?')) return;
-  o.sl = {}; o.f = JSON.parse(JSON.stringify(x)); if (k === 'd' && !o.f.mats.length) o.f.mats.push({ n: '', q: '', u: '' });
+  o.sl = {}; o.f = JSON.parse(JSON.stringify(x)); if (k === 'd' && !o.f.mats.length) o.f.mats.push({ n: '', q: '', u: '' }); if (k === 'n' && !o.f.rest) o.f.rest = [];
   o.dirty = false; render(); window.scrollTo(0, 0);
 }
 function whDirty() { const o = S.wh[S.wh.tab]; o.dirty = true; const e = $('whState'); if (e) e.innerHTML = whState(); }
@@ -4730,8 +4730,8 @@ function whMatAdd() { const m = S.wh.d.f.mats; if (m.length >= 20) return toast(
 function whMatRm(i) { const m = S.wh.d.f.mats; m.splice(i, 1); if (!m.length) m.push({ n: '', q: '', u: '' }); whDirty(); render(); }
 
 /* 사진 칸 (하자점검 칸 모양, 사용자 11-26): 큰 4:3 칸 — 비었으면 안에 [카메라] · 아래 [파일] */
-function whCell(k, fld, L, i, multi) {
-  const pick = cam => '<label class="btn dfbt' + (cam ? ' dfcam' : '') + '">' + (cam ? ICON.cam + ' 카메라' : ICON.folder + ' 파일') + '<input type="file" accept="image/*"' + (cam ? ' capture="environment"' : multi ? ' multiple' : '') + ' hidden onchange="whAdd(\'' + k + '\',\'' + fld + '\',this,' + i + ')"></label>';
+function whCell(k, fld, L, i) {
+  const pick = cam => '<label class="btn dfbt' + (cam ? ' dfcam' : '') + '">' + (cam ? ICON.cam + ' 카메라' : ICON.folder + ' 파일') + '<input type="file" accept="image/*"' + (cam ? ' capture="environment"' : '') + ' hidden onchange="whAdd(\'' + k + '\',\'' + fld + '\',this,' + i + ')"></label>';
   return (L[i] ? whTile(k, fld, L[i], i) : '<div class="whim dfph">' + pick(1) + '</div>') + '<div class="whbs">' + pick(0) + '</div>';
 }
 function whTile(k, fld, p, i) {
@@ -4740,25 +4740,46 @@ function whTile(k, fld, p, i) {
 }
 function whSlots(k, fld, title, max) {   // 주간: 칸 하나에 사진 한 장, 칸마다 카메라/파일 (예전에 더 넣어 둔 사진은 칸을 더 보여 줌)
   const L = S.wh[k].f[fld], n = Math.max(max, L.length);
-  return Array.from({ length: n }, (_, i) => '<div class="whpc"><h4>' + title + ' ' + (i + 1) + '</h4>' + whCell(k, fld, L, i, false) + '</div>').join('');
+  return Array.from({ length: n }, (_, i) => '<div class="whpc"><h4>' + title + ' ' + (i + 1) + '</h4>' + whCell(k, fld, L, i) + '</div>').join('');
 }
 const WH_MAX = 20;
-function whMulti(k, fld, title) {   // 야간: 주간과 같은 칸 모양, 처음 2칸 · ＋ 버튼으로 20칸까지, 휴대폰 2열 · PC 4열
-  const o = S.wh[k], L = o.f[fld], n = Math.max(2, L.length, (o.sl && o.sl[fld]) || 0);
+function whMin(fld) { return fld === 'pledge' ? 1 : 2; }
+function whAddCell(fn, n, max) { return '<button type="button" class="whadd" onclick="' + fn + '">' + ICON.plus + '<span>사진 칸 추가</span><small>(' + n + ' / ' + max + ')</small></button>'; }
+function whMulti(k, fld, title) {   // 야간: 주간과 같은 칸 모양, ＋로 20칸까지, 휴대폰 2열 · PC 4열. 각서는 1칸 + 오른쪽 ＋ 칸
+  const o = S.wh[k], L = o.f[fld], n = Math.max(whMin(fld), L.length, (o.sl && o.sl[fld]) || 0), cell = fld === 'pledge', add = 'whPlus(\'' + k + '\',\'' + fld + '\')';
   return '<div class="whsec"><h4>' + title + '<small>' + L.length + '장 / ' + WH_MAX + '장</small></h4><div class="whg">' +
-    Array.from({ length: n }, (_, i) => '<div class="whpc"><h4>' + title + ' ' + (i + 1) + '</h4>' + whCell(k, fld, L, i, true) + '</div>').join('') + '</div>' +
-    '<button type="button" class="btn whplus" onclick="whPlus(\'' + k + '\',\'' + fld + '\')"' + (n >= WH_MAX ? ' disabled' : '') + '>' + ICON.plus + ' 사진 칸 추가 (' + n + ' / ' + WH_MAX + ')</button></div>';
+    Array.from({ length: n }, (_, i) => '<div class="whpc"><h4>' + title + ' ' + (i + 1) + '</h4>' + whCell(k, fld, L, i) + '</div>').join('') +
+    (cell && n < WH_MAX ? whAddCell(add, n, WH_MAX) : '') + '</div>' +
+    (cell ? '' : '<button type="button" class="btn whplus" onclick="' + add + '"' + (n >= WH_MAX ? ' disabled' : '') + '>' + ICON.plus + ' 사진 칸 추가 (' + n + ' / ' + WH_MAX + ')</button>') + '</div>';
 }
+/* 식당가 점검: 매장 1곳 = 매장명 + 사진(1 가스누설경보기 · 2 주방전경 필수, ＋로 10장까지). 사진은 칸 자리대로 보관(빈 칸 null) */
+const WH_RMAX = 20, WH_RPIC = 10, WH_RLAB = ['가스누설경보기', '주방전경'];
+function whRest(k) {
+  const R = S.wh[k].f.rest, c = R.reduce((a, x) => a + x.pics.filter(Boolean).length, 0);
+  return '<div class="whsec whrest"><h4>식당가 점검<small>매장 ' + R.length + '곳 · 사진 ' + c + '장</small></h4>' + R.map((x, j) => {
+    const L = x.pics, n = Math.min(WH_RPIC, Math.max(2, L.length, x.n || 0)), fld = 'r' + j;
+    return '<div class="whst"><div class="whsh"><b>매장 ' + (j + 1) + '</b><input class="inp" maxlength="30" placeholder="매장명 입력" value="' + h(x.name) + '" oninput="whRestName(' + j + ',this)" aria-label="매장 ' + (j + 1) + ' 매장명">' +
+      '<button type="button" class="btn sm whsx" onclick="whRestRm(' + j + ')">' + ICON.x + ' 매장 빼기</button></div><div class="whg">' +
+      Array.from({ length: n }, (_, i) => '<div class="whpc"><h4>' + (WH_RLAB[i] || '사진 ' + (i + 1)) + '</h4>' + whCell(k, fld, L, i) + '</div>').join('') +
+      (n < WH_RPIC ? whAddCell('whRestPlus(' + j + ')', n, WH_RPIC) : '') + '</div></div>';
+  }).join('') + '<button type="button" class="btn whplus" onclick="whRestAdd()"' + (R.length >= WH_RMAX ? ' disabled' : '') + '>' + ICON.plus + ' 매장 추가 (' + R.length + '곳)</button></div>';
+}
+function whRestName(j, el) { S.wh.n.f.rest[j].name = el.value; whDirty(); }
+function whRestAdd() { const R = S.wh.n.f.rest; if (R.length >= WH_RMAX) return; R.push({ name: '', pics: [] }); whDirty(); render(); }
+function whRestRm(j) { const x = S.wh.n.f.rest[j]; if ((x.name.trim() || x.pics.some(Boolean)) && !confirm('매장 ' + (j + 1) + '을(를) 뺄까요? 넣은 사진도 빠집니다.')) return; S.wh.n.f.rest.splice(j, 1); whDirty(); render(); }
+function whRestPlus(j) { const x = S.wh.n.f.rest[j]; x.n = Math.min(WH_RPIC, Math.max(2, x.pics.length, x.n || 0) + 1); render(); }
+function whL(k, fld) { const f = S.wh[k].f; return /^r\d+$/.test(fld) ? f.rest[+fld.slice(1)].pics : f[fld]; }
+function whPos(fld) { return fld === 'fire' || /^r\d+$/.test(fld); }   // 칸 자리대로 보관하는 칸 (빈 칸 null)
 function whFireN(f, sl) { return Math.min(WH_MAX, Math.max(2, Math.ceil(f.fire.length / 2), sl || 0)); }
 function whFire(k) {   // 방염집기 1곳 = 집기사진 + 방염서류 (각각 카메라/파일). 짝은 저장 순서로 이어 붙여 보관(2칸씩)
   const o = S.wh[k], L = o.f.fire, n = whFireN(o.f, o.sl && o.sl.fire), c = L.filter(Boolean).length;
-  const part = (t, i) => '<div class="whfp"><b>' + t + '</b>' + whCell(k, 'fire', L, i, false) + '</div>';
+  const part = (t, i) => '<div class="whfp"><b>' + t + '</b>' + whCell(k, 'fire', L, i) + '</div>';
   return '<div class="whsec"><h4>방염집기<small>사진 ' + c + '장 / ' + WH_MAX * 2 + '장</small></h4><div class="whg whfg">' +
     Array.from({ length: n }, (_, j) => '<div class="whpc"><h4>방염집기 ' + (j + 1) + '</h4>' + '<div class="whfr">' + part('집기사진', 2 * j) + part('방염서류', 2 * j + 1) + '</div></div>').join('') + '</div>' +
     '<button type="button" class="btn whplus" onclick="whPlus(\'' + k + '\',\'fire\')"' + (n >= WH_MAX ? ' disabled' : '') + '>' + ICON.plus + ' 방염집기 추가 (' + n + ' / ' + WH_MAX + ')</button></div>';
 }
 function whFirePairs(L) { const r = []; for (let j = 0; j * 2 < L.length; j++) if (L[2 * j] || L[2 * j + 1]) r.push([L[2 * j] || null, L[2 * j + 1] || null]); return r; }
-function whPlus(k, fld) { const o = S.wh[k]; o.sl = o.sl || {}; o.sl[fld] = fld === 'fire' ? Math.min(WH_MAX, whFireN(o.f, o.sl[fld]) + 1) : Math.min(WH_MAX, Math.max(2, o.f[fld].length, o.sl[fld] || 0) + 1); render(); }
+function whPlus(k, fld) { const o = S.wh[k]; o.sl = o.sl || {}; o.sl[fld] = fld === 'fire' ? Math.min(WH_MAX, whFireN(o.f, o.sl[fld]) + 1) : Math.min(WH_MAX, Math.max(whMin(fld), o.f[fld].length, o.sl[fld] || 0) + 1); render(); }
 function whFloors(f) { return '<div class="rwfls">' + RW_FLOORS.map(x => '<button type="button" class="rwfl' + (f.floor === x ? ' on' : '') + '" aria-pressed="' + (f.floor === x) + '" onclick="whFloor(\'' + x + '\')">' + x + '</button>').join('') + '</div>'; }
 function whFormD(f) {
   return '<div class="card whf"><label class="rwlb">일자</label><input class="inp" type="date" max="' + rwToday() + '" value="' + h(f.day) + '" onchange="whIn(\'day\',this)" aria-label="일자">' +
@@ -4780,7 +4801,7 @@ function whFormN(f) {
     '<div class="rwlb">작업위치 (버튼으로 선택)</div>' + whFloors(f) +
     '<label class="rwlb">작업내용</label><textarea class="inp" rows="3" maxlength="300" oninput="whIn(\'content\',this)">' + h(f.content) + '</textarea>' +
     whFire('n') + whMulti('n', 'pledge', '각서') +
-    '<small class="rwhint">서류 사진은 누르면 크게 볼 수 있습니다. 흐리거나 어두우면 「다시 찍으세요」 안내가 나옵니다. 서류 사진은 일반 사진보다 덜 줄여 저장합니다.</small>' +
+    '<small class="rwhint">서류 사진은 누르면 크게 볼 수 있습니다. 흐리거나 어두우면 「다시 찍으세요」 안내가 나옵니다. 서류 사진은 일반 사진보다 덜 줄여 저장합니다.</small>' + whRest('n') +
     '<label class="rwlb">기타사항</label><textarea class="inp" rows="2" maxlength="300" oninput="whIn(\'note\',this)">' + h(f.note) + '</textarea>' + whDelBtn(f) + '</div>';
 }
 function whDelBtn(f) { return f.id ? '<button type="button" class="btn sm whdel" onclick="whDel()">이 작업 삭제</button>' : ''; }
@@ -4793,7 +4814,7 @@ function whListHtml(k) {
   const bad = (t, n) => n ? '' : '<span class="whb">' + t + ' 없음</span>';
   const row = x => '<button type="button" class="whrow' + (o.f && o.f.id === x.id ? ' on' : '') + '" onclick="whEdit(&quot;' + x.id + '&quot;)"><b>' + h(x.day.slice(5).replace('-', '/')) + (x.floor ? ' · ' + h(x.floor) : '') + (k === 'n' ? ' · ' + h(x.co) : '') + '</b>' +
     '<span>' + h(x.content) + '</span><small>' + (k === 'd' ? h(x.workers) + ' · ' + x.parts.map(p => (WH_PARTS.find(y => y[0] === p) || [0, p])[1]).join('·') + ' · 사진 ' + (x.before.length + x.after.length) + '장'
-      : '현장 ' + x.photos.length + '장 ' + bad('방염집기', x.fire.length) + bad('각서', x.pledge.length)) + '</small></button>';
+      : '현장 ' + x.photos.length + '장 ' + bad('방염집기', x.fire.length) + ((x.rest || []).length ? ' · 식당가 ' + x.rest.length + '곳' : '')) + '</small></button>';
   const mons = []; o.list.forEach(x => {   // 목록은 최근 날짜가 위
     const m = x.day.slice(0, 7), w = whWeek(x.day)[0]; let M = mons.find(y => y.m === m); if (!M) mons.push(M = { m, n: 0, wk: [] });
     let W = M.wk.find(y => y.w === w); if (!W) M.wk.push(W = { w, list: [] }); W.list.push(x); M.n++;
@@ -4903,14 +4924,14 @@ function whQuality(uri) {
 }
 async function whAdd(k, fld, el, at) {
   const fs = Array.from(el.files || []); el.value = ''; if (!fs.length) return;
-  const o = S.wh[k], L = o.f[fld], max = k === 'd' ? 2 : WH_MAX, doc = fld === 'pledge' || (fld === 'fire' && at % 2 === 1); let dup = 0, cut = 0, bad = '';
+  const o = S.wh[k], L = whL(k, fld), max = k === 'd' ? 2 : WH_MAX, doc = fld === 'pledge' || (fld === 'fire' && at % 2 === 1); let dup = 0, cut = 0, bad = '';
   for (const f of fs) {
-    if (fld !== 'fire' && L.length >= max && !(at >= 0 && at < L.length)) { cut++; continue; }
+    if (!whPos(fld) && L.length >= max && !(at >= 0 && at < L.length)) { cut++; continue; }
     const key = f.name + '|' + f.size + '|' + f.lastModified;
     if (o.keys.indexOf(key) !== -1) { dup++; continue; }
     try {
       const data = await (doc ? shrinkJpeg(f, 2400, 0.85) : shrinkJpeg(f, 1600, 0.7));
-      if (fld === 'fire') { while (L.length < at) L.push(null); L[at] = { data, src: data }; } else if (at >= 0 && at < L.length) L[at] = { data, src: data }; else L.push({ data, src: data }); o.keys.push(key); at = -1; if (o.keys.length > 80) o.keys.shift();
+      if (whPos(fld)) { while (L.length < at) L.push(null); L[at] = { data, src: data }; } else if (at >= 0 && at < L.length) L[at] = { data, src: data }; else L.push({ data, src: data }); o.keys.push(key); at = -1; if (o.keys.length > 80) o.keys.shift();
       if (doc && !bad) bad = await whQuality(data);
     } catch (e) { toast(e.message); }
   }
@@ -4919,8 +4940,8 @@ async function whAdd(k, fld, el, at) {
   if (bad) toast('서류 사진이 ' + bad + '. 다시 찍어 주세요');
   whDirty(); render();
 }
-function whRm(k, fld, i) { if (!confirm('이 사진을 지울까요?')) return; const L = S.wh[k].f[fld]; if (fld === 'fire') { L[i] = null; while (L.length && !L[L.length - 1]) L.pop(); } else L.splice(i, 1); whDirty(); render(); }
-function whView(k, fld, i) { const L = S.wh[k].f[fld], ix = L.map((p, j) => p ? j : -1).filter(j => j >= 0); S.wh.v = { list: ix.map(j => L[j].src), i: ix.indexOf(i), z: 1 }; whVDraw(); }
+function whRm(k, fld, i) { if (!confirm('이 사진을 지울까요?')) return; const L = whL(k, fld); if (whPos(fld)) { L[i] = null; while (L.length && !L[L.length - 1]) L.pop(); } else L.splice(i, 1); whDirty(); render(); }
+function whView(k, fld, i) { const L = whL(k, fld), ix = L.map((p, j) => p ? j : -1).filter(j => j >= 0); S.wh.v = { list: ix.map(j => L[j].src), i: ix.indexOf(i), z: 1 }; whVDraw(); }
 function whVDraw() {
   const v = S.wh.v;
   $('layer').innerHTML = '<div class="rwv" role="dialog" aria-modal="true"><div class="rwvh"><span>' + (v.i + 1) + ' / ' + v.list.length + '</span><button class="btn sm" onclick="whVClose()">닫기</button></div>' +
@@ -4938,16 +4959,23 @@ async function whSave() {
   if (k === 'd' && !f.parts.length) return toast('파트를 하나 이상 골라 주세요');
   if (k === 'n' && !f.co.trim()) return toast('업체명을 입력해 주세요');
   if (!f.content.trim()) return toast('작업내용을 입력해 주세요');
-  let fire = [];
+  let fire = []; const rest = [];
   if (k === 'n') {
     const L = f.fire; for (let j = 0; j * 2 < L.length; j++) {
       const a = L[2 * j], b = L[2 * j + 1];
       if (!!a !== !!b) return toast('방염집기 ' + (j + 1) + '에 ' + (a ? '방염서류' : '집기사진') + ' 사진도 넣어 주세요');
       if (a) fire.push(a, b);
     }
+    for (let j = 0; j < f.rest.length; j++) {
+      const x = f.rest[j], nm = x.name.trim(), L = x.pics.filter(Boolean);
+      if (!nm && !L.length) continue;   // 빈 매장은 빼고 저장
+      if (!nm) return toast('매장 ' + (j + 1) + ': 매장명을 넣어 주세요');
+      if (!x.pics[0] || !x.pics[1]) return toast('매장 ' + (j + 1) + ': ' + (x.pics[0] ? '주방전경' : '가스누설경보기') + ' 사진을 넣어 주세요');
+      rest.push({ name: nm, pics: whPics4(L) });
+    }
   }
   const d = k === 'd' ? { id: f.id, day: f.day, parts: f.parts, workers: f.workers, floor: f.floor, content: f.content, mats: f.mats, note: f.note, before: whPics4(f.before), after: whPics4(f.after) }
-    : { id: f.id, day: f.day, co: f.co, floor: f.floor, content: f.content, note: f.note, photos: whPics4(f.photos), fire: whPics4(fire), pledge: whPics4(f.pledge) };
+    : { id: f.id, day: f.day, co: f.co, floor: f.floor, content: f.content, note: f.note, photos: whPics4(f.photos), fire: whPics4(fire), pledge: whPics4(f.pledge), rest };
   o.busy = true; render();
   try {
     const r = await call(WH_API[k][1], d); o.busy = false;
@@ -4973,14 +5001,14 @@ const WH_CSS = '.whp{font-family:"Noto Sans KR","Malgun Gothic",sans-serif;color
   '.whp td,.whp th{border:1px solid #888;font-size:12px;padding:5px 7px;text-align:left;vertical-align:top;line-height:1.45;word-break:break-all}.whp th{background:#e8edf3;width:72px;font-weight:600}' +
   '.whp .bx{border:1px solid #888;padding:7px 9px;font-size:12px;line-height:1.5;min-height:48px;margin-bottom:10px;white-space:pre-wrap;word-break:break-all}.whp .bx b{display:block;font-size:11px;color:#444;margin-bottom:2px}' +
   '.whp .ph{display:flex;gap:0;border:1px solid #888}.whp .col{flex:1;min-width:0;padding:6px}.whp .col+.col{border-left:1px solid #888}.whp .col h4{margin:0 0 5px;font-size:12px}' +
-  '.whp .gr{display:grid;gap:5px}.whp .cell{background:#f1f3f6;display:flex;align-items:center;justify-content:center;overflow:hidden}.whp .cell img{display:block}' +
+  '.whp .gr{display:grid;gap:5px}.whp .cell{background:#f1f3f6;display:flex;align-items:center;justify-content:center;overflow:hidden}.whp .cell{position:relative}.whp .cell img{display:block}.whp .cap{position:absolute;left:0;top:0;background:#fff;border:1px solid #888;font-size:10px;padding:1px 5px}' +
   '.whp .none{font-size:12px;color:#666;padding:10px 0}.whp .full{position:absolute;left:44px;right:44px;top:70px;bottom:44px;display:flex;align-items:center;justify-content:center}.whp .full img{display:block}.whp .fa,.whp .fb{position:absolute;left:44px;right:44px;display:flex;align-items:center;justify-content:center}.whp .fa{top:70px;height:250px}.whp .fb{top:340px;bottom:44px}.whp .fa img,.whp .fb img{display:block}.whp .lbl{position:absolute;left:0;top:-14px;font-size:10px;color:#666}' +
   '.whp .ft{position:absolute;left:44px;right:44px;bottom:16px;font-size:10px;color:#666;display:flex;justify-content:space-between}.whp .pdfonly{color:#999}@media print{.whp .pdfonly{display:none}}';
 function whGrid(l, W, H) {   // 장수에 맞춰 칸 수·크기를 정함 (많으면 줄여서 한 쪽에 모음). 칸이 모자라면 빈 칸은 안 그림
   if (!l.length) return '';
   const n = l.length, cols = n === 1 ? 1 : n <= 4 ? 2 : n <= 9 ? 3 : n <= 16 ? 4 : 5, rows = Math.ceil(n / cols), gap = 5;
   const ch = Math.floor((H - gap * (rows - 1)) / rows), cw = Math.floor((W - gap * (cols - 1)) / cols), s = Math.min(ch, Math.round(cw * 0.75));
-  return '<div class="gr" style="grid-template-columns:repeat(' + cols + ',1fr)">' + l.map(p => '<div class="cell" style="height:' + s + 'px"><img src="' + h(p.src) + '" alt=""></div>').join('') + '</div>';
+  return '<div class="gr" style="grid-template-columns:repeat(' + cols + ',1fr)">' + l.map(p => '<div class="cell" style="height:' + s + 'px"><img src="' + h(p.src) + '" alt="">' + (p.cap ? '<span class="cap">' + h(p.cap) + '</span>' : '') + '</div>').join('') + '</div>';
 }
 function whDay(d) { return d.slice(0, 4) + '년 ' + Number(d.slice(5, 7)) + '월 ' + Number(d.slice(8, 10)) + '일'; }
 function whFt(t) { return '<div class="ft"><span>에비뉴엘 잠실점 시설팀 · 출력 ' + rwToday() + '</span><span>' + h(t) + '</span></div>'; }
@@ -5004,7 +5032,10 @@ function whPages(k) {
   const box = (cls, t, p) => '<div class="' + cls + '"><div class="lbl">' + t + '</div>' + (p ? '<img src="' + h(p.src) + '" alt="">' : '<div class="none">미첨부</div>') + '</div>';
   const fire = pr.length ? pr.map((q, i) => '<div class="pg"><div class="sub">방염집기 ' + (i + 1) + '/' + pr.length + ' · ' + h(f.co) + ' · ' + h(whDay(f.day)) + ' <span class="pdfonly">· 이 쪽부터 단면 인쇄</span></div>' + box('fa', '집기사진', q[0]) + box('fb', '방염서류', q[1]) + '</div>').join('')
     : '<div class="pg"><h1>방염집기</h1><div class="sub">' + h(f.co) + ' · ' + h(whDay(f.day)) + '</div><div class="none">방염집기 미첨부</div></div>';
-  return p1 + p2 + fire;
+  const R = (f.rest || []).filter(x => x.pics.some(Boolean));
+  const rest = R.map((x, i) => '<div class="pg"><h1>식당가 점검</h1><div class="sub">' + h(x.name) + ' · ' + h(f.co) + ' · ' + h(whDay(f.day)) + ' (' + (i + 1) + '/' + R.length + ')</div>' +
+    whGrid(x.pics.map((p, j) => p && { src: p.src, cap: WH_RLAB[j] || '사진 ' + (j + 1) }).filter(Boolean), 706, 940) + whFt('야간 작업내역 · 식당가 점검') + '</div>').join('');
+  return p1 + p2 + fire + rest;
 }
 /* 사진은 자르지 않고 칸에 맞춰 줄임 — PDF 도구가 object-fit 을 못 읽어 크기를 직접 정함 */
 async function whFit(box) {
