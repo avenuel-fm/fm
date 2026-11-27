@@ -489,11 +489,13 @@ body:not(.zone-cat-wall) .safety-zone-item[data-zone-category="wall"] .user-draw
 #wall-check-bar { position: fixed; top: 110px; left: 50%; transform: translateX(-50%); z-index: 3000; display: none; align-items: center; flex-wrap: wrap; gap: 8px; max-width: calc(100vw - 32px); padding: 8px 12px; background: #fff; border: 1px solid #fca5a5; border-radius: 8px; box-shadow: 0 4px 14px rgba(0,0,0,.15); font-size: 13px; color: #334155; }
 #wall-check-bar .wall-bar-btn { height: 30px; padding: 0 12px; border: none; border-radius: 6px; background: #dc2626; color: #fff; font-weight: 700; cursor: pointer; }
 #wall-check-bar .wall-bar-x { width: 28px; height: 28px; border: none; background: none; color: #64748b; cursor: pointer; font-size: 14px; }
-#wall-seg-pop, #floor-sel-pop { position: fixed; z-index: 3001; display: flex; flex-direction: column; gap: 6px; width: 170px; padding: 10px; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 4px 14px rgba(0,0,0,.15); font-size: 13px; color: #334155; }
-#wall-seg-pop .wall-seg-title, #floor-sel-pop .wall-seg-title { font-weight: 700; padding-right: 24px; }
-#wall-seg-pop button, #floor-sel-pop button { height: 30px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: #334155; cursor: pointer; font-size: 13px; }
+#wall-seg-pop, #floor-sel-pop, #floor-fill-pop { position: fixed; z-index: 3001; display: flex; flex-direction: column; gap: 6px; width: 170px; padding: 10px; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 4px 14px rgba(0,0,0,.15); font-size: 13px; color: #334155; }
+#wall-seg-pop .wall-seg-title, #floor-sel-pop .wall-seg-title, #floor-fill-pop .wall-seg-title { font-weight: 700; padding-right: 24px; }
+#wall-seg-pop button, #floor-sel-pop button, #floor-fill-pop button { height: 30px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: #334155; cursor: pointer; font-size: 13px; }
 #wall-seg-pop .wall-seg-del, #floor-sel-pop .wall-seg-del { border-color: #dc2626; background: #fef2f2; color: #b91c1c; font-weight: 700; }
 #wall-seg-pop .wall-bar-x { position: absolute; top: 4px; right: 4px; width: 26px; height: 26px; border: none; background: none; color: #64748b; }
 #wall-check-bar .wall-copy-opt { display: inline-flex; align-items: center; gap: 3px; }
 body.wall-flashing .wall-outside-flash, body.wall-flashing .wall-outside-flash > polygon, body.wall-flashing .wall-outside-flash > polyline { animation: wallOutFlash 0.8s ease-in-out 10; }
 @keyframes wallOutFlash { 50% { stroke: #f59e0b; stroke-width: 6px; stroke-opacity: 1; } }
+#floor-fill-pop .ff-hint { font-size: 12px; color: #64748b; white-space: nowrap; }
+#floor-fill-pop .ff-ok { border-color: #1e3a5f; background: #1e3a5f; color: #fff; font-weight: 700; }   /* 바닥 채우기 (결정 334) */

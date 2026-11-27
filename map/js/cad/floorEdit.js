@@ -16,7 +16,7 @@ var FE_HANDLE_PX = 8;    // 손잡이 누르는 범위 (화면 px)
 var feLastDown = null;   // 꼭짓점 두 번 누르기 판단 { id, i, t }
 
 function feBase() { return typeof isZoneDrawingMode !== 'undefined' && isZoneDrawingMode && currentZoneCategory === 'floor' && !(typeof isLayerLocked === 'function' && isLayerLocked('floor')); }
-function feOn() { return feBase() && !drawingZonePoints.length && !isSpacePressed; }
+function feOn() { return feBase() && !drawingZonePoints.length && !isSpacePressed && !(typeof ffOn !== 'undefined' && ffOn); }   // 바닥 채우기 중엔 고르기 안 함
 function feCode() { return FLOORS[currentFloorIdx].code; }
 function feZones() { return getFloorZones(feCode()).filter(z => z.category === 'floor' && z.points && z.points.length >= 3); }
 function feZone(id) { return id ? feZones().find(z => z.id === id) || null : null; }

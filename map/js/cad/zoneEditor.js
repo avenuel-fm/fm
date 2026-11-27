@@ -139,6 +139,7 @@ function bringZoneLayersToFront() {
             updateZoneGuideUI();
             updateZoneDrawingPreview();
             if (typeof feRender === 'function') feRender();
+            if (typeof ffSync === 'function') ffSync();
         }
 
         // 지우개 켜기/끄기 (결정 216): 켜면 구역 종류는 잠기고 면으로 그려 바닥색으로 칠함
@@ -219,6 +220,7 @@ function bringZoneLayersToFront() {
             document.body.classList.remove('zone-cat-wall');
             hideFloorGrid();
             if (typeof feRender === 'function') feRender();   // 바닥 고르기 지움 (결정 330)
+            if (typeof ffSync === 'function') ffSync();   // 바닥 채우기 끔 (결정 334)
         }
 
         function createTempZoneDrawingGroup() {
@@ -1202,7 +1204,7 @@ function bringZoneLayersToFront() {
                 // 임시 요소(드로잉 레이어, 스냅 링, 핸들 등)를 배제한 순수 도면만 복제하여 저장
                 const clone = svgEl.cloneNode(true);
                 clone.querySelectorAll('#temp-zone-drawing-layer, #temp-drawing-layer, #wall-vertex-handles-layer, #cad-floor-grid-rect').forEach(el => el.remove());
-                clone.querySelectorAll('#wall-gap-mark, #wall-seg-mark, .wall-snap-hl, .wall-snap-name, #floor-edit-layer').forEach(el => el.remove());   // 외벽 알림 표시는 저장 안 함 (결정 322)
+                clone.querySelectorAll('#wall-gap-mark, #wall-seg-mark, .wall-snap-hl, .wall-snap-name, #floor-edit-layer, #floor-fill-layer').forEach(el => el.remove());   // 외벽 알림 표시는 저장 안 함 (결정 322)
                 clone.querySelectorAll('.wall-outside-flash').forEach(el => el.classList.remove('wall-outside-flash'));
                 clone.querySelectorAll('circle[stroke="#0ea5e9"], circle[fill="rgba(14, 165, 233, 0.25)"]').forEach(el => el.remove());
                 clone.querySelectorAll('#safety-zones-layer, #map-symbols-layer, #floor-layer, #floor-outline-layer, #eraser-layer, #eraser-defs').forEach(el => el.remove());
