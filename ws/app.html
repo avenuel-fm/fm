@@ -1142,7 +1142,7 @@ function renderMain() {
 }
 /* ── 지도 (결정 130): 도면 앱(fm/map)을 이 화면 안에 띄움 → 주소창은 업무지원 그대로. 자료는 PIN 로그인 표로만 (supabase/13_map.sql) ── */
 function renderMap() {
-  return '<div class="mapview">' + topbar('업무지원 ›', '지도') + '<iframe class="mapframe" src="../map/index.html?v=0.26.52" title="에비뉴엘 도면" allow="fullscreen"></iframe>' +
+  return '<div class="mapview">' + topbar('업무지원 ›', '지도') + '<iframe class="mapframe" src="../map/index.html?v=0.26.50" title="에비뉴엘 도면" allow="fullscreen"></iframe>' +
     '<button class="btn mapback" onclick="back()">' + ICON.back + '뒤로</button></div>';   // 뒤로는 왼쪽 아래 작은 버튼 (결정 160)
 }
 /** 지도 전체화면: 지도 칸을 화면 가득 + 되면 기기 전체화면 (아이폰은 기기 전체화면이 없어 화면 가득만) */
@@ -1375,7 +1375,7 @@ if (window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matche
 /* ── 메인 메뉴 켜기·끄기 (결정 148): 설정 표 「메인메뉴끄기」, 소장·관리자·옵저버는 꺼진 칸도 엶 ── */
 const MENU = [
   ['docs', '서류작업', [['tbm', 'TBM'], ['nw', '명일 작업 예정'], ['att', '출근현황'], ['ahu', '온습도/공조기/에어커튼 입력'], ['log', '종합업무일지'], ['risk', '위험작업신청서'], ['work', '주간/야간 작업내역']]],
-  ['inspect', '점검', [['fire', '소화기/소화전/공기호흡기 점검'], ['eh', '전열필증'], ['thermal', '열화상 리포트 자동 작성'], ['cs', '공사장 점검'], ['defect', '하자점검']]],
+  ['inspect', '점검', [['fire', '소화기/소화전/공기호흡기 점검'], ['eh', '전열필증'], ['thermal', '열화상점검'], ['cs', '공사장 점검'], ['defect', '하자점검']]],
   ['spec', '시방서 검색', null], ['mat', '자재현황', null], ['map', '지도', null], ['cad', 'CAD', null]];   // 자재현황은 준비중이라 켜고 끄기 없음
 const menuOff = k => (S.menuOff || []).indexOf(k) !== -1;
 const menuCanOpen = () => !!S.user && ['소장', '관리자', '옵저버'].indexOf(S.user.role) !== -1;
@@ -2591,7 +2591,7 @@ function renderInspect() {
   return topbar('업무지원 ›', '점검') + '<div class="wrap list">' +
     R('fire', "go('fire')", 'var(--blue-bg)', 'var(--blue)', ICON.fire, '소화기/소화전/공기호흡기 점검', 'QR 관리 · 월별 점검 현황') +
     R('eh', 'openEh()', 'var(--orange-bg)', 'var(--orange)', ICON.plug, '전열필증', '층·매장별 전열기기 관리 · 신고필증' + (CAN_PRINT ? ' 출력' : ' (출력은 PC에서)')) +
-    R('thermal', 'openThermal()', 'var(--blue-bg)', 'var(--blue)', ICON.therm, '열화상 리포트 자동 작성', 'FLIR 열화상 사진 → 점검 보고서(.atr) · PC 전용', !thCanOpen()) +
+    R('thermal', 'openThermal()', 'var(--blue-bg)', 'var(--blue)', ICON.therm, '열화상점검', 'FLIR 열화상 사진 → 점검 보고서(.atr) · PC 전용', !thCanOpen()) +
     R('cs', 'openCs()', 'var(--green-bg)', 'var(--green)', ICON.hat, '공사장 점검', '공사 현장 안전 순찰 · 사진 · 날짜별 현장별 PDF') +
     R('defect', 'openDf()', 'var(--green-bg)', 'var(--green)', ICON.file, '하자점검', '현장·하자내용 · 사진 · 서명 · 인쇄 A4 · PDF') +
     '</div>';
@@ -4701,7 +4701,7 @@ const WH_API = { d: ['dwList', 'dwSave', 'dwDelete'], n: ['dnList', 'dnSave', 'd
 const WH_TITLE = { d: '주간 작업내역', n: '야간 작업내역' };
 function whNew(k) {
   const u = S.user || {}, part = u.part === '전방파트' ? ['전기방재'] : u.part === '기건파트' ? ['기계건축'] : [];
-  return k === 'n' ? { id: '', day: rwToday(), co: '', floor: '', content: '', note: '', photos: [], fire: [], pledge: [], rest: [] }
+  return k === 'n' ? { id: '', day: rwToday(), co: '', floor: '', content: '', note: '', photos: [], fire: [], pledge: [], rest: [{ name: '', pics: [] }] }   // 식당가: 처음부터 빈 매장 1곳 (결정 336)
     : { id: '', day: rwToday(), parts: part, workers: u.name || '', floor: '', content: '', mats: [{ n: '', q: '', u: '' }], note: '', before: [], after: [] };
 }
 async function openWh() {
@@ -4720,7 +4720,7 @@ function whNewForm() { const o = S.wh.n; if (o.dirty && !confirm('저장하지 �
 function whEdit(id) {
   const k = S.wh.tab, o = S.wh[k], x = o.list.find(y => y.id === id); if (!x) return;
   if (o.dirty && !confirm('저장하지 않은 내용이 있습니다. 다른 작업을 열까요?')) return;
-  o.sl = {}; o.f = JSON.parse(JSON.stringify(x)); if (k === 'd' && !o.f.mats.length) o.f.mats.push({ n: '', q: '', u: '' }); if (k === 'n' && !o.f.rest) o.f.rest = [];
+  o.sl = {}; o.f = JSON.parse(JSON.stringify(x)); if (k === 'd' && !o.f.mats.length) o.f.mats.push({ n: '', q: '', u: '' }); if (k === 'n' && !(o.f.rest || []).length) o.f.rest = [{ name: '', pics: [] }];
   o.dirty = false; render(); window.scrollTo(0, 0);
 }
 function whDirty() { const o = S.wh[S.wh.tab]; o.dirty = true; const e = $('whState'); if (e) e.innerHTML = whState(); }
