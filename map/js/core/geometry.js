@@ -148,7 +148,20 @@
             return out;
         }
         function isUtilEl(el) { return (currentStores.find(s => s.polygonElement === el) || {}).type === 'utility'; }
-        function floorAvoidStores(rings) { return avoidStoreShapes(rings, true); }
+        // line: 복도 중심선 점 목록 — 중심선이 매장을 가로지르면 관통 (결정 322)
+        function floorAvoidStores(rings, line) { return avoidStoreShapes(rings, true, null, null, line); }
+        var floorForcePass = false, floorCutNames = [];   // 「매장 위로 그대로」: 매장은 안 자름(기능실은 자름) · 이번에 비운 매장 이름 (결정 322)
+        // 중심선이 매장을 가로지름 = 양 끝이 매장 밖이고 선이 매장을 둘로 나눔
+        function lineCrossesStore(line, pts) {
+            if (!line || line.length < 2 || isPointInsidePolygon(line[0], pts) || isPointInsidePolygon(line[line.length - 1], pts)) return false;
+            return polygonClipping.difference([pts.map(p => [p.x, p.y])], ...edgeBands(line, 0.5, false)).length >= 2;
+        }
+        // 바닥이 매장을 가로질러 겹친 깊이 — 이만큼 안의 바깥 줄기는 끊긴 것으로 봄 (띠가 매장 위로 조금 넘친 경우, 결정 322)
+        function floorOverlapDepth(pts, drawn) {
+            let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+            polygonClipping.intersection([pts.map(p => [p.x, p.y])], drawn).forEach(poly => poly[0].forEach(([x, y]) => { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }));
+            return x1 > x0 ? Math.min(x1 - x0, y1 - y0) : 0;
+        }
         // 매장 자리(둘레 2px 포함)를 빼면 바닥이 끊어지면 = 매장을 지나가는 바닥 → 관통 (결정 320).
         // 매장 가장자리를 덮고 좌우로 지나가는 띠도 여기 들어감. 넓은 바닥이 매장 변만 덮으면(안 끊어짐) 지금처럼 자름
         var FLOOR_PASS_MARGIN = 12;   // 매장 둘레 이만큼 안의 가는 바닥 줄기는 이어진 것으로 안 봄 (매장 위를 살짝 넘겨 그린 띠도 관통)
@@ -157,7 +170,8 @@
             return big(polygonClipping.difference(drawn, polygonClipping.union([pts.map(p => [p.x, p.y])], ...edgeBands(pts, g)))) >big(polygonClipping.union(...drawn));
         }
         // only: 'utility' 면 기능실만 피함. skipEl: 자기 자신(고치는 중인 도형)은 빼고
-        function avoidStoreShapes(rings, passStores, only, skipEl) {
+        function avoidStoreShapes(rings, passStores, only, skipEl, line) {
+            if (passStores) floorCutNames = [];
             if (typeof polygonClipping === 'undefined' || !rings.length) return rings;
             let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
             rings.forEach(r => r.forEach(([x, y]) => { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }));
@@ -167,7 +181,12 @@
                 // 바닥이 매장을 꿰뚫어(매장이 둘 이상으로 나뉨) 지나가면 자르지 않고 그린 대로. 기능실은 꿰뚫을 수 없음 (결정 314)
                 const isUtil = isUtilEl(c.el);
                 if (only === 'utility' && !isUtil) return;
-                if (passStores && !isUtil && (polygonClipping.difference([[c.pts.map(p => [p.x, p.y])]], drawn).length >= 2 || floorSplitByStore(c.pts, drawn, FLOOR_PASS_MARGIN))) return;
+                if (passStores && !isUtil) {
+                    if (floorForcePass || lineCrossesStore(line, c.pts) || polygonClipping.difference([[c.pts.map(p => [p.x, p.y])]], drawn).length >= 2
+                        || floorSplitByStore(c.pts, drawn, Math.max(FLOOR_PASS_MARGIN, floorOverlapDepth(c.pts, drawn)))) return;
+                    if (polygonClipping.intersection([c.pts.map(p => [p.x, p.y])], drawn).length)   // 2px 둘레만 닿으면 알림 없이 자름
+                        floorCutNames.push(((currentStores.find(s => s.polygonElement === c.el) || {}).name) || '매장');
+                }
                 cut.push([c.pts.map(p => [p.x, p.y])], ...edgeBands(c.pts, g));   // 둘레 2px 키운 모양
             });
             if (!cut.length) return rings;

@@ -142,7 +142,7 @@ function finishCenterlineFloor() {
     if (pts.length < 2) { showToast('중심선은 2개 이상의 점이 필요합니다.', 1500); return; }
     let parts = fclRibbonParts(pts, floorRibbonW / 2);
     // 외벽 밖 → 외벽선 안쪽 5px 까지 (결정 316), 매장 침범 → 둘레 2px 밖으로 (결정 308)
-    try { parts = floorAvoidStores(clipRingsToWall(parts, FLOOR_WALL_GAP)); } catch (err) { console.warn('매장 피하기 실패, 그린 그대로', err); }
+    try { parts = floorAvoidStores(clipRingsToWall(parts, FLOOR_WALL_GAP), pts); } catch (err) { console.warn('매장 피하기 실패, 그린 그대로', err); }
     if (!parts.length) { showToast('그린 바닥이 모두 매장 안이거나 외벽 밖이라 남는 곳이 없습니다.', 2000); return; }
     pushUndoState('바닥 중심선 추가');
     const floor = FLOORS[currentFloorIdx];
@@ -167,6 +167,7 @@ function finishCenterlineFloor() {
     syncSvgCache();
     continueZoneDrawing();   // 그리기 상태 그대로 (결정 314)
     showToast(`바닥이 추가되었습니다.${res.removeIds.length ? ` (기존 바닥 ${res.removeIds.length}개와 합쳐짐)` : ''}`, 1800);
+    offerFloorPass('cl', pts);   // 매장 자리를 비웠으면 「매장 위로 그대로」 (결정 322)
 }
 
 function toggleCenterlineFloor() {

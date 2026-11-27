@@ -557,15 +557,18 @@ function hideWallSegSel() {
 }
 
 // 외벽 그리기 중 외벽을 누르면: 그 구간을 빨갛게 + 작은 편집창
+// 다른 층에서 복사한 외벽: 고르면 선 전체 · 전체 삭제만 (결정 322). 예전 복사본은 id 끝 「_c층번호」로 알아봄
+function isWallCopy(z) { return !!(z && (z.copyOf || /_c[A-Za-z0-9]+$/.test(z.id || ''))); }
+
 function selectWallSegment(z, x, y, clientX, clientY) {
     hideWallSegSel();
-    const k = wallSegAt(z, x, y);
-    wallSel = { id: z.id, k };
+    const copy = isWallCopy(z), k = copy ? null : wallSegAt(z, x, y);
+    wallSel = { id: z.id, k, copy };
     const svgEl = mapContainer?.querySelector('svg');
     if (svgEl) {
         const m = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
         m.setAttribute('id', 'wall-seg-mark');
-        m.setAttribute('points', wallSegPts(z, k).map(p => p.x + ',' + p.y).join(' '));
+        m.setAttribute('points', (copy ? z.points.concat(z.geometry === 'polygon' ? [z.points[0]] : []) : wallSegPts(z, k)).map(p => p.x + ',' + p.y).join(' '));
         m.setAttribute('fill', 'none');
         m.setAttribute('stroke', '#dc2626');
         m.setAttribute('stroke-width', 7 / (scale || 1));
@@ -575,7 +578,10 @@ function selectWallSegment(z, x, y, clientX, clientY) {
     }
     const pop = document.createElement('div');
     pop.id = 'wall-seg-pop';
-    pop.innerHTML = '<div class="wall-seg-title">외벽 구간</div>'
+    pop.innerHTML = copy
+        ? `<div class="wall-seg-title">외벽 (복사본${z.copyOf ? ' · ' + z.copyOf + '에서' : ''})</div>`
+          + '<button type="button" class="wall-seg-del" onclick="deleteWallWhole()">선 전체 삭제 (Del)</button>'
+        : '<div class="wall-seg-title">외벽 구간</div>'
         + '<button type="button" class="wall-seg-del" onclick="deleteWallSegment()">이 구간 삭제 (Del)</button>'
         + '<button type="button" onclick="deleteWallWhole()">선 전체 삭제</button>'
         + '<button type="button" class="wall-bar-x" onclick="hideWallSegSel()" aria-label="닫기">✕</button>';
@@ -596,6 +602,7 @@ function wallDeleteDone(code, zones, msg) {
 
 function deleteWallSegment() {
     if (!wallSel) return;
+    if (wallSel.copy) { deleteWallWhole(); return; }   // 복사본은 통째로만
     if (isLayerLocked('wall')) { warnLayerLocked(); return; }
     const code = wallFloorCode(), zones = getFloorZones(code), i = zones.findIndex(z => z.id === wallSel.id);
     if (i < 0) { hideWallSegSel(); return; }
@@ -633,18 +640,28 @@ function copyWallToFloors() {
     const targets = Array.from(document.querySelectorAll('#wall-check-bar .wall-copy-opt input:checked')).map(i => i.value);
     if (!targets.length) { showToast('복사할 층을 골라 주세요.', 1500); return; }
     // 되돌리기는 지금 층만 기억하고 외벽은 지울 수 없음 → 한 번 묻기
-    if (!confirm(`외벽을 ${targets.length}개 층에 복사합니다. 외벽은 지울 수 없어 되돌릴 수 없습니다. 복사할까요?`)) return;
+    if (!confirm(`외벽을 ${targets.length}개 층에 복사합니다. 복사한 외벽은 그 층에서 골라 「선 전체 삭제」로 지울 수 있습니다. 복사할까요?`)) return;
     hideWallBar();
-    const src = wallZonesOf(wallFloorCode()), key = z => JSON.stringify(z.points.map(p => [Math.round(p.x), Math.round(p.y)]));
+    const from = wallFloorCode(), src = wallZonesOf(from), key = z => JSON.stringify(z.points.map(p => [Math.round(p.x), Math.round(p.y)]));
     let n = 0;
+    const made = {};   // 층 → 방금 만든 복사본 id (「복사 취소」용)
     targets.forEach(code => {
         const zones = getFloorZones(code), have = new Set(zones.filter(z => z.category === 'wall').map(key));
         src.forEach((z, i) => {
             if (have.has(key(z))) return;
-            zones.push(Object.assign({}, z, { id: 'zone_' + Date.now() + '_c' + code + i, points: z.points.map(p => ({ x: p.x, y: p.y })), createdAt: Date.now() }));
+            const id = 'zone_' + Date.now() + '_c' + code + i;
+            zones.push(Object.assign({}, z, { id, copyOf: from, points: z.points.map(p => ({ x: p.x, y: p.y })), createdAt: Date.now() }));
+            (made[code] = made[code] || []).push(id);
             n++;
         });
         saveFloorZones(code, zones);
     });
-    showToast(n ? `외벽 ${n}개를 ${targets.length}개 층에 복사했습니다.` : '고른 층에 같은 외벽이 이미 있습니다.', 2000);
+    if (!n) { showToast('고른 층에 같은 외벽이 이미 있습니다.', 2000); return; }
+    showToastAction(`외벽 ${n}개를 ${targets.length}개 층에 복사했습니다.`, '복사 취소', () => undoWallCopy(made), 8000);
+}
+
+// 방금 복사한 외벽을 그 층들에서 한 번에 지움 (결정 322)
+function undoWallCopy(made) {
+    Object.keys(made).forEach(code => saveFloorZones(code, getFloorZones(code).filter(z => !made[code].includes(z.id))));
+    showToast('복사를 취소했습니다.', 1500);
 }

@@ -232,6 +232,8 @@
             transform: translateX(-50%) translateY(0);
             opacity: 1;
         }
+        #toast.has-btn { pointer-events: auto; }
+        #toast .toast-btn { margin-left: var(--sp-3); padding: 2px 10px; border: 1px solid var(--primary); border-radius: var(--radius); background: var(--white); color: var(--primary); font: inherit; cursor: pointer; }
     
 
         /* 편집 드롭다운 메뉴 */

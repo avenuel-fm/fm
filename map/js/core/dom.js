@@ -54,9 +54,20 @@ var toastTimer = null;
                 toastTimer = null;
             }
             toastEl.textContent = msg;
+            toastEl.classList.remove('has-btn');
             toastEl.classList.add('show');
             toastTimer = setTimeout(() => {
                 toastEl.classList.remove('show');
                 toastTimer = null;
             }, duration);
+        }
+
+        // 버튼 하나 붙은 알림 (결정 322)
+        function showToastAction(msg, label, fn, duration = 6000) {
+            showToast(msg, duration);
+            const b = document.createElement('button');
+            b.type = 'button'; b.className = 'toast-btn'; b.textContent = label;
+            b.onclick = () => { toastEl.classList.remove('show', 'has-btn'); fn(); };
+            toastEl.appendChild(b);
+            toastEl.classList.add('has-btn');
         }

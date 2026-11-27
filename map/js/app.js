@@ -312,7 +312,7 @@
                     updateZoneGuideUI();
                     return;
                 }
-                if (typeof activeEditingWallZone !== 'undefined' && activeEditingWallZone) {
+                if (typeof activeEditingWallZone !== 'undefined' && activeEditingWallZone && !isWallCopy(activeEditingWallZone)) {   // 복사본은 이어 그리지 않음 (결정 322)
                     if (typeof hideWallSegSel === 'function') hideWallSegSel();
                     pushUndoState('외벽 선분 연장');
                     activeEditingWallZone.points.push({ x: ptX, y: ptY });

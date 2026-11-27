@@ -591,7 +591,8 @@ function bringZoneLayersToFront() {
                 if (targetGroup) targetGroup.classList.add('selected-zone');
             }
 
-            renderWallVertexHandles(zone);
+            const copy = typeof isWallCopy === 'function' && isWallCopy(zone);
+            if (copy) cleanupWallVertexHandles(); else renderWallVertexHandles(zone);   // 복사본은 꼭짓점 손잡이 없음 (결정 322)
 
             if (zoneGuideBanner) {
                 const titleEl = zoneGuideBanner.querySelector('.guide-banner-title') || zoneGuideBanner.querySelector('span');
@@ -599,7 +600,7 @@ function bringZoneLayersToFront() {
                     titleEl.textContent = '🧱 외벽 수정 모드: 꼭짓점을 드래그하여 모양을 변경하거나 도면을 클릭하여 선을 이어갈 수 있습니다. (ESC: 완료)';
                 }
             }
-            showToast('외벽 구간을 골랐습니다. Del 로 지우거나 꼭짓점을 끌어 고치세요.', 1500);
+            showToast(copy ? '복사한 외벽을 골랐습니다. Del 로 선 전체를 지울 수 있습니다.' : '외벽 구간을 골랐습니다. Del 로 지우거나 꼭짓점을 끌어 고치세요.', 1500);
         }
 
         function renderWallVertexHandles(zone) {
@@ -790,6 +791,25 @@ function bringZoneLayersToFront() {
 
             showToast(isWall ? '외벽이 추가되었습니다.' : `'${zoneName}'이 추가되었습니다.`, 1500);
             if (isWall) afterWallChange();   // 끊긴 곳 · 밖으로 나간 도형 알림 (결정 316)
+            if (floorRings && currentZoneCategory === 'floor') offerFloorPass('poly', newZone.points);
+        }
+
+        // 바닥이 매장 자리를 비웠으면 알림에 「매장 위로 그대로」 → 방금 그린 바닥만 매장을 안 자르고 다시 그림(기능실은 자름) (결정 322)
+        function offerFloorPass(kind, pts) {
+            if (!floorCutNames.length) return;
+            const code = FLOORS[currentFloorIdx].code, snap = undoStack[undoStack.length - 1];
+            if (!snap || snap.floorCode !== code) return;
+            const before = snap.floorZones, names = [...new Set(floorCutNames)].join('·'), raw = pts.map(p => ({ x: p.x, y: p.y }));
+            showToastAction(`바닥이 추가되었습니다. ${names} 자리는 비웠습니다.`, '매장 위로 그대로', () => {
+                const mode = typeof fclActive === 'function' && fclActive() ? 'cl' : (currentZoneGeometry === 'polygon' ? 'poly' : '');
+                if (FLOORS[currentFloorIdx].code !== code || !isZoneDrawingMode || currentZoneCategory !== 'floor' || drawingZonePoints.length || mode !== kind) {
+                    showToast('바닥을 그리던 그대로일 때만 바꿀 수 있습니다.', 1800); return;
+                }
+                saveFloorZones(code, JSON.parse(JSON.stringify(before)));
+                floorForcePass = true;
+                try { drawingZonePoints = raw; if (kind === 'cl') finishCenterlineFloor(); else finishDrawingZone(); }
+                finally { floorForcePass = false; }
+            }, 6000);
         }
 
         // 도면 상의 구역(방화구역/제연구획/외벽) SVG 레이어 렌더링
