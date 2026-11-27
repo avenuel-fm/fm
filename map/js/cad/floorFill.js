@@ -101,39 +101,48 @@ function ffCompute(z, gap) {
         const step = L / K, firstK = dd.findIndex(d => d > 0.5), lastK = dd.length - 1 - [...dd].reverse().findIndex(d => d > 0.5);
         if (firstK > 0 && firstK * step <= 10) for (let k = 0; k < firstK; k++) dd[k] = dd[firstK];
         if (firstK >= 0 && lastK < K - 1 && (K - 1 - lastK) * step <= 10) for (let k = lastK + 1; k < K; k++) dd[k] = dd[lastK];
-        // 넓어지는 자리끼리 이어 한 덩어리 (점은 자리 가운데, 양 끝은 그 자리 끝) → 사선 앞은 사선
+        // 넓어지는 자리끼리 이어 한 덩어리. 자리마다 그 폭 그대로(깊이가 바뀌는 곳은 직각) →
+        // 사선 매장 앞은 매장 띠에서 정확히 사선으로 잘림 (결정 352)
         const out = [];
         let run = null;
         dd.forEach((d, k) => {
             if (d > 0.5) {
-                const t = (k + 0.5) / K, p = ffLerp(a, b, t);
-                if (!run) { const p0 = ffLerp(a, b, k / K); run = { base0: p0, tips: [{ x: p0.x + nx * d, y: p0.y + ny * d }] }; }
-                run.tips.push({ x: p.x + nx * d, y: p.y + ny * d });
-                run.last = { k, d };
-            } else if (run) { out.push(ffRunPoly(a, b, K, nx, ny, run)); run = null; }
+                const p0 = ffLerp(a, b, k / K), p1 = ffLerp(a, b, (k + 1) / K);
+                if (!run) run = { base0: p0, tips: [] };
+                run.tips.push({ x: p0.x + nx * d, y: p0.y + ny * d }, { x: p1.x + nx * d, y: p1.y + ny * d });
+                run.end = p1;
+            } else if (run) { out.push([run.base0, ...run.tips, run.end]); run = null; }
         });
-        if (run) out.push(ffRunPoly(a, b, K, nx, ny, run));
+        if (run) out.push([run.base0, ...run.tips, run.end]);
         if (!out.length) continue;
         edges.push({ i, n: nn, polys: out, dmax: Math.max(...dd), on: true });
     }
     return { edges };
 }
-function ffRunPoly(a, b, K, nx, ny, run) {
-    const p1 = ffLerp(a, b, (run.last.k + 1) / K), d = run.last.d;
-    return [run.base0, ...run.tips, { x: p1.x + nx * d, y: p1.y + ny * d }, p1];
+
+// 여러 면(polygon-clipping 꼴)의 모든 테두리 → 띠+꼭짓점 네모 / 띠만
+function ffBands(mp, g) { return mp.flatMap(poly => poly.flatMap(r => edgeBands(r.slice(0, -1).map(([x, y]) => ({ x, y })), g))); }
+function ffStripsOf(r, g) {   // r: [x,y] 닫힌 고리 (끝점 = 첫 점)
+    const out = [];
+    for (let i = 0; i < r.length - 1; i++) {
+        const [px, py] = r[i], [qx, qy] = r[i + 1], L = Math.hypot(qx - px, qy - py);
+        if (L < 1e-6) continue;
+        const nx = -(qy - py) / L * g, ny = (qx - px) / L * g;
+        out.push([[[px + nx, py + ny], [qx + nx, qy + ny], [qx - nx, qy - ny], [px - nx, py - ny]]]);
+    }
+    return out;
 }
+function ffStrips(mp, g) { return mp.flatMap(poly => poly.flatMap(r => ffStripsOf(r, g))); }
+function ffU(list) { return list.length ? polygonClipping.union(...list) : []; }
 
 // 가는 조각·돌기 지우기: 5px 깎았다가 5px 다시 붙임(원래 모양 안에서만)
 function ffOpen(mp) {
     if (!mp.length) return mp;
-    const bands = m => m.flatMap(poly => poly.flatMap(r => edgeBands(r.slice(0, -1).map(([x, y]) => ({ x, y })), FF_THIN)));
-    // 깎을 땐 변 띠만 (꼭짓점 네모까지 쓰면 사선 변이 더 깎여 간격이 커짐)
-    const strips = m => m.flatMap(poly => poly.flatMap(r => { const out = []; for (let i = 0; i < r.length - 1; i++) { const [px, py] = r[i], [qx, qy] = r[i + 1], L = Math.hypot(qx - px, qy - py); if (L < 1e-6) continue; const nx = -(qy - py) / L * FF_THIN, ny = (qx - px) / L * FF_THIN; out.push([[[px + nx, py + ny], [qx + nx, qy + ny], [qx - nx, qy - ny], [px - nx, py - ny]]]); } return out; }));
     try {
-        const b1 = strips(mp);
-        const eroded = b1.length ? polygonClipping.difference(mp, polygonClipping.union(...b1)) : mp;
+        const b1 = ffStrips(mp, FF_THIN);   // 깎을 땐 변 띠만 (꼭짓점 네모까지 쓰면 사선 변이 더 깎임)
+        const eroded = b1.length ? polygonClipping.difference(mp, ffU(b1)) : mp;
         if (!eroded.length) return [];
-        const grown = polygonClipping.union(eroded, ...bands(eroded));
+        const grown = polygonClipping.union(eroded, ...ffBands(eroded, FF_THIN));
         return polygonClipping.intersection(grown, mp);
     } catch (err) { console.warn('가는 조각 정리 실패, 그대로', err); return mp; }
 }
@@ -166,25 +175,77 @@ function ffShape(z, edges, gap) {
         const pe = e.polys[e.polys.length - 1], pf = f.polys[0], c = P[(e.i + 1) % n];
         const A = pe[pe.length - 2], B = pf[1];
         if (Math.hypot(pe[pe.length - 1].x - c.x, pe[pe.length - 1].y - c.y) > 0.5 || Math.hypot(pf[0].x - c.x, pf[0].y - c.y) > 0.5) return;
-        const db = Math.hypot(B.x - c.x, B.y - c.y);
-        parts.push([feRing([c, A, { x: A.x + f.n.x * db, y: A.y + f.n.y * db }, B])]);
+        // 볼록한 모서리만: 두 넓힌 선(변과 나란한 선)이 만나는 점까지. 너무 멀면(아주 뾰족) 안 채움 (결정 352)
+        if (isPointInsidePolygon({ x: c.x + (e.n.x + f.n.x) * 0.5, y: c.y + (e.n.y + f.n.y) * 0.5 }, P)) return;
+        const ue = { x: -e.n.y, y: e.n.x }, uf = { x: -f.n.y, y: f.n.x }, den = ue.x * uf.y - ue.y * uf.x;
+        if (Math.abs(den) < 1e-6) return;
+        const t = ((B.x - A.x) * uf.y - (B.y - A.y) * uf.x) / den, X = { x: A.x + ue.x * t, y: A.y + ue.y * t };
+        const da = Math.hypot(A.x - c.x, A.y - c.y), db = Math.hypot(B.x - c.x, B.y - c.y);
+        if (Math.hypot(X.x - c.x, X.y - c.y) > 3 * Math.max(da, db)) return;
+        parts.push([feRing([c, A, X, B])]);
     });
-    let added = polygonClipping.union(...parts);
-    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-    added.forEach(poly => poly[0].forEach(([x, y]) => { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }));
-    const cut = [];
-    shapeSnapPolys().forEach(c => {
-        if (c.pts.length < 3 || c.x1 < x0 - gap || c.x0 > x1 + gap || c.y1 < y0 - gap || c.y0 > y1 + gap) return;
-        cut.push([feRing(c.pts)], ...edgeBands(c.pts, gap - 0.05));
-    });
-    if (cut.length) added = polygonClipping.difference(added, polygonClipping.union(...cut));
-    added = polygonClipping.difference(added, [feRing(P)]);   // 넓힌 부분만 보고 가는 조각 정리
-    added = ffOpen(added);
-    let rings = outerRings(polygonClipping.union([feRing(P)], ...added.map(poly => [poly[0]])));
+    const added = polygonClipping.union(...parts);
+    let mp = null;
+    try { mp = ffKeepGap(P, added, gap); } catch (err) { console.warn('매장 띄우기 실패, 넓힌 부분만', err); }
+    if (!mp) mp = ffAddedOnly(P, added, gap);
+    let rings = outerRings(mp);
     try { rings = clipRingsToWall(rings, FLOOR_WALL_GAP); } catch (err) { console.warn('외벽 자르기 실패', err); }
     if (!rings.length) return null;
     const best = rings.reduce((m, r) => ringArea(r) > ringArea(m) ? r : m);
     return feToPts(ffSimplify(best));
+}
+function ffBox(mp) {
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    mp.forEach(poly => poly[0].forEach(([x, y]) => { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }));
+    return { x0, y0, x1, y1 };
+}
+function ffClosed(pts) { const r = feRing(pts); return r.concat([r[0]]); }
+// 옆 매장·기능실 (바닥이 이미 덮고 있는 기능실은 빼서 그대로 둠)
+function ffNear(P, mp, m) {
+    const b = ffBox(mp), ring = feRing(P);
+    return shapeSnapPolys().filter(c => c.pts.length >= 3 && !(c.x1 < b.x0 - m || c.x0 > b.x1 + m || c.y1 < b.y0 - m || c.y0 > b.y1 + m)
+        && !(isUtilEl(c.el) && polygonClipping.intersection([ring], [feRing(c.pts)]).some(q => ringArea(q[0]) > 1)));
+}
+// 예전 방식: 넓힌 부분만 매장 간격 밖으로 (원래 바닥은 그대로)
+function ffAddedOnly(P, added, gap) {
+    let a = added;
+    const near = ffNear(P, added.length ? added : [[feRing(P)]], gap);
+    if (near.length) a = polygonClipping.difference(a, ffU(near.flatMap(c => [[feRing(c.pts)], ...edgeBands(c.pts, gap - 0.05)])));
+    a = ffOpen(polygonClipping.difference(a, [feRing(P)]));
+    return polygonClipping.union([feRing(P)], ...a.map(poly => [poly[0]]));
+}
+// 바닥 전체(원래 + 넓힌 곳)를 매장 테두리에서 매장 간격만큼 띄움.
+// 다만 매장 사이 틈이 간격 이하로 좁으면 그 틈은 매장벽 2px 까지 채우고, 간격 선과 직각으로 만나게 이음 (결정 352)
+// 바닥이 여러 조각으로 갈라지면 null (→ 예전 방식)
+function ffKeepGap(P, added, gap) {
+    const ring = feRing(P), base = polygonClipping.union([ring], ...added.map(poly => [poly[0]]));
+    const near = ffNear(P, base, gap + 20);
+    if (!near.length) return base;
+    const storeU = ffU(near.map(c => [feRing(c.pts)]));
+    const store2 = ffU([...storeU.map(poly => [poly[0]]), ...near.flatMap(c => edgeBands(c.pts, FLOOR_STORE_GAP))]);
+    const cutG = ffU([...storeU.map(poly => [poly[0]]), ...near.flatMap(c => edgeBands(c.pts, gap - 0.05))]);
+    const allowed = polygonClipping.difference(base, store2);
+    let main = polygonClipping.difference(allowed, cutG);
+    // 가는 조각 정리는 원래 바닥 밖(넓힌 곳)만
+    main = polygonClipping.union(polygonClipping.intersection(main, [ring]), ...ffOpen(polygonClipping.difference(main, [ring])).map(poly => [poly[0]]));
+    // 좁은 틈(간격 이하): 매장들을 간격/2 만큼 부풀렸다 줄이면 메워지는 곳
+    const r = gap / 2;
+    const dil = ffU([...storeU.map(poly => [poly[0]]), ...near.flatMap(c => edgeBands(c.pts, r))]);
+    const closed = polygonClipping.difference(dil, ffU(ffBands(dil, r)));
+    const slit = polygonClipping.difference(closed, store2);
+    if (slit.length) {
+        // 틈은 바닥이 덮던 곳만, 입구 → 간격 선까지 곧게 잇는 곳은 간격 선 가까이만
+        // (매장 띠를 꼭짓점 네모 없이 빼면 입구 앞 네모만 남음)
+        const inSlit = polygonClipping.intersection(slit, base);
+        const conn = inSlit.length ? polygonClipping.difference(polygonClipping.union(inSlit, ...ffBands(inSlit, gap)), ffU([store2, ...near.flatMap(c => ffStripsOf(ffClosed(c.pts), gap - 0.05))])) : [];
+        const nearMain = main.length ? polygonClipping.union(main, ...ffBands(main, gap + 1)) : [];
+        const extra = polygonClipping.union(inSlit, ...(conn.length && nearMain.length ? polygonClipping.intersection(conn, nearMain, polygonClipping.union(base, ...ffBands(base, gap + 1))) : []).map(poly => [poly[0]]));
+        if (extra.length) main = polygonClipping.union(main, extra);
+    }
+    if (!main.length) return null;
+    const rs = outerRings(main), total = rs.reduce((t, q) => t + ringArea(q), 0), big = Math.max(...rs.map(q => ringArea(q)));
+    if (big < total * 0.99) return null;   // 갈라지면 잃는 곳이 생기니 예전 방식
+    return main;
 }
 
 function ffItem(id) { return ffPrev && ffPrev.items.find(it => it.id === id); }

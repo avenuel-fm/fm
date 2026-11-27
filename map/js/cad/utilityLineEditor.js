@@ -6,6 +6,7 @@ var isUtilLineDrawingMode = false;
 var utilLineSourceStore = null;    // 자 = 매장 (결정 246. 예전에는 기능실이 자)
 var utilLineTargetStore = null;    // 모 = 기능실. 흐름은 모 → 자
 var utilLineSelectedType = 'power';// 'power'(전기) | 'water'(수도) | 'gas'(가스) | 'drain'(배수)
+var utilLinePowerKind = '일반';     // 전기만: '일반' | '비상' (결정 354)
 var utilLineInputValue = '50';     // 입력 규격 (전기: A, 수도: mm, 배수: mm, 가스: 비활성)
 var utilLineDrawingPoints = [];    // 선분 점 목록 [{x, y}, ...]
 var activeHighlightedStore = null;   // 현재 라인 하이라이트 중인 매장/기능실
@@ -543,6 +544,7 @@ function startUtilityLineDrawingMode(preStore = null) {
     utilLineDrawingPoints = [];
     utilLineSourceStore = null;
     utilLineTargetStore = null;
+    utilLinePowerKind = '일반';
     purgeLegacyUtilityLines();
     showUtilLineGuideBanner();
     if (preStore) { handleUtilLineMapClick(null, preStore); return; }   // 기능실 창의 「매장 연결선」에서 온 경우
@@ -674,7 +676,8 @@ function finishUtilityLine() {
         id: `util-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         auto: true,
         sourceType: utilLineSourceStore.name || '매장',
-        subType: cfg.id, subTypeLabel: cfg.label, specText, className: cfg.className, color: cfg.color,
+        subType: cfg.id, subTypeLabel: cfg.id === 'power' ? `${cfg.label} ${utilLinePowerKind}` : cfg.label, specText,
+        ...(cfg.id === 'power' ? { powerKind: utilLinePowerKind } : {}), className: cfg.className, color: cfg.color,
         direction: 'forward',
         sourceStoreId: utilLineSourceStore.id || '', sourceName: utilLineSourceStore.name || '매장',
         targetStoreId: utilLineTargetStore.id || '', targetName: utilLineTargetStore.name || '기능실',
@@ -771,6 +774,10 @@ function updateUtilLineGuideUI() {
         `;
     }).join('');
 
+    // 전기만 [일반 | 비상] (결정 354)
+    const kindHtml = utilLineSelectedType !== 'power' ? '' : `<div id="util-power-kind" style="display:inline-flex; border:1px solid #fca5a5; border-radius:6px; overflow:hidden; background:#fff;">${['일반', '비상'].map(k =>
+        `<button type="button" data-kind="${k}" onclick="utilLinePowerKind='${k}'; updateUtilLineGuideUI()" style="border:none; font-size:12px; font-weight:800; padding:4px 10px; cursor:pointer; background:${utilLinePowerKind === k ? '#dc2626' : 'transparent'}; color:${utilLinePowerKind === k ? '#fff' : '#991b1b'};">${k}</button>`).join('')}</div>`;
+
     // 규격 입력 필드
     let inputFieldHtml = '';
     if (cfg.disabledInput) {
@@ -812,6 +819,8 @@ function updateUtilLineGuideUI() {
             <div style="display:inline-flex; align-items:center; gap:3px; background:#f8fafc; padding:2px 6px; border-radius:6px; border:1px solid #e2e8f0;">
                 ${radioList}
             </div>
+
+            ${kindHtml}
 
             <!-- 규격 입력 -->
             ${inputFieldHtml}
