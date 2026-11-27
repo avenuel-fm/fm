@@ -10,10 +10,10 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.26.57"></script>
-<script>window.WS_VERSION = '0.26.57';</script>
-<script src="offline.js?v=0.26.57"></script>
-<script src="ws-api.js?v=0.26.57"></script>
+<script src="config.js?v=0.26.58"></script>
+<script>window.WS_VERSION = '0.26.58';</script>
+<script src="offline.js?v=0.26.58"></script>
+<script src="ws-api.js?v=0.26.58"></script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -824,7 +824,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B3','B2','B1','1F','2F','3F','4F','5F','6F','7F','8F','9F','10F','POPUP'];   // 소화기·소화전·공기호흡기 층 B3~10F · 맨 아래 POPUP (결정 228·260)
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.57' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.58' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -2100,9 +2100,18 @@ function lgSet(r) {
   LG_FIELDS.forEach(k => { f[k] = cur[k] || ''; });
   const works = {};
   LG_DEPTS.forEach(d => { const w = (cur.works && cur.works[d]) || []; works[d] = Array.from({ length: Math.min(LG_MAX, Math.max(LG_LINES, w.length)) }, (_, i) => w[i] || ''); });
-  // 그날 금일작업이 아직 비었으면 서버가 준 주간작업으로 채워 둠 (저장은 직원이 [저장]). 명일 작업 일정·TBM 표는 서버가 안 줌 (결정 268)
-  const tbm = r.tbm || {}, auto = LG_DEPTS.every(d => !works[d].some(x => x)) && LG_DEPTS.some(d => (tbm[d] || []).length);
-  if (auto) LG_DEPTS.forEach(d => { const a = tbm[d] || []; works[d] = Array.from({ length: Math.min(LG_MAX, Math.max(LG_LINES, a.length)) }, (_, i) => a[i] || ''); });
+  // 서버가 준 주간작업 중 일지에 아직 없는 글만 마지막 글 아래에 덧붙임 (파트마다 15줄까지, 저장은 직원이 [저장]). 일지를 먼저 저장해도 뒤에 넣은 주간작업이 들어옴 (사용자 11-27, 결정 350)
+  const tbm = r.tbm || {}; let auto = false;
+  LG_DEPTS.forEach(d => {
+    const w = works[d], have = new Set(w.map(x => String(x).trim()));
+    (tbm[d] || []).forEach(t => {
+      t = String(t || '').trim(); if (!t || have.has(t)) return;
+      let k = w.length; while (k && !String(w[k - 1]).trim()) k--;
+      if (k >= LG_MAX) return;
+      if (k === w.length) w.push('');
+      w[k] = t; have.add(t); auto = true;
+    });
+  });
   S.lg = { srv: r, day: r.day, f, works, ver: r.ver, by: r.by, pdf: r.pdf, dirty: auto, busy: false };
   if (S.view === 'log') render();
   // Supabase 판: 공조기·에어커튼은 구글을 거쳐 늦게 옴(6~9초) → 일지를 먼저 보여 주고 그 칸만 나중에 채움
