@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>롯데 잠실점 쇼핑맵 통합 메인보드</title>
         <!-- 모듈형 스타일시트 -->
-    <link rel="stylesheet" href="css/common.css?v=0.26.68">
-    <link rel="stylesheet" href="css/layout.css?v=0.26.68">
-    <link rel="stylesheet" href="css/modals.css?v=0.26.68">
-    <link rel="stylesheet" href="css/cad-tools.css?v=0.26.68">
+    <link rel="stylesheet" href="css/common.css?v=0.26.69">
+    <link rel="stylesheet" href="css/layout.css?v=0.26.69">
+    <link rel="stylesheet" href="css/modals.css?v=0.26.69">
+    <link rel="stylesheet" href="css/cad-tools.css?v=0.26.69">
 </head>
 <body>
     <header>
@@ -649,43 +649,43 @@
         <button type="button" class="other-card" data-building="castle" onclick="pickOtherBuilding('castle')"><span class="ic">🏰</span><span><b>캐슬플라자</b><small>B1 ~ 2F · 3개 층</small></span></button>
         <p class="other-note">고르면 그 건물 지도가 열립니다. 매장·구역·심벌·연결선·기록 모두 에비뉴엘과 같게 씁니다.</p>
     </aside>
-    <script src="js/config/floors.js"></script>
-    <script src="js/storage/mapStore.js"></script>
+    <script src="js/config/floors.js?v=0.26.69"></script>
+    <script src="js/storage/mapStore.js?v=0.26.69"></script>
 
     <!-- 2. 공유 DOM 레지스트리 및 공통 유틸 -->
-    <script src="js/core/dom.js?v=0.26.68"></script>
+    <script src="js/core/dom.js?v=0.26.69"></script>
 
     <!-- 3. 저장소 및 실행 취소 (추후 Supabase 연동 모듈) -->
-    <script src="js/storage/storeBook.js"></script>
-    <script src="js/storage/storeRepository.js"></script>
-    <script src="js/storage/zoneRepository.js"></script>
-    <script src="js/storage/utilityLineRepository.js"></script>
-    <script src="js/storage/undoManager.js"></script>
+    <script src="js/storage/storeBook.js?v=0.26.69"></script>
+    <script src="js/storage/storeRepository.js?v=0.26.69"></script>
+    <script src="js/storage/zoneRepository.js?v=0.26.69"></script>
+    <script src="js/storage/utilityLineRepository.js?v=0.26.69"></script>
+    <script src="js/storage/undoManager.js?v=0.26.69"></script>
 
     <!-- 4. 코어 기하학 연산, 바닥 그리드, 줌/팬, 도면 뷰어 -->
-    <script src="js/core/geometry.js?v=0.26.68"></script>
-    <script src="js/core/grid.js?v=0.26.68"></script>
-    <script src="js/core/panZoom.js"></script>
-    <script src="js/core/mapViewer.js?v=0.26.68"></script>
+    <script src="js/core/geometry.js?v=0.26.69"></script>
+    <script src="js/core/grid.js?v=0.26.69"></script>
+    <script src="js/core/panZoom.js?v=0.26.69"></script>
+    <script src="js/core/mapViewer.js?v=0.26.69"></script>
 
     <!-- 5. 전문 CAD 및 측정 엔진 (축척 캘리브레이션, 매장/기능실 CAD, 구역 CAD, 심벌 CAD, 자유 필기/실측) -->
-    <script src="js/scale/scaleCalibrator.js"></script>
-    <script src="js/cad/storeEditor.js?v=0.26.68"></script>
-    <script src="js/cad/storeExcel.js"></script>
-    <script src="js/lib/polygon-clipping.umd.min.js"></script>
-    <script src="js/cad/floorCenterline.js?v=0.26.68"></script>
-    <script src="js/cad/zoneEditor.js?v=0.26.68"></script>
-    <script src="js/cad/wallTools.js?v=0.26.68"></script>
-    <script src="js/cad/floorEdit.js?v=0.26.68"></script>
-    <script src="js/cad/eraserBrush.js?v=0.26.68"></script>
-    <script src="js/cad/floorFill.js?v=0.26.68"></script>
-    <script src="js/cad/symbolEditor.js?v=0.26.68"></script>
-    <script src="js/cad/utilityLineEditor.js?v=0.26.68"></script>
-    <script src="js/cad/routeFinder.js?v=0.26.68"></script>
-    <script src="js/freehand/freehandLayer.js"></script>
+    <script src="js/scale/scaleCalibrator.js?v=0.26.69"></script>
+    <script src="js/cad/storeEditor.js?v=0.26.69"></script>
+    <script src="js/cad/storeExcel.js?v=0.26.69"></script>
+    <script src="js/lib/polygon-clipping.umd.min.js?v=0.26.69"></script>
+    <script src="js/cad/floorCenterline.js?v=0.26.69"></script>
+    <script src="js/cad/zoneEditor.js?v=0.26.69"></script>
+    <script src="js/cad/wallTools.js?v=0.26.69"></script>
+    <script src="js/cad/floorEdit.js?v=0.26.69"></script>
+    <script src="js/cad/eraserBrush.js?v=0.26.69"></script>
+    <script src="js/cad/floorFill.js?v=0.26.69"></script>
+    <script src="js/cad/symbolEditor.js?v=0.26.69"></script>
+    <script src="js/cad/utilityLineEditor.js?v=0.26.69"></script>
+    <script src="js/cad/routeFinder.js?v=0.26.69"></script>
+    <script src="js/freehand/freehandLayer.js?v=0.26.69"></script>
 
     <!-- 6. 메인 애플리케이션 엔트리 및 부트스트랩 -->
-    <script src="js/storage/mapHistory.js"></script>
-    <script src="js/app.js?v=0.26.68"></script>
+    <script src="js/storage/mapHistory.js?v=0.26.69"></script>
+    <script src="js/app.js?v=0.26.69"></script>
 </body>
 </html>
