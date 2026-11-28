@@ -753,7 +753,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
             const one = document.createElementNS(ns, 'tspan');
             one.textContent = name;
             textEl.appendChild(one);
-            if (typeof isCorridorEl === 'function' && isCorridorEl(pathEl)) noGrow = true;   // 후방복도는 글자 때문에 안 키움 (결정 380)
+            if (typeof isCorridorEl === 'function' && isCorridorEl(pathEl)) { textEl.textContent = ''; return; }   // 후방복도는 지도에 이름을 안 씀 (이름은 자료에만, 결정 380 보충)
             let bb = null;
             try { bb = pathEl && pathEl.getBBox(); } catch (e) { /* 화면에 없으면 그대로 한 줄 */ }
             if (!bb || !bb.width) return;

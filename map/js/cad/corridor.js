@@ -31,7 +31,15 @@ function corridorSources(svgEl, floor) {
         const ring = pts.map(p => [Math.round(p.x * 10) / 10, Math.round(p.y * 10) / 10]);
         if (ringArea(ring) < CORRIDOR_MIN_AREA) return;
         const cx = pts.reduce((a, p) => a + p.x, 0) / pts.length, cy = pts.reduce((a, p) => a + p.y, 0) / pts.length;
-        if (vb.length === 4 && !(cx >= vb[0] && cx <= vb[0] + vb[2] && cy >= vb[1] && cy <= vb[1] + vb[3])) return;
+        if (vb.length === 4 && !(cx >= vb[0] && cx <= vb[0] + vb[2] && cy >= vb[1] && cy <= vb[1] + vb[3])) {
+            // shortcut: 지하1층만 지도 틀에 걸친 큰 후방 구역(서울스카이 아래)도 틀 안만 씀 — 다른 층도 필요하면 조건을 넓힘
+            if (floor.code !== 'B1') return;
+            const box = [[vb[0], vb[1]], [vb[0] + vb[2], vb[1]], [vb[0] + vb[2], vb[1] + vb[3]], [vb[0], vb[1] + vb[3]]];
+            let inBox = [];
+            try { inBox = outerRings(polygonClipping.intersection([ring], [box])); } catch (e) { return; }
+            inBox.filter(r => ringArea(r) >= CORRIDOR_MIN_AREA).forEach((r, i) => out.push({ src: (el.id || '') + (i ? '#' + i : ''), ring: r.map(q => [Math.round(q[0] * 10) / 10, Math.round(q[1] * 10) / 10]), el }));
+            return;
+        }
         out.push({ src: el.id || '', ring, el });
     });
     return out;
@@ -53,7 +61,7 @@ function corridorNextId(list) { return Math.max(90000, ...list.map(c => +c.id ||
 // 층을 처음 열 때 한 번: 아베뉴엘 층에 후방복도를 만듦 (도면을 불러온 뒤, 매장 묶기 전에 부름)
 function corridorInit(floor) {
     const svgEl = mapContainer.querySelector('svg');
-    if (!svgEl || !floor || floor.crop !== AVENUEL_CROP) return;
+    if (!svgEl || !floor || (floor.crop !== AVENUEL_CROP && floor.crop !== B1_FULL_CROP)) return;   // 아베뉴엘 1~6층 + 지하1층
     const srcs = corridorSources(svgEl, floor);
     const list = getCustomStores(floor.code), mine = list.filter(c => c.kind === CORRIDOR_KIND);
     corridorHideSources(srcs.filter(s => mine.some(c => c.src === s.src)));
@@ -105,24 +113,15 @@ function corridorRefit(force) {
         p.setAttribute('fill-rule', 'evenodd');
         if (p.getAttribute('d') !== d) { p.setAttribute('d', d); changed = true; }
         if (cs.pathData !== d) { cs.pathData = d; changed = true; }
-        corridorLabel(svgEl, g, cs, res);
+        corridorLabel(svgEl, g);
     });
     if (changed && !mapStore.readOnly()) saveCustomStores(floor.code, list);
     currentStores.forEach(s => { if (s.isCustom && isCorridorEl(s.polygonElement)) s.pathData = s.polygonElement.getAttribute('d'); });
     return changed;
 }
 
-// 이름은 가장 큰 조각 안에 (여러 조각이라 도형 전체로 자리를 잡으면 틈에 떨어짐)
-function corridorLabel(svgEl, g, cs, res) {
-    const t = g.querySelector('text');
-    if (!t) return;
-    if (!res.length) { t.textContent = ''; return; }
-    const big = res.reduce((a, poly) => ringArea(poly[0]) > ringArea(a[0]) ? poly : a);
-    const tmp = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    tmp.setAttribute('d', corridorPathD([[big[0]]]));
-    svgEl.appendChild(tmp);
-    try { layoutStoreLabel(t, StoreBook.show(cs.name), tmp, true); } finally { tmp.remove(); }
-}
+// 지도에는 이름 글자를 안 씀 — 좁은 복도에서 기능실 글자와 겹치고 기울어짐 (결정 380 보충). 이름은 자료·현황 창에 그대로
+function corridorLabel(svgEl, g) { const t = g.querySelector('text'); if (t && t.textContent) t.textContent = ''; }
 
 // 후방복도 묶음은 맨 아래 층으로, 아니게 된 것은 직접 그린 매장 층으로
 function corridorPlace(svgEl) {
