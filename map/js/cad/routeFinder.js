@@ -59,7 +59,8 @@ function rtGrid(polysFloor, fromPoly, toPoly, otherPolys) {
     const free = new Uint8Array(W * H);
     for (let r = 1; r < H - 1; r++) for (let c = 1; c < W - 1; c++) {   // 한 칸 넓힌 바닥 → 작은 틈 이어짐
         const i = r * W + c;
-        free[i] = (floor[i] | floor[i - 1] | floor[i + 1] | floor[i - W] | floor[i + W]) && !store[i] ? 1 : 0;
+        // 다른 매장(3)이라도 바닥이 덮은 칸(관통·걸침)은 지나감 (결정 364)
+        free[i] = (floor[i] | floor[i - 1] | floor[i + 1] | floor[i - W] | floor[i + W]) && (!store[i] || (store[i] === 3 && floor[i])) ? 1 : 0;
     }
     // 벽(바닥 밖·매장)까지 몇 칸인가: 같은 길이면 복도 가운데 쪽을 고르는 데 씀
     const clear = new Uint8Array(W * H), q = new Int32Array(W * H);
@@ -71,7 +72,7 @@ function rtGrid(polysFloor, fromPoly, toPoly, otherPolys) {
             if (j >= 0 && j < W * H && free[j] && !clear[j]) { clear[j] = Math.min(250, d); q[qt++] = j; }
         });
     }
-    return { s, x0, y0, W, H, store, free, clear, cx: c => x0 + (c + 0.5) * s, cy: r => y0 + (r + 0.5) * s };
+    return { s, x0, y0, W, H, store, floor, free, clear, cx: c => x0 + (c + 0.5) * s, cy: r => y0 + (r + 0.5) * s };
 }
 // 매장 변마다 한가운데(입구) → 바깥쪽으로 가로·세로로 나가 처음 닿는 바닥 칸
 function rtExits(poly, g, ok, me, other) {
@@ -88,7 +89,7 @@ function rtExits(poly, g, ok, me, other) {
         for (let k = 0; k < 4000; k++, c += dc, r += dr) {
             if (c < 0 || r < 0 || c >= g.W || r >= g.H) break;
             const j = r * g.W + c, st = g.store[j];
-            if (st === 3 || st === other) break;          // 다른 매장을 지나야 하면 이 변은 안 씀
+            if ((st === 3 && !g.floor[j]) || st === other) break;   // 다른 매장을 지나야 하면 이 변은 안 씀 (바닥이 덮은 곳은 건넘, 결정 364)
             if (ok[j]) { out.push({ E, dir, cell: j, cost: Math.abs(dc ? g.cx(c) - E.x : g.cy(r) - E.y) }); break; }
             if (st !== me && (gap += g.s) > RT_EXIT_GAP + g.s) break;   // 바닥과 떨어진 변 (빈 곳을 건너지 않음)
         }

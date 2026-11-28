@@ -162,6 +162,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                 }
                 if (typeof renderFloorUtilityLines === 'function') {
                     renderFloorUtilityLines();
+                    if (isUtilLineDrawingMode) updateUtilLineGuideUI();   // 연결선 그리는 중 층을 옮기면 띠를 새 층으로 (결정 366)
                 }
                 if (typeof bringZoneLayersToFront === 'function') {
                     bringZoneLayersToFront();

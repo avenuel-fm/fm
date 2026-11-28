@@ -338,7 +338,10 @@ function layoutUtilLabels() {
 // ================= 이름표 고치기 · 옮기기 (결정 308) =================
 // 더블클릭 → 그 자리에서 고침(Enter 줄바꿈 · 바깥 누르면 저장 · Esc 취소), 끌면 옮김. 저장: line.labelText(줄은 \n) · line.labelPos({x,y})
 var UTIL_LABEL_LINE = 14;
-function utilDefaultLabel(line) { return line.specText ? `${line.subTypeLabel || ''} (${line.specText})` : (line.subTypeLabel || '설비'); }
+function utilDefaultLabel(line) {
+    const base = line.specText ? `${line.subTypeLabel || ''} (${line.specText})` : (line.subTypeLabel || '설비');
+    return line.originName ? `${base}/${line.originName}` : base;   // 다른 층에서 시작한 선은 「/1층 3번 EPS」 (결정 366)
+}
 function utilLabelLines(line) { return (line.labelText || utilDefaultLabel(line)).split('\n'); }
 function utilTextWidth(t) {
     const c = utilTextWidth._c || (utilTextWidth._c = document.createElement('canvas').getContext('2d'));
@@ -544,6 +547,7 @@ function startUtilityLineDrawingMode(preStore = null) {
     utilLineDrawingPoints = [];
     utilLineSourceStore = null;
     utilLineTargetStore = null;
+    utilLineTargetFloor = null;
     utilLinePowerKind = '일반';
     purgeLegacyUtilityLines();
     showUtilLineGuideBanner();
@@ -572,6 +576,7 @@ function exitUtilityLineDrawingMode() {
     utilLineDrawingPoints = [];
     utilLineSourceStore = null;
     utilLineTargetStore = null;
+    utilLineTargetFloor = null;
     activeSelectedUtilLineId = null;
     hideUtilLineGuideBanner();
     removeTempDrawingLine();
@@ -633,12 +638,23 @@ function removeTempDrawingLine() {
     if (tempPoly) tempPoly.remove();
 }
 
+// ---- 다른 층 매장 연결 (결정 366): 기능실을 고른 뒤 지도의 층 버튼으로 옮기면, 그 층의 같은 기능실(층 뺀 이름이 같음)에서 이어 그림 ----
+var utilLineTargetFloor = null;   // 기능실(모)을 고른 층 코드
+function utilLineCrossFloor() {
+    return !!(utilLineTargetStore && utilLineTargetFloor && utilLineTargetFloor !== FLOORS[currentFloorIdx].code);
+}
+function utilLineFloorTwin() {    // 지금 층에서 고른 기능실과 같은 기능실 (예: 1층 3번 EPS → 2층 3번 EPS)
+    const key = stripFloorName(utilLineTargetStore && utilLineTargetStore.name);
+    return key ? currentStores.find(s => s.type === 'utility' && s.polygonElement && stripFloorName(s.name) === key) || null : null;
+}
+
 // 매장(자)·기능실(모)을 누르면 둘이 모였을 때 길찾기로 선을 그림. 누르는 순서는 상관없음
 function handleUtilLineMapClick(svgPt, targetStore = null) {
     if (!isUtilLineDrawingMode) return false;
     if (!targetStore) { showToast('도면의 매장 또는 기능실을 눌러 주세요.', 1500); return true; }
     if (targetStore.type === 'utility') {
         utilLineTargetStore = targetStore;
+        utilLineTargetFloor = FLOORS[currentFloorIdx].code;
         const nm = ((typeof utilKindOf === 'function' ? utilKindOf(targetStore) + ' ' : '') + (targetStore.name || '')).toUpperCase();   // 주요 기능실·이름으로 종류 자동 (결정 362)
         if (nm.includes('EPS')) setUtilLineType('power');
         else if (nm.includes('PS')) setUtilLineType('water');
@@ -655,7 +671,13 @@ function handleUtilLineMapClick(svgPt, targetStore = null) {
 
 function finishUtilityLine() {
     if (!utilLineSourceStore || !utilLineTargetStore) { showToast('매장(자)과 기능실(모)을 모두 눌러 주세요.', 1500); return; }
-    const res = routeBetweenStores(utilLineTargetStore, utilLineSourceStore);   // 기능실 → 매장 순서의 점
+    let origin = null, from = utilLineTargetStore;
+    if (utilLineCrossFloor()) {   // 다른 층: 이 층의 같은 기능실에서 이어 그림
+        const twin = utilLineFloorTwin(), here = floorLabel(FLOORS[currentFloorIdx].code);
+        if (!twin) { showToast(`${here}에 ${stripFloorName(utilLineTargetStore.name)}이(가) 없습니다.`, 2800); utilLineSourceStore = null; updateUtilLineGuideUI(); return; }
+        origin = utilLineTargetStore; from = twin;
+    }
+    const res = routeBetweenStores(from, utilLineSourceStore);   // 기능실 → 매장 순서의 점
     if (!res.ok) {
         showToast(res.error, 2800);
         if (res.gap) showRouteGap(res.gap);
@@ -680,7 +702,8 @@ function finishUtilityLine() {
         ...(cfg.id === 'power' ? { powerKind: utilLinePowerKind } : {}), className: cfg.className, color: cfg.color,
         direction: 'forward',
         sourceStoreId: utilLineSourceStore.id || '', sourceName: utilLineSourceStore.name || '매장',
-        targetStoreId: utilLineTargetStore.id || '', targetName: utilLineTargetStore.name || '기능실',
+        targetStoreId: from.id || '', targetName: from.name || '기능실',
+        ...(origin ? { originName: origin.name || '', originFloor: utilLineTargetFloor } : {}),
         points: res.points
     };
     addUtilityLine(floor.code, newLine);
@@ -757,7 +780,7 @@ function updateUtilLineGuideUI() {
     if (!banner) return;
 
     const cfg = UTIL_SPECS_CONFIG[utilLineSelectedType] || UTIL_SPECS_CONFIG.power;
-    const srcText = utilLineSourceStore ? utilLineSourceStore.name : '선택 중...';
+    const srcText = utilLineSourceStore ? utilLineSourceStore.name : utilLineCrossFloor() ? floorLabel(FLOORS[currentFloorIdx].code) + '에서 눌러 주세요' : '선택 중...';
     const tgtText = utilLineTargetStore ? utilLineTargetStore.name : '선택 중...';
     const isOrtho = (typeof isGlobalOrthoMode !== 'undefined' && isGlobalOrthoMode);
 
@@ -773,6 +796,15 @@ function updateUtilLineGuideUI() {
             </label>
         `;
     }).join('');
+
+    // 다른 층으로 옮겼으면 「2층 보는 중 — 연결할 매장을 눌러 주세요 (2층 3번 EPS 에서 이어 그림)」 (결정 366)
+    let crossHtml = '';
+    if (utilLineCrossFloor()) {
+        const here = floorLabel(FLOORS[currentFloorIdx].code), twin = utilLineFloorTwin();
+        crossHtml = `<span id="util-cross-floor" style="padding:2px 8px; border-radius:4px; background:${twin ? '#fef3c7' : '#fee2e2'}; color:${twin ? '#92400e' : '#b91c1c'}; border:1px solid ${twin ? '#fcd34d' : '#fca5a5'};">${twin
+            ? `${here} 보는 중 · ${escapeHtml(twin.name)}에서 이어 그림`
+            : `${here}에 ${escapeHtml(stripFloorName(utilLineTargetStore.name))}이(가) 없습니다`}</span>`;
+    }
 
     // 전기만 [일반 | 비상] (결정 354)
     const kindHtml = utilLineSelectedType !== 'power' ? '' : `<div id="util-power-kind" style="display:inline-flex; border:1px solid #fca5a5; border-radius:6px; overflow:hidden; background:#fff;">${['일반', '비상'].map(k =>
@@ -803,6 +835,7 @@ function updateUtilLineGuideUI() {
                 <span style="padding:2px 8px; border-radius:4px; background:${utilLineTargetStore ? '#eff6ff' : '#f1f5f9'}; color:${utilLineTargetStore ? '#2563eb' : '#64748b'}; border:1px solid ${utilLineTargetStore ? '#bfdbfe' : '#e2e8f0'};">
                     모 기능실[${tgtText}]
                 </span>
+                ${crossHtml}
                 <!-- 점선 흐름 연출 인디케이터 -->
                 <div style="display:inline-flex; align-items:center; gap:2px; padding:0 4px; overflow:hidden;">
                     <div style="width:24px; height:3px; background:${cfg.color}; border-radius:2px; position:relative; overflow:hidden;">
@@ -826,7 +859,7 @@ function updateUtilLineGuideUI() {
             ${inputFieldHtml}
 
 
-            <span class="zone-pts-badge">길은 자동</span>
+            ${crossHtml ? '' : '<span class="zone-pts-badge">길은 자동</span>'}
         </div>
 
         <div style="display:flex; align-items:center; gap:8px;">

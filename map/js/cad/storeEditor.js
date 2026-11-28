@@ -64,12 +64,23 @@ var lastCreatedStoreId = null;
         const UTIL_KINDS = ['EPS', 'AV', '공조실', 'PS', 'PD', '영업창고'];
         function utilKindOf(store) {
             const el = store && (store.groupElement || store.polygonElement);
-            return (el && el.getAttribute('data-util-kind')) || (store && UTIL_KINDS.includes(store.name) ? store.name : '');
+            const nm = store ? stripFloorName(store.name) : '';
+            return (el && el.getAttribute('data-util-kind')) || (UTIL_KINDS.includes(nm) ? nm : '');
         }
 
+        // 층 이름: 1F → 1층, B1 → 지하1층 (기능실 이름 앞에 붙임, 결정 366)
+        function floorLabel(code) {
+            const m = /^(\d+)F$/i.exec(code || ''), b = /^B(\d+)$/i.exec(code || '');
+            return m ? m[1] + '층' : b ? '지하' + b[1] + '층' : (code || '');
+        }
+        var FLOOR_NAME_RE = /^\s*(지하\s*\d+\s*층|\d+\s*층|B\d+F?|\d+F)\s*/i;
+        function stripFloorName(name) { return String(name || '').replace(FLOOR_NAME_RE, '').trim(); }
+        function withFloorName(name, code) { return FLOOR_NAME_RE.test(name) ? name : floorLabel(code) + ' ' + name; }
+
         function onSelectUtilityRadio(val) {
-            // 이름이 비었거나 다른 주요 기능실 이름 그대로일 때만 이름을 채움 (직접 쓴 이름은 그대로)
-            if (editNameInput && (!editNameInput.value.trim() || UTIL_KINDS.includes(editNameInput.value.trim()))) editNameInput.value = val;
+            // 이름이 비었거나 주요 기능실 이름 그대로(층 빼고)일 때만 「1층 EPS」로 채움 (직접 쓴 이름은 그대로)
+            const cur = editNameInput ? editNameInput.value.trim() : '';
+            if (editNameInput && (!cur || UTIL_KINDS.includes(stripFloorName(cur)))) editNameInput.value = withFloorName(val, FLOORS[currentFloorIdx].code);
             if (val === '영업창고') {
                 selectEditColor('#e2e8f0');
             }
@@ -400,8 +411,9 @@ var lastCreatedStoreId = null;
             if (isImmutableStore(activeSelectedStore.name)) {
                 return showToast('해당 항목은 수정할 수 없습니다.', 1500);
             }
-            const newName = editNameInput.value.trim();
             const isUtil = currentEditType === 'utility';
+            let newName = editNameInput.value.trim();
+            if (isUtil && newName) newName = withFloorName(newName, FLOORS[currentFloorIdx].code);   // 기능실 이름에 층이 없으면 앞에 붙임 (결정 366)
 
             if (!newName && !activeSelectedStore.bookId) {
                 return showToast(isUtil ? '기능실명을 입력해주세요.' : '매장명을 입력해주세요.', 1500);
