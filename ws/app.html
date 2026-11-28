@@ -10,10 +10,10 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.26.74"></script>
-<script>window.WS_VERSION = '0.26.74';</script>
-<script src="offline.js?v=0.26.74"></script>
-<script src="ws-api.js?v=0.26.74"></script>
+<script src="config.js?v=0.26.75"></script>
+<script>window.WS_VERSION = '0.26.75';</script>
+<script src="offline.js?v=0.26.75"></script>
+<script src="ws-api.js?v=0.26.75"></script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -825,7 +825,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B3','B2','B1','1F','2F','3F','4F','5F','6F','7F','8F','9F','10F','POPUP'];   // 소화기·소화전·공기호흡기 층 B3~10F · 맨 아래 POPUP (결정 228·260)
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.74' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.75' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -2743,10 +2743,36 @@ function renderHyd() {
     '<small style="text-align:center;color:var(--muted)">이 화면은 조회만 됩니다. 점검 입력은 소화전·공기호흡기에 붙어 있는 QR을 휴대폰으로 찍어서 합니다.</small>' +
     '<button class="btn" onclick="loadHyd(\'' + st.ym + '\')">새로고침</button></div>';
 }
-function openHydFloor(fl) { S.hfloor = fl; go('hydfl'); }
+function openHydFloor(fl) { S.hdel = false; S.hsel = {}; S.hfloor = fl; go('hydfl'); }
+/* ── ③ 층 화면 점검 기록 삭제 (결정 384): 소장·부소장·파트장만 (서버 ws_eq_check_delete 에서도 막음) ── */
+const eqDelCan = () => !!S.user && ['소장', '부소장', '파트장'].indexOf(S.user.role) !== -1;
+function hdelOn() { S.hdel = true; S.hsel = {}; render(); }
+function hdelOff() { S.hdel = false; S.hsel = {}; render(); }
+function hdelIds() { return Object.keys(S.hsel || {}).filter(k => S.hsel[k]); }
+function hdelPick(id) { S.hsel[id] = !S.hsel[id]; render(); }
+function hdelAsk() {
+  const pick = S.hq.items.filter(i => i.checkId && S.hsel[i.checkId]), m = Number(S.hq.ym.slice(5, 7));
+  if (!pick.length) return;
+  dialog('<h2 style="margin:0 0 var(--sp-2);font-size:var(--size-l)">점검 기록 ' + pick.length + '개 삭제</h2>' +
+    '<div style="max-height:200px;overflow:auto;margin-bottom:var(--sp-2)">' + pick.map(i => '<div style="padding:4px 0;border-top:1px solid var(--line)"><b>' + h(i.name) + '</b> · ' + m + '월 점검</div>').join('') + '</div>' +
+    '<div class="banner b-gray">삭제하면 ' + m + '월 「미입력」으로 돌아가고, QR을 찍어 다시 입력할 수 있습니다. 사진도 목록에서 빠집니다. 장비(QR)는 그대로 남습니다.</div>' +
+    '<div style="display:flex;gap:var(--sp-2);margin-top:var(--sp-3)"><button class="btn big" style="flex:1" onclick="closeDialog()">취소</button><button id="hdBtn" class="btn big delpri" style="flex:2" onclick="hdelGo()">삭제</button></div>');
+}
+async function hdelGo() {
+  const ids = hdelIds(), b = $('hdBtn'); if (b) b.disabled = true;
+  let n = 0, err = '';
+  for (const id of ids) {
+    try { const r = await call('eqCheckDelete', id); if (r && r.ok) n++; else err = (r && r.error) || err; } catch (e) { err = (e && e.message) || err; }
+  }
+  closeDialog(); S.hdel = false; S.hsel = {};
+  toast(n ? '점검 기록 ' + n + '개를 삭제했습니다' + (n < ids.length ? ' (' + (ids.length - n) + '개 못 지움)' : '') : (err || '삭제하지 못했습니다'));
+  if (S.hq) { const s = await call('eqStatus', S.hq.ym); if (s && s.ok) S.hq = s; }
+  render();
+}
 function renderHydFloor() {
   const st = S.hq, it = st.items.filter(i => i.floor === S.hfloor), m = Number(st.ym.slice(5, 7));
-  const chips = FLOORS.map(f => '<button class="fl' + (f === S.hfloor ? ' on' : '') + '" aria-pressed="' + (f === S.hfloor) + '" onclick="S.hfloor=\'' + f + '\';render()">' + f + '</button>').join('');
+  const chips = FLOORS.map(f => '<button class="fl' + (f === S.hfloor ? ' on' : '') + '" aria-pressed="' + (f === S.hfloor) + '" onclick="S.hfloor=\'' + f + '\';S.hsel={};render()">' + f + '</button>').join('');
+  const del = !!S.hdel, sel = S.hsel || {}, n = hdelIds().length;
   const sect = k => {
     const list = it.filter(i => i.kind === k);
     if (!list.length) return '';
@@ -2755,14 +2781,17 @@ function renderHydFloor() {
       list.map(i => {
         const has = i.state === 'ok' || i.state === 'bad';
         const sub = has ? h(i.by) + ' · ' + h(String(i.at).slice(5, 16)) + ' 입력' + (i.late ? ' · 기한 후' : '') : (i.state === 'miss' ? m + '월 ' + st.window.end + '일까지 입력 없음' : m + '월 ' + st.window.end + '일까지 입력 받는 중');
-        return '<button class="feb" ' + (has ? 'onclick="hydDetail(\'' + i.checkId + '\')"' : 'disabled') + '><span class="fname"><b>' + h(i.name) + '</b><small>' + sub + '</small></span>' +
+        if (del && has) return '<button class="feb" aria-pressed="' + !!sel[i.checkId] + '" onclick="hdelPick(\'' + i.checkId + '\')"><span style="font-size:22px;width:28px">' + (sel[i.checkId] ? '☑' : '☐') + '</span><span class="fname"><b>' + h(i.name) + '</b><small>' + sub + '</small></span><span class="chip ' + STATE[i.state][1] + '">' + STATE[i.state][0] + '</span></button>';
+        return '<button class="feb" ' + (has && !del ? 'onclick="hydDetail(\'' + i.checkId + '\')"' : 'disabled') + '><span class="fname"><b>' + h(i.name) + '</b><small>' + sub + '</small></span>' +
           (i.late ? '<span class="chip c-wait">기한 후</span>' : '') + '<span class="chip ' + STATE[i.state][1] + '">' + STATE[i.state][0] + '</span></button>';
       }).join('') + '</div>';
   };
   return topbar('층별 점검 현황 › ' + ymLabel(st.ym) + ' ›', S.hfloor + ' · 소화전 ' + it.filter(i => i.kind === 'hyd').length + ' · 공기호흡기 ' + it.filter(i => i.kind === 'air').length) + '<div class="wrap list">' +
     '<div style="display:flex;gap:var(--sp-1);overflow-x:auto;padding-bottom:var(--sp-1)">' + chips + '</div>' +
+    (del ? '<div class="banner b-gray">지울 점검 기록을 눌러 고르세요. 점검완료 · 이상 있음만 고를 수 있습니다.</div><div style="display:flex;gap:var(--sp-2)"><button class="btn big" style="flex:1" onclick="hdelOff()">취소</button><button class="btn big delpri" style="flex:2" ' + (n ? '' : 'disabled ') + 'onclick="hdelAsk()">선택 ' + n + '개 삭제</button></div>'
+      : eqDelCan() && it.some(i => i.checkId) ? '<button class="btn del" style="min-height:52px" onclick="hdelOn()">점검 기록 삭제</button>' : '') +
     (it.length ? sect('hyd') + sect('air') : '<div class="banner b-gray">' + S.hfloor + '에 등록된 소화전·공기호흡기가 없습니다.</div>') +
-    '<small style="text-align:center;color:var(--muted)">점검완료 · 이상 있음을 누르면 입력한 사진과 내용을 봅니다 (입력은 QR로)</small></div>';
+    '<small style="text-align:center;color:var(--muted)">점검완료 · 이상 있음을 누르면 입력한 사진과 내용을 봅니다 (입력은 QR로)' + (eqDelCan() ? '' : '<br>점검 기록 삭제는 소장 · 부소장 · 파트장만 할 수 있습니다') + '</small></div>';
 }
 async function hydDetail(id) {
   dialog('<div style="display:flex;justify-content:center;padding:var(--sp-8)"><span class="spin" style="color:var(--blue);width:28px;height:28px"></span></div>');
@@ -3340,7 +3369,7 @@ function detSheet(r, body, kind, id) {
   S.det = { kind, id, name: r.name, ym: r.ym, by: r.by || '', at: r.at };
   dialog('<div class="dh"><div class="fname"><b style="font-size:var(--size-l)">' + h(r.name) + '</b><small>' + h(r.floor) + (r.by ? ' · 점검자 ' + h(r.by) : '') + ' · ' + h(r.at) + ' 입력' + (r.late ? ' · 기한 후' : '') + '</small></div><button class="back" onclick="closeDialog()" aria-label="닫기">✕</button></div>' +
     '<div class="db">' + body + '</div>' +
-    '<div class="df"><button class="btn big del" style="flex:1" onclick="detDelAsk()">점검 기록 삭제</button><button class="btn big pri" style="flex:1" onclick="closeDialog()">닫기</button></div>');
+    '<div class="df">' + (kind === 'fe' || eqDelCan() ? '<button class="btn big del" style="flex:1" onclick="detDelAsk()">점검 기록 삭제</button>' : '') + '<button class="btn big pri" style="flex:1" onclick="closeDialog()">닫기</button></div>');
   document.querySelector('#layer .dialog').classList.add('dsheet');
 }
 function detDelAsk() {
