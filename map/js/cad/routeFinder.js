@@ -227,6 +227,7 @@ function rtPathPoints(path) {                          // 매장 path 의 d → 
         if (pts.length > 1 && Math.abs(pts[0].x - pts[pts.length - 1].x) < 0.01 && Math.abs(pts[0].y - pts[pts.length - 1].y) < 0.01) pts.pop();
         if (pts.length >= 3) return pts;
     }
+    if (!/\d/.test(path.getAttribute('d') || '')) return [];   // 다 깎여 빈 후방복도 등: 점 없음 (빈 path 는 getPointAtLength 가 오류)
     const L = path.getTotalLength(), pts = [], N = 40;
     for (let k = 0; k < N; k++) { const p = path.getPointAtLength(L * k / N); pts.push({ x: p.x, y: p.y }); }
     return pts;
