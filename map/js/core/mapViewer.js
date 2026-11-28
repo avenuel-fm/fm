@@ -193,6 +193,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
             activeSelectedStore = null;
             const svgEl = mapContainer.querySelector('svg');
             if (!svgEl) return;
+            if (typeof MAP_TEMP_SEL !== 'undefined') svgEl.querySelectorAll(MAP_TEMP_SEL).forEach(el => el.remove());   // 예전에 같이 저장된 고치기 표시 지움
 
             // B1 매장 색상 6각형 더미 도형(ff65ec50-0a22-4d3c-a72b-5e7222f29469) 및 관련 POI 즉시 제거
             if (floor.code === 'B1') {
