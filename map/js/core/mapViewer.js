@@ -170,6 +170,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                 }
                 // 외벽에 맞닿은 직접 그린 매장·기능실은 간격 없이 붙임 (이미 붙어 있으면 아무것도 안 함, 결정 376)
                 try { if (typeof wallFlushStores === 'function' && wallFlushStores(floor.code)) syncSvgCache(); } catch (e) { console.warn('외벽 붙이기 실패', e); }
+                if (infoDupRemoved) { infoDupRemoved = 0; if (!mapStore.readOnly()) syncSvgCache(); }   // 겹친 인포 그림을 치웠으면 저장 (결정 378)
 
                 if (!keepView) {
                     resetView();
@@ -576,10 +577,11 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
 
         // 인포 레이어: 업체 도면의 안내 그림을 한 묶음으로 (결정 160). 부모에 위치 변환이 없어 옮겨도 자리 그대로
         var INFO_NAMES = /엘리베이터|elevator|에스컬레이터|escalator|화장실|restroom|계단|stairs|tax ?refund|택스|텍스|안내|information|심장충격|aed|환전|currency exchange/i;
+        var infoDupRemoved = 0;   // 겹친 인포 그림을 치운 수 (층을 열 때 0 이 아니면 저장)
         function collectInfoLayer(svgEl) {
             let layer = svgEl.querySelector('#info-layer');
             const icons = Array.from(svgEl.querySelectorAll('g[group-type="POI_GROUP"]'))
-                .filter(g => g.querySelector('image') && INFO_NAMES.test(g.getAttribute('name') || '') && !g.closest('#info-layer'));
+                .filter(g => g.querySelector('image') && INFO_NAMES.test(g.getAttribute('name') || '') && !g.closest('#info-layer, #eraser-defs'));   // 지우개 구멍용 그림은 빼고 (결정 378)
             if (!layer && !icons.length) return null;
             if (!layer) {
                 layer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -592,7 +594,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                 return at(g, n('x') + n('width') / 2, n('y') + n('height') / 2);
             });
             const plates = Array.from(svgEl.querySelectorAll('path[stroke="#ffffff"]')).filter(p => {
-                if (p.closest('#info-layer') || !/^#(334155|67615d)$/i.test(p.getAttribute('fill') || '')) return false;
+                if (p.closest('#info-layer, #eraser-defs') || !/^#(334155|67615d)$/i.test(p.getAttribute('fill') || '')) return false;
                 const v = (p.getAttribute('d') || '').match(/-?\d+(\.\d+)?/g); if (!v) return false;
                 const xs = v.filter((_, i) => i % 2 === 0).map(Number), ys = v.filter((_, i) => i % 2).map(Number);
                 if (Math.max(...xs) - Math.min(...xs) > 80 || Math.max(...ys) - Math.min(...ys) > 80) return false;
@@ -609,6 +611,13 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                     + '</filter></defs>');
             }
             layer.querySelectorAll('image').forEach(im => im.setAttribute('filter', 'url(#info-tint)'));
+            // v0.26.68 에서 똑같이 겹쳐 늘어난 그림·받침은 하나만 남김 (결정 378)
+            const seen = new Set();
+            Array.from(layer.children).forEach(c => {
+                if (c.tagName.toLowerCase() === 'defs') return;
+                const k = c.outerHTML;
+                if (seen.has(k)) { c.remove(); infoDupRemoved++; } else seen.add(k);
+            });
             layer.style.pointerEvents = 'none';   // 그림을 눌러도 매장 그리기·선택을 막지 않음
             layer.style.display = infoLayerOn() ? '' : 'none';
             return layer;

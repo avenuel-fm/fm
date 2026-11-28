@@ -117,7 +117,11 @@ function rebuildEraserMask(svgEl) {
             mk(mask, 'polyline', { points: src.getAttribute('points') || '', fill: 'none', stroke: '#000', 'stroke-width': '12', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
         });
         svgEl.querySelectorAll('.building-exterior-wall').forEach(el => cloneBlack(mask, el));   // 외벽선은 늘 그대로
-        key.split(',').filter(Boolean).forEach(k => { const sel = eraserKeepSel(k); if (sel) svgEl.querySelectorAll(sel).forEach(el => cloneBlack(mask, el)); });
+        key.split(',').filter(Boolean).forEach(k => {
+            const sel = eraserKeepSel(k);
+            if (k === 'info') { if (svgEl.querySelector('#info-layer')) mk(mk(mask, 'g', { filter: 'url(#eraser-black)' }), 'use', { href: '#info-layer' }); }   // 복사하지 않고 가리키기만 (복사본이 인포로 끌려가 계속 늘던 문제, 결정 378)
+            else if (sel) svgEl.querySelectorAll(sel).forEach(el => cloneBlack(mask, el));
+        });
         const g = mk(layer, 'g', { mask: `url(#eraser-mask-${gi})`, 'data-keep-grp': key });
         groups[key].forEach(el => g.appendChild(el));
     });
