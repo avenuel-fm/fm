@@ -10,10 +10,10 @@
 <title>업무지원 · 에비뉴엘 시설팀</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=0.26.73"></script>
-<script>window.WS_VERSION = '0.26.73';</script>
-<script src="offline.js?v=0.26.73"></script>
-<script src="ws-api.js?v=0.26.73"></script>
+<script src="config.js?v=0.26.74"></script>
+<script>window.WS_VERSION = '0.26.74';</script>
+<script src="offline.js?v=0.26.74"></script>
+<script src="ws-api.js?v=0.26.74"></script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -433,6 +433,7 @@ button.attag{cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:n
 .ehsum{display:flex;align-items:center;flex-wrap:wrap;gap:var(--sp-2);margin:var(--sp-2) 0;font-size:var(--size-s);color:var(--muted)}
 .ehsum span{flex:1 1 auto}.ehsum b{color:var(--ink);font-size:var(--size-m)}
 .ehcnt{display:inline-flex;align-items:center;height:24px;padding:0 var(--sp-2);border-radius:var(--radius);background:var(--blue-bg);color:var(--blue-d);font-size:var(--size-s);font-weight:500;white-space:nowrap;flex:none}
+.ehdv{display:block;margin-top:2px;font-size:var(--size-s);color:var(--muted);overflow-wrap:anywhere}
 .ehst{margin-bottom:var(--sp-2)}
 .ehsh{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-1) var(--sp-1) var(--sp-1) var(--sp-3);min-height:56px}
 .ehsh input,.ehit input,.ehtbl input{width:22px;height:22px;accent-color:var(--blue);flex:none;margin:0}
@@ -824,7 +825,7 @@ select.lgin{text-align:center;padding:0}
 const EXEC_URL = '';
 const FLOORS = ['B3','B2','B1','1F','2F','3F','4F','5F','6F','7F','8F','9F','10F','POPUP'];   // 소화기·소화전·공기호흡기 층 B3~10F · 맨 아래 POPUP (결정 228·260)
 const CAN_PRINT = window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 900;
-const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.73' || store('ws_ver') || '' };
+const S = { token: store('ws_token') || '', user: null, view: 'loading', pin: '', sign: null, docs: null, tbm: null, fire: null, qr: null, sel: {}, q: '', st: null, ym: '', floor: '3F', busy: false, ver: '0.26.74' || store('ws_ver') || '' };
 
 /* ── 도우미 ── */
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -4055,7 +4056,7 @@ async function pvShare() {
 function renderEh() {
   ehWas = ehWide();
   return topbar('점검 ›', '전열필증') + '<div class="wrap">' +
-    '<input id="ehQ" class="inp" type="search" placeholder="매장명 검색 (모든 층)" aria-label="매장명 검색" value="' + h(S.ehQ || '') + '" oninput="ehSearch(this)">' +
+    '<input id="ehQ" class="inp" type="search" placeholder="매장명·기기명 검색 (모든 층)" aria-label="매장명·기기명 검색" value="' + h(S.ehQ || '') + '" oninput="ehSearch(this)">' +
     '<div id="ehBody">' + ehBody() + '</div></div>';
 }
 function ehBody() {
@@ -4063,11 +4064,13 @@ function ehBody() {
   let body = '<div class="banner b-gray">불러오는 중…</div>';
   if (r) {
     const q = (S.ehQ || '').trim().toLowerCase().replace(/\s+/g, '');
-    const hits = q ? r.names.filter(n => n[1].toLowerCase().replace(/\s+/g, '').indexOf(q) !== -1) : null;
+    const has = s => String(s).toLowerCase().replace(/\s+/g, '').indexOf(q) !== -1;
+    // 매장명이 맞으면 그대로, 아니면 기기명(n[3])이 맞는 매장 + 맞은 기기명
+    const hits = q ? r.names.map(n => has(n[1]) ? [n, []] : [n, (n[3] || []).filter(has)]).filter(x => has(x[0][1]) || x[1].length) : null;
     const fl = r.floors.find(f => f.code === r.floor);
     body = '<div class="ehfls" role="tablist">' + r.floors.map(f => '<button class="ehfl' + (f.code === r.floor ? ' on' : '') + '" role="tab" aria-selected="' + (f.code === r.floor) + '" onclick="ehFloorGo(\'' + f.code + '\')"><b>' + f.code + '</b><small>' + f.stores + '곳 · ' + f.items + '</small></button>').join('') + '</div>';
     if (hits) {
-      body += '<div class="list" style="margin-top:var(--sp-2)">' + (hits.length ? hits.slice(0, 50).map(n => '<button class="row" onclick="ehJump(\'' + n[0] + '\',\'' + n[2] + '\')"><span class="ehcnt">' + h(n[0]) + '</span><span class="fname"><b style="font-size:var(--size-m)">' + h(n[1]) + '</b></span>' + ICON.chev + '</button>').join('') : '<div class="banner b-gray">「' + h(S.ehQ) + '」 매장이 없습니다.</div>') + '</div>';
+      body += '<div class="list" style="margin-top:var(--sp-2)">' + (hits.length ? hits.slice(0, 50).map(([n, dv]) => '<button class="row" onclick="ehJump(\'' + n[0] + '\',\'' + n[2] + '\')"><span class="ehcnt">' + h(n[0]) + '</span><span class="fname"><b style="font-size:var(--size-m)">' + h(n[1]) + '</b>' + (dv.length ? '<small class="ehdv">' + h(dv.join(', ')) + '</small>' : '') + '</span>' + ICON.chev + '</button>').join('') : '<div class="banner b-gray">「' + h(S.ehQ) + '」 매장·기기가 없습니다.</div>') + '</div>';
     } else {
       body += '<div class="ehsum"><span><b>' + h(r.floor) + '</b> 매장 ' + fl.stores + '곳 · 기기 ' + fl.items + '대</span>' +
         (CAN_PRINT ? '<button class="btn sm" onclick="ehImportDlg(' + !r.empty + ')">' + (r.empty ? '엑셀 가져오기' : '엑셀 다시 가져오기') + '</button>' : '') +
