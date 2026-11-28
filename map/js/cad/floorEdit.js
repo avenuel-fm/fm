@@ -14,6 +14,7 @@ var feSnapPt = null;     // 자석으로 붙은 자리 (초록 동그라미)
 var feSkipClick = false; // 끌기 뒤 따라오는 클릭은 버림
 var FE_HANDLE_PX = 8;    // 손잡이 누르는 범위 (화면 px)
 var feLastDown = null;   // 꼭짓점 두 번 누르기 판단 { id, i, t }
+var feMulti = [];        // Shift+클릭으로 함께 고른 바닥 id 들 (2개 이상일 때만, 결정 372)
 
 function feBase() { return typeof isZoneDrawingMode !== 'undefined' && isZoneDrawingMode && currentZoneCategory === 'floor' && !(typeof isLayerLocked === 'function' && isLayerLocked('floor')); }
 function feOn() { return feBase() && !drawingZonePoints.length && !isSpacePressed && !(typeof ffOn !== 'undefined' && ffOn); }   // 바닥 채우기 중엔 고르기 안 함
@@ -168,32 +169,60 @@ function feDeleteVertex(id, i) {
 }
 
 function feDelete() {
-    const z = feZone(feSel);
-    if (!z) return;
-    const code = feCode();
+    const zs = feMulti.length ? feMulti.map(feZone).filter(Boolean) : [feZone(feSel)].filter(Boolean);
+    if (!zs.length) return;
+    const code = feCode(), ids = new Set(zs.map(z => z.id));
     pushUndoState('바닥 삭제');
-    saveFloorZones(code, getFloorZones(code).filter(q => q.id !== z.id));
-    feSel = null;
+    saveFloorZones(code, getFloorZones(code).filter(q => !ids.has(q.id)));
+    feSel = null; feMulti = [];
     feHidePop();
     renderFloorZones(code);
     syncSvgCache();
     feRender();
-    showToast(`'${z.name}'을 지웠습니다. (되돌리기 가능)`, 1500);
+    showToast((zs.length > 1 ? `바닥 ${zs.length}개를` : `'${zs[0].name}'을`) + ' 지웠습니다. (되돌리기 가능)', 1500);
+}
+
+// 고른 바닥들을 닿거나 겹친 덩어리마다 한 장으로 (Shift+클릭으로 고름, 결정 372)
+function feMergeSel() {
+    const ids = feMulti.length ? feMulti : [];
+    if (ids.length < 2) { showToast('Shift 를 누른 채 합칠 바닥을 더 눌러 고르세요.', 2000); return; }
+    const code = feCode(), zones = getFloorZones(code), sel = ids.map(id => zones.find(z => z.id === id)).filter(Boolean);
+    let groups;
+    try {
+        const rings = outerRings(polygonClipping.union(...sel.map(z => [feRing(z.points)])));
+        groups = rings.map(r => ({ ring: r, zs: sel.filter(z => polygonClipping.intersection([r], [feRing(z.points)]).some(q => ringArea(q[0]) > 1)) })).filter(g => g.zs.length > 1);
+    } catch (err) { console.warn('바닥 합치기 실패', err); showToast('바닥을 합치지 못했습니다.', 1800); return; }
+    if (!groups.length) { showToast('서로 닿거나 겹친 바닥이 없어 합치지 못했습니다.', 2000); return; }
+    pushUndoState('바닥 합치기');
+    const drop = new Set(groups.flatMap(g => g.zs.slice(1).map(z => z.id)));
+    const keep = new Map(groups.map(g => [g.zs[0].id, g]));
+    saveFloorZones(code, zones.filter(z => !drop.has(z.id)).map(z => keep.has(z.id) ? Object.assign({}, z, { points: feToPts(keep.get(z.id).ring), cl: keep.get(z.id).zs.flatMap(q => q.cl || []) }) : z));
+    renderFloorZones(code);
+    syncSvgCache();
+    const left = sel.length - drop.size - groups.length;
+    feMulti = [];
+    feSel = groups.length === 1 && !left ? groups[0].zs[0].id : null;
+    feHidePop();
+    if (feSel) feShowPop(feZone(feSel));
+    feRender();
+    showToast(`바닥 ${drop.size + groups.length}개를 ${groups.length}장으로 합쳤습니다.` + (left ? ` 떨어진 바닥 ${left}개는 그대로입니다.` : '') + ' (되돌리기 가능)', 2200);
 }
 
 function feHidePop() { document.getElementById('floor-sel-pop')?.remove(); }
 function feShowPop(z) {
     feHidePop();
+    const zs = Array.isArray(z) ? z : [z];
     const pop = document.createElement('div');
     pop.id = 'floor-sel-pop';
     pop.innerHTML = `<div class="wall-seg-title"></div>`
+        + '<button type="button" class="fe-merge" onclick="feMergeSel()">합치기</button>'
         + '<button type="button" class="wall-seg-del" onclick="feDelete()">삭제 (Del)</button>'
-        + '<button type="button" onclick="feRename()">이름 바꾸기</button>'
-        + '<button type="button" onclick="feSel=null;feHidePop();feRender()">닫기 (Esc)</button>';
-    pop.querySelector('.wall-seg-title').textContent = `${z.name} · 꼭짓점 ${feCorners(z.points).length}개`;
+        + (zs.length > 1 ? '' : '<button type="button" onclick="feRename()">이름 바꾸기</button>')
+        + '<button type="button" onclick="feSel=null;feMulti=[];feHidePop();feRender()">닫기 (Esc)</button>';
+    pop.querySelector('.wall-seg-title').textContent = zs.length > 1 ? `바닥 ${zs.length}개 고름 (Shift+클릭)` : `${zs[0].name} · 꼭짓점 ${feCorners(zs[0].points).length}개`;
     // 바닥 아래 가운데 (손잡이를 가리지 않게). 화면 밖이면 위로
-    const r = mapContainer.getBoundingClientRect(), c = FLOORS[currentFloorIdx].crop;
-    const xs = z.points.map(q => r.left + (q.x - c.minX) * scale), ys = z.points.map(q => r.top + (q.y - c.minY) * scale);
+    const r = mapContainer.getBoundingClientRect(), c = FLOORS[currentFloorIdx].crop, all = zs.flatMap(q => q.points);
+    const xs = all.map(q => r.left + (q.x - c.minX) * scale), ys = all.map(q => r.top + (q.y - c.minY) * scale);
     let top = Math.max(...ys) + 16;
     if (top > window.innerHeight - 150) top = Math.max(8, Math.min(...ys) - 160);
     pop.style.left = Math.max(8, Math.min((Math.min(...xs) + Math.max(...xs)) / 2 - 85, window.innerWidth - 190)) + 'px';
@@ -204,7 +233,19 @@ function feShowPop(z) {
 function feRename() { const z = feZone(feSel); feHidePop(); if (z) openZoneModal(z); }
 
 function feSelect(id, e) {
-    feSel = id; feHover = null; fePick = null;
+    feHover = null; fePick = null;
+    if (e && e.shiftKey) {   // Shift+클릭: 고른 바닥에 더하기·빼기 (결정 372)
+        const set = feMulti.length ? feMulti.slice() : (feSel ? [feSel] : []), i = set.indexOf(id);
+        if (i >= 0) set.splice(i, 1); else set.push(id);
+        feMulti = set.length > 1 ? set : [];
+        feSel = set.length === 1 ? set[0] : null;
+        if (feMulti.length) feShowPop(feMulti.map(feZone).filter(Boolean));
+        else if (feSel) feShowPop(feZone(feSel));
+        else feHidePop();
+        feRender();
+        return;
+    }
+    feSel = id; feMulti = [];
     const z = feZone(id);
     if (z) feShowPop(z);
     feRender();
@@ -216,11 +257,12 @@ function feRender(hoverPt) {
     let g = svg && svg.querySelector('#floor-edit-layer');
     if (!feBase() || !svg) {
         if (g) g.remove();
-        feSel = feHover = feDrag = fePick = null;
+        feSel = feHover = feDrag = fePick = null; feMulti = [];
         feHidePop();
         return;
     }
     if (feSel && !feZone(feSel)) { feSel = null; feHidePop(); }
+    if (feMulti.length) { feMulti = feMulti.filter(id => feZone(id)); if (feMulti.length < 2) { feMulti = []; feHidePop(); } }
     if (!g) { g = document.createElementNS(NS_SVG, 'g'); g.setAttribute('id', 'floor-edit-layer'); g.style.pointerEvents = 'none'; }
     svg.appendChild(g);
     g.textContent = '';
@@ -235,6 +277,7 @@ function feRender(hoverPt) {
             if (hoverPt) { const t = mk('text', { x: hoverPt.x + 10 * k, y: hoverPt.y - 10 * k, 'font-size': 12 * k, fill: '#1e3a5f', 'font-weight': 700, 'paint-order': 'stroke', stroke: '#fff', 'stroke-width': 3 * k }); t.textContent = z.name; }
         }
     }
+    feMulti.forEach(id => { const z = feZone(id); if (z) poly(z.points, { class: 'fe-sel', fill: 'rgba(30,58,95,0.18)', stroke: '#1e3a5f', 'stroke-width': 3 * k }); });
     const s = feZone(feSel);
     if (!s) return;
     if (live) poly(s.points, { fill: 'none', stroke: '#94a3b8', 'stroke-width': 1.5 * k, 'stroke-dasharray': `${6 * k} ${4 * k}` });
@@ -314,19 +357,20 @@ function feRender(hoverPt) {
             if (Math.hypot(pts[d.vi].x - d.base.x, pts[d.vi].y - d.base.y) > 0.5) feApply(d.id, pts); else feRender();
             return;
         }
-        if (e.shiftKey) return;   // Shift + 클릭 = 바닥 안에서도 새 바닥 첫 점
+        if (e.altKey) return;   // Alt + 클릭 = 바닥 안에서도 새 바닥 첫 점 (전: Shift, Shift 는 여러 바닥 고르기로 바뀜 결정 372)
         const z = feFloorAt(p);
         if (z) { e.stopPropagation(); feSelect(z.id, e); return; }
-        if (feSel) { e.stopPropagation(); feSel = null; feHidePop(); feRender(); }
+        if (e.shiftKey) return;   // 바닥 밖 Shift+클릭 = 그대로 새 바닥 첫 점
+        if (feSel || feMulti.length) { e.stopPropagation(); feSel = null; feMulti = []; feHidePop(); feRender(); }
     }, true);
 
     window.addEventListener('keydown', e => {
         if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName) || !feBase()) return;
-        if (e.key === 'Escape' && (fePick || feDrag || feSel)) {
+        if (e.key === 'Escape' && (fePick || feDrag || feSel || feMulti.length)) {
             e.stopImmediatePropagation(); e.preventDefault();
-            if (fePick || feDrag) { fePick = feDrag = null; feSnapPt = null; } else { feSel = null; feHidePop(); }
+            if (fePick || feDrag) { fePick = feDrag = null; feSnapPt = null; } else { feSel = null; feMulti = []; feHidePop(); }
             feRender();
-        } else if ((e.key === 'Delete' || e.code === 'Delete') && feSel && !fePick && !feDrag) {
+        } else if ((e.key === 'Delete' || e.code === 'Delete') && (feSel || feMulti.length) && !fePick && !feDrag) {
             e.stopImmediatePropagation(); e.preventDefault();
             feDelete();
         }
