@@ -446,7 +446,9 @@
 .store-id-chip { width: fit-content; font-size: var(--size-s); font-weight: 500; background: var(--tint); border: 1px solid var(--line); border-radius: var(--radius); padding: 0 var(--sp-2); line-height: 24px; font-variant-numeric: tabular-nums; }
 .store-id-chip[hidden], .store-form-note[hidden], #btn-clear-name[hidden] { display: none; }
 /* 기능실 이름 옆 주요 기능실 (결정 362) */
-.util-kind-chip { width: fit-content; font-size: var(--size-s); font-weight: 700; color: var(--navy); background: var(--tint); border: 1px solid var(--navy); border-radius: var(--radius); padding: 0 var(--sp-2); line-height: 24px; }
+.util-kind-chip { width: fit-content; font-size: var(--size-s); font-weight: 700; color: var(--navy); background: var(--white, #fff); border: 1.5px solid var(--navy); border-radius: var(--radius); padding: 0 var(--sp-2); line-height: 22px; }
+.modal-header-title .mh-row { display: flex; align-items: center; flex-wrap: wrap; gap: var(--sp-2); }   /* 윗줄 현황·고유번호 / 아랫줄 이름·주요 기능실 (결정 370) */
+.store-form-sec[hidden], .facility-info-table[hidden] { display: none; }
 .util-kind-chip[hidden] { display: none; }
 .store-form-note { margin-top: var(--sp-2); font-size: var(--size-s); color: var(--text-sub); line-height: 1.5; }
 .store-form-title { margin: var(--sp-3) 0 var(--sp-2); font-size: var(--size-s); font-weight: 700; color: var(--navy); }

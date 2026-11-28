@@ -36,6 +36,7 @@ var lastCreatedStoreId = null;
                 }
             }
             applyTypeShape(type);
+            syncEpsPipeForm();
         }
 
         // 탭을 바꾸면 모양도 그 종류 규칙으로 (결정 316): 기능실 = 매장 옆이면 붙고 3px · 매장 침범은 그린 대로, 매장 = 기존 도형과 2px.
@@ -84,6 +85,7 @@ var lastCreatedStoreId = null;
             if (val === '영업창고') {
                 selectEditColor('#e2e8f0');
             }
+            syncEpsPipeForm();
         }
 
         function selectEditColor(hex) {
@@ -125,11 +127,20 @@ var lastCreatedStoreId = null;
             }
             const book = getStoreBook(FLOORS[currentFloorIdx].code);
             const it = book.items[store.bookId] || { details: {} };
-            box.innerHTML = StoreBook.groups(StoreBook.itemsWith(getStoreItems(), book), it).map(g => `
+            box.innerHTML = StoreBook.groups(StoreBook.itemsWith(getStoreItems(), book), it).map(g => `<div class="store-form-sec" data-group="${escapeHtml(g.title)}">
                 <div class="store-form-title">${escapeHtml(g.title)}</div>
                 <div class="store-form-grid${g.rows.length === 4 ? ' cols2' : ''}">${g.rows.map(r => `
                     <div class="form-group"><label>${escapeHtml(r.label)}</label><input type="text" data-detail-key="${escapeHtml(r.key)}" value="${escapeHtml(r.value)}"></div>`).join('')}
-                </div>`).join('');
+                </div></div>`).join('');
+            syncEpsPipeForm();
+        }
+
+        // 기능실이 EPS 면 배관 칸을 숨김 (값은 지우지 않고 숨긴 칸에 그대로 남겨 저장, 결정 370)
+        const isPipeRow = label => /급수|배수|가스|수도|배관/.test(label || '');
+        function syncEpsPipeForm() {
+            const r = document.querySelector('input[name="util-type-opt"]:checked');
+            const eps = currentEditType === 'utility' && !!r && r.value === 'EPS';
+            document.querySelectorAll('#store-detail-form .store-form-sec[data-group="배관"]').forEach(el => { el.hidden = eps; });
         }
 
         function gatherStoreDetails() {
@@ -212,15 +223,17 @@ var lastCreatedStoreId = null;
                 tableEl.innerHTML = '';
                 const book = getStoreBook(FLOORS[currentFloorIdx].code);
                 const it = storeItem.bookId && book.items[storeItem.bookId];
-                const sections = it ? StoreBook.groups(StoreBook.itemsWith(getStoreItems(), book), it)
+                const all = it ? StoreBook.groups(StoreBook.itemsWith(getStoreItems(), book), it)
                     : [{ title: '', rows: (storeItem.fields || []) }];
-                if (sections.some(g => g.rows.length)) {
-                    tableEl.innerHTML = sections.map(g => `
-                        ${g.title ? `<div class="facility-group">${escapeHtml(g.title)}</div>` : ''}
-                        ${g.rows.map(f => `<div class="facility-row"><div class="facility-label">${escapeHtml(f.label)}</div><div class="facility-value">${escapeHtml(f.value || '-')}</div></div>`).join('')}`).join('');
-                } else {
-                    tableEl.innerHTML = `<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px 0;">등록된 시설 항목이 없습니다.</div>`;
-                }
+                // 입력한 칸만 · 빈 묶음은 제목까지 숨김 · EPS 는 배관 빼기 · 다 비면 표도 숨김 (결정 370)
+                const eps = isUtil && kind === 'EPS', filled = v => { const s = StoreBook.clean(v); return s && s !== '-'; };
+                const sections = all.filter(g => !(eps && g.title === '배관'))
+                    .map(g => ({ title: g.title, rows: g.rows.filter(f => filled(f.value) && !(eps && isPipeRow(f.label))) }))
+                    .filter(g => g.rows.length);
+                tableEl.innerHTML = sections.map(g => `
+                    ${g.title ? `<div class="facility-group">${escapeHtml(g.title)}</div>` : ''}
+                    ${g.rows.map(f => `<div class="facility-row"><div class="facility-label">${escapeHtml(f.label)}</div><div class="facility-value">${escapeHtml(f.value)}</div></div>`).join('')}`).join('');
+                tableEl.hidden = !sections.length;
             }
 
             // 매장 시설 현황 팝업: 어두운 딤 오버레이 제거 & 우측 하단 플로팅 팝업 카드 표시
