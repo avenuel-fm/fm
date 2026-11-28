@@ -719,3 +719,5 @@ body.map-ro #btn-excel-up, body.map-ro .btn-edit-action { display: none; }
 body.menu-hidden header { display: none; }
 body.map-full header, body.map-full .menu-tab, body.map-full .map-top-left-group, body.map-full .panel-sidebar,
 body.map-full .floating-controls, body.map-full .map-btn-store, body.map-full .map-btn-utility { display: none !important; }
+/* 휴대폰에서는 매장·구역 추가/편집을 뺌 (보기·심벌·연결선만, 결정 374) */
+@media (max-width: 768px) { #menu-item-store, #menu-item-zone { display: none !important; } }

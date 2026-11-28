@@ -511,3 +511,25 @@ body.wall-march .safety-zone-item[data-zone-category="wall"] > polygon { stroke:
 @keyframes wallMarch { to { stroke-dashoffset: -16; } }
 #floor-fill-pop .ff-hint { font-size: 12px; color: #64748b; white-space: nowrap; }
 #floor-fill-pop .ff-ok { border-color: #1e3a5f; background: #1e3a5f; color: #fff; font-weight: 700; }   /* 바닥 채우기 (결정 334) */
+/* 동그라미 지우개 (결정 374) */
+.user-eraser-stroke { pointer-events: none; }
+body.eraser-brush #viewport, body.eraser-brush #viewport * { cursor: none !important; }
+#eraser-cursor { position: fixed; z-index: 2500; pointer-events: none; border-radius: 50%; border: 1.5px solid #475569; background: rgba(148,163,184,.18); box-shadow: 0 0 0 1px rgba(255,255,255,.8); }
+#eraser-cursor.down { background: rgba(148,163,184,.45); }
+.erase-hit { stroke: var(--red, #C0261A) !important; stroke-width: 3px !important; vector-effect: non-scaling-stroke; stroke-opacity: 1 !important; animation: eraseHit .5s ease-in-out infinite alternate; }
+@keyframes eraseHit { from { stroke-opacity: 1; } to { stroke-opacity: .25; } }
+#erase-confirm { position: fixed; inset: 0; z-index: 3000; display: flex; align-items: center; justify-content: center; background: rgba(15,23,42,.35); }
+#erase-confirm .ec-card { background: #fff; border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,.2); padding: 18px 20px 16px; width: min(360px, calc(100vw - 32px)); }
+#erase-confirm .ec-title { font-size: 16px; font-weight: 700; color: #1e3a5f; }
+#erase-confirm .ec-sub { font-size: 12px; color: #64748b; margin: 4px 0 10px; }
+#erase-confirm .ec-list { max-height: 240px; overflow: auto; border: 1px solid #e2e8f0; border-radius: 8px; }
+#erase-confirm .ec-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; font-size: 13px; cursor: pointer; }
+#erase-confirm .ec-row + .ec-row { border-top: 1px solid #f1f5f9; }
+#erase-confirm .ec-row input { width: 16px; height: 16px; accent-color: #1e3a5f; }
+#erase-confirm .ec-kind { flex: none; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 4px; border: 1.5px solid currentColor; }
+#erase-confirm .ec-store { color: #1e3a5f; } #erase-confirm .ec-utility { color: #7c3aed; } #erase-confirm .ec-line { color: #C0261A; }
+#erase-confirm .ec-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#erase-confirm .ec-btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+#erase-confirm button { min-width: 72px; height: 36px; border-radius: 8px; font-size: 14px; border: 1px solid #cbd5e1; background: #fff; color: #1e3a5f; cursor: pointer; }
+#erase-confirm .ec-ok { background: #1e3a5f; border-color: #1e3a5f; color: #fff; font-weight: 700; }
+svg text.lbl-movable, svg text.editable-store-name.lbl-movable { cursor: move !important; pointer-events: auto !important; }   /* 수정 중 매장명 끌기 (결정 374) */

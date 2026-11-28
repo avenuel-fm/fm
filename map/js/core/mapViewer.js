@@ -452,6 +452,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                     newText.setAttribute('y', (cs.y + 6).toFixed(2));
                     newText.classList.add('editable-store-name');
                     newText.setAttribute('data-store-id', cs.id);
+                    if (cs.lblDx || cs.lblDy) { newText.dataset.lblDx = cs.lblDx || 0; newText.dataset.lblDy = cs.lblDy || 0; }   // 끌어 옮긴 매장명 자리 (결정 374)
 
                     const newTspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
                     newTspan.textContent = cs.name;
@@ -740,6 +741,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
             // 기운 도형: 글자도 긴 변 따라 기울여 한 줄로 가운데. 넘치면 가운데·기울기 그대로 도형을 키움 (결정 308)
             const pts = typeof rtPathPoints === 'function' ? rtPathPoints(pathEl) : parseSvgPathPoints(pathEl.getAttribute('d'));
             const tilt = storeTilt(pts);
+            const ox = +textEl.dataset.lblDx || 0, oy = +textEl.dataset.lblDy || 0;   // 수정 창에서 끌어 옮긴 만큼 (결정 374)
             if (tilt) {
                 one.textContent = name;
                 const needL = width(name) + STORE_LABEL_PAD * 2, needS = STORE_LABEL_LINE + STORE_LABEL_PAD;
@@ -748,13 +750,14 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                     pathEl.setAttribute('d', pointsToPathD(grown));
                     if (typeof persistCustomShape === 'function') persistCustomShape(pathEl);
                 }
-                textEl.setAttribute('x', tilt.cx.toFixed(2));
-                textEl.setAttribute('y', (tilt.cy + STORE_LABEL_SIZE / 3).toFixed(2));
-                textEl.setAttribute('transform', `rotate(${tilt.deg.toFixed(2)} ${tilt.cx.toFixed(2)} ${tilt.cy.toFixed(2)})`);
+                const tx = tilt.cx + ox, ty = tilt.cy + oy;
+                textEl.setAttribute('x', tx.toFixed(2));
+                textEl.setAttribute('y', (ty + STORE_LABEL_SIZE / 3).toFixed(2));
+                textEl.setAttribute('transform', `rotate(${tilt.deg.toFixed(2)} ${tx.toFixed(2)} ${ty.toFixed(2)})`);
                 return;
             }
             const box = storeLabelBox(pathEl, width(name) + STORE_LABEL_PAD * 2, STORE_LABEL_LINE + STORE_LABEL_PAD);
-            const cx = box.x + box.w / 2, cy = box.y + box.h / 2;
+            const cx = box.x + box.w / 2 + ox, cy = box.y + box.h / 2 + oy;
             const room = box.w - STORE_LABEL_PAD * 2;
             const out = splitStoreLabel(name, room, width);
             const x = cx.toFixed(2);

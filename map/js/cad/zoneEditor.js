@@ -80,7 +80,7 @@ function rebuildEraserMask(svgEl) {
     const layer = svgEl.querySelector('#eraser-layer');
     if (!layer) return;
     let defs = svgEl.querySelector('#eraser-defs');
-    if (!layer.querySelector('polygon')) { layer.removeAttribute('mask'); if (defs) defs.remove(); return; }
+    if (!layer.querySelector('polygon, polyline')) { layer.removeAttribute('mask'); if (defs) defs.remove(); return; }
     if (!defs) { defs = document.createElementNS(NS_SVG, 'defs'); defs.setAttribute('id', 'eraser-defs'); svgEl.insertBefore(defs, svgEl.firstChild); }
     defs.textContent = '';
     const mask = document.createElementNS(NS_SVG, 'mask');
@@ -153,9 +153,10 @@ function bringZoneLayersToFront() {
             updateZoneDrawingPreview();
             if (typeof feRender === 'function') feRender();
             if (typeof ffSync === 'function') ffSync();
+            if (typeof ebSync === 'function') ebSync();
         }
 
-        // 지우개 켜기/끄기 (결정 216): 켜면 구역 종류는 잠기고 면으로 그려 바닥색으로 칠함
+        // 지우개 켜기/끄기 (결정 216 → 374): 켜면 구역 종류는 잠기고 동그라미로 문질러 바닥색으로 칠함 (eraserBrush.js)
         function toggleEraserMode() {
             if (!isZoneDrawingMode) return;
             if (currentZoneCategory === 'erase') {
@@ -165,6 +166,7 @@ function bringZoneLayersToFront() {
                 zoneCatBeforeEraser = currentZoneCategory || 'fire';
                 drawingZonePoints = [];
                 setZoneCategory('erase');
+                showToast('누른 채 문지르면 지워집니다. [ ] 키로 크기 (10·20·40px)', 2000);
             }
         }
 
@@ -220,6 +222,7 @@ function bringZoneLayersToFront() {
         function exitAddZoneMode() {
             isZoneDrawingMode = false;
             if (currentZoneCategory === 'erase') currentZoneCategory = zoneCatBeforeEraser || 'fire';   // 지우개는 한 번 쓰면 꺼짐
+            if (typeof ebSync === 'function') ebSync();
             deselectWallZone();
             document.body.classList.remove('drawing-locked');
             document.body.classList.remove('zone-drawing-mode');
@@ -877,7 +880,7 @@ function bringZoneLayersToFront() {
             }
             outLayer.appendChild(lineG);
             const eraserLayer = ensureSvgLayer(svgEl, 'eraser-layer');
-            Array.from(eraserLayer.querySelectorAll('polygon')).forEach(e => e.remove());
+            Array.from(eraserLayer.querySelectorAll('polygon, polyline')).forEach(e => e.remove());
             zones.forEach(zone => {
                 if (zone.category === 'floor' || zone.category === 'erase') {   // 바닥·지우개는 자기 층에 (결정 216)
                     renderPaintZone(zone, lineG, eraserLayer);
@@ -1078,6 +1081,13 @@ function bringZoneLayersToFront() {
         // 바닥(흰 면, 매장 아래) · 지우개(흰 칠, 맨 위지만 매장·바닥·배관은 비켜 감). 보통은 눌리지 않고, 구역 그리기 중이거나 바닥 레이어를 켰을 때 점선을 눌러 열기
         function renderPaintZone(zone, floorUser, eraserLayer) {
             const isFloor = zone.category === 'floor';
+            if (zone.geometry === 'stroke') {   // 동그라미 지우개로 문지른 칠 (결정 374)
+                const pl = document.createElementNS(NS_SVG, 'polyline');
+                Object.entries({ points: (zone.points || []).map(p => `${p.x},${p.y}`).join(' '), fill: 'none', stroke: '#ffffff', 'stroke-width': zone.w || 10,
+                    'stroke-linecap': 'round', 'stroke-linejoin': 'round', class: 'user-eraser-stroke', 'data-zone-id': zone.id }).forEach(([n, v]) => pl.setAttribute(n, v));
+                eraserLayer.appendChild(pl);
+                return;
+            }
             const poly = document.createElementNS(NS_SVG, 'polygon');
             poly.setAttribute('points', (zone.points || []).map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' '));
             poly.setAttribute('fill', '#ffffff');
@@ -1225,7 +1235,7 @@ function bringZoneLayersToFront() {
                 // 임시 요소(드로잉 레이어, 스냅 링, 핸들 등)를 배제한 순수 도면만 복제하여 저장
                 const clone = svgEl.cloneNode(true);
                 clone.querySelectorAll('#temp-zone-drawing-layer, #temp-drawing-layer, #wall-vertex-handles-layer, #cad-floor-grid-rect').forEach(el => el.remove());
-                clone.querySelectorAll('#wall-gap-mark, #wall-seg-mark, .wall-snap-hl, .wall-snap-hl-line, .wall-snap-tag, .wall-snap-name, #floor-edit-layer, #floor-fill-layer').forEach(el => el.remove());   // 외벽 알림 표시는 저장 안 함 (결정 322)
+                clone.querySelectorAll('#wall-gap-mark, #wall-seg-mark, .wall-snap-hl, .wall-snap-hl-line, .wall-snap-tag, .wall-snap-name, #floor-edit-layer, #floor-fill-layer, #eraser-temp-layer, #lbl-snap-guide').forEach(el => el.remove());   // 외벽 알림 표시는 저장 안 함 (결정 322)
                 clone.querySelectorAll('.wall-outside-flash').forEach(el => el.classList.remove('wall-outside-flash'));
                 clone.querySelectorAll('circle[stroke="#0ea5e9"], circle[fill="rgba(14, 165, 233, 0.25)"]').forEach(el => el.remove());
                 clone.querySelectorAll('#safety-zones-layer, #map-symbols-layer, #floor-layer, #floor-outline-layer, #eraser-layer, #eraser-defs').forEach(el => el.remove());

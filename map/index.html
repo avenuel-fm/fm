@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>롯데 잠실점 쇼핑맵 통합 메인보드</title>
         <!-- 모듈형 스타일시트 -->
-    <link rel="stylesheet" href="css/common.css?v=0.26.66">
-    <link rel="stylesheet" href="css/layout.css?v=0.26.66">
-    <link rel="stylesheet" href="css/modals.css?v=0.26.66">
-    <link rel="stylesheet" href="css/cad-tools.css?v=0.26.66">
+    <link rel="stylesheet" href="css/common.css?v=0.26.67">
+    <link rel="stylesheet" href="css/layout.css?v=0.26.67">
+    <link rel="stylesheet" href="css/modals.css?v=0.26.67">
+    <link rel="stylesheet" href="css/cad-tools.css?v=0.26.67">
 </head>
 <body>
     <header>
@@ -265,14 +265,14 @@
                         <button type="button" class="zone-toggle-btn active" id="btn-zone-geom-polygon" onclick="setZoneGeometry('polygon')">면 (영역)</button>
                     </div>
                     <button type="button" class="zone-toggle-btn" id="btn-wall-copy" style="display:none" onclick="openWallCopy()" title="이 층에 그린 외벽을 같은 건물의 다른 층에 그대로 붙여 넣기">다른 층에 복사</button>
-                    <button type="button" class="zone-toggle-btn zone-eraser" id="btn-zone-eraser" onclick="toggleEraserMode()" title="그린 면 안의 도면 원본·구역·심벌·인포를 바닥색(흰색)으로 지움. 매장·바닥·배관은 그대로">지우개</button>
                     <span id="floor-cl-controls" class="zone-toggle-group" style="display:none;align-items:center;gap:4px">
                         <button type="button" class="zone-toggle-btn" id="btn-centerline-floor" onclick="toggleCenterlineFloor()" title="중심선을 그리면 폭만큼 펼친 바닥이 자동으로 만들어지고 겹치는 바닥과 하나로 합쳐집니다">복도 중심선</button>
                         <span style="font-size:12px">폭</span><input type="number" id="input-floor-width-px" value="80" min="10" max="600" step="10" style="width:56px;height:26px;text-align:center" onchange="setFloorRibbonWidth(this.value)"><span style="font-size:12px">px</span>
                         <button type="button" class="zone-toggle-btn" id="btn-floor-fill" onclick="toggleFloorFill()" title="켜고 바닥을 누르면 매장 모양을 따라 매장 간격만큼 떨어진 곳까지 채움 · Shift+클릭: 여러 바닥 (결정 348)">바닥 채우기</button>
                         <label class="zone-ortho-check" id="ff-gap-wrap" style="display:none" title="매장 테두리와 이만큼 띄우고 채움 (이 기기에 기억)"><span style="font-size:12px">매장 간격</span><input type="number" id="ff-gap" style="width:48px;height:26px;text-align:center" value="20" min="1" max="100" step="1" onchange="ffGapChanged()"><span style="font-size:12px">px</span></label>
                     </span>
-                    <label class="zone-ortho-check" title="직각 스냅 (단축키: Shift)"><input type="checkbox" id="chk-zone-ortho" class="chk-ortho" onchange="toggleGlobalOrthoMode()"><span>직각 (Shift)</span></label><span id="zone-points-indicator" class="zone-pts-badge">0점</span>
+                    <button type="button" class="zone-toggle-btn zone-eraser" id="btn-zone-eraser" onclick="toggleEraserMode()" title="누른 채 문질러 바닥색(흰색)으로 지움. 매장·기능실·연결선에 걸리면 골라 지움. [ ] 키로 크기">지우개</button>
+                    <label class="zone-ortho-check" title="체크하면 지우개가 매장·기능실 도형을 건드리지 않음 (연결선은 지움) · 직각은 Shift"><input type="checkbox" id="chk-eraser-lock" checked onchange="ebLockChanged(this.checked)"><span>매장·기능실 잠금</span></label><span id="zone-points-indicator" class="zone-pts-badge">0점</span>
                     <button class="btn-guide-finish" onclick="finishDrawingZone()">완료 (Enter)</button>
                     <button class="btn-guide-close" onclick="handleZoneCancelOrEsc()">취소 (ESC)</button>
                 </div>
@@ -650,7 +650,7 @@
     <script src="js/storage/mapStore.js"></script>
 
     <!-- 2. 공유 DOM 레지스트리 및 공통 유틸 -->
-    <script src="js/core/dom.js?v=0.26.66"></script>
+    <script src="js/core/dom.js?v=0.26.67"></script>
 
     <!-- 3. 저장소 및 실행 취소 (추후 Supabase 연동 모듈) -->
     <script src="js/storage/storeBook.js"></script>
@@ -660,28 +660,29 @@
     <script src="js/storage/undoManager.js"></script>
 
     <!-- 4. 코어 기하학 연산, 바닥 그리드, 줌/팬, 도면 뷰어 -->
-    <script src="js/core/geometry.js?v=0.26.66"></script>
-    <script src="js/core/grid.js?v=0.26.66"></script>
+    <script src="js/core/geometry.js?v=0.26.67"></script>
+    <script src="js/core/grid.js?v=0.26.67"></script>
     <script src="js/core/panZoom.js"></script>
-    <script src="js/core/mapViewer.js?v=0.26.66"></script>
+    <script src="js/core/mapViewer.js?v=0.26.67"></script>
 
     <!-- 5. 전문 CAD 및 측정 엔진 (축척 캘리브레이션, 매장/기능실 CAD, 구역 CAD, 심벌 CAD, 자유 필기/실측) -->
     <script src="js/scale/scaleCalibrator.js"></script>
-    <script src="js/cad/storeEditor.js?v=0.26.66"></script>
+    <script src="js/cad/storeEditor.js?v=0.26.67"></script>
     <script src="js/cad/storeExcel.js"></script>
     <script src="js/lib/polygon-clipping.umd.min.js"></script>
-    <script src="js/cad/floorCenterline.js?v=0.26.66"></script>
-    <script src="js/cad/zoneEditor.js?v=0.26.66"></script>
-    <script src="js/cad/wallTools.js?v=0.26.66"></script>
-    <script src="js/cad/floorEdit.js?v=0.26.66"></script>
-    <script src="js/cad/floorFill.js?v=0.26.66"></script>
-    <script src="js/cad/symbolEditor.js?v=0.26.66"></script>
-    <script src="js/cad/utilityLineEditor.js?v=0.26.66"></script>
-    <script src="js/cad/routeFinder.js?v=0.26.66"></script>
+    <script src="js/cad/floorCenterline.js?v=0.26.67"></script>
+    <script src="js/cad/zoneEditor.js?v=0.26.67"></script>
+    <script src="js/cad/wallTools.js?v=0.26.67"></script>
+    <script src="js/cad/floorEdit.js?v=0.26.67"></script>
+    <script src="js/cad/eraserBrush.js?v=0.26.67"></script>
+    <script src="js/cad/floorFill.js?v=0.26.67"></script>
+    <script src="js/cad/symbolEditor.js?v=0.26.67"></script>
+    <script src="js/cad/utilityLineEditor.js?v=0.26.67"></script>
+    <script src="js/cad/routeFinder.js?v=0.26.67"></script>
     <script src="js/freehand/freehandLayer.js"></script>
 
     <!-- 6. 메인 애플리케이션 엔트리 및 부트스트랩 -->
     <script src="js/storage/mapHistory.js"></script>
-    <script src="js/app.js?v=0.26.66"></script>
+    <script src="js/app.js?v=0.26.67"></script>
 </body>
 </html>

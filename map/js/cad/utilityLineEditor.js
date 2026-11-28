@@ -286,6 +286,7 @@ function renderFloorUtilityLines() {
         layer.appendChild(g);
     });
     layoutUtilLabels();
+    if (typeof ebOn === 'function' && ebOn()) ebSync();   // 지우개 중엔 연결선 모두 보임 (결정 374)
 }
 
 // 보이는 선들의 이름표가 서로 겹치지 않게 자리를 정함 (결정 258): 선 따라 가운데 → 35% → 65% → 20% → 80%, 다 막히면 아래위로 24px씩 쌓음
@@ -439,6 +440,12 @@ function selectUtilLineForDelete(line) {
     renderFloorUtilityLines();
     if (mapStore.readOnly()) return;
     if (isLayerLocked(line.subType || 'power')) { warnLayerLocked(); return; }   // 보기 전용: 선택(라벨 보기)만
+    // 기능실 수정 중: 확인 창 없이 고르기만, Del 로 삭제 (결정 374). 이름 칸에 글쇠가 머물면 Del 이 안 먹으니 빼 냄
+    if (typeof editModal !== 'undefined' && editModal && editModal.style.display !== 'none') {
+        if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) document.activeElement.blur();
+        showToast('연결선을 골랐습니다. Delete 키로 지우기 · Esc 로 선택 풀기', 2000);
+        return;
+    }
 
     const specDesc = line.specText ? ` (${line.specText})` : '';
     const confirmMsg = `[설비 연결선 선택]\n매장(자): ${line.sourceName || '매장'}\n기능실(모): ${line.targetName || '기능실'}\n구분: ${line.subTypeLabel || ''}${specDesc}\n\n이 연결선을 삭제하시겠습니까?`;
@@ -457,8 +464,9 @@ function selectUtilLineForDelete(line) {
 // 키보드 Delete 키로 선택된 설비 선분 삭제 지원
 window.addEventListener('keydown', (e) => {
     if (!activeSelectedUtilLineId || ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
-    if (e.key === 'Escape') { activeSelectedUtilLineId = null; renderFloorUtilityLines(); return; }
+    if (e.key === 'Escape') { e.stopImmediatePropagation(); activeSelectedUtilLineId = null; renderFloorUtilityLines(); return; }   // 선택만 풀고 수정 창은 그대로 (결정 374)
     if (e.key === 'Delete' && !mapStore.readOnly()) {
+        e.stopImmediatePropagation(); e.preventDefault();
         const floor = FLOORS[currentFloorIdx];
         const sel = getFloorUtilityLines(floor.code).find(l => l.id === activeSelectedUtilLineId);
         if (sel && isLayerLocked(sel.subType || 'power')) { warnLayerLocked(); return; }
@@ -467,7 +475,7 @@ window.addEventListener('keydown', (e) => {
         renderFloorUtilityLines();
         showToast('🗑️ 설비 연결선이 삭제되었습니다.', 1500);
     }
-});
+}, true);   // 먼저 받아 수정 창 Esc·Del 과 안 부딪힘 (결정 374)
 
 // ================= 매장(모) 또는 기능실(자) 클릭 시 연동 =================
 function highlightUtilityLinesForStore(store) {

@@ -340,6 +340,8 @@ var lastCreatedStoreId = null;
             statusModal.style.display = 'none';
             editModal.style.display = 'flex';
             startShapeEdit(store);
+            // 기능실 수정 중에는 이어진 매장 연결선을 모두 보임 → 눌러 고르고 Del 로 삭제 (결정 374)
+            if (type === 'utility' && typeof highlightUtilityLinesForStore === 'function') highlightUtilityLinesForStore(store);
             if (editNameInput) {
                 editNameInput.focus();
                 editNameInput.select();
@@ -558,7 +560,7 @@ var lastCreatedStoreId = null;
             p.classList.remove('selected');            // 원래 색 그대로 보이게
             p.classList.add('shape-editing');
             if (store.groupElement) store.groupElement.classList.remove('selected');
-            if (store.textElement) store.textElement.style.pointerEvents = 'none';
+            if (t) { t.classList.add('lbl-movable'); t.onmousedown = e => labelDrag(e); }   // 매장명 끌어 옮기기 (결정 374)
             p.onmousedown = e => shapeDrag(e, (pts, dx, dy, ev) => {
                 if (ev.shiftKey) { if (Math.abs(dx) >= Math.abs(dy)) dy = 0; else dx = 0; }   // Shift = 가로·세로로만 (결정 352)
                 return pts.map(q => ({ x: q.x + dx, y: q.y + dy }));
@@ -572,7 +574,7 @@ var lastCreatedStoreId = null;
             shapeEdit = null;
             const p = se.store.polygonElement;
             if (p) {
-                if (p.getAttribute('d') !== se.origD) {
+                if (p.getAttribute('d') !== se.origD || se.lblMoved) {
                     p.setAttribute('d', se.origD);
                     const t = se.store.textElement, o = se.origText;
                     if (t && o) { [...t.attributes].forEach(a => t.removeAttribute(a.name)); o.attrs.forEach(([n, v]) => t.setAttribute(n, v)); t.innerHTML = o.html; }
@@ -581,18 +583,24 @@ var lastCreatedStoreId = null;
                 p.classList.remove('shape-editing');
                 p.onmousedown = null;
             }
-            if (se.store.textElement) se.store.textElement.style.pointerEvents = '';
-            mapContainer.querySelector('#shape-edit-handles')?.remove();
+            const te = se.store.textElement;
+            if (te) { te.classList.remove('lbl-movable'); te.onmousedown = null; }
+            mapContainer.querySelectorAll('#shape-edit-handles, #lbl-snap-guide').forEach(el => el.remove());
         }
 
         // 저장 때: 바뀐 모양을 남기고 끝냄 → 바뀌었으면 true
         function commitShapeEdit() {
             const se = shapeEdit;
             if (!se) return false;
-            const d = se.store.polygonElement.getAttribute('d'), changed = d !== se.origD;
-            se.origD = d;
+            const d = se.store.polygonElement.getAttribute('d'), changed = d !== se.origD, lblMoved = se.lblMoved;
+            se.origD = d; se.lblMoved = false;   // 저장: 옮긴 글자 자리도 그대로 둠
             endShapeEdit();
             if (changed) persistCustomShape(se.store.polygonElement);
+            const t = se.store.textElement;
+            if (lblMoved && t && se.store.isCustom && !mapStore.readOnly()) {   // 직접 그린 매장은 자료에도 남김 (되돌리기·다시 열 때 글자를 새로 만듦)
+                const code = FLOORS[currentFloorIdx].code, list = getCustomStores(code), cs = list.find(c => String(c.id) === String(se.store.id));
+                if (cs) { cs.lblDx = +t.dataset.lblDx || 0; cs.lblDy = +t.dataset.lblDy || 0; saveCustomStores(code, list); }
+            }
             return changed;
         }
 
@@ -626,6 +634,53 @@ var lastCreatedStoreId = null;
             svgEl.appendChild(g);
         }
 
+        // 매장명 끌기: Shift = 가로·세로로만, 도형 가운데 줄 가까이 오면 붙고 점선 안내 (결정 374)
+        function labelDrag(e) {
+            if (e.button !== 0 || !shapeEdit) return;
+            e.stopPropagation(); e.preventDefault();
+            const se = shapeEdit, t = se.store.textElement, p = se.store.polygonElement;
+            const ctm = p.getScreenCTM(), k = ctm && ctm.a ? ctm.a : 1;
+            const dx0 = +t.dataset.lblDx || 0, dy0 = +t.dataset.lblDy || 0, sx = e.clientX, sy = e.clientY;
+            const tb = t.getBBox(), pb = p.getBBox();
+            const c0x = tb.x + tb.width / 2, c0y = tb.y + tb.height / 2;      // 글자 가운데 (시작)
+            const scx = pb.x + pb.width / 2, scy = pb.y + pb.height / 2;      // 도형 가운데
+            const snap = 6 / k, ns = 'http://www.w3.org/2000/svg';
+            let moved = false;
+            const guide = (vx, hy) => {
+                mapContainer.querySelector('#lbl-snap-guide')?.remove();
+                if (!vx && !hy) return;
+                const g = document.createElementNS(ns, 'g');
+                g.setAttribute('id', 'lbl-snap-guide');
+                g.setAttribute('pointer-events', 'none');
+                const ln = (x1, y1, x2, y2) => { const l = document.createElementNS(ns, 'line'); Object.entries({ x1, y1, x2, y2, stroke: '#2563eb', 'stroke-width': 1 / k, 'stroke-dasharray': `${4 / k} ${3 / k}` }).forEach(([n, v]) => l.setAttribute(n, v)); g.appendChild(l); };
+                if (vx) ln(scx, pb.y, scx, pb.y + pb.height);
+                if (hy) ln(pb.x, scy, pb.x + pb.width, scy);
+                p.ownerSVGElement.appendChild(g);
+            };
+            const move = ev => {
+                if (!moved && Math.hypot(ev.clientX - sx, ev.clientY - sy) < 3) return;
+                moved = true;
+                let dx = (ev.clientX - sx) / k, dy = (ev.clientY - sy) / k;
+                if (ev.shiftKey) { if (Math.abs(dx) >= Math.abs(dy)) dy = 0; else dx = 0; }
+                const vx = Math.abs(c0x + dx - scx) < snap, hy = Math.abs(c0y + dy - scy) < snap;
+                if (vx) dx = scx - c0x;
+                if (hy) dy = scy - c0y;
+                guide(vx, hy);
+                t.dataset.lblDx = (dx0 + dx).toFixed(2); t.dataset.lblDy = (dy0 + dy).toFixed(2);
+                se.lblMoved = true;
+                shapeRelabel(se.store, true);
+            };
+            const up = () => {
+                window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up);
+                guide(false, false);
+                if (!moved) return;
+                const blk = ev => ev.stopPropagation();   // 끌고 놓은 바로 그 클릭만 매장 고르기로 안 감
+                window.addEventListener('click', blk, true);
+                setTimeout(() => window.removeEventListener('click', blk, true), 0);
+            };
+            window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
+        }
+
         // 끌기 공통: apply(시작 점들, 지도 dx, dy, 이벤트) → 새 점들
         function shapeDrag(e, apply) {
             if (e.button !== 0 || !shapeEdit) return;
@@ -656,28 +711,36 @@ var lastCreatedStoreId = null;
             }
             if (activeSelectedStore.bookId && !confirm('도형을 삭제하면 매장명·고유번호·상세내역이 함께 삭제됩니다. 삭제할까요?')) return;
             pushUndoState('매장 삭제');
+            const targetName = activeSelectedStore.name, isUtil = activeSelectedStore.type === 'utility';
+            removeStoreShape(activeSelectedStore);
+            closeAllPopovers();
+            renderStoreList(currentStores);
+            syncSvgCache();
+            showToast(`${isUtil ? '기능실' : '매장'} '${StoreBook.show(targetName)}'이(가) 삭제되었습니다.`, 1500);
+        }
 
-            const targetName = activeSelectedStore.name;
-            const isUtil = activeSelectedStore.type === 'utility';
+        // 도형 하나 지우기 (되돌리기·확인·화면 정리는 부르는 쪽에서). 수정 창 삭제 · 지우개(결정 374)가 같이 씀
+        function removeStoreShape(st) {
+            const targetName = st.name;
             const floor = FLOORS[currentFloorIdx];
-            const shapeKey = activeSelectedStore.shapeKey;
+            const shapeKey = st.shapeKey;
             const shapeBase = shapeKey ? StoreBook.baseOf(shapeKey) : null;
 
             // 1. 사용자가 추가/편집으로 생성한 커스텀 도형인 경우:
             // 흰색(#ffffff) 바닥으로 덮지 않고 도형 자체를 즉시 제거하여 바탕의 원래 색상(#cbdbe9 공용부 등)이 그대로 유지되도록 처리!
-            if (activeSelectedStore.isCustom) {
-                const customList = getCustomStores(floor.code).filter(cs => cs.id !== activeSelectedStore.id);
+            if (st.isCustom) {
+                const customList = getCustomStores(floor.code).filter(cs => cs.id !== st.id);
                 saveCustomStores(floor.code, customList);
                 if (shapeKey) saveStoreBook(floor.code, StoreBook.removeShape(getStoreBook(floor.code), shapeKey, false));
-                activeSelectedStore.groupElement?.remove();
-                activeSelectedStore.polygonElement?.remove();
-                activeSelectedStore.textElement?.remove();
+                st.groupElement?.remove();
+                st.polygonElement?.remove();
+                st.textElement?.remove();
             } else {
                 // 2. 기본 원본 매장 도형일 경우
-                const pathD = activeSelectedStore.pathData || activeSelectedStore.polygonElement?.getAttribute('d');
+                const pathD = st.pathData || st.polygonElement?.getAttribute('d');
                 if (pathD) {
                     // 원본 색상이 공용시설/기능실 슬레이트(#cbdbe9, #c7c0b7)인 경우 흰색으로 덮지 않고 원형 유지
-                    const origFill = (activeSelectedStore.polygonElement?.getAttribute('data-orig-fill') || activeSelectedStore.fillColor || '').toLowerCase();
+                    const origFill = (st.polygonElement?.getAttribute('data-orig-fill') || st.fillColor || '').toLowerCase();
                     const isFacilitySlate = origFill === '#cbdbe9' || origFill === '#c7c0b7';
                     if (!isFacilitySlate) {
                         const vacantList = getVacantPolygons(floor.code);
@@ -692,25 +755,25 @@ var lastCreatedStoreId = null;
                     }
                 }
 
-                if (activeSelectedStore.textElement) {
-                    activeSelectedStore.textElement.remove();
+                if (st.textElement) {
+                    st.textElement.remove();
                 }
-                if (activeSelectedStore.polygonElement) {
-                    const origFill = (activeSelectedStore.polygonElement.getAttribute('data-orig-fill') || activeSelectedStore.fillColor || '').toLowerCase();
+                if (st.polygonElement) {
+                    const origFill = (st.polygonElement.getAttribute('data-orig-fill') || st.fillColor || '').toLowerCase();
                     const isFacilitySlate = origFill === '#cbdbe9' || origFill === '#c7c0b7';
                     if (!isFacilitySlate) {
-                        activeSelectedStore.polygonElement.setAttribute('fill', '#ffffff');
-                        activeSelectedStore.polygonElement.setAttribute('stroke', '#ffffff');
-                        activeSelectedStore.polygonElement.setAttribute('stroke-width', '0');
-                        activeSelectedStore.polygonElement.style.stroke = 'none';
-                        activeSelectedStore.polygonElement.style.strokeWidth = '0';
-                        activeSelectedStore.polygonElement.classList.remove('store-polygon', 'selected');
-                        activeSelectedStore.polygonElement.classList.add('vacant-floor-polygon');
+                        st.polygonElement.setAttribute('fill', '#ffffff');
+                        st.polygonElement.setAttribute('stroke', '#ffffff');
+                        st.polygonElement.setAttribute('stroke-width', '0');
+                        st.polygonElement.style.stroke = 'none';
+                        st.polygonElement.style.strokeWidth = '0';
+                        st.polygonElement.classList.remove('store-polygon', 'selected');
+                        st.polygonElement.classList.add('vacant-floor-polygon');
                     } else {
-                        activeSelectedStore.polygonElement.setAttribute('fill', '#cbdbe9');
-                        activeSelectedStore.polygonElement.classList.remove('store-polygon', 'selected');
+                        st.polygonElement.setAttribute('fill', '#cbdbe9');
+                        st.polygonElement.classList.remove('store-polygon', 'selected');
                     }
-                    activeSelectedStore.polygonElement.onclick = null;
+                    st.polygonElement.onclick = null;
                 }
 
                 if (shapeKey) {
@@ -726,11 +789,7 @@ var lastCreatedStoreId = null;
                 }
             }
 
-            currentStores = currentStores.filter(s => s.id !== activeSelectedStore.id && !(shapeBase && s.shapeKey && StoreBook.baseOf(s.shapeKey) === shapeBase));
-            closeAllPopovers();
-            renderStoreList(currentStores);
-            syncSvgCache();
-            showToast(`${isUtil ? '기능실' : '매장'} '${StoreBook.show(targetName)}'이(가) 삭제되었습니다.`, 1500);
+            currentStores = currentStores.filter(s => s.id !== st.id && !(shapeBase && s.shapeKey && StoreBook.baseOf(s.shapeKey) === shapeBase));
         }
 
 
