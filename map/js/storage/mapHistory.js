@@ -32,14 +32,32 @@ body.map-ro #btn-edit-menu,body.map-ro #btn-undo,body.map-ro #btn-status-edit,bo
 .hist-dlg>div{background:#fff;border-radius:14px;padding:22px;width:380px;max-width:100%;font-size:14px;line-height:1.6;box-shadow:0 20px 40px rgba(0,0,0,.25);color:#0f172a}
 .hist-dlg p{margin:10px 0;color:#475569}.hist-dlg .row{display:flex;gap:8px;justify-content:flex-end}
 .hist-dlg button{min-height:40px;padding:0 16px;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px}
-.hist-dlg .no{border:1px solid #d6d3d1;background:#fff}.hist-dlg .yes{border:0;background:#b91c1c;color:#fff}`;
+.hist-dlg .no{border:1px solid #d6d3d1;background:#fff}.hist-dlg .yes{border:0;background:#b91c1c;color:#fff}
+.hist-cal .d{position:relative}
+.hist-cal .d .n{position:absolute;top:-5px;right:-5px;min-width:15px;height:15px;border-radius:8px;background:#f59e0b;color:#fff;font-size:10px;font-weight:700;line-height:15px;padding:0 3px;box-shadow:0 0 0 2px #fff;z-index:1}
+.hist-saves{margin-top:10px;border:1px solid #dbeafe;background:#f8fbff;border-radius:10px;padding:10px}
+.hist-saves .t{font-weight:700;margin-bottom:6px}
+.hist-saves .row{display:flex;flex-wrap:wrap;gap:6px}
+.hist-saves .cha{border:1px solid #cbd5e1;background:#fff;border-radius:8px;padding:6px 10px;font:inherit;font-size:12px;cursor:pointer;text-align:left;line-height:1.35;color:#475569}
+.hist-saves .cha b{display:block;font-size:13px;color:#0f172a}.hist-saves .cha.on{border-color:#1d4ed8;background:#eff6ff;outline:2px solid #1d4ed8}
+.hist-saves .last{border-style:dashed}
+.hist-save{margin-top:12px;display:flex;align-items:center;gap:8px;border-top:1px solid #f1f5f9;padding-top:10px}
+.hist-save button{flex:1;min-height:40px;border-radius:8px;border:0;background:#1e3a5f;color:#fff;font-weight:700;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.hist-save button:disabled{opacity:.5;cursor:default}
+.hist-save small{color:#64748b;font-size:11px;line-height:1.35;width:130px;word-break:keep-all}`;
 
     const KIND = { facility_specs: '매장', deleted_stores: '매장', renamed_stores: '매장', custom_stores: '매장', vacant_polygons: '매장', store_book: '매장',
         floor_zones: '구역', symbols: '심벌', util_lines: '연결선', saved_svg: '외벽·도면', base_svg: '업체 도면' };
     const kst = () => new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
     const md = d => Number(d.slice(5, 7)) + '월 ' + Number(d.slice(8, 10)) + '일';
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    let H = null, ym = kst().slice(0, 7), pop = null, busy = false;
+    let H = null, ym = kst().slice(0, 7), pop = null, busy = false, selDay = '';
+    // 저장 차수 (결정 382): 이 건물 것만, 날마다 1차·2차…
+    function saves() {
+        const b = suffix().slice(1), cnt = {};
+        return ((H && H.saves) || []).filter(x => (x.building || '') === b).map(x => Object.assign({}, x, { n: (cnt[x.day] = (cnt[x.day] || 0) + 1) }));
+    }
+    const savesOf = day => saves().filter(x => x.day === day);
 
     /** 칸 이름 → 「1F 매장」. 지금 건물 칸만 (다른 건물은 null) */
     function label(k) {
@@ -67,11 +85,13 @@ body.map-ro #btn-edit-menu,body.map-ro #btn-undo,body.map-ro #btn-status-edit,bo
         if (!bar) { bar = document.createElement('div'); bar.className = 'hist-bar'; document.getElementById('viewport').appendChild(bar); }
         const at = mapStore.viewAt, isDay = /^\d{4}-\d{2}-\d{2}$/.test(at);
         const r = !isDay && H && H.restores.find(x => x.before === at);
-        bar.innerHTML = '<b>' + (isDay ? md(at) + ' 기준' : md(r ? r.day : at.slice(0, 10)) + ' ' + (r ? r.time : '') + ' 되돌리기 전 모습') + '</b>' +
+        const sv = !isDay && !r && saves().find(x => x.at === at);
+        const name = isDay ? md(at) : sv ? md(sv.day) + ' ' + sv.n + '차 저장 (' + sv.time + ')' : '';
+        bar.innerHTML = '<b>' + (isDay ? md(at) + ' 기준' : sv ? name + ' 모습' : md(r ? r.day : at.slice(0, 10)) + ' ' + (r ? r.time : '') + ' 되돌리기 전 모습') + '</b>' +
             '<span>· 보기 전용 (고칠 수 없음)</span><span class="sp"></span><button class="back" id="hist-back">오늘로 돌아가기</button>' +
-            (mapStore.canRestore && isDay && at < kst() ? '<button class="rest" id="hist-rest">이 날로 되돌리기</button>' : '');
+            (mapStore.canRestore && (isDay && at < kst() || sv) ? '<button class="rest" id="hist-rest">' + (sv ? '이 차수로 되돌리기' : '이 날로 되돌리기') + '</button>' : '');
         bar.querySelector('#hist-back').onclick = () => go('');
-        const rb = bar.querySelector('#hist-rest'); if (rb) rb.onclick = () => askRestore(at);
+        const rb = bar.querySelector('#hist-rest'); if (rb) rb.onclick = () => askRestore(at, name);
     }
 
     async function go(at) {
@@ -85,10 +105,11 @@ body.map-ro #btn-edit-menu,body.map-ro #btn-undo,body.map-ro #btn-status-edit,bo
         finally { busy = false; }
     }
 
-    function askRestore(day) {
+    function askRestore(day, name) {
+        name = name || md(day);
         const d = document.createElement('div'); d.className = 'hist-dlg';
-        d.innerHTML = '<div role="dialog" aria-modal="true"><b style="font-size:17px">' + md(day) + ' 모습으로 되돌릴까요?</b>' +
-            '<p>지금 도면(매장·구역·심벌·연결선·축척)이 <b>' + md(day) + ' 모습으로 바뀝니다.</b><br>지금 모습도 기록에 남아 「되돌리기 전 보기」로 다시 볼 수 있습니다.<br><small style="color:#94a3b8">소장·부소장·파트장만 할 수 있습니다</small></p>' +
+        d.innerHTML = '<div role="dialog" aria-modal="true"><b style="font-size:17px">' + esc(name) + ' 모습으로 되돌릴까요?</b>' +
+            '<p>지금 도면(매장·구역·심벌·연결선·축척)이 <b>' + esc(name) + ' 모습으로 바뀝니다.</b><br>지금 모습도 기록에 남아 「되돌리기 전 보기」로 다시 볼 수 있습니다.<br><small style="color:#94a3b8">소장·부소장·파트장만 할 수 있습니다</small></p>' +
             '<div class="row"><button class="no">취소</button><button class="yes">되돌리기</button></div></div>';
         document.body.appendChild(d);
         d.querySelector('.no').onclick = () => d.remove();
@@ -114,27 +135,59 @@ body.map-ro #btn-edit-menu,body.map-ro #btn-undo,body.map-ro #btn-status-edit,bo
         for (let i = 0; i < start; i++) cal += '<div></div>';
         for (let i = 1; i <= n; i++) {
             const d = ym + '-' + String(i).padStart(2, '0'), on = d >= first && d <= today;
+            const ns = savesOf(d).length, viewDay = /^\d{4}-\d{2}-\d{2}/.test(mapStore.viewAt) ? mapStore.viewAt.slice(0, 10) : '';
             cal += (on ? '<button type="button" data-d="' + d + '" class="d on' : '<div class="d') + (chg[d] ? ' chg' : '') + (d === today ? ' today' : '') +
-                ((mapStore.viewAt === d || (!mapStore.viewAt && d === today)) ? ' sel' : '') + '">' + i + (on ? '</button>' : '</div>');
+                ((selDay ? selDay === d : (viewDay === d || (!mapStore.viewAt && d === today))) ? ' sel' : '') + '">' + i +
+                (ns ? '<span class="n" title="저장 ' + ns + '번">' + ns + '</span>' : '') + (on ? '</button>' : '</div>');
         }
         const items = [];
         Object.keys(chg).filter(d => d.startsWith(ym)).forEach(d => items.push({ k: d + ' 0', h: '<span><b>' + md(d) + '</b> · ' + esc(chg[d].ls.join(' · ')) + (chg[d].by.length ? ' · ' + esc(chg[d].by.join(', ')) : '') + '</span>' }));
-        H.restores.filter(r => r.day.startsWith(ym)).forEach(r => items.push({ k: r.day + ' 1' + r.time, h: '<span><b>' + md(r.day) + ' ' + r.time + '</b> · ' + md(r.to) + '로 되돌림 · ' + esc(r.by) + ' <button type="button" data-at="' + esc(r.before) + '">되돌리기 전 보기</button></span>' }));
+        H.restores.filter(r => r.day.startsWith(ym)).forEach(r => items.push({ k: r.day + ' 1' + r.time, h: '<span><b>' + md(r.day) + ' ' + r.time + '</b> · ' + md(r.to) + (r.toTime ? ' ' + r.toTime + ' 저장 모습으로' : '로') + ' 되돌림 · ' + esc(r.by) + ' <button type="button" data-at="' + esc(r.before) + '">되돌리기 전 보기</button></span>' }));
         items.sort((a, b) => a.k < b.k ? 1 : -1);
         pop.innerHTML = '<h4><button type="button" data-m="-1" aria-label="이전 달">‹</button>' + y + '년 ' + m + '월<button type="button" data-m="1" aria-label="다음 달">›</button></h4>' +
-            '<div class="hist-cal">' + cal + '</div><div class="hist-list"><span>● 점 = 도면이 바뀐 날 · 날짜를 누르면 그날 모습</span>' +
-            (items.length ? items.map(x => x.h).join('') : '<span>이 달은 바뀐 기록이 없습니다.</span>') + '</div>';
+            '<div class="hist-cal">' + cal + '</div>' + savesPanel() + '<div class="hist-list"><span>● 점 = 도면이 바뀐 날 · <b style="color:#b45309">주황 숫자 = 저장한 횟수</b> · 날짜를 누르면 그날 모습</span>' +
+            (items.length ? items.map(x => x.h).join('') : '<span>이 달은 바뀐 기록이 없습니다.</span>') + '</div>' + saveBtn();
+    }
+    // 저장한 날을 누르면: 차수 목록 (누르면 그때 모습) + 그날 마지막 모습
+    function savesPanel() {
+        const L = selDay ? savesOf(selDay) : [];
+        if (!L.length) return '';
+        return '<div class="hist-saves"><div class="t">' + md(selDay) + ' 저장 차수 (' + L.length + '번 저장)</div><div class="row">' +
+            L.map(x => '<button type="button" class="cha' + (mapStore.viewAt === x.at ? ' on' : '') + '" data-at="' + esc(x.at) + '"><b>' + x.n + '차</b>' + esc(x.time) + (x.by ? ' · ' + esc(x.by) : '') + '</button>').join('') +
+            '<button type="button" class="cha last" data-last="' + selDay + '"><b>그날 마지막</b>모습 보기</button></div></div>';
+    }
+    // 달력 아래 「저장」: 고칠 수 있는 사람 · 지금 모습을 볼 때만
+    function saveBtn() {
+        if (!mapStore.canEdit || mapStore.viewAt || !mapStore.canMark()) return '';
+        const n = savesOf(kst()).length + 1;
+        return '<div class="hist-save"><button type="button" id="hist-save-btn"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3M8 21v-7h8v7"/></svg>저장</button><small>지금 모습을 오늘 ' + n + '차로 남김</small></div>';
+    }
+    async function doSave(btn) {
+        btn.disabled = true;
+        try {
+            const r = await mapStore.mark(suffix().slice(1));
+            if (!r || !r.ok) throw new Error((r && r.error) || '저장하지 못했습니다');
+            if (typeof showToast === 'function') showToast(md(kst()) + ' ' + r.n + '차로 저장했습니다.', 1800);
+            const d = await mapStore.days(); if (d && d.ok) H = d;
+            selDay = kst(); ym = selDay.slice(0, 7); drawPop();
+        } catch (e) { btn.disabled = false; alert(e && e.message ? e.message : e); }
     }
 
     async function openPop() {
         if (pop) return closePop();
+        selDay = /^\d{4}-\d{2}-\d{2}T/.test(mapStore.viewAt) ? mapStore.viewAt.slice(0, 10) : '';   // 차수를 보는 중이면 그날 차수 목록을 펼쳐 둠
         pop = document.createElement('div'); pop.className = 'hist-pop'; pop.innerHTML = '<span>불러오는 중…</span>';
         document.getElementById('btn-hist').parentElement.appendChild(pop); setModeBtn();
         pop.addEventListener('click', e => {
             const t = e.target.closest('button'); if (!t) return;
             e.stopPropagation();
             if (t.dataset.m) { const d = new Date(Date.UTC(Number(ym.slice(0, 4)), Number(ym.slice(5, 7)) - 1 + Number(t.dataset.m), 1)); ym = d.toISOString().slice(0, 7); drawPop(); }
-            else if (t.dataset.d) go(t.dataset.d === kst() ? '' : t.dataset.d);
+            else if (t.id === 'hist-save-btn') doSave(t);
+            else if (t.dataset.last) go(t.dataset.last === kst() ? '' : t.dataset.last);
+            else if (t.dataset.d) {
+                if (savesOf(t.dataset.d).length) { selDay = selDay === t.dataset.d ? '' : t.dataset.d; drawPop(); }   // 저장한 날: 차수 목록을 펼침
+                else go(t.dataset.d === kst() ? '' : t.dataset.d);
+            }
             else if (t.dataset.at) go(t.dataset.at);
         });
         try {

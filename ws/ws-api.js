@@ -95,7 +95,8 @@
     mapBase: (token, k, v) => rpc('ws_map_base', { p_token: token, p_k: k, p_v: v }),   // 업체 바탕 도면 보관 (결정 132)
     mapDays: (token) => rpc('ws_map_days', { p_token: token }),
     mapAt: (token, at) => rpc('ws_map_at', { p_token: token, p_at: at }),
-    mapRestore: (token, day) => rpc('ws_map_restore', { p_token: token, p_day: day }),
+    mapRestore: (token, day) => rpc('ws_map_restore', { p_token: token, p_day: day }),   // 날짜 또는 저장 차수 시각 (결정 382)
+    mapMark: (token, b) => rpc('ws_map_mark', { p_token: token, p_building: b || '' }),   // 기록 달력 「저장」 (결정 382, 28_map_saves.sql)
     /* ── CAD 변환된 도면 (supabase/18_cad.sql): 뷰어(fm/cad)가 WS_CAD 통로로 부름 ── */
     cadList: (token) => rpc('ws_cad_list', { p_token: token }),
     cadSave: (token, r) => rpc('ws_cad_save', { p_token: token, p_r: r }),

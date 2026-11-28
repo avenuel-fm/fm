@@ -80,7 +80,10 @@ var mapStore = (function () {
             viewAt = at; cache = r.kv || {};
         },
         days: () => api.days(),
-        restore: day => api.restore(day)
+        restore: day => api.restore(day),   // 날짜 또는 저장 차수 시각
+        /** 기록 달력 「저장」: 보낸 저장을 다 끝낸 뒤 지금 시각을 차수로 남김 (결정 382). 앱이 옛 판이면 null */
+        canMark: () => !!(api && api.mark),
+        async mark(b) { await this.flush(); return api.mark(b || ''); }
     };
 })();
 
