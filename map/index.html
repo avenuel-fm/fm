@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>롯데 잠실점 쇼핑맵 통합 메인보드</title>
         <!-- 모듈형 스타일시트 -->
-    <link rel="stylesheet" href="css/common.css?v=0.26.67">
-    <link rel="stylesheet" href="css/layout.css?v=0.26.67">
-    <link rel="stylesheet" href="css/modals.css?v=0.26.67">
-    <link rel="stylesheet" href="css/cad-tools.css?v=0.26.67">
+    <link rel="stylesheet" href="css/common.css?v=0.26.68">
+    <link rel="stylesheet" href="css/layout.css?v=0.26.68">
+    <link rel="stylesheet" href="css/modals.css?v=0.26.68">
+    <link rel="stylesheet" href="css/cad-tools.css?v=0.26.68">
 </head>
 <body>
     <header>
@@ -16,16 +16,16 @@
             <!-- 건물 선택: 에비뉴엘 · 타점(백화점·캐슬플라자) -->
             <div class="building-switch-tabs" id="mainboard-tabs">
                 <button type="button" class="mainboard-building-tab active" data-building="avenuel" onclick="switchCurrentBuilding('avenuel')">
-                    <span>🏛️ 에비뉴엘</span>
+                    <span>🏛️ <span class="tab-txt">에비뉴엘</span></span>
                 </button>
                 <!-- 타점(백화점·캐슬플라자)은 한 버튼으로 묶고 왼쪽에서 밀려 나오는 메뉴로 고름 (결정 136) -->
                 <button type="button" class="mainboard-building-tab other-tab" id="btn-other-bld" onclick="openOtherDrawer()" title="백화점 · 캐슬플라자 지도">
-                    <span>🏙️ <span id="other-tab-label">타점</span></span><span class="other-tab-arrow">›</span>
+                    <span>🏙️ <span id="other-tab-label" class="tab-txt">타점</span></span><span class="other-tab-arrow">›</span>
                 </button>
             </div>
             <div class="floor-pill-badge" id="current-floor-indicator">
                 <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                <span>1F 럭셔리 부티크</span>
+                <span>1F 럭셔리 부티크</span><span class="fl-short">1F</span>
             </div>
         </div>
 
@@ -40,33 +40,33 @@
                 <div class="dropdown-menu" id="symbol-filter-dropdown-menu" style="display:none; min-width:180px; padding:10px; flex-direction:column; gap:4px;">
                     <div style="font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px; border-bottom:1px solid var(--border-light); padding-bottom:6px;">심벌 레이어 표시</div>
                     <label class="symbol-filter-item">
-                        <input type="checkbox" checked onchange="onSymbolCheckboxChange('clean_extinguisher', this.checked)">
+                        <input type="checkbox" checked onchange="onSymbolCheckboxChange('clean_extinguisher', this.checked)"><input type="checkbox" class="chk-lock" data-lock="sym_clean_extinguisher" title="잠금 (수정·삭제 막기 · 지우개에 안 지워짐)" onchange="onLayerLockChange('sym_clean_extinguisher', this.checked)">
                         <span class="symbol-badge-dot" style="background:#475569;"><svg viewBox="-13 -13 26 26" width="12" height="12" aria-hidden="true"><rect x="-3.6" y="-4" width="7.2" height="11" rx="2" fill="#fff"/><rect x="-1.5" y="-7" width="3" height="3.4" fill="#fff"/></svg></span>
                         <span>청정소화기</span>
                     </label>
                     <label class="symbol-filter-item">
-                        <input type="checkbox" checked onchange="onSymbolCheckboxChange('powder_extinguisher', this.checked)">
+                        <input type="checkbox" checked onchange="onSymbolCheckboxChange('powder_extinguisher', this.checked)"><input type="checkbox" class="chk-lock" data-lock="sym_powder_extinguisher" title="잠금 (수정·삭제 막기 · 지우개에 안 지워짐)" onchange="onLayerLockChange('sym_powder_extinguisher', this.checked)">
                         <span class="symbol-badge-dot" style="background:#f97316;"><svg viewBox="-13 -13 26 26" width="12" height="12" aria-hidden="true"><rect x="-3.6" y="-4" width="7.2" height="11" rx="2" fill="#fff"/><rect x="-1.5" y="-7" width="3" height="3.4" fill="#fff"/></svg></span>
                         <span>분말소화기</span>
                     </label>
                     <label class="symbol-filter-item">
-                        <input type="checkbox" checked onchange="onSymbolCheckboxChange('fire_hydrant', this.checked)">
+                        <input type="checkbox" checked onchange="onSymbolCheckboxChange('fire_hydrant', this.checked)"><input type="checkbox" class="chk-lock" data-lock="sym_fire_hydrant" title="잠금 (수정·삭제 막기 · 지우개에 안 지워짐)" onchange="onLayerLockChange('sym_fire_hydrant', this.checked)">
                         <span class="symbol-badge-dot" style="background:#1e293b;"><svg viewBox="-13 -13 26 26" width="12" height="12" aria-hidden="true"><g fill="none" stroke="#fff" stroke-linecap="round"><circle cy="-2" r="6.6" stroke-width="1.6"/><circle cy="-2" r="3.8" stroke-width="1.4"/><path d="M-6.6 -2 V5.2" stroke-width="1.6"/><path d="M6.6 -2 V8.6" stroke-width="1.6"/></g><circle cy="-2" r="1.3" fill="#fff"/><path d="M-8.4 5 H-4.8 L-5.6 9 H-7.6 Z" fill="#fff"/></svg></span>
                         <span>소화전</span>
                     </label>
                     <label class="symbol-filter-item">
-                        <input type="checkbox" checked onchange="onSymbolCheckboxChange('air_respirator', this.checked)">
+                        <input type="checkbox" checked onchange="onSymbolCheckboxChange('air_respirator', this.checked)"><input type="checkbox" class="chk-lock" data-lock="sym_air_respirator" title="잠금 (수정·삭제 막기 · 지우개에 안 지워짐)" onchange="onLayerLockChange('sym_air_respirator', this.checked)">
                         <span class="symbol-badge-dot" style="background:#2563eb;"><svg viewBox="-13 -13 26 26" width="12" height="12" aria-hidden="true"><rect x="-3.8" y="-4.5" width="7.6" height="12.5" rx="3.8" fill="#fff"/><rect x="-1.4" y="-7.5" width="2.8" height="3.4" fill="#fff"/><rect x="-3.4" y="-9.2" width="6.8" height="1.8" rx="0.9" fill="#fff"/></svg></span>
                         <span>공기호흡기</span>
                     </label>
                     <div style="font-size:12px; font-weight:700; color:var(--text-main); margin:6px 0 4px; border-top:1px solid var(--border-light); padding-top:6px;">구역 레이어 표시 <span style="font-weight:400;color:var(--text-muted);font-size:11px;">(🔑 = 잠금)</span></div>
                     <label class="symbol-filter-item">
-                        <input type="checkbox" id="chk-zone-filter-fire" checked onchange="onZoneCheckboxChange('fire', this.checked)"><input type="checkbox" class="chk-lock" data-lock="fire" title="잠금 (수정·삭제 막기)" onchange="onLayerLockChange('fire', this.checked)">
+                        <input type="checkbox" id="chk-zone-filter-fire" checked onchange="onZoneCheckboxChange('fire', this.checked)"><input type="checkbox" class="chk-lock" data-lock="fire" title="잠금 (수정·삭제 막기 · 지우개에 안 지워짐)" onchange="onLayerLockChange('fire', this.checked)">
                         <span class="symbol-badge-dot" style="background:#dc2626; color:#ffffff;">🔥</span>
                         <span>방화구역</span>
                     </label>
                     <label class="symbol-filter-item">
-                        <input type="checkbox" id="chk-zone-filter-smoke" checked onchange="onZoneCheckboxChange('smoke', this.checked)"><input type="checkbox" class="chk-lock" data-lock="smoke" title="잠금 (수정·삭제 막기)" onchange="onLayerLockChange('smoke', this.checked)">
+                        <input type="checkbox" id="chk-zone-filter-smoke" checked onchange="onZoneCheckboxChange('smoke', this.checked)"><input type="checkbox" class="chk-lock" data-lock="smoke" title="잠금 (수정·삭제 막기 · 지우개에 안 지워짐)" onchange="onLayerLockChange('smoke', this.checked)">
                         <span class="symbol-badge-dot" style="background:#0284c7; color:#ffffff;">💨</span>
                         <span>제연구획</span>
                     </label>
@@ -82,12 +82,12 @@
                         <span>외벽</span>
                     </label>
                     <label class="symbol-filter-item">
-                        <input type="checkbox" id="chk-info-layer" checked onchange="onInfoLayerChange(this.checked)">
+                        <input type="checkbox" id="chk-info-layer" checked onchange="onInfoLayerChange(this.checked)"><input type="checkbox" class="chk-lock" data-lock="info" title="잠금 (수정·삭제 막기 · 지우개에 안 지워짐)" onchange="onLayerLockChange('info', this.checked)">
                         <span class="symbol-badge-dot" style="background:#1f3a5f; color:#ffffff; font-size:12px; font-weight:700;">i</span>
                         <span>인포</span>
                     </label>
                     <label class="symbol-filter-item">
-                        <input type="checkbox" id="chk-grid-filter" onchange="onGridCheckboxChange(this.checked)">
+                        <input type="checkbox" id="chk-grid-filter" onchange="onGridCheckboxChange(this.checked)"><input type="checkbox" class="chk-lock" data-lock="grid" title="잠금 (수정·삭제 막기 · 지우개에 안 지워짐)" onchange="onLayerLockChange('grid', this.checked)">
                         <span class="symbol-badge-dot" style="background:#64748b; color:#ffffff; font-size:12px; font-weight:700;">#</span>
                         <span>그리드</span>
                     </label>
@@ -139,8 +139,8 @@
                         <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                         <span>설비연결 모-자</span>
                     </button>
-                    <div class="dropdown-divider"></div>
-                    <button type="button" class="dropdown-item" onclick="openScaleModal()">
+                    <div class="dropdown-divider" id="menu-div-scale"></div>
+                    <button type="button" class="dropdown-item" id="menu-item-scale" onclick="openScaleModal()">
                         <svg viewBox="0 0 24 24"><path d="M21.3 15.3l-6.6-6.6a2 2 0 0 0-2.8 0L2.7 18a2 2 0 0 0 0 2.8l1.4 1.4a2 2 0 0 0 2.8 0l9.2-9.2 1.4 1.4-1.4 1.4 2.8 2.8 1.4-1.4 1.4 1.4 1.4-1.4-2.8-2.8 1.4-1.4zM7 17l-1.4-1.4 1.4-1.4 1.4 1.4L7 17z"/></svg>
                         <span>축척입력</span>
                     </button>
@@ -172,7 +172,7 @@
             </div>
 
             <!-- PNG 내보내기 버튼 -->
-            <button class="btn btn-primary" onclick="downloadCurrentPng()">
+            <button class="btn btn-primary" id="btn-png" onclick="downloadCurrentPng()">
                 <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                 <span>PNG</span>
             </button>
@@ -315,6 +315,9 @@
                 </button>
                 <button class="ctrl-btn" title="축소" onclick="zoomOut()">
                     <svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg>
+                </button>
+                <button class="ctrl-btn" id="btn-fit-view" title="화면 맞춤 (층 전체 보기)" onclick="fitView()">
+                    <svg viewBox="0 0 24 24"><path d="M4 9V5a1 1 0 0 1 1-1h4M15 4h4a1 1 0 0 1 1 1v4M20 15v4a1 1 0 0 1-1 1h-4M9 20H5a1 1 0 0 1-1-1v-4"/></svg>
                 </button>
                 <button class="ctrl-btn" id="btn-toggle-freehand" title="도면 위 그리기 (손/펜 메모)" onclick="toggleFreehandDrawing()">
                     <svg viewBox="0 0 24 24"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>
@@ -650,7 +653,7 @@
     <script src="js/storage/mapStore.js"></script>
 
     <!-- 2. 공유 DOM 레지스트리 및 공통 유틸 -->
-    <script src="js/core/dom.js?v=0.26.67"></script>
+    <script src="js/core/dom.js?v=0.26.68"></script>
 
     <!-- 3. 저장소 및 실행 취소 (추후 Supabase 연동 모듈) -->
     <script src="js/storage/storeBook.js"></script>
@@ -660,29 +663,29 @@
     <script src="js/storage/undoManager.js"></script>
 
     <!-- 4. 코어 기하학 연산, 바닥 그리드, 줌/팬, 도면 뷰어 -->
-    <script src="js/core/geometry.js?v=0.26.67"></script>
-    <script src="js/core/grid.js?v=0.26.67"></script>
+    <script src="js/core/geometry.js?v=0.26.68"></script>
+    <script src="js/core/grid.js?v=0.26.68"></script>
     <script src="js/core/panZoom.js"></script>
-    <script src="js/core/mapViewer.js?v=0.26.67"></script>
+    <script src="js/core/mapViewer.js?v=0.26.68"></script>
 
     <!-- 5. 전문 CAD 및 측정 엔진 (축척 캘리브레이션, 매장/기능실 CAD, 구역 CAD, 심벌 CAD, 자유 필기/실측) -->
     <script src="js/scale/scaleCalibrator.js"></script>
-    <script src="js/cad/storeEditor.js?v=0.26.67"></script>
+    <script src="js/cad/storeEditor.js?v=0.26.68"></script>
     <script src="js/cad/storeExcel.js"></script>
     <script src="js/lib/polygon-clipping.umd.min.js"></script>
-    <script src="js/cad/floorCenterline.js?v=0.26.67"></script>
-    <script src="js/cad/zoneEditor.js?v=0.26.67"></script>
-    <script src="js/cad/wallTools.js?v=0.26.67"></script>
-    <script src="js/cad/floorEdit.js?v=0.26.67"></script>
-    <script src="js/cad/eraserBrush.js?v=0.26.67"></script>
-    <script src="js/cad/floorFill.js?v=0.26.67"></script>
-    <script src="js/cad/symbolEditor.js?v=0.26.67"></script>
-    <script src="js/cad/utilityLineEditor.js?v=0.26.67"></script>
-    <script src="js/cad/routeFinder.js?v=0.26.67"></script>
+    <script src="js/cad/floorCenterline.js?v=0.26.68"></script>
+    <script src="js/cad/zoneEditor.js?v=0.26.68"></script>
+    <script src="js/cad/wallTools.js?v=0.26.68"></script>
+    <script src="js/cad/floorEdit.js?v=0.26.68"></script>
+    <script src="js/cad/eraserBrush.js?v=0.26.68"></script>
+    <script src="js/cad/floorFill.js?v=0.26.68"></script>
+    <script src="js/cad/symbolEditor.js?v=0.26.68"></script>
+    <script src="js/cad/utilityLineEditor.js?v=0.26.68"></script>
+    <script src="js/cad/routeFinder.js?v=0.26.68"></script>
     <script src="js/freehand/freehandLayer.js"></script>
 
     <!-- 6. 메인 애플리케이션 엔트리 및 부트스트랩 -->
     <script src="js/storage/mapHistory.js"></script>
-    <script src="js/app.js?v=0.26.67"></script>
+    <script src="js/app.js?v=0.26.68"></script>
 </body>
 </html>

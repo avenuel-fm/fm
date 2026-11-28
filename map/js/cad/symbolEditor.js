@@ -210,7 +210,8 @@ function renderFloorSymbols() {
         // 편집 중: 눌러서 위치 고치기·삭제 / 평소: 이름 말풍선
         g.onclick = (e) => {
             e.stopPropagation();
-            if (isSymbolMode) openSymbolDialog(sym);
+            if (isSymbolMode && isLayerLocked('sym_' + sym.type)) warnLayerLocked();   // 열쇠 잠긴 심벌은 못 고침 (결정 376)
+            else if (isSymbolMode) openSymbolDialog(sym);
             else showSymbolBubble(sym.name || def.name, e.clientX, e.clientY);
         };
 

@@ -265,11 +265,27 @@ var hasDraggedDuringInteraction = false;
         function zoomIn() { scale = Math.min(scale * 1.3, 4.5); updateTransform(); }
         function zoomOut() { scale = Math.max(scale * 0.7, 0.05); updateTransform(); }
 
+        function isPhoneView() { return window.matchMedia('(max-width: 768px)').matches; }
+        // 「화면 맞춤」: 층 전체가 화면에 꽉 차게 (결정 376)
+        function fitView() {
+            const c = FLOORS[currentFloorIdx].crop, vw = viewport.clientWidth, vh = viewport.clientHeight;
+            scale = Math.min(vw / c.width, vh / c.height) * 0.98;
+            panX = (vw - c.width * scale) / 2;
+            panY = (vh - c.height * scale) / 2;
+            updateTransform();
+            lastFit = { scale, panX, panY };
+        }
+        // 맞춘 그대로인데 화면 크기가 바뀌면(처음 여는 중 · 사이드바 접힘) 다시 맞춤
+        var lastFit = null;
+        if (window.ResizeObserver) new ResizeObserver(() => {
+            if (lastFit && lastFit.scale === scale && lastFit.panX === panX && lastFit.panY === panY && viewport.clientWidth && viewport.clientHeight) fitView();
+        }).observe(viewport);
         function resetView() {
             const floor = FLOORS[currentFloorIdx];
             const vWidth = viewport.clientWidth;
             const vHeight = viewport.clientHeight;
 
+            if (isPhoneView()) { fitView(); return; }   // 휴대폰은 처음부터 꽉 차게
             if (floor.crop && typeof floor.crop.centerX === 'number' && typeof floor.crop.centerY === 'number') {
                 scale = (typeof currentBuildingId !== 'undefined' && currentBuildingId === 'castle') ? 0.32 : 0.22;
                 panX = vWidth / 2 - floor.crop.centerX * scale;

@@ -592,6 +592,7 @@
 // 앱 초기 구동 — 도면 자료(Supabase)를 받은 뒤 (mapStore.js)
 mapStore.ready.then(() => {
     renderFloorList();
+    if (isPhoneView() && floorPanel && !floorPanel.classList.contains('hidden')) toggleFloorPanel();   // 휴대폰: 층 선택은 접어 두고 시작 (결정 376)
     selectFloor(typeof currentFloorIdx !== 'undefined' ? currentFloorIdx : 0); // 각 건물별 기본층 자동 로드
     updateUndoButtonState();
 }).catch(e => {

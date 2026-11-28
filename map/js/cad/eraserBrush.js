@@ -61,7 +61,17 @@ function ebTargets() {
     });
     return out;
 }
+// 닫힌 외벽 안인지 (외벽이 없으면 어디든 됨). area = wallArea(0) 결과 [[[x,y]...]...]
+function ebInWall(p) {
+    const a = ebStroke.area;
+    if (!a) return true;
+    const q = ebMapPt(p);
+    let n = 0;
+    a.forEach(poly => poly.forEach(r => { if (isPointInsidePolygon(q, r.map(([x, y]) => ({ x, y })))) n++; }));
+    return n % 2 === 1;
+}
 function ebHitTest(p) {
+    if (!ebInWall(p)) return;   // 외벽 밖은 못 지움 (결정 376)
     const r = ebDiam() / 2;
     ebStroke.targets.forEach(t => {
         if (ebStroke.hits.has(t)) return;
@@ -125,6 +135,7 @@ function ebFinish() {
     const zone = {
         id: 'zone_' + Date.now(), category: 'erase', geometry: 'stroke', createdAt: Date.now(),
         w: Math.round(ebDiam() / scale * 10) / 10,
+        keep: eraserKeepKeys().join(','),   // 지금 열쇠로 잠긴 레이어는 이 칠에 안 지워짐 (나중에 풀어도 그대로)
         points: (st.pts.length > 1 ? st.pts : [st.pts[0], { x: st.pts[0].x + 0.01, y: st.pts[0].y }]).map(ebMapPt).map(q => ({ x: Math.round(q.x * 10) / 10, y: Math.round(q.y * 10) / 10 }))
     };
     const hits = Array.from(st.hits);
@@ -198,7 +209,8 @@ function ebCommit(zone, pick) {
     window.addEventListener('mousedown', e => {
         if (!ebOn() || e.button !== 0 || !ebOnMap(e) || ebPending || isSpacePressed) return;
         e.stopPropagation(); e.preventDefault();
-        ebStroke = { pts: [{ x: e.clientX, y: e.clientY }], targets: ebTargets(), hits: new Set(), poly: null };
+        const area = typeof wallArea === 'function' ? wallArea(0) : null;
+        ebStroke = { pts: [{ x: e.clientX, y: e.clientY }], targets: ebTargets(), hits: new Set(), poly: null, area: area && area.length ? area : null };
         ebHitTest(ebStroke.pts[0]);
         ebDrawPoly();
         ebCursor(e);
@@ -206,7 +218,12 @@ function ebCommit(zone, pick) {
     window.addEventListener('mousemove', e => {
         ebCursor(e);
         if (!ebStroke) return;
-        const last = ebStroke.pts[ebStroke.pts.length - 1], p = { x: e.clientX, y: e.clientY };
+        const last = ebStroke.pts[ebStroke.pts.length - 1];
+        let p = { x: e.clientX, y: e.clientY };
+        if (e.shiftKey) {   // Shift: 누른 곳부터 가로·세로로만 (결정 376)
+            const a = ebStroke.anchor = ebStroke.anchor || last;
+            p = Math.abs(p.x - a.x) >= Math.abs(p.y - a.y) ? { x: p.x, y: a.y } : { x: a.x, y: p.y };
+        } else ebStroke.anchor = null;
         const d = Math.hypot(p.x - last.x, p.y - last.y), step = Math.max(1, ebDiam() / 4);
         if (d < 1) return;
         for (let s = step; s < d; s += step) ebHitTest({ x: last.x + (p.x - last.x) * s / d, y: last.y + (p.y - last.y) * s / d });   // 빠르게 문질러도 사이를 놓치지 않게

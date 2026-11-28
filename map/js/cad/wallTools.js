@@ -9,7 +9,7 @@ var FLOOR_WALL_GAP = 5;      // 바닥은 외벽선 안쪽 5px 까지
 var WALL_SNAP_PX = 14;       // 외벽 그릴 때 자석 거리 (화면 px)
 var WALL_CURVE_STEP = 0.25;  // 곡선 테두리를 따라갈 때 점 간격 (지도 단위, 결정 318)
 var WALL_SIMPLIFY_TOL = 0.05;
-var WALL_FIT_GAP = 2;        // 「안쪽으로 맞추기」 때 매장·기능실·방화구역은 외벽선 안쪽 2px (바닥은 FLOOR_WALL_GAP)
+var WALL_FIT_GAP = 0;        // 「안쪽으로 맞추기」 때 매장·기능실·방화구역은 외벽선에 딱 붙임 (전: 2px, 결정 376 · 바닥은 FLOOR_WALL_GAP)
 
 // 점 줄이기 (더글라스-포이커). 모양이 tol 안에서 같은 점만 뺌
 function wallSimplify(pts, tol) {
@@ -540,6 +540,43 @@ function flashOutside(outs) {
     setTimeout(() => { els.forEach(e => e && e.classList.remove('wall-outside-flash')); document.body.classList.remove('wall-flashing'); }, 8000);
 }
 
+// 외벽에 맞닿은 직접 그린 매장·기능실: 외벽선에서 WALL_FLUSH_TOL 안의 꼭짓점을 외벽선 위로 붙여 간격 없앰 (결정 376)
+var WALL_FLUSH_TOL = 3;
+function wallFlushStores(code) {
+    code = code || wallFloorCode();
+    if (mapStore.readOnly() || typeof currentStores === 'undefined') return 0;
+    const segs = [];
+    wallZonesOf(code).forEach(z => {
+        const P = z.points;
+        for (let i = 1; i < P.length; i++) segs.push([P[i - 1], P[i]]);
+        if (z.geometry === 'polygon' && P.length >= 3) segs.push([P[P.length - 1], P[0]]);
+    });
+    if (!segs.length) return 0;
+    const near = p => {
+        let best = null, bd = WALL_FLUSH_TOL;
+        segs.forEach(([a, b]) => {
+            const dx = b.x - a.x, dy = b.y - a.y, L = dx * dx + dy * dy;
+            const t = L ? Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / L)) : 0;
+            const q = { x: a.x + t * dx, y: a.y + t * dy }, d = Math.hypot(p.x - q.x, p.y - q.y);
+            if (d <= bd) { bd = d; best = q; }
+        });
+        return best;
+    };
+    let n = 0;
+    currentStores.filter(s => s.isCustom && s.polygonElement).forEach(s => {
+        const pts = parseSvgPathPoints(s.polygonElement.getAttribute('d'));
+        if (pts.length < 3) return;
+        let moved = false;
+        const out = pts.map(p => { const q = near(p); if (q && Math.hypot(q.x - p.x, q.y - p.y) > 0.01) { moved = true; return { x: Math.round(q.x * 100) / 100, y: Math.round(q.y * 100) / 100 }; } return p; });
+        if (!moved) return;
+        s.polygonElement.setAttribute('d', pointsToPathD(out));
+        persistCustomShape(s.polygonElement);
+        if (typeof shapeRelabel === 'function') shapeRelabel(s, true);
+        n++;
+    });
+    return n;
+}
+
 function fitShapesInsideWall() {
     hideWallBar();
     const outs = shapesOutsideWall();
@@ -573,6 +610,7 @@ function fitShapesInsideWall() {
         n++;
     });
     saveFloorZones(code, zones);
+    wallFlushStores(code);   // 맞춘 도형도 외벽선에 딱 붙임
     renderFloorZones(code);
     syncSvgCache();
     showToast(`${n}개를 외벽 안쪽으로 맞췄습니다.` + (skip ? ` (모두 밖인 ${skip}개는 그대로)` : ''), 2200);

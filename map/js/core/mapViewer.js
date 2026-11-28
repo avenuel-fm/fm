@@ -94,6 +94,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
             }
 
             floorIndicator.querySelector('span').textContent = `${floor.name} ${floor.category}`;
+            const flShort = floorIndicator.querySelector('.fl-short'); if (flShort) flShort.textContent = floor.name;   // 휴대폰은 층만 (결정 376)
 
             loading.style.display = 'flex';
             loadingMsg.textContent = `${floor.name} 도면을 불러오는 중입니다...`;
@@ -167,6 +168,8 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                 if (typeof bringZoneLayersToFront === 'function') {
                     bringZoneLayersToFront();
                 }
+                // 외벽에 맞닿은 직접 그린 매장·기능실은 간격 없이 붙임 (이미 붙어 있으면 아무것도 안 함, 결정 376)
+                try { if (typeof wallFlushStores === 'function' && wallFlushStores(floor.code)) syncSvgCache(); } catch (e) { console.warn('외벽 붙이기 실패', e); }
 
                 if (!keepView) {
                     resetView();

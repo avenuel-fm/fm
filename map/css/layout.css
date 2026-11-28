@@ -721,3 +721,14 @@ body.map-full header, body.map-full .menu-tab, body.map-full .map-top-left-group
 body.map-full .floating-controls, body.map-full .map-btn-store, body.map-full .map-btn-utility { display: none !important; }
 /* 휴대폰에서는 매장·구역 추가/편집을 뺌 (보기·심벌·연결선만, 결정 374) */
 @media (max-width: 768px) { #menu-item-store, #menu-item-zone { display: none !important; } }
+/* 휴대폰 첫 화면 단순하게 (결정 376): 층만 · 건물 탭은 그림만 · 윗줄 버튼은 그림만 한 줄 · 기록·인쇄·PNG·축척 뺌 */
+.floor-pill-badge .fl-short { display: none; }
+@media (max-width: 768px) {
+    .floor-pill-badge span:not(.fl-short) { display: none; }
+    .floor-pill-badge .fl-short { display: inline; }
+    .mainboard-building-tab .tab-txt { display: none; }
+    .mainboard-building-tab { min-width: 0 !important; padding: 0 10px !important; }
+    #btn-symbol-menu > span, #btn-edit-menu > span { display: none; }
+    #btn-hist, #print-dropdown-wrapper, #btn-png, #menu-item-scale, #menu-div-scale { display: none !important; }
+    .header-actions { flex-wrap: nowrap; }
+}

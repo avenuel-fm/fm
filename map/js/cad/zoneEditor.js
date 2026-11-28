@@ -47,6 +47,7 @@ function warnLayerLocked() { if (typeof showToast === 'function') showToast('�
 function onLayerLockChange(key, on) {
     layerLockState[key] = !!on;
     try { localStorage.setItem('lotte_map_layer_locks', JSON.stringify(layerLockState)); } catch (e) {}
+    if (key === 'grid') bringZoneLayersToFront();   // 그리드는 칠 위/아래 자리로
 }
 function syncLayerLockCheckboxes() { document.querySelectorAll('input.chk-lock[data-lock]').forEach(i => { i.checked = isLayerLocked(i.dataset.lock); }); }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', syncLayerLockCheckboxes); else syncLayerLockCheckboxes();
@@ -73,33 +74,61 @@ function liftVendorStores(svgEl) {
         .forEach(g => layer.appendChild(g));
 }
 
-/** 지우개: 매장·바닥·배관만 구멍을 뚫은 마스크로 맨 위에서 흰색으로 칠함 (인포·심벌·구역·도면 원본이 지워짐) */
+/** 지우개: 매장·바닥·배관·외벽선은 구멍을 뚫은 마스크로 맨 위에서 흰색으로 칠함 (인포·심벌·구역·도면 원본이 지워짐).
+ *  외벽이 닫혀 있으면 외벽 안쪽만 칠함. 칠할 때 열쇠로 잠겨 있던 레이어(칠의 data-keep)도 구멍 → 나중에 열쇠를 풀어도 그대로 보임 (결정 376) */
+var ERASER_KEEP_SEL = {
+    fire: '#safety-zones-layer .safety-zone-item[data-zone-category="fire"]',
+    smoke: '#safety-zones-layer .safety-zone-item[data-zone-category="smoke"]',
+    info: '#info-layer'
+};
+function eraserKeepSel(k) { return ERASER_KEEP_SEL[k] || (/^sym_/.test(k) ? `#map-symbols-layer .cad-symbol-node[data-type="${k.slice(4)}"]` : null); }
+function eraserKeepKeys() { return Object.keys(layerLockState).filter(k => layerLockState[k] && eraserKeepSel(k)).sort(); }   // 지금 잠긴, 지우개가 비켜 갈 레이어
 function rebuildEraserMask(svgEl) {
     svgEl = svgEl || ((typeof mapContainer !== 'undefined' && mapContainer) ? mapContainer.querySelector('svg') : null);
     if (!svgEl) return;
     const layer = svgEl.querySelector('#eraser-layer');
     if (!layer) return;
     let defs = svgEl.querySelector('#eraser-defs');
-    if (!layer.querySelector('polygon, polyline')) { layer.removeAttribute('mask'); if (defs) defs.remove(); return; }
+    const paints = Array.from(layer.querySelectorAll('polygon, polyline'));
+    if (!paints.length) { layer.textContent = ''; layer.removeAttribute('mask'); layer.removeAttribute('clip-path'); if (defs) defs.remove(); return; }
     if (!defs) { defs = document.createElementNS(NS_SVG, 'defs'); defs.setAttribute('id', 'eraser-defs'); svgEl.insertBefore(defs, svgEl.firstChild); }
     defs.textContent = '';
-    const mask = document.createElementNS(NS_SVG, 'mask');
-    mask.setAttribute('id', 'eraser-mask');
-    mask.setAttribute('maskUnits', 'userSpaceOnUse');
-    mask.setAttribute('x', '-100000'); mask.setAttribute('y', '-100000'); mask.setAttribute('width', '300000'); mask.setAttribute('height', '300000');
-    const add = (tag, attrs) => { const e = document.createElementNS(NS_SVG, tag); Object.keys(attrs).forEach(k => e.setAttribute(k, attrs[k])); mask.appendChild(e); };
-    add('rect', { x: -100000, y: -100000, width: 300000, height: 300000, fill: '#fff' });
-    const holes = svgEl.querySelectorAll('#vendor-stores-layer path.store-polygon, #custom-stores-top-layer path.store-polygon, #floor-layer path, #floor-layer polygon');
-    holes.forEach(src => {
-        const a = { fill: '#000', stroke: '#000', 'stroke-width': '2' };
-        ['d', 'points', 'transform'].forEach(k => { if (src.hasAttribute(k)) a[k] = src.getAttribute(k); });
-        add(src.tagName.toLowerCase(), a);
+    const mk = (parent, tag, attrs) => { const e = document.createElementNS(NS_SVG, tag); Object.keys(attrs).forEach(k => e.setAttribute(k, attrs[k])); parent.appendChild(e); return e; };
+    // 그림을 통째로 검게 (조금이라도 보이는 곳은 모두 구멍)
+    const black = mk(defs, 'filter', { id: 'eraser-black', x: '-10%', y: '-10%', width: '120%', height: '120%' });
+    mk(black, 'feColorMatrix', { type: 'matrix', values: '0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 255 0' });
+    const cloneBlack = (mask, el) => {
+        const c = el.cloneNode(true);
+        c.removeAttribute('id'); c.style.display = ''; c.querySelectorAll('[style]').forEach(n => { n.style.display = ''; });
+        const g = mk(mask, 'g', { filter: 'url(#eraser-black)' }); g.appendChild(c);
+    };
+    const groups = {};
+    paints.forEach(el => { const k = el.getAttribute('data-keep') || ''; (groups[k] = groups[k] || []).push(el); });
+    layer.textContent = '';
+    Object.keys(groups).forEach((key, gi) => {
+        const mask = mk(defs, 'mask', { id: 'eraser-mask-' + gi, maskUnits: 'userSpaceOnUse', x: -100000, y: -100000, width: 300000, height: 300000 });
+        mk(mask, 'rect', { x: -100000, y: -100000, width: 300000, height: 300000, fill: '#fff' });
+        svgEl.querySelectorAll('#vendor-stores-layer path.store-polygon, #custom-stores-top-layer path.store-polygon, #floor-layer path, #floor-layer polygon').forEach(src => {
+            const a = { fill: '#000', stroke: '#000', 'stroke-width': '2' };
+            ['d', 'points', 'transform'].forEach(k => { if (src.hasAttribute(k)) a[k] = src.getAttribute(k); });
+            mk(mask, src.tagName.toLowerCase(), a);
+        });
+        svgEl.querySelectorAll('#utility-lines-layer polyline.util-feeder-line').forEach(src => {
+            mk(mask, 'polyline', { points: src.getAttribute('points') || '', fill: 'none', stroke: '#000', 'stroke-width': '12', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+        });
+        svgEl.querySelectorAll('.building-exterior-wall').forEach(el => cloneBlack(mask, el));   // 외벽선은 늘 그대로
+        key.split(',').filter(Boolean).forEach(k => { const sel = eraserKeepSel(k); if (sel) svgEl.querySelectorAll(sel).forEach(el => cloneBlack(mask, el)); });
+        const g = mk(layer, 'g', { mask: `url(#eraser-mask-${gi})`, 'data-keep-grp': key });
+        groups[key].forEach(el => g.appendChild(el));
     });
-    svgEl.querySelectorAll('#utility-lines-layer polyline.util-feeder-line').forEach(src => {
-        add('polyline', { points: src.getAttribute('points') || '', fill: 'none', stroke: '#000', 'stroke-width': '12', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
-    });
-    defs.appendChild(mask);
-    layer.setAttribute('mask', 'url(#eraser-mask)');
+    layer.removeAttribute('mask');
+    // 외벽이 닫혀 있으면 외벽 안쪽만 칠함 (밖은 못 지움)
+    const area = typeof wallArea === 'function' ? wallArea(0) : null;
+    if (area && area.length) {
+        const cp = mk(defs, 'clipPath', { id: 'eraser-clip', clipPathUnits: 'userSpaceOnUse' });
+        mk(cp, 'path', { 'clip-rule': 'evenodd', d: area.map(poly => poly.map(r => 'M' + r.map(q => q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join('L') + 'Z').join('')).join('') });
+        layer.setAttribute('clip-path', 'url(#eraser-clip)');
+    } else layer.removeAttribute('clip-path');
 }
 
 function bringZoneLayersToFront() {
@@ -117,6 +146,8 @@ function bringZoneLayersToFront() {
         infoLayer, svgEl.querySelector('#map-symbols-layer'), svgEl.querySelector('#eraser-layer'), svgEl.querySelector('#floor-outline-layer'),
         svgEl.querySelector('#temp-zone-drawing-layer'), svgEl.querySelector('#temp-drawing-layer')
     ].forEach(el => { if (el && (el.parentElement === svgEl || el === infoLayer)) svgEl.appendChild(el); });   // 인포는 처음 만들 때 아직 도면에 안 붙어 있음
+    const grid = svgEl.querySelector('#cad-floor-grid-rect');   // 그리드 열쇠: 지우개 칠 위로 올려 안 지워지게 (결정 376)
+    if (grid && grid.parentElement === svgEl && isLayerLocked('grid')) svgEl.insertBefore(grid, svgEl.querySelector('#floor-outline-layer'));
     rebuildEraserMask(svgEl);
 }
 
@@ -880,7 +911,7 @@ function bringZoneLayersToFront() {
             }
             outLayer.appendChild(lineG);
             const eraserLayer = ensureSvgLayer(svgEl, 'eraser-layer');
-            Array.from(eraserLayer.querySelectorAll('polygon, polyline')).forEach(e => e.remove());
+            eraserLayer.textContent = '';   // 칠 묶음(g)째로 비움
             zones.forEach(zone => {
                 if (zone.category === 'floor' || zone.category === 'erase') {   // 바닥·지우개는 자기 층에 (결정 216)
                     renderPaintZone(zone, lineG, eraserLayer);
@@ -1084,7 +1115,7 @@ function bringZoneLayersToFront() {
             if (zone.geometry === 'stroke') {   // 동그라미 지우개로 문지른 칠 (결정 374)
                 const pl = document.createElementNS(NS_SVG, 'polyline');
                 Object.entries({ points: (zone.points || []).map(p => `${p.x},${p.y}`).join(' '), fill: 'none', stroke: '#ffffff', 'stroke-width': zone.w || 10,
-                    'stroke-linecap': 'round', 'stroke-linejoin': 'round', class: 'user-eraser-stroke', 'data-zone-id': zone.id }).forEach(([n, v]) => pl.setAttribute(n, v));
+                    'stroke-linecap': 'round', 'stroke-linejoin': 'round', class: 'user-eraser-stroke', 'data-zone-id': zone.id, 'data-keep': zone.keep || '' }).forEach(([n, v]) => pl.setAttribute(n, v));
                 eraserLayer.appendChild(pl);
                 return;
             }
