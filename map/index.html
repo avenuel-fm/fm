@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>롯데 잠실점 쇼핑맵 통합 메인보드</title>
         <!-- 모듈형 스타일시트 -->
-    <link rel="stylesheet" href="css/common.css?v=0.26.70">
-    <link rel="stylesheet" href="css/layout.css?v=0.26.70">
-    <link rel="stylesheet" href="css/modals.css?v=0.26.70">
-    <link rel="stylesheet" href="css/cad-tools.css?v=0.26.70">
+    <link rel="stylesheet" href="css/common.css?v=0.26.71">
+    <link rel="stylesheet" href="css/layout.css?v=0.26.71">
+    <link rel="stylesheet" href="css/modals.css?v=0.26.71">
+    <link rel="stylesheet" href="css/cad-tools.css?v=0.26.71">
 </head>
 <body>
     <header>
@@ -81,6 +81,11 @@
                         <span class="symbol-badge-dot" style="background:#334155; color:#ffffff;"><svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true"><rect x="1.5" y="1.5" width="9" height="9" fill="none" stroke="#fff" stroke-width="2"/></svg></span>
                         <span>외벽</span>
                     </label>
+                    <label class="symbol-filter-item" title="업체 도면의 회색 후방 구역 (직원 동선). 매장·기능실·바닥보다 아래">
+                        <input type="checkbox" id="chk-corridor" checked onchange="onCorridorCheckboxChange(this.checked)"><input type="checkbox" class="chk-lock" data-lock="corridor" title="잠금 (수정·삭제 막기 · 지우개에 안 지워짐)" onchange="onLayerLockChange('corridor', this.checked)">
+                        <span class="symbol-badge-dot" style="background:#b4bfcc; color:#1e293b; border:1px solid #64748b;"></span>
+                        <span>후방복도</span>
+                    </label>
                     <label class="symbol-filter-item">
                         <input type="checkbox" id="chk-info-layer" checked onchange="onInfoLayerChange(this.checked)"><input type="checkbox" class="chk-lock" data-lock="info" title="잠금 (수정·삭제 막기 · 지우개에 안 지워짐)" onchange="onLayerLockChange('info', this.checked)">
                         <span class="symbol-badge-dot" style="background:#1f3a5f; color:#ffffff; font-size:12px; font-weight:700;">i</span>
@@ -138,6 +143,10 @@
                     <button type="button" class="dropdown-item" id="menu-item-util-line" onclick="onSelectEditUtilLine()">
                         <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                         <span>설비연결 모-자</span>
+                    </button>
+                    <button type="button" class="dropdown-item" id="menu-item-corridor" onclick="rebuildCorridors()" title="업체 도면의 회색 후방 구역에서 이 층 후방복도를 다시 만듦 (이름·색은 이어 받음)">
+                        <svg viewBox="0 0 24 24"><path d="M3 4h18v6h-8v10H3z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                        <span>후방복도 다시 맞추기</span>
                     </button>
                     <div class="dropdown-divider" id="menu-div-scale"></div>
                     <button type="button" class="dropdown-item" id="menu-item-scale" onclick="openScaleModal()">
@@ -566,6 +575,7 @@
                             <label class="util-radio-chip"><input type="radio" name="util-type-opt" value="PS" onchange="onSelectUtilityRadio(this.value)"><span>PS</span></label>
                             <label class="util-radio-chip"><input type="radio" name="util-type-opt" value="PD" onchange="onSelectUtilityRadio(this.value)"><span>PD</span></label>
                             <label class="util-radio-chip"><input type="radio" name="util-type-opt" value="영업창고" onchange="onSelectUtilityRadio(this.value)"><span>영업창고</span></label>
+                            <label class="util-radio-chip"><input type="radio" name="util-type-opt" value="후방복도" onchange="onSelectUtilityRadio(this.value)"><span>후방복도</span></label>
                         </div>
                     </div>
                 </div>
@@ -580,6 +590,7 @@
                         <button type="button" class="color-swatch" data-color="#cbdbe9" style="background:#cbdbe9;" title="쿨 슬레이트 (기능실)" onclick="selectEditColor('#cbdbe9')"></button>
                         <button type="button" class="color-swatch" data-color="#e2e8f0" style="background:#e2e8f0;" title="슬레이트 그레이" onclick="selectEditColor('#e2e8f0')"></button>
                         <button type="button" class="color-swatch" data-color="#dcfce7" style="background:#dcfce7;" title="소프트 민트" onclick="selectEditColor('#dcfce7')"></button>
+                        <button type="button" class="color-swatch" data-color="#b4bfcc" style="background:#b4bfcc;" title="후방복도" onclick="selectEditColor('#b4bfcc')"></button>
                         <button type="button" class="color-swatch" data-color="#ffedd5" style="background:#ffedd5;" title="소프트 오렌지" onclick="selectEditColor('#ffedd5')"></button>
                         <div class="custom-color-picker-wrap" title="직접 색상 선택">
                             <input type="color" id="edit-color-picker" value="#e6f0fc" onchange="selectEditColor(this.value)">
@@ -649,43 +660,44 @@
         <button type="button" class="other-card" data-building="castle" onclick="pickOtherBuilding('castle')"><span class="ic">🏰</span><span><b>캐슬플라자</b><small>B1 ~ 2F · 3개 층</small></span></button>
         <p class="other-note">고르면 그 건물 지도가 열립니다. 매장·구역·심벌·연결선·기록 모두 에비뉴엘과 같게 씁니다.</p>
     </aside>
-    <script src="js/config/floors.js?v=0.26.70"></script>
-    <script src="js/storage/mapStore.js?v=0.26.70"></script>
+    <script src="js/config/floors.js?v=0.26.71"></script>
+    <script src="js/storage/mapStore.js?v=0.26.71"></script>
 
     <!-- 2. 공유 DOM 레지스트리 및 공통 유틸 -->
-    <script src="js/core/dom.js?v=0.26.70"></script>
+    <script src="js/core/dom.js?v=0.26.71"></script>
 
     <!-- 3. 저장소 및 실행 취소 (추후 Supabase 연동 모듈) -->
-    <script src="js/storage/storeBook.js?v=0.26.70"></script>
-    <script src="js/storage/storeRepository.js?v=0.26.70"></script>
-    <script src="js/storage/zoneRepository.js?v=0.26.70"></script>
-    <script src="js/storage/utilityLineRepository.js?v=0.26.70"></script>
-    <script src="js/storage/undoManager.js?v=0.26.70"></script>
+    <script src="js/storage/storeBook.js?v=0.26.71"></script>
+    <script src="js/storage/storeRepository.js?v=0.26.71"></script>
+    <script src="js/storage/zoneRepository.js?v=0.26.71"></script>
+    <script src="js/storage/utilityLineRepository.js?v=0.26.71"></script>
+    <script src="js/storage/undoManager.js?v=0.26.71"></script>
 
     <!-- 4. 코어 기하학 연산, 바닥 그리드, 줌/팬, 도면 뷰어 -->
-    <script src="js/core/geometry.js?v=0.26.70"></script>
-    <script src="js/core/grid.js?v=0.26.70"></script>
-    <script src="js/core/panZoom.js?v=0.26.70"></script>
-    <script src="js/core/mapViewer.js?v=0.26.70"></script>
+    <script src="js/core/geometry.js?v=0.26.71"></script>
+    <script src="js/core/grid.js?v=0.26.71"></script>
+    <script src="js/core/panZoom.js?v=0.26.71"></script>
+    <script src="js/core/mapViewer.js?v=0.26.71"></script>
 
     <!-- 5. 전문 CAD 및 측정 엔진 (축척 캘리브레이션, 매장/기능실 CAD, 구역 CAD, 심벌 CAD, 자유 필기/실측) -->
-    <script src="js/scale/scaleCalibrator.js?v=0.26.70"></script>
-    <script src="js/cad/storeEditor.js?v=0.26.70"></script>
-    <script src="js/cad/storeExcel.js?v=0.26.70"></script>
-    <script src="js/lib/polygon-clipping.umd.min.js?v=0.26.70"></script>
-    <script src="js/cad/floorCenterline.js?v=0.26.70"></script>
-    <script src="js/cad/zoneEditor.js?v=0.26.70"></script>
-    <script src="js/cad/wallTools.js?v=0.26.70"></script>
-    <script src="js/cad/floorEdit.js?v=0.26.70"></script>
-    <script src="js/cad/eraserBrush.js?v=0.26.70"></script>
-    <script src="js/cad/floorFill.js?v=0.26.70"></script>
-    <script src="js/cad/symbolEditor.js?v=0.26.70"></script>
-    <script src="js/cad/utilityLineEditor.js?v=0.26.70"></script>
-    <script src="js/cad/routeFinder.js?v=0.26.70"></script>
-    <script src="js/freehand/freehandLayer.js?v=0.26.70"></script>
+    <script src="js/scale/scaleCalibrator.js?v=0.26.71"></script>
+    <script src="js/cad/storeEditor.js?v=0.26.71"></script>
+    <script src="js/cad/storeExcel.js?v=0.26.71"></script>
+    <script src="js/lib/polygon-clipping.umd.min.js?v=0.26.71"></script>
+    <script src="js/cad/floorCenterline.js?v=0.26.71"></script>
+    <script src="js/cad/zoneEditor.js?v=0.26.71"></script>
+    <script src="js/cad/wallTools.js?v=0.26.71"></script>
+    <script src="js/cad/floorEdit.js?v=0.26.71"></script>
+    <script src="js/cad/eraserBrush.js?v=0.26.71"></script>
+    <script src="js/cad/floorFill.js?v=0.26.71"></script>
+    <script src="js/cad/symbolEditor.js?v=0.26.71"></script>
+    <script src="js/cad/utilityLineEditor.js?v=0.26.71"></script>
+    <script src="js/cad/routeFinder.js?v=0.26.71"></script>
+    <script src="js/cad/corridor.js?v=0.26.71"></script>
+    <script src="js/freehand/freehandLayer.js?v=0.26.71"></script>
 
     <!-- 6. 메인 애플리케이션 엔트리 및 부트스트랩 -->
-    <script src="js/storage/mapHistory.js?v=0.26.70"></script>
-    <script src="js/app.js?v=0.26.70"></script>
+    <script src="js/storage/mapHistory.js?v=0.26.71"></script>
+    <script src="js/app.js?v=0.26.71"></script>
 </body>
 </html>

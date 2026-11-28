@@ -70,7 +70,7 @@ function ensureFloorLayer(svgEl) {
 function liftVendorStores(svgEl) {
     const layer = ensureSvgLayer(svgEl, 'vendor-stores-layer');
     Array.from(svgEl.querySelectorAll('g.store-group'))
-        .filter(g => !g.closest('#custom-stores-top-layer') && !g.closest('#vendor-stores-layer'))
+        .filter(g => !g.closest('#custom-stores-top-layer') && !g.closest('#vendor-stores-layer') && !g.closest('#corridor-layer'))
         .forEach(g => layer.appendChild(g));
 }
 
@@ -108,7 +108,7 @@ function rebuildEraserMask(svgEl) {
     Object.keys(groups).forEach((key, gi) => {
         const mask = mk(defs, 'mask', { id: 'eraser-mask-' + gi, maskUnits: 'userSpaceOnUse', x: -100000, y: -100000, width: 300000, height: 300000 });
         mk(mask, 'rect', { x: -100000, y: -100000, width: 300000, height: 300000, fill: '#fff' });
-        svgEl.querySelectorAll('#vendor-stores-layer path.store-polygon, #custom-stores-top-layer path.store-polygon, #floor-layer path, #floor-layer polygon').forEach(src => {
+        svgEl.querySelectorAll('#vendor-stores-layer path.store-polygon, #custom-stores-top-layer path.store-polygon, #corridor-layer path.store-polygon, #floor-layer path, #floor-layer polygon').forEach(src => {
             const a = { fill: '#000', stroke: '#000', 'stroke-width': '2' };
             ['d', 'points', 'transform'].forEach(k => { if (src.hasAttribute(k)) a[k] = src.getAttribute(k); });
             mk(mask, src.tagName.toLowerCase(), a);
@@ -140,12 +140,13 @@ function bringZoneLayersToFront() {
     if (!svgEl) return;
     ensureFloorLayer(svgEl);
     liftVendorStores(svgEl);
+    const corridorLayer = typeof corridorPlace === 'function' ? corridorPlace(svgEl) : null;   // 후방복도: 맨 아래 (결정 380)
     ensureSvgLayer(svgEl, 'eraser-layer');
     ensureSvgLayer(svgEl, 'floor-outline-layer');
     // 인포 레이어 (엘리베이터·화장실 등 업체 도면 그림): 직접 그린 매장보다 위 (결정 160)
     const infoLayer = typeof collectInfoLayer === 'function' ? collectInfoLayer(svgEl) : null;
-    // 아래 → 위. 바닥 < 매장·기능실 < 격자 < 배관 < 구역 < 인포 < 심벌 < 지우개 < 그리는 중 (결정 216)
-    [svgEl.querySelector('#floor-layer'), svgEl.querySelector('#vendor-stores-layer'), svgEl.querySelector('#custom-stores-top-layer'),
+    // 아래 → 위. 후방복도 < 바닥 < 매장·기능실 < 격자 < 배관 < 구역 < 인포 < 심벌 < 지우개 < 그리는 중 (결정 216·380)
+    [corridorLayer, svgEl.querySelector('#floor-layer'), svgEl.querySelector('#vendor-stores-layer'), svgEl.querySelector('#custom-stores-top-layer'),
         svgEl.querySelector('#cad-floor-grid-rect'), svgEl.querySelector('#utility-lines-layer'), svgEl.querySelector('#safety-zones-layer'),
         infoLayer, svgEl.querySelector('#map-symbols-layer'), svgEl.querySelector('#eraser-layer'), svgEl.querySelector('#floor-outline-layer'),
         svgEl.querySelector('#temp-zone-drawing-layer'), svgEl.querySelector('#temp-drawing-layer')
@@ -1266,6 +1267,7 @@ function bringZoneLayersToFront() {
             const floor = FLOORS[currentFloorIdx];
             const svgEl = mapContainer.querySelector('svg');
             if (svgEl) {
+                try { if (typeof corridorRefit === 'function') corridorRefit(); } catch (e) { console.warn('후방복도 깎기 실패', e); }   // 매장·기능실이 바뀌면 후방복도도 다시 깎음 (결정 380)
                 if (typeof rebuildEraserMask === 'function') rebuildEraserMask(svgEl);   // 매장이 바뀌면 지우개 구멍도 새로
                 // 임시 요소(드로잉 레이어, 스냅 링, 핸들 등)를 배제한 순수 도면만 복제하여 저장
                 const clone = svgEl.cloneNode(true);

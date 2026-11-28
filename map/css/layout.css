@@ -732,3 +732,6 @@ body.map-full .floating-controls, body.map-full .map-btn-store, body.map-full .m
     #btn-hist, #print-dropdown-wrapper, #btn-png, #menu-item-scale, #menu-div-scale { display: none !important; }
     .header-actions { flex-wrap: nowrap; }
 }
+
+/* 후방복도 보기 끔 (레이어 메뉴, 결정 380) */
+#map-container.hide-corridor #corridor-layer { display: none; }

@@ -39,20 +39,18 @@ var lastCreatedStoreId = null;
             syncEpsPipeForm();
         }
 
-        // 탭을 바꾸면 모양도 그 종류 규칙으로 (결정 316): 기능실 = 매장 옆이면 붙고 3px · 매장 침범은 그린 대로, 매장 = 기존 도형과 2px.
+        // 탭을 바꾸면 모양도 다시 (결정 380, 전: 316): 매장·기능실 모두 다른 도형 옆이면 1px 띄워 붙고, 겹친 곳은 그린 대로.
         // 수정 창이 열린 직접 그린 도형만, 저장 때 남음(닫으면 되돌림)
         function applyTypeShape(type) {
             const se = typeof shapeEdit !== 'undefined' ? shapeEdit : null;
             if (!se || se.store !== activeSelectedStore) return;
             const p = se.store.polygonElement;
+            if (isCorridorEl(p)) return;   // 후방복도는 자기 규칙 (corridor.js)
             const raw = se.store.rawPts || parseSvgPathPoints(se.origD);
             let pts;
             try {
-                if (type === 'utility') pts = utilityShapeFor(raw, p);
-                else if (se.store.rawPts) {
-                    const rs = avoidStoreShapes([raw.map(q => [q.x, q.y])], false, null, p);
-                    pts = rs.length ? rs.reduce((a, r) => ringArea(r) > ringArea(a) ? r : a).map(q => ({ x: Math.round(q[0] * 10) / 10, y: Math.round(q[1] * 10) / 10 })) : raw;
-                } else pts = parseSvgPathPoints(se.origD);
+                if (type === 'utility' || se.store.rawPts) pts = utilityShapeFor(raw, p);
+                else pts = parseSvgPathPoints(se.origD);
             } catch (err) { console.warn('모양 다시 계산 실패', err); return; }
             if (pts.length < 3) return;
             p.setAttribute('d', pointsToPathD(pts));
@@ -62,7 +60,7 @@ var lastCreatedStoreId = null;
 
         // 기능실의 주요 기능실(EPS·PS…)은 도형에 따로 남김 — 지도 저장본에 같이 저장 (결정 362)
         // shortcut: 대장(StoreBook)이 아니라 도형 data-util-kind 에 둠, 다른 화면(대장 목록)에서도 쓰게 되면 대장 칸으로
-        const UTIL_KINDS = ['EPS', 'AV', '공조실', 'PS', 'PD', '영업창고'];
+        const UTIL_KINDS = ['EPS', 'AV', '공조실', 'PS', 'PD', '영업창고', '후방복도'];
         function utilKindOf(store) {
             const el = store && (store.groupElement || store.polygonElement);
             const nm = store ? stripFloorName(store.name) : '';
@@ -85,6 +83,7 @@ var lastCreatedStoreId = null;
             if (val === '영업창고') {
                 selectEditColor('#e2e8f0');
             }
+            if (val === CORRIDOR_KIND) selectEditColor(CORRIDOR_COLOR);   // 후방복도 색 (결정 380)
             syncEpsPipeForm();
         }
 
@@ -489,6 +488,11 @@ var lastCreatedStoreId = null;
                     targetCs.name = newName;
                     targetCs.type = currentEditType;
                     targetCs.fillColor = currentEditColor;
+                    if (kindVal === CORRIDOR_KIND) { targetCs.kind = CORRIDOR_KIND; if (!targetCs.base) targetCs.base = targetCs.pathData; }   // 후방복도로 바꿈 (결정 380)
+                    else if (targetCs.kind === CORRIDOR_KIND) {   // 후방복도 → 다른 것: 깎기 전 모양으로
+                        if (targetCs.base) { targetCs.pathData = targetCs.base; activeSelectedStore.polygonElement?.setAttribute('d', targetCs.base); }
+                        delete targetCs.kind; delete targetCs.base;
+                    }
                     saveCustomStores(floor.code, customStores);
                 }
             } else if (!bookId && oldName && oldName !== newName) {
@@ -533,7 +537,7 @@ var lastCreatedStoreId = null;
             const cx = pts.reduce((a, p) => a + p.x, 0) / pts.length, cy = pts.reduce((a, p) => a + p.y, 0) / pts.length;
             const floor = FLOORS[currentFloorIdx], id = String(pathEl.getAttribute('data-store-id'));
             const list = getCustomStores(floor.code), cs = list.find(c => String(c.id) === id);
-            if (cs) { cs.pathData = d; cs.x = cx; cs.y = cy; saveCustomStores(floor.code, list); }
+            if (cs) { cs.pathData = d; cs.x = cx; cs.y = cy; if (cs.kind === CORRIDOR_KIND) cs.base = d; saveCustomStores(floor.code, list); }   // 후방복도는 깎기 전 모양을 고침 (결정 380)
             const s = currentStores.find(x => x.polygonElement === pathEl);
             if (s) { s.pathData = d; s.x = cx; s.y = cy; }
         }
@@ -557,6 +561,8 @@ var lastCreatedStoreId = null;
             if (!store || !p || p.tagName.toLowerCase() !== 'path' || mapStore.readOnly()) return;
             const t = store.textElement;   // 원래 도면 글자는 취소 때 그대로 되돌리려고 남겨 둠
             shapeEdit = { store, origD: p.getAttribute('d'), origText: t && { html: t.innerHTML, attrs: [...t.attributes].map(a => [a.name, a.value]) } };
+            const cor = isCorridorEl(p) && corridorCsOf(store);   // 후방복도: 깎기 전 모양(한 덩어리)을 고침, 저장하면 다시 깎음 (결정 380)
+            if (cor && cor.base) p.setAttribute('d', cor.base);
             p.classList.remove('selected');            // 원래 색 그대로 보이게
             p.classList.add('shape-editing');
             if (store.groupElement) store.groupElement.classList.remove('selected');
@@ -688,17 +694,31 @@ var lastCreatedStoreId = null;
             const se = shapeEdit, p = se.store.polygonElement;
             const pts0 = shapePts(p), sx = e.clientX, sy = e.clientY;
             const ctm = p.getScreenCTM(), k = ctm && ctm.a ? ctm.a : 1;
+            const area = typeof wallArea === 'function' ? wallArea(0) : null;   // 외벽 밖으로는 안 늘어남·안 나감 (결정 380)
+            const inWall = pts => {
+                if (!area || pts.length < 3) return pts;
+                try {
+                    const ring = pts.map(q => [q.x, q.y]), rs = outerRings(polygonClipping.intersection([ring], area));
+                    if (!rs.length || (rs.length === 1 && Math.abs(ringArea(rs[0]) - ringArea(ring)) < 0.5)) return pts;
+                    return rs.reduce((a, r) => ringArea(r) > ringArea(a) ? r : a).map(q => ({ x: Math.round(q[0] * 100) / 100, y: Math.round(q[1] * 100) / 100 }));
+                } catch (err) { return pts; }
+            };
             let moved = false;
             const move = ev => {
                 if (!moved && Math.hypot(ev.clientX - sx, ev.clientY - sy) < 3) return;
                 moved = true;
-                p.setAttribute('d', pointsToPathD(apply(pts0, (ev.clientX - sx) / k, (ev.clientY - sy) / k, ev)));
+                p.setAttribute('d', pointsToPathD(inWall(apply(pts0, (ev.clientX - sx) / k, (ev.clientY - sy) / k, ev))));
                 shapeRelabel(se.store, true);
                 drawShapeHandles();
             };
             const up = () => {
                 window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up);
-                if (moved) shapeRelabel(se.store, true);
+                if (!moved) return;
+                if (!isCorridorEl(p)) {   // 놓으면 옆 도형에 1px 띄워 붙음 (결정 380)
+                    try { const m = utilityShapeFor(shapePts(p), p); if (m.length >= 3) p.setAttribute('d', pointsToPathD(m)); } catch (err) { console.warn('자석 실패', err); }
+                }
+                shapeRelabel(se.store, true);
+                drawShapeHandles();
             };
             window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
         }
@@ -913,8 +933,7 @@ var lastCreatedStoreId = null;
                 return;
             }
 
-            // 기존 도형과 겹침 방지 및 8px 평행 간격 자동 보정
-            // 기존 매장·기능실과 겹친 부분을 빼고 둘레 2px 띄움. 둘로 나뉘면 큰 쪽만 (결정 314)
+            // 옆 매장·기능실 변 가까이면 1px 띄워 붙음. 겹치게 그리면 자르지 않음 — 보이는 순서로 가림 (결정 380, 전: 314)
             // 닫힌 외벽 밖은 잘라 냄 (결정 316). 기능실 탭을 고르면 이 모양(rawPts)에서 다시 계산
             let rawPts = drawingPoints.slice();
             try {
@@ -926,12 +945,11 @@ var lastCreatedStoreId = null;
                     showToast('외벽 밖으로 나간 부분은 잘라 냈습니다.', 1500);
                 }
                 drawingPoints = rawPts;
-                const rings = avoidStoreShapes([drawingPoints.map(p => [p.x, p.y])], false);
-                if (!rings.length) { showToast('그린 도형이 모두 기존 매장 안이라 남는 곳이 없습니다.', 2000); return; }
-                const big = rings.reduce((a, r) => ringArea(r) > ringArea(a) ? r : a);
-                const moved = rings.length > 1 || Math.abs(ringArea(big) - ringArea(drawingPoints.map(p => [p.x, p.y]))) > 0.5;
-                if (moved) drawingPoints = toPts(big);
-                if (moved) showToast('기존 도형과 겹치지 않게 2px 띄워 그렸습니다.', 1500);
+                const snapped = utilityShapeFor(drawingPoints, null);   // 옆 도형에 1px 띄워 붙음, 겹친 곳은 그린 대로 (결정 380)
+                if (snapped.length >= 3 && snapped.some((q, i) => !drawingPoints[i] || Math.hypot(q.x - drawingPoints[i].x, q.y - drawingPoints[i].y) > 0.05)) {
+                    drawingPoints = snapped;
+                    showToast('옆 도형에 1px 띄워 붙였습니다.', 1500);
+                }
             } catch (err) { console.warn('매장 피하기 실패, 그린 그대로', err); }
 
             pushUndoState('매장 추가');

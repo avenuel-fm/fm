@@ -47,7 +47,7 @@ function ebTargets() {
     if (!ebLock) (typeof currentStores !== 'undefined' ? currentStores : []).forEach(s => {
         const p = s.polygonElement;
         if (!p || !p.isConnected || isImmutableStore(s.name)) return;
-        const kind = s.type === 'utility' ? 'utility' : 'store';
+        const kind = isCorridorEl(p) ? 'corridor' : s.type === 'utility' ? 'utility' : 'store';   // 후방복도 열쇠 (결정 380)
         if (typeof isLayerLocked === 'function' && isLayerLocked(kind)) return;
         const pts = ebScreenPts(p, shapePts(p));
         if (pts.length >= 3) out.push({ key: 's:' + (s.id || s.name), kind, store: s, el: p, pts, label: StoreBook.show(s.name) });

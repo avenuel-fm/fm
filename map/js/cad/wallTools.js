@@ -512,7 +512,7 @@ function shapesOutsideWall() {
     if (!area) return [];
     const outside = (pts, a) => pts.length >= 3 && polygonClipping.difference([pts.map(p => [p.x, p.y])], a).some(p => ringArea(p[0]) > 1);
     const res = [];
-    currentStores.filter(s => s.isCustom && s.polygonElement).forEach(s => {
+    currentStores.filter(s => s.isCustom && s.polygonElement && !isCorridorEl(s.polygonElement)).forEach(s => {   // 후방복도는 늘 외벽 안으로 깎임 (결정 380)
         if (outside(parseSvgPathPoints(s.polygonElement.getAttribute('d')), area)) res.push({ kind: 'store', id: s.id, store: s });
     });
     getFloorZones(wallFloorCode()).forEach(z => {
@@ -563,7 +563,7 @@ function wallFlushStores(code) {
         return best;
     };
     let n = 0;
-    currentStores.filter(s => s.isCustom && s.polygonElement).forEach(s => {
+    currentStores.filter(s => s.isCustom && s.polygonElement && !isCorridorEl(s.polygonElement)).forEach(s => {
         const pts = parseSvgPathPoints(s.polygonElement.getAttribute('d'));
         if (pts.length < 3) return;
         let moved = false;

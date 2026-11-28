@@ -98,10 +98,11 @@
         // 그릴 때 매장·기능실 모서리(먼저)·변에 자석처럼 붙기 (화면 12px 안, 결정 308)
         var SHAPE_SNAP_PX = 12;
         var shapeSnapCache = new WeakMap();
-        function shapeSnapPolys() {
+        // withCorridor: 후방복도도 넣음 (점 붙이기만). 나머지(자르기·바닥·외벽)는 후방복도를 없는 것으로 봄 (결정 380)
+        function shapeSnapPolys(withCorridor) {
             const svgEl = mapContainer && mapContainer.querySelector('svg');
             if (!svgEl) return [];
-            return Array.from(svgEl.querySelectorAll('.store-polygon')).map(el => {
+            return Array.from(svgEl.querySelectorAll('.store-polygon')).filter(el => !el.hasAttribute('data-corridor-src') && (withCorridor || !isCorridorEl(el))).map(el => {
                 const d = el.getAttribute('d') || '';
                 let c = shapeSnapCache.get(el);
                 if (!c || c.d !== d) {
@@ -116,7 +117,7 @@
         }
         function snapToShapes(x, y) {
             const r = SHAPE_SNAP_PX / (typeof scale !== 'undefined' && scale ? scale : 1);
-            const near = shapeSnapPolys().filter(c => c.pts.length >= 2 && x >= c.x0 - r && x <= c.x1 + r && y >= c.y0 - r && y <= c.y1 + r);
+            const near = shapeSnapPolys(true).filter(c => c.pts.length >= 2 && x >= c.x0 - r && x <= c.x1 + r && y >= c.y0 - r && y <= c.y1 + r);
             let best = null, bd = r;
             near.forEach(c => c.pts.forEach(p => { const d = Math.hypot(p.x - x, p.y - y); if (d < bd) { bd = d; best = { x: p.x, y: p.y, isSnapped: true, type: 'corner' }; } }));
             if (best) return best;
@@ -194,39 +195,36 @@
             return outerRings(polygonClipping.difference(rings.map(r => [r]), ...cut));
         }
 
-        // 기능실 모양 (결정 316): 매장을 침범하면 그린 대로. 아니면 매장 변 가까이(화면 12px) 꼭짓점을 매장 쪽으로 붙이고 3px 띄움. 기능실끼리는 2px
-        var UTIL_STORE_GAP = 3;
+        // 매장·기능실 자석 (결정 380, 전: 결정 316): 다른 도형 변 가까이(화면 12px) 꼭짓점을 그 변에서 1px 띄워 붙임.
+        // 이미 겹친(침범한) 도형은 자르지 않고 그린 대로 — 보이는 순서(기능실이 매장 위)로 가림
+        var SHAPE_GAP = 1, UTIL_STORE_GAP = SHAPE_GAP;
+        function isCorridorEl(el) { return !!(el && el.closest && el.closest('[data-util-kind="후방복도"]')); }
         function utilityShapeFor(raw, skipEl) {
             if (typeof polygonClipping === 'undefined' || raw.length < 3) return raw;
-            const R = SHAPE_SNAP_PX / (typeof scale !== 'undefined' && scale ? scale : 1), g = UTIL_STORE_GAP;
+            const R = SHAPE_SNAP_PX / (typeof scale !== 'undefined' && scale ? scale : 1), g = SHAPE_GAP;
             const ring = raw.map(p => [p.x, p.y]);
-            const stores = shapeSnapPolys().filter(c => c.el !== skipEl && c.pts.length >= 3 && !isUtilEl(c.el));
             const sq = c => [c.pts.map(p => [p.x, p.y])];
-            const overlaps = stores.some(c => polygonClipping.intersection([ring], sq(c)).some(p => ringArea(p[0]) > 1));
-            let pts = raw;
-            if (!overlaps) {
-                const near = stores.filter(c => raw.some(p => p.x >= c.x0 - R && p.x <= c.x1 + R && p.y >= c.y0 - R && p.y <= c.y1 + R));
-                pts = raw.map(p => {
-                    let best = null;
-                    near.forEach(c => c.pts.forEach((a, i) => {
-                        const b = c.pts[(i + 1) % c.pts.length], q = projectPointToSegment(p, a, b), d = Math.hypot(q.x - p.x, q.y - p.y);
-                        if (d > R || (best && d >= best.d)) return;
-                        const L = Math.hypot(b.x - a.x, b.y - a.y) || 1;
-                        let nx = -(b.y - a.y) / L, ny = (b.x - a.x) / L;
-                        if (isPointInsidePolygon({ x: q.x + nx, y: q.y + ny }, c.pts)) { nx = -nx; ny = -ny; }   // 매장 밖 쪽으로
-                        best = { d, x: q.x + nx * g, y: q.y + ny * g };
-                    }));
-                    return best ? { x: best.x, y: best.y } : p;
-                });
-                if (near.length) {   // 모서리 어긋남 정리: 매장 둘레 3px 안은 비움
-                    const cut = []; near.forEach(c => cut.push(sq(c), ...edgeBands(c.pts, g - 0.01)));
-                    const rs = outerRings(polygonClipping.difference([pts.map(p => [p.x, p.y])], ...cut));
-                    if (rs.length) pts = rs.reduce((a, r) => ringArea(r) > ringArea(a) ? r : a).map(q => ({ x: q[0], y: q[1] }));
-                }
-            }
-            const rs = avoidStoreShapes([pts.map(p => [p.x, p.y])], false, 'utility', skipEl);   // 기능실끼리 2px
-            if (!rs.length) return pts;
-            return rs.reduce((a, r) => ringArea(r) > ringArea(a) ? r : a).map(q => ({ x: Math.round(q[0] * 10) / 10, y: Math.round(q[1] * 10) / 10 }));
+            const near = shapeSnapPolys().filter(c => c.el !== skipEl && c.pts.length >= 3
+                && raw.some(p => p.x >= c.x0 - R && p.x <= c.x1 + R && p.y >= c.y0 - R && p.y <= c.y1 + R)
+                && !polygonClipping.intersection([ring], sq(c)).some(p => ringArea(p[0]) > 1));
+            if (!near.length) return raw;
+            let pts = raw.map(p => {
+                let best = null;
+                near.forEach(c => c.pts.forEach((a, i) => {
+                    const b = c.pts[(i + 1) % c.pts.length], q = projectPointToSegment(p, a, b), d = Math.hypot(q.x - p.x, q.y - p.y);
+                    if (d > R || (best && d >= best.d)) return;
+                    const L = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+                    let nx = -(b.y - a.y) / L, ny = (b.x - a.x) / L;
+                    if (isPointInsidePolygon({ x: q.x + nx, y: q.y + ny }, c.pts)) { nx = -nx; ny = -ny; }   // 그 도형 밖 쪽으로
+                    best = { d, x: q.x + nx * g, y: q.y + ny * g };
+                }));
+                return best ? { x: best.x, y: best.y } : p;
+            });
+            // 모서리 어긋남 정리: 붙은 도형 둘레 1px 안은 비움
+            const cut = []; near.forEach(c => cut.push(sq(c), ...edgeBands(c.pts, g - 0.01)));
+            const rs = outerRings(polygonClipping.difference([pts.map(p => [p.x, p.y])], ...cut));
+            if (rs.length) pts = rs.reduce((a, r) => ringArea(r) > ringArea(a) ? r : a).map(q => ({ x: q[0], y: q[1] }));
+            return pts.map(q => ({ x: Math.round(q.x * 10) / 10, y: Math.round(q.y * 10) / 10 }));
         }
 
         // ================= 직각(Orthogonal / 수평·수직) CAD 스냅 엔진 =================

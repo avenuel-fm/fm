@@ -156,6 +156,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                     }
                 }
 
+                try { if (typeof corridorInit === 'function') corridorInit(floor); } catch (e) { console.warn('후방복도 만들기 실패', e); }   // 결정 380
                 bindStoresAndPolygons(floor);
                 renderFloorZones(floor.code);
                 if (typeof renderFloorSymbols === 'function') {
@@ -170,6 +171,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                 }
                 // 외벽에 맞닿은 직접 그린 매장·기능실은 간격 없이 붙임 (이미 붙어 있으면 아무것도 안 함, 결정 376)
                 try { if (typeof wallFlushStores === 'function' && wallFlushStores(floor.code)) syncSvgCache(); } catch (e) { console.warn('외벽 붙이기 실패', e); }
+                try { if (typeof corridorRefit === 'function' && corridorRefit(true) && !mapStore.readOnly()) syncSvgCache(); } catch (e) { console.warn('후방복도 깎기 실패', e); }
                 if (infoDupRemoved) { infoDupRemoved = 0; if (!mapStore.readOnly()) syncSvgCache(); }   // 겹친 인포 그림을 치웠으면 저장 (결정 378)
 
                 if (!keepView) {
@@ -234,7 +236,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
 
             const pathEls = Array.from(svgEl.querySelectorAll('path, polygon')).filter(p => {
                 if (p.classList.contains('building-exterior-wall')) return false;
-                if (p.closest('#custom-stores-top-layer')) return false;   // 직접 그린 매장은 아래에서 따로 묶음
+                if (p.closest('#custom-stores-top-layer, #corridor-layer') || p.hasAttribute('data-corridor-src')) return false;   // 직접 그린 매장은 아래에서 따로 묶음 · 후방복도로 바꾼 회색 구역은 뺌 (결정 380)
                 const fill = (p.getAttribute('fill') || '').toLowerCase();
                 const stroke = (p.getAttribute('stroke') || '').toLowerCase();
                 const dsW = parseFloat(p.getAttribute('ds-width')) || p.getBBox?.()?.width || 0;
@@ -249,7 +251,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
             });
 
             const textEls = Array.from(svgEl.querySelectorAll('g[group-type="POI_GROUP"] text, text')).filter(t => {
-                if (t.closest('#custom-stores-top-layer')) return false;
+                if (t.closest('#custom-stores-top-layer, #corridor-layer')) return false;
                 const tspan = t.querySelector('tspan') || t;
                 const txt = (t.dataset.lblName || tspan.textContent).trim();   // 줄 나눈 이름은 통째로 (결정 338)
                 if (!txt || txt === 'NaN' || txt.length === 0) return false;
@@ -433,7 +435,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                 const customShape = cs.shape || `c:${cs.id}`;
                 if (!bookShapes.has(customShape) && deletedStores.includes(cs.name)) return;
 
-                let existingGroup = svgEl.querySelector(`#custom-stores-top-layer g.store-group[data-store-id="${cs.id}"]`);
+                let existingGroup = svgEl.querySelector(`#custom-stores-top-layer g.store-group[data-store-id="${cs.id}"], #corridor-layer g.store-group[data-store-id="${cs.id}"]`);
                 let pathEl = null;
                 let textEl = null;
 
@@ -467,6 +469,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                     existingGroup.setAttribute('data-store-id', cs.id);
                     existingGroup.setAttribute('data-store-name', cs.name);
                     existingGroup.setAttribute('data-store-type', cs.type || 'store');
+                    if (cs.kind) existingGroup.setAttribute('data-util-kind', cs.kind);   // 후방복도 (결정 380)
 
                     existingGroup.appendChild(newPath);
                     existingGroup.appendChild(newText);
@@ -485,7 +488,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                     textEl = existingGroup.querySelector('text');
                     if (pathEl && cs.pathData) pathEl.setAttribute('d', cs.pathData);   // 옮기거나 키운 모양은 저장값이 기준
                 }
-                layoutStoreLabel(textEl, cs.name, pathEl);
+                if (cs.kind !== '후방복도') layoutStoreLabel(textEl, cs.name, pathEl);   // 후방복도 이름은 깎은 뒤 가장 큰 조각에 (corridor.js)
 
                 const spec = storedSpecs[cs.name] || cs;
                 const customItem = {
@@ -508,6 +511,10 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                 const clickHandler = (e) => {
                     if (typeof isSymbolMode !== 'undefined' && isSymbolMode) return;
                     if (isDrawingMode || isZoneDrawingMode) return;
+                    if (cs.kind === '후방복도') {   // 후방복도: 연결선은 지나감 · 열쇠 잠기면 못 고름 (결정 380)
+                        if (typeof isUtilLineDrawingMode !== 'undefined' && isUtilLineDrawingMode) return;
+                        if (isLayerLocked('corridor')) { warnLayerLocked(); return; }
+                    }
                     if (typeof isUtilLineDrawingMode !== 'undefined' && isUtilLineDrawingMode) {
                         e.stopPropagation();
                         const pt = typeof getSvgPoint === 'function' ? getSvgPoint(e) : { x: e.offsetX, y: e.offsetY };
@@ -746,6 +753,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
             const one = document.createElementNS(ns, 'tspan');
             one.textContent = name;
             textEl.appendChild(one);
+            if (typeof isCorridorEl === 'function' && isCorridorEl(pathEl)) noGrow = true;   // 후방복도는 글자 때문에 안 키움 (결정 380)
             let bb = null;
             try { bb = pathEl && pathEl.getBBox(); } catch (e) { /* 화면에 없으면 그대로 한 줄 */ }
             if (!bb || !bb.width) return;
