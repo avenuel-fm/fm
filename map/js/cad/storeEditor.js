@@ -59,8 +59,17 @@ var lastCreatedStoreId = null;
             drawShapeHandles();
         }
 
+        // 기능실의 주요 기능실(EPS·PS…)은 도형에 따로 남김 — 지도 저장본에 같이 저장 (결정 362)
+        // shortcut: 대장(StoreBook)이 아니라 도형 data-util-kind 에 둠, 다른 화면(대장 목록)에서도 쓰게 되면 대장 칸으로
+        const UTIL_KINDS = ['EPS', 'AV', '공조실', 'PS', 'PD', '영업창고'];
+        function utilKindOf(store) {
+            const el = store && (store.groupElement || store.polygonElement);
+            return (el && el.getAttribute('data-util-kind')) || (store && UTIL_KINDS.includes(store.name) ? store.name : '');
+        }
+
         function onSelectUtilityRadio(val) {
-            if (editNameInput) editNameInput.value = val;
+            // 이름이 비었거나 다른 주요 기능실 이름 그대로일 때만 이름을 채움 (직접 쓴 이름은 그대로)
+            if (editNameInput && (!editNameInput.value.trim() || UTIL_KINDS.includes(editNameInput.value.trim()))) editNameInput.value = val;
             if (val === '영업창고') {
                 selectEditColor('#e2e8f0');
             }
@@ -182,6 +191,8 @@ var lastCreatedStoreId = null;
             if (statusBadge) statusBadge.textContent = isUtil ? '기능실 시설 현황' : '매장 시설 현황';
 
             statusStoreName.textContent = StoreBook.show(storeItem.name);
+            const kindChip = document.getElementById('status-util-kind'), kind = isUtil ? utilKindOf(storeItem) : '';
+            if (kindChip) { kindChip.textContent = kind; kindChip.hidden = !kind || kind === StoreBook.show(storeItem.name); }   // 이름과 같으면 두 번 안 씀
             setStoreIdChip(document.getElementById('status-store-id'), storeItem);
 
             // 동적 시설 항목 테이블 렌더링
@@ -287,8 +298,9 @@ var lastCreatedStoreId = null;
 
             // 기능실 라디오 버튼 상태 동기화
             const utilRadios = document.querySelectorAll('input[name="util-type-opt"]');
+            const kind = type === 'utility' ? utilKindOf(store) : '';
             utilRadios.forEach(r => {
-                r.checked = (type === 'utility' && r.value === store.name);
+                r.checked = !!kind && r.value === kind;
             });
 
             renderStoreDetailForm(store);
@@ -410,6 +422,9 @@ var lastCreatedStoreId = null;
             activeSelectedStore.name = newName;
             activeSelectedStore.type = currentEditType;
             activeSelectedStore.fillColor = currentEditColor;
+            const kindEl = activeSelectedStore.groupElement || activeSelectedStore.polygonElement;
+            const kindVal = isUtil ? (document.querySelector('input[name="util-type-opt"]:checked')?.value || '') : '';
+            if (kindEl) { if (kindVal) kindEl.setAttribute('data-util-kind', kindVal); else kindEl.removeAttribute('data-util-kind'); }
 
             // 대장에 저장: 번호는 그대로, 이름·상세내역만 바뀜 (결정 154)
             if (bookId) {
@@ -428,7 +443,7 @@ var lastCreatedStoreId = null;
 
             // SVG DOM 업데이트
             if (activeSelectedStore.textElement) {
-                if (activeSelectedStore.isCustom) layoutStoreLabel(activeSelectedStore.textElement, StoreBook.show(newName), activeSelectedStore.polygonElement);
+                if (activeSelectedStore.isCustom || activeSelectedStore.textElement.dataset.lblFree) layoutStoreLabel(activeSelectedStore.textElement, StoreBook.show(newName), activeSelectedStore.polygonElement);
                 else fitOrigLabel(activeSelectedStore.textElement, StoreBook.show(newName), activeSelectedStore.polygonElement);
             }
             if (activeSelectedStore.groupElement) {
@@ -486,7 +501,7 @@ var lastCreatedStoreId = null;
         // 도형 모양이 바뀐 것을 저장 (직접 그린 도형만, 보기 전용은 화면만)
         function persistCustomShape(pathEl) {
             if (!pathEl || mapStore.readOnly()) return;
-            const d = pathEl.getAttribute('d'), pts = parseSvgPathPoints(d);
+            const d = pathEl.getAttribute('d'), pts = shapePts(pathEl);
             if (pts.length < 3) return;
             const cx = pts.reduce((a, p) => a + p.x, 0) / pts.length, cy = pts.reduce((a, p) => a + p.y, 0) / pts.length;
             const floor = FLOORS[currentFloorIdx], id = String(pathEl.getAttribute('data-store-id'));
@@ -497,14 +512,24 @@ var lastCreatedStoreId = null;
         }
 
         function shapeRelabel(store, noGrow) {
-            if (store.textElement && store.polygonElement) layoutStoreLabel(store.textElement, StoreBook.show(store.name), store.polygonElement, noGrow);
+            const t = store.textElement;
+            if (!t || !store.polygonElement) return;
+            if (!store.isCustom) { delete t.dataset.lblOrig; delete t.dataset.lblName; t.dataset.lblFree = '1'; }   // 옮긴 원래 매장 글자는 그린 도형처럼 (결정 360)
+            layoutStoreLabel(t, StoreBook.show(store.name), store.polygonElement, noGrow);
+        }
+
+        // 도형 점 (원래 도면 매장은 상대 좌표 h·v·곡선이 있어 rtPathPoints 로 읽음, 결정 360)
+        function shapePts(p) {
+            return typeof rtPathPoints === 'function' ? rtPathPoints(p) : parseSvgPathPoints(p.getAttribute('d'));
         }
 
         function startShapeEdit(store) {
             endShapeEdit();
             const p = store && store.polygonElement;
-            if (!store || !store.isCustom || !p || mapStore.readOnly()) return;
-            shapeEdit = { store, origD: p.getAttribute('d') };
+            // 원래 도면 매장도 기능실처럼 고침 (결정 360). shortcut: <path> 만 — <polygon> 매장은 손잡이 없음, 나오면 points 도 다루게
+            if (!store || !p || p.tagName.toLowerCase() !== 'path' || mapStore.readOnly()) return;
+            const t = store.textElement;   // 원래 도면 글자는 취소 때 그대로 되돌리려고 남겨 둠
+            shapeEdit = { store, origD: p.getAttribute('d'), origText: t && { html: t.innerHTML, attrs: [...t.attributes].map(a => [a.name, a.value]) } };
             p.classList.remove('selected');            // 원래 색 그대로 보이게
             p.classList.add('shape-editing');
             if (store.groupElement) store.groupElement.classList.remove('selected');
@@ -522,7 +547,12 @@ var lastCreatedStoreId = null;
             shapeEdit = null;
             const p = se.store.polygonElement;
             if (p) {
-                if (p.getAttribute('d') !== se.origD) { p.setAttribute('d', se.origD); shapeRelabel(se.store, true); }
+                if (p.getAttribute('d') !== se.origD) {
+                    p.setAttribute('d', se.origD);
+                    const t = se.store.textElement, o = se.origText;
+                    if (t && o) { [...t.attributes].forEach(a => t.removeAttribute(a.name)); o.attrs.forEach(([n, v]) => t.setAttribute(n, v)); t.innerHTML = o.html; }
+                    else shapeRelabel(se.store, true);
+                }
                 p.classList.remove('shape-editing');
                 p.onmousedown = null;
             }
@@ -546,7 +576,7 @@ var lastCreatedStoreId = null;
             const svgEl = mapContainer.querySelector('svg');
             svgEl?.querySelector('#shape-edit-handles')?.remove();
             if (!svgEl || !shapeEdit) return;
-            const pts = parseSvgPathPoints(shapeEdit.store.polygonElement.getAttribute('d'));
+            const pts = shapePts(shapeEdit.store.polygonElement);
             if (pts.length < 3) return;
             const xs = pts.map(q => q.x), ys = pts.map(q => q.y);
             const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
@@ -576,7 +606,7 @@ var lastCreatedStoreId = null;
             if (e.button !== 0 || !shapeEdit) return;
             e.stopPropagation(); e.preventDefault();       // 지도 끌기 대신 도형 끌기
             const se = shapeEdit, p = se.store.polygonElement;
-            const pts0 = parseSvgPathPoints(p.getAttribute('d')), sx = e.clientX, sy = e.clientY;
+            const pts0 = shapePts(p), sx = e.clientX, sy = e.clientY;
             const ctm = p.getScreenCTM(), k = ctm && ctm.a ? ctm.a : 1;
             let moved = false;
             const move = ev => {

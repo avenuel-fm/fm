@@ -818,7 +818,7 @@ var storeFilterMode = 'all'; // 'all' | 'store' | 'utility'
                 s.details = it.details || {};
                 s.fields = StoreBook.fields(items, it);
                 if (it.color) { s.fillColor = it.color; s.polygonElement?.setAttribute('fill', it.color); }
-                if (s.isCustom) layoutStoreLabel(s.textElement, StoreBook.show(it.name), s.polygonElement);
+                if (s.isCustom || s.textElement?.dataset.lblFree) layoutStoreLabel(s.textElement, StoreBook.show(it.name), s.polygonElement);   // 옮긴 원래 매장 글자 (결정 360)
                 else fitOrigLabel(s.textElement, StoreBook.show(it.name), s.polygonElement);
                 s.groupElement?.setAttribute('data-store-name', it.name);
                 s.groupElement?.setAttribute('data-store-type', s.type);

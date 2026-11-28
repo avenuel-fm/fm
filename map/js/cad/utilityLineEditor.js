@@ -639,7 +639,7 @@ function handleUtilLineMapClick(svgPt, targetStore = null) {
     if (!targetStore) { showToast('도면의 매장 또는 기능실을 눌러 주세요.', 1500); return true; }
     if (targetStore.type === 'utility') {
         utilLineTargetStore = targetStore;
-        const nm = (targetStore.name || '').toUpperCase();   // 기능실 이름으로 종류 자동
+        const nm = ((typeof utilKindOf === 'function' ? utilKindOf(targetStore) + ' ' : '') + (targetStore.name || '')).toUpperCase();   // 주요 기능실·이름으로 종류 자동 (결정 362)
         if (nm.includes('EPS')) setUtilLineType('power');
         else if (nm.includes('PS')) setUtilLineType('water');
         else if (nm.includes('PD')) setUtilLineType('drain');
