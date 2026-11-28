@@ -92,6 +92,53 @@ function wallChains(code) {
     return { rings, open };
 }
 
+// ================= 새로 그린 외벽을 닿은 기존 외벽과 한 선으로 합침 (결정 368) =================
+var WALL_TAIL_MAX = 0.25;   // 선 안쪽에 닿아 자를 때 짧은 쪽이 전체의 이 비율 이하면 꼬리로 보고 지움 (더 길면 갈래라 따로 남김)
+function wallLen(pts) { let s = 0; for (let i = 1; i < pts.length; i++) s += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y); return s; }
+function wallDedupe(pts) { return pts.filter((p, i) => !i || Math.hypot(p.x - pts[i - 1].x, p.y - pts[i - 1].y) > 0.05); }
+// 점 p 가 선 pts 위(끝 포함)면 그 자리에서 잘라 [p 까지, p 부터], 아니면 null
+function wallCutAt(pts, p) {
+    let best = null;
+    for (let i = 0; i < pts.length - 1; i++) {
+        const a = pts[i], b = pts[i + 1], dx = b.x - a.x, dy = b.y - a.y, L = dx * dx + dy * dy;
+        const t = L ? Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / L)) : 0;
+        const d = Math.hypot(a.x + t * dx - p.x, a.y + t * dy - p.y);
+        if (d <= WALL_JOIN_TOL && (!best || d < best.d)) best = { i, d };
+    }
+    if (!best) return null;
+    const q = { x: p.x, y: p.y };
+    return [wallDedupe(pts.slice(0, best.i + 1).concat([q])), wallDedupe([q].concat(pts.slice(best.i + 1)))];
+}
+// zones(그 층 구역 목록)를 고쳐 가며 새 선 pts 의 양 끝을 기존 열린 외벽에 붙임 → { points, id(합친 기존 외벽 id), tails(지운 꼬리 수) }
+function wallMergeNew(zones, pts) {
+    let line = pts.map(p => Object.assign({}, p)), id = null, tails = 0;   // 따라간 점 표시(t) 등은 그대로
+    const attach = atStart => {
+        const p = atStart ? line[0] : line[line.length - 1];
+        for (let k = 0; k < zones.length; k++) {
+            const z = zones[k];
+            if (z.category !== 'wall' || z.geometry === 'polygon' || !z.points || z.points.length < 2) continue;
+            const cut = wallCutAt(z.points, p);
+            if (!cut) continue;
+            const la = wallLen(cut[0]), lb = wallLen(cut[1]), short = Math.min(la, lb);
+            let keep = la >= lb ? cut[0] : cut[1];
+            const drop = la >= lb ? cut[1] : cut[0];
+            zones.splice(k, 1);
+            if (short > WALL_JOIN_TOL) {
+                if (short <= (la + lb) * WALL_TAIL_MAX) tails++;
+                else zones.push(Object.assign({}, z, { id: z.id + '_b' + Date.now(), points: drop }));   // 갈래: 짧은 쪽도 길면 따로 남김
+            }
+            const dp = q => Math.hypot(q.x - p.x, q.y - p.y);
+            if (atStart) { if (dp(keep[0]) < dp(keep[keep.length - 1])) keep = keep.slice().reverse(); line = keep.slice(0, -1).concat(line); }   // keep 이 p 로 끝나게
+            else { if (dp(keep[keep.length - 1]) < dp(keep[0])) keep = keep.slice().reverse(); line = line.concat(keep.slice(1)); }
+            id = id || z.id;
+            return;
+        }
+    };
+    attach(true);
+    attach(false);
+    return { points: wallDedupe(line), id, tails };
+}
+
 // 닫힌 외벽 안쪽 (polygonClipping 여러 면) 또는 null. gap 이 있으면 그만큼 안쪽으로 줄인 것
 function wallArea(gap, code) {
     if (typeof polygonClipping === 'undefined') return null;
@@ -338,32 +385,46 @@ function wallCR(p0, p1, p2, p3, u) {
     return L(L(A1, A2, t0, t2), L(A2, A3, t1, t3), t1, t2);
 }
 
-// 외벽 그릴 때 붙은 테두리를 초록으로 + 이름 (미리 보기)
+// 외벽 그릴 때 붙은 테두리를 빨강(디자인 --red)으로 + 이름 꼬리표 (마우스 올림 연출, 결정 368)
+var WALL_HL_RED = '#C0261A';
 function wallSnapHighlight(g, snap, x, y) {
     if (!g || !snap || !snap.key || snap.key === 'cur') return;
     const ns = 'http://www.w3.org/2000/svg', k = 1 / (typeof scale !== 'undefined' && scale ? scale : 1);
-    const el = document.createElementNS(ns, snap.closed ? 'polygon' : 'polyline');
-    el.setAttribute('class', 'wall-snap-hl');
-    el.setAttribute('points', snap.pts.map(p => p.x + ',' + p.y).join(' '));
-    el.setAttribute('fill', 'none');
-    el.setAttribute('stroke', '#16a34a');
-    el.setAttribute('stroke-opacity', '0.45');
-    el.setAttribute('stroke-width', 7 * k);
-    el.setAttribute('stroke-linejoin', 'round');
-    el.style.pointerEvents = 'none';
-    g.insertBefore(el, g.firstChild);
+    const pts = snap.pts.map(p => p.x + ',' + p.y).join(' ');
+    [['wall-snap-hl', 16 * k], ['wall-snap-hl-line', 2.5 * k]].forEach(([cls, w], i) => {   // 은은히 깜빡이는 띠(그리는 선 아래) + 가는 빨간 선(맨 위)
+        const el = document.createElementNS(ns, snap.closed ? 'polygon' : 'polyline');
+        el.setAttribute('class', cls);
+        el.setAttribute('points', pts);
+        el.setAttribute('fill', 'none');
+        el.setAttribute('stroke', WALL_HL_RED);
+        if (!i) el.setAttribute('stroke-opacity', '0.3');
+        el.setAttribute('stroke-width', w);
+        el.setAttribute('stroke-linejoin', 'round');
+        el.setAttribute('stroke-linecap', 'round');
+        el.style.pointerEvents = 'none';
+        if (i) g.appendChild(el); else g.insertBefore(el, g.firstChild);
+    });
     const t = document.createElementNS(ns, 'text');
     t.setAttribute('class', 'wall-snap-name');
-    t.setAttribute('x', x + 12 * k);
-    t.setAttribute('y', y - 12 * k);
+    t.setAttribute('x', x + 18 * k);
+    t.setAttribute('y', y - 14 * k);
     t.setAttribute('font-size', 13 * k);
-    t.setAttribute('fill', '#15803d');
-    t.setAttribute('stroke', '#fff');
-    t.setAttribute('stroke-width', 3 * k);
-    t.setAttribute('paint-order', 'stroke');
+    t.setAttribute('fill', '#fff');
     t.style.pointerEvents = 'none';
     t.textContent = wallOutlineName(snap.key) + (lastWallSnap && lastWallSnap.key ? (wallTraceBetween(lastWallSnap, snap).length ? ' · 따라가기' : '') : '');
     g.appendChild(t);
+    let w = t.textContent.length * 13 * k;
+    try { w = t.getBBox().width; } catch (e) {}
+    const tag = document.createElementNS(ns, 'rect');
+    tag.setAttribute('class', 'wall-snap-tag');
+    tag.setAttribute('x', x + 12 * k);
+    tag.setAttribute('y', y - 29 * k);
+    tag.setAttribute('width', w + 12 * k);
+    tag.setAttribute('height', 21 * k);
+    tag.setAttribute('rx', 4 * k);
+    tag.setAttribute('fill', WALL_HL_RED);
+    tag.style.pointerEvents = 'none';
+    g.insertBefore(tag, t);
 }
 
 // ================= 외벽 바뀐 뒤 검사: 끊긴 곳 · 밖으로 나간 도형 =================

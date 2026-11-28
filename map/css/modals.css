@@ -500,5 +500,11 @@ body:not(.zone-cat-wall) .safety-zone-item[data-zone-category="wall"] .user-draw
 #wall-check-bar .wall-copy-opt { display: inline-flex; align-items: center; gap: 3px; }
 body.wall-flashing .wall-outside-flash, body.wall-flashing .wall-outside-flash > polygon, body.wall-flashing .wall-outside-flash > polyline { animation: wallOutFlash 0.8s ease-in-out 10; }
 @keyframes wallOutFlash { 50% { stroke: #f59e0b; stroke-width: 6px; stroke-opacity: 1; } }
+/* 외벽 그릴 때 마우스 올린 외벽: 빨간 띠가 은은히 깜빡임 · 레이어에서 외벽 켜면 3초 빨간 점선이 흐름 (결정 368) */
+.wall-snap-hl { animation: wallHlPulse 1.6s ease-in-out infinite; }
+@keyframes wallHlPulse { 50% { stroke-opacity: 0.5; } }
+body.wall-march .safety-zone-item[data-zone-category="wall"] > polyline,
+body.wall-march .safety-zone-item[data-zone-category="wall"] > polygon { stroke: var(--red, #C0261A) !important; stroke-width: 3px !important; vector-effect: non-scaling-stroke; stroke-dasharray: 10 6; animation: wallMarch 0.8s linear infinite; }
+@keyframes wallMarch { to { stroke-dashoffset: -16; } }
 #floor-fill-pop .ff-hint { font-size: 12px; color: #64748b; white-space: nowrap; }
 #floor-fill-pop .ff-ok { border-color: #1e3a5f; background: #1e3a5f; color: #fff; font-weight: 700; }   /* 바닥 채우기 (결정 334) */

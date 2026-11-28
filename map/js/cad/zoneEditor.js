@@ -28,6 +28,15 @@ function onZoneCheckboxChange(category, isChecked) {
     items.forEach(el => {
         el.style.display = isChecked ? 'inline' : 'none';
     });
+    if (category === 'wall') wallMarchFlash(isChecked);
+}
+
+// 레이어에서 외벽을 켜면 3초 동안 빨간 점선이 흐름 (결정 368)
+var wallMarchTimer = null;
+function wallMarchFlash(on) {
+    clearTimeout(wallMarchTimer);
+    document.body.classList.toggle('wall-march', !!on);
+    if (on) wallMarchTimer = setTimeout(() => document.body.classList.remove('wall-march'), 3000);
 }
 
 /* 레이어 열쇠(잠금): 켜면 그 레이어 도형은 수정·삭제 안 됨. 이 기기 브라우저에만 기억 */
@@ -400,7 +409,7 @@ function bringZoneLayersToFront() {
 
             const isFloorCat = currentZoneCategory === 'floor';
             const isEraseCat = currentZoneCategory === 'erase';
-            const strokeColor = isEraseCat ? '#2563eb' : (isFloorCat ? '#000000' : (isWall ? '#334155' : (isSmoke ? '#0284c7' : '#dc2626')));
+            const strokeColor = isEraseCat ? '#2563eb' : (isFloorCat ? '#000000' : (isWall ? '#C0261A' : (isSmoke ? '#0284c7' : '#dc2626')));
             const strokeDash = isWall ? '' : '8 5';
             const strokeWidth = isWall ? '4' : (isPoly ? '3' : '3.5');
             const fillColor = isEraseCat ? 'rgba(37, 99, 235, 0.12)' : (isFloorCat ? 'rgba(0, 0, 0, 0.06)' : (isWall ? (isPoly ? 'rgba(51, 65, 85, 0.12)' : 'none') : (isPoly ? 'rgba(220, 38, 38, 0.18)' : 'none')));
@@ -789,6 +798,12 @@ function bringZoneLayersToFront() {
                 createdAt: Date.now()
             };
 
+            let wallMerged = null;   // 기존 외벽 끝·안쪽에 닿으면 한 선으로 합침, 남는 짧은 꼬리는 지움 (결정 368)
+            if (isWall && newZone.geometry !== 'polygon' && typeof wallMergeNew === 'function') {
+                wallMerged = wallMergeNew(zones, newZone.points);
+                newZone.points = wallMerged.points;
+                if (wallMerged.id) newZone.id = wallMerged.id;
+            }
             if (floorRings) floorRings.forEach((ring, i) => zones.push(Object.assign({}, newZone, { id: newZone.id + (i ? '_' + i : ''), name: i ? `${zoneName.replace(/ \d+$/, '')} ${zones.filter(z => z.category === currentZoneCategory).length + 1}` : zoneName, points: ring })));
             else zones.push(newZone);
             saveFloorZones(floor.code, zones);
@@ -799,7 +814,7 @@ function bringZoneLayersToFront() {
             if (isWall) currentZoneGeometry = 'line';   // 시작점을 눌러 닫은 외벽도 다음은 선으로
             continueZoneDrawing();   // 그리기 상태 그대로 (결정 314)
 
-            showToast(isWall ? '외벽이 추가되었습니다.' : `'${zoneName}'이 추가되었습니다.`, 1500);
+            showToast(isWall ? (wallMerged && wallMerged.id ? '기존 외벽과 하나로 합쳤습니다.' + (wallMerged.tails ? ' 남는 짧은 꼬리는 지웠습니다.' : '') : '외벽이 추가되었습니다.') :`'${zoneName}'이 추가되었습니다.`, 1500);
             if (isWall) afterWallChange();   // 끊긴 곳 · 밖으로 나간 도형 알림 (결정 316)
             if (floorRings && currentZoneCategory === 'floor') offerFloorPass('poly', newZone.points);
         }
@@ -1210,7 +1225,7 @@ function bringZoneLayersToFront() {
                 // 임시 요소(드로잉 레이어, 스냅 링, 핸들 등)를 배제한 순수 도면만 복제하여 저장
                 const clone = svgEl.cloneNode(true);
                 clone.querySelectorAll('#temp-zone-drawing-layer, #temp-drawing-layer, #wall-vertex-handles-layer, #cad-floor-grid-rect').forEach(el => el.remove());
-                clone.querySelectorAll('#wall-gap-mark, #wall-seg-mark, .wall-snap-hl, .wall-snap-name, #floor-edit-layer, #floor-fill-layer').forEach(el => el.remove());   // 외벽 알림 표시는 저장 안 함 (결정 322)
+                clone.querySelectorAll('#wall-gap-mark, #wall-seg-mark, .wall-snap-hl, .wall-snap-hl-line, .wall-snap-tag, .wall-snap-name, #floor-edit-layer, #floor-fill-layer').forEach(el => el.remove());   // 외벽 알림 표시는 저장 안 함 (결정 322)
                 clone.querySelectorAll('.wall-outside-flash').forEach(el => el.classList.remove('wall-outside-flash'));
                 clone.querySelectorAll('circle[stroke="#0ea5e9"], circle[fill="rgba(14, 165, 233, 0.25)"]').forEach(el => el.remove());
                 clone.querySelectorAll('#safety-zones-layer, #map-symbols-layer, #floor-layer, #floor-outline-layer, #eraser-layer, #eraser-defs').forEach(el => el.remove());
